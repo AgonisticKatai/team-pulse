@@ -1,5 +1,10 @@
 import cors from '@fastify/cors'
-import Fastify, { type FastifyRequest, type FastifyReply, type FastifyInstance } from 'fastify'
+import Fastify, {
+  type FastifyRequest,
+  type FastifyReply,
+  type FastifyInstance,
+  type FastifyError,
+} from 'fastify'
 
 export async function buildApp(): Promise<FastifyInstance> {
   const fastify = Fastify({
@@ -39,23 +44,27 @@ export async function buildApp(): Promise<FastifyInstance> {
     }
   })
 
-  fastify.setNotFoundHandler(async (request: FastifyRequest) => {
-    return {
+  fastify.setNotFoundHandler(async (request: FastifyRequest, reply: FastifyReply) => {
+    return reply.code(404).send({
       error: 'Not Found',
       message: `Route ${request.url} not found`,
       statusCode: 404,
-    }
-  })
-
-  fastify.setErrorHandler(async (error: Error, _request: FastifyRequest, reply: FastifyReply) => {
-    fastify.log.error(error)
-
-    return reply.status((error as any).statusCode || 500).send({
-      error: 'Internal Server Error',
-      message: process.env.NODE_ENV === 'production' ? 'Something went wrong' : error.message,
-      statusCode: (error as any).statusCode || 500,
     })
   })
+
+  fastify.setErrorHandler(
+    async (error: FastifyError, _request: FastifyRequest, reply: FastifyReply) => {
+      fastify.log.error(error)
+
+      const statusCode = error.statusCode || 500
+
+      return reply.code(statusCode).send({
+        error: error.name || 'Internal Server Error',
+        message: process.env.NODE_ENV === 'production' ? 'Something went wrong' : error.message,
+        statusCode,
+      })
+    },
+  )
 
   await fastify.ready()
   return fastify
