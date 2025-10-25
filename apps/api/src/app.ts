@@ -1,5 +1,5 @@
-import Fastify from 'fastify'
 import cors from '@fastify/cors'
+import Fastify, { type FastifyRequest, type FastifyReply } from 'fastify'
 
 export async function buildApp() {
   const fastify = Fastify({
@@ -41,7 +41,7 @@ export async function buildApp() {
   })
 
   // 404 handler
-  fastify.setNotFoundHandler(async (request) => {
+  fastify.setNotFoundHandler(async (request: FastifyRequest) => {
     return {
       error: 'Not Found',
       message: `Route ${request.url} not found`,
@@ -50,13 +50,13 @@ export async function buildApp() {
   })
 
   // Error handler
-  fastify.setErrorHandler(async (error, _request, reply) => {
+  fastify.setErrorHandler(async (error: Error, _request: FastifyRequest, reply: FastifyReply) => {
     fastify.log.error(error)
 
-    return reply.status(error.statusCode || 500).send({
+    return reply.status((error as any).statusCode || 500).send({
       error: 'Internal Server Error',
       message: process.env.NODE_ENV === 'production' ? 'Something went wrong' : error.message,
-      statusCode: error.statusCode || 500,
+      statusCode: (error as any).statusCode || 500,
     })
   })
 
