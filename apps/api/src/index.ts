@@ -1,54 +1,70 @@
-import express from 'express';
-import cors from 'cors';
-import { config } from 'dotenv';
+import cors from '@fastify/cors'
+import { config } from 'dotenv'
+import Fastify from 'fastify'
 
 // Load environment variables
-config();
+config()
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+const fastify = Fastify({
+  logger: {
+    level: process.env.LOG_LEVEL || 'info',
+  },
+})
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+const PORT = Number(process.env.PORT) || 3000
+const HOST = process.env.HOST || '0.0.0.0'
+
+// Register CORS
+await fastify.register(cors, {
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true,
+})
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({
+fastify.get('/api/health', async () => {
+  return {
     status: 'ok',
     message: 'TeamPulse API is running',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-  });
-});
+  }
+})
 
 // Root endpoint
-app.get('/api', (req, res) => {
-  res.json({
+fastify.get('/api', async () => {
+  return {
     name: 'TeamPulse API',
     version: '1.0.0',
     description: 'Football team statistics platform API',
-  });
-});
+  }
+})
 
 // 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({
+fastify.setNotFoundHandler(async (request) => {
+  return {
     error: 'Not Found',
-    message: `Route ${req.originalUrl} not found`,
-  });
-});
+    message: `Route ${request.url} not found`,
+    statusCode: 404,
+  }
+})
 
 // Error handler
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error(err.stack);
-  res.status(500).json({
-    error: 'Internal Server Error',
-    message: process.env.NODE_ENV === 'production' ? 'Something went wrong' : err.message,
-  });
-});
+fastify.setErrorHandler(async (error, _request, reply) => {
+  fastify.log.error(error)
 
-app.listen(PORT, () => {
-  console.log(`🚀 TeamPulse API running on http://localhost:${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
-});
+  return reply.status(error.statusCode || 500).send({
+    error: 'Internal Server Error',
+    message: process.env.NODE_ENV === 'production' ? 'Something went wrong' : error.message,
+    statusCode: error.statusCode || 500,
+  })
+})
+
+// Start server
+try {
+  await fastify.listen({ port: PORT, host: HOST })
+  console.log(`🚀 TeamPulse API running on http://localhost:${PORT}`)
+  console.log(`📊 Health check: http://localhost:${PORT}/api/health`)
+} catch (err) {
+  fastify.log.error(err)
+  process.exit(1)
+}

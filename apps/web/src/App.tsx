@@ -10,18 +10,18 @@ function App() {
         <h1>⚽ TeamPulse</h1>
         <p>Football Team Statistics Platform</p>
       </header>
-      
+
       <main className="app-main">
         <div className="card">
           <h2>Welcome to TeamPulse!</h2>
           <p>Your modern football statistics platform</p>
-          <button onClick={() => setCount((count) => count + 1)}>
+          <button onClick={() => setCount((count) => count + 1)} type="button">
             Clicks: {count}
           </button>
           <p className="status">🚀 Status: Ready for development</p>
         </div>
       </main>
-      
+
       <footer className="app-footer">
         <p>Built with React + TypeScript + Vite</p>
       </footer>

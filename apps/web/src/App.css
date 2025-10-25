@@ -5,23 +5,26 @@
 }
 
 .app-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(
+    135deg,
+    rgb(var(--color-primary)) 0%,
+    rgb(var(--color-primary-dark)) 100%
+  );
   color: white;
-  padding: 2rem;
+  padding: var(--space-xl);
   text-align: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+  box-shadow: var(--shadow-md);
 
-.app-header h1 {
-  margin: 0;
-  font-size: 3rem;
-  font-weight: 700;
-}
+  & h1 {
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 3rem);
+  }
 
-.app-header p {
-  margin: 0.5rem 0 0;
-  font-size: 1.2rem;
-  opacity: 0.9;
+  & p {
+    margin-block-start: var(--space-sm);
+    font-size: var(--font-size-lg);
+    opacity: 0.9;
+  }
 }
 
 .app-main {
@@ -29,69 +32,73 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 2rem;
+  padding: var(--space-xl);
 }
 
 .card {
-  background: white;
-  border-radius: 12px;
-  padding: 3rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  background: rgb(var(--color-bg-card));
+  border-radius: var(--radius-lg);
+  padding: var(--space-2xl);
+  box-shadow: var(--shadow-lg);
   text-align: center;
   max-width: 500px;
   width: 100%;
-}
 
-.card h2 {
-  color: #667eea;
-  margin-top: 0;
-}
+  & h2 {
+    color: rgb(var(--color-primary));
+    margin-block-start: 0;
+  }
 
-.card button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  padding: 1rem 2rem;
-  font-size: 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  margin: 1rem 0;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
+  & button {
+    background: linear-gradient(
+      135deg,
+      rgb(var(--color-primary)) 0%,
+      rgb(var(--color-primary-dark)) 100%
+    );
+    color: white;
+    border: none;
+    padding: var(--space-md) var(--space-xl);
+    font-size: var(--font-size-base);
+    border-radius: var(--radius-md);
+    margin-block: var(--space-md);
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
 
-.card button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-}
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgb(var(--color-primary) / 0.4);
+    }
 
-.card button:active {
-  transform: translateY(0);
+    &:active {
+      transform: translateY(0);
+    }
+  }
 }
 
 .status {
-  margin-top: 1rem;
-  padding: 0.75rem;
-  background: #f0fdf4;
-  border: 1px solid #86efac;
-  border-radius: 6px;
-  color: #166534;
+  margin-block-start: var(--space-md);
+  padding: var(--space-md);
+  background: rgb(var(--color-success-bg));
+  border: 1px solid rgb(var(--color-success-border));
+  border-radius: var(--radius-sm);
+  color: rgb(var(--color-success-text));
   font-weight: 500;
 }
 
 .app-footer {
-  background: #f8fafc;
-  padding: 1.5rem;
+  background: rgb(var(--color-bg));
+  padding: var(--space-lg);
   text-align: center;
-  color: #64748b;
-  border-top: 1px solid #e2e8f0;
+  color: rgb(var(--color-text-muted));
+  border-block-start: 1px solid rgb(var(--color-border));
 }
 
-@media (max-width: 768px) {
+/* Modern media query with range syntax */
+@media (width < 768px) {
   .app-header h1 {
-    font-size: 2rem;
+    font-size: var(--font-size-2xl);
   }
-  
+
   .card {
-    padding: 2rem;
+    padding: var(--space-xl);
   }
 }
