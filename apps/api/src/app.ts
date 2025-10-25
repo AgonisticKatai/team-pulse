@@ -1,14 +1,14 @@
 import cors from '@fastify/cors'
-import Fastify, { type FastifyRequest, type FastifyReply } from 'fastify'
+import Fastify, { type FastifyRequest, type FastifyReply, type FastifyInstance } from 'fastify'
 
-export async function buildApp() {
+export async function buildApp(): Promise<FastifyInstance> {
   const fastify = Fastify({
     logger: {
       level: process.env.LOG_LEVEL || 'info',
     },
   })
 
-  // Register CORS
+  // Register CORS first
   await fastify.register(cors, {
     origin:
       process.env.NODE_ENV === 'production'
@@ -17,7 +17,7 @@ export async function buildApp() {
     credentials: true,
   })
 
-  // Health check endpoint
+  // Now register routes (after await)
   fastify.get('/api/health', async () => {
     return {
       status: 'ok',
@@ -28,7 +28,6 @@ export async function buildApp() {
     }
   })
 
-  // Root endpoint
   fastify.get('/api', async () => {
     return {
       name: 'TeamPulse API',
@@ -40,7 +39,6 @@ export async function buildApp() {
     }
   })
 
-  // 404 handler
   fastify.setNotFoundHandler(async (request: FastifyRequest) => {
     return {
       error: 'Not Found',
@@ -49,7 +47,6 @@ export async function buildApp() {
     }
   })
 
-  // Error handler
   fastify.setErrorHandler(async (error: Error, _request: FastifyRequest, reply: FastifyReply) => {
     fastify.log.error(error)
 
@@ -60,5 +57,6 @@ export async function buildApp() {
     })
   })
 
+  await fastify.ready()
   return fastify
 }
