@@ -1,6 +1,6 @@
+import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import { config } from 'dotenv'
-import Fastify from 'fastify'
 
 // Load environment variables
 config()
@@ -51,7 +51,7 @@ fastify.setNotFoundHandler(async (request) => {
 // Error handler
 fastify.setErrorHandler(async (error, _request, reply) => {
   fastify.log.error(error)
-
+  
   return reply.status(error.statusCode || 500).send({
     error: 'Internal Server Error',
     message: process.env.NODE_ENV === 'production' ? 'Something went wrong' : error.message,
@@ -68,3 +68,4 @@ try {
   fastify.log.error(err)
   process.exit(1)
 }
+

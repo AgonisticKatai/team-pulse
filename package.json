@@ -4,12 +4,12 @@
   "private": true,
   "description": "Modern football team statistics platform with real-time match tracking",
   "scripts": {
-    "dev": "pnpm --parallel --filter \"./apps/*\" dev",
-    "build": "pnpm --filter \"./apps/*\" build",
-    "lint": "biome check .",
-    "lint:fix": "biome check --write .",
-    "format": "biome format --write .",
-    "type-check": "pnpm --parallel --filter \"./apps/*\" type-check"
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "lint:fix": "turbo lint:fix",
+    "format": "turbo format",
+    "type-check": "turbo type-check"
   },
   "keywords": ["football", "statistics", "react", "typescript", "hexagonal-architecture"],
   "author": "",
@@ -19,6 +19,9 @@
     "pnpm": ">=8.0.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4"
-  }
+    "@biomejs/biome": "^1.9.4",
+    "@vercel/node": "^3.2.17",
+    "turbo": "^2.2.3"
+  },
+  "packageManager": "pnpm@9.0.0"
 }

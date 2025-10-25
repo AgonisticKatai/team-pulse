@@ -1,7 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "turbo build --filter=@team-pulse/web",
   "installCommand": "pnpm install",
-  "buildCommand": "pnpm --filter @team-pulse/web build",
+  "framework": null,
   "rewrites": [
     {
       "source": "/api/:path*",
@@ -9,3 +10,4 @@
     }
   ]
 }
+
