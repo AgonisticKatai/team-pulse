@@ -15,8 +15,8 @@
   "author": "",
   "license": "MIT",
   "engines": {
-    "node": "20.x",
-    "pnpm": ">=8.0.0"
+    "node": "22.x",
+    "pnpm": "9.x"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
