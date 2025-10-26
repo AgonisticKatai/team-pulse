@@ -7,18 +7,24 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "fastify": "^5.1.0",
     "@fastify/cors": "^10.0.1",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "fastify": "^5.1.0"
   },
   "devDependencies": {
-    "@types/node": "^22.8.6",
+    "@types/node": "^22.18.12",
+    "@types/supertest": "^6.0.3",
+    "supertest": "^7.1.4",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3"
   }
