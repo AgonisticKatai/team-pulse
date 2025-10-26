@@ -1,5 +1,8 @@
 # ⚽ TeamPulse
 
+[![CI](https://github.com/AgonisticKatai/team-pulse/actions/workflows/ci.yml/badge.svg)](https://github.com/AgonisticKatai/team-pulse/actions/workflows/ci.yml)
+[![Deploy](https://github.com/AgonisticKatai/team-pulse/actions/workflows/deploy.yml/badge.svg)](https://github.com/AgonisticKatai/team-pulse/actions/workflows/deploy.yml)
+
 Modern football team statistics platform with real-time match tracking, admin dashboard and analytics.
 
 **🌐 Live Demo**: [Coming soon after deployment]
@@ -63,19 +66,41 @@ pnpm dev
 All commands use Turborepo for optimal caching and parallelization:
 
 ```bash
-pnpm dev          # Start all apps in development mode
-pnpm build        # Build all apps for production
-pnpm lint         # Lint all workspaces
-pnpm lint:fix     # Auto-fix linting issues
-pnpm format       # Format code
-pnpm type-check   # TypeScript type checking
+pnpm dev             # Start all apps in development mode
+pnpm build           # Build all apps for production
+pnpm test            # Run all tests
+pnpm test:watch      # Run tests in watch mode
+pnpm test:coverage   # Run tests with coverage report
+pnpm lint            # Lint all workspaces
+pnpm lint:fix        # Auto-fix linting issues
+pnpm format          # Format code
+pnpm type-check      # TypeScript type checking
 ```
 
 ## 🚀 Deployment
 
-This project uses Turborepo and is optimized for Vercel deployment.
+This project uses Turborepo and is optimized for Vercel deployment with automatic CI/CD via GitHub Actions.
 
-### Quick Deploy to Vercel
+### Automatic Deployment (Recommended)
+
+Every push to `main` automatically:
+1. ✅ Runs CI pipeline (lint, type-check, tests, build)
+2. 🚀 Deploys to Vercel production
+
+### Setting up GitHub Secrets
+
+For automatic deployment, add these secrets to your GitHub repository:
+
+1. Go to `Settings > Secrets and variables > Actions`
+2. Add the following secrets:
+
+```bash
+VERCEL_TOKEN          # From Vercel account settings
+VERCEL_ORG_ID         # From Vercel project settings (.vercel/project.json)
+VERCEL_PROJECT_ID     # From Vercel project settings (.vercel/project.json)
+```
+
+### Manual Deploy to Vercel
 
 1. Push to GitHub
 2. Import project in Vercel
@@ -87,10 +112,10 @@ This project uses Turborepo and is optimized for Vercel deployment.
 ```
 Framework Preset: Other
 Root Directory: .
-Build Command: turbo build --filter=@team-pulse/web
+Build Command: turbo build
 Output Directory: apps/web/dist
 Install Command: pnpm install
-Node.js Version: 20.x
+Node.js Version: 22.x
 ```
 
 ## 📝 Features (Coming Soon)
