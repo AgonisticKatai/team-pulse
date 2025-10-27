@@ -1,6 +1,6 @@
-import { describe, it, expect, afterEach } from 'vitest'
-import { buildApp } from './app'
 import type { FastifyInstance } from 'fastify'
+import { afterEach, describe, expect, it } from 'vitest'
+import { buildApp } from './app'
 
 describe('Fastify App', () => {
   let app: FastifyInstance
