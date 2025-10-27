@@ -39,6 +39,7 @@
     "@vitest/ui": "catalog:",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.6",
+    "node-gyp": "^11.5.0",
     "turbo": "^2.2.3",
     "typescript": "catalog:",
     "vitest": "catalog:"

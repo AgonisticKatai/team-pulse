@@ -14,17 +14,26 @@
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@fastify/cors": "^10.0.1",
     "@team-pulse/shared": "workspace:*",
+    "better-sqlite3": "catalog:",
     "dotenv": "^16.4.5",
-    "fastify": "^5.1.0"
+    "drizzle-orm": "^0.44.7",
+    "fastify": "^5.1.0",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "catalog:",
     "@types/supertest": "^6.0.3",
+    "drizzle-kit": "^0.31.5",
     "supertest": "^7.1.4",
     "tsx": "^4.19.2",
     "typescript": "catalog:"
