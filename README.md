@@ -127,6 +127,45 @@ Node.js Version: 22.x
 - [ ] Team analytics dashboard
 - [ ] Mobile-responsive design
 
+## 🔒 Git Hooks & Code Quality
+
+This project uses **Husky** and **lint-staged** to ensure code quality before commits.
+
+### Automatic Checks
+
+**Pre-commit** (runs automatically before each commit):
+- 🎨 Lint and format changed files (Biome)
+- 🔎 TypeScript type checking
+
+**Commit-msg** (validates commit message format):
+- 📝 Enforces [Conventional Commits](https://www.conventionalcommits.org/)
+- Valid types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
+
+**Pre-push** (runs before pushing to remote):
+- 🧪 All tests must pass
+
+### Commit Message Format
+
+```bash
+<type>(<scope>): <subject>
+
+# Examples:
+feat: add user authentication
+fix: resolve login redirect issue
+docs: update API documentation
+test: add unit tests for match service
+```
+
+### Bypass Hooks (Emergency Only)
+
+```bash
+# Skip pre-commit and commit-msg (NOT RECOMMENDED)
+git commit --no-verify -m "message"
+
+# Skip pre-push (NOT RECOMMENDED)
+git push --no-verify
+```
+
 ## 🏗️ Architecture
 
 This project follows **Hexagonal Architecture** principles with:
