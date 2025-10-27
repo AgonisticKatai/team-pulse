@@ -2,6 +2,7 @@
   "name": "team-pulse",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "Modern football team statistics platform with real-time match tracking",
   "scripts": {
     "dev": "turbo dev",
