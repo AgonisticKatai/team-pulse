@@ -32,15 +32,15 @@
     "@biomejs/biome": "^1.9.4",
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
-    "@types/node": "^22.18.12",
+    "@types/node": "catalog:",
     "@vercel/node": "^3.2.17",
-    "@vitest/coverage-v8": "^4.0.3",
-    "@vitest/ui": "^4.0.3",
+    "@vitest/coverage-v8": "catalog:",
+    "@vitest/ui": "catalog:",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.6",
     "turbo": "^2.2.3",
-    "typescript": "^5.6.3",
-    "vitest": "^4.0.3"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "packageManager": "pnpm@10.19.0"
 }

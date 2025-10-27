@@ -5,3 +5,15 @@ packages:
 onlyBuiltDependencies:
   - '@biomejs/biome'
   - esbuild
+
+# Centralized dependency versions
+# Use "catalog:" in package.json to reference these versions
+catalog:
+  # Core
+  typescript: ^5.6.3
+  '@types/node': ^22.18.12
+
+  # Testing
+  vitest: ^4.0.3
+  '@vitest/coverage-v8': ^4.0.3
+  '@vitest/ui': ^4.0.3

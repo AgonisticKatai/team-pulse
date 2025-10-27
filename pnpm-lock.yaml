@@ -4,6 +4,24 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@types/node':
+      specifier: ^22.18.12
+      version: 22.18.12
+    '@vitest/coverage-v8':
+      specifier: ^4.0.3
+      version: 4.0.3
+    '@vitest/ui':
+      specifier: ^4.0.3
+      version: 4.0.3
+    typescript:
+      specifier: ^5.6.3
+      version: 5.9.3
+    vitest:
+      specifier: ^4.0.3
+      version: 4.0.3
+
 importers:
 
   .:
@@ -18,16 +36,16 @@ importers:
         specifier: ^20.0.0
         version: 20.0.0
       '@types/node':
-        specifier: ^22.18.12
+        specifier: 'catalog:'
         version: 22.18.12
       '@vercel/node':
         specifier: ^3.2.17
         version: 3.2.29
       '@vitest/coverage-v8':
-        specifier: ^4.0.3
+        specifier: 'catalog:'
         version: 4.0.3(vitest@4.0.3)
       '@vitest/ui':
-        specifier: ^4.0.3
+        specifier: 'catalog:'
         version: 4.0.3(vitest@4.0.3)
       husky:
         specifier: ^9.1.7
@@ -39,10 +57,10 @@ importers:
         specifier: ^2.2.3
         version: 2.5.8
       typescript:
-        specifier: ^5.6.3
+        specifier: 'catalog:'
         version: 5.9.3
       vitest:
-        specifier: ^4.0.3
+        specifier: 'catalog:'
         version: 4.0.3(@edge-runtime/vm@3.2.0)(@types/node@22.18.12)(@vitest/ui@4.0.3)(happy-dom@20.0.8)(jiti@2.6.1)(tsx@4.20.6)(yaml@2.8.1)
 
   apps/api:
@@ -58,7 +76,7 @@ importers:
         version: 5.6.1
     devDependencies:
       '@types/node':
-        specifier: ^22.18.12
+        specifier: 'catalog:'
         version: 22.18.12
       '@types/supertest':
         specifier: ^6.0.3
@@ -70,7 +88,7 @@ importers:
         specifier: ^4.19.2
         version: 4.20.6
       typescript:
-        specifier: ^5.6.3
+        specifier: 'catalog:'
         version: 5.9.3
 
   apps/web:
@@ -107,7 +125,7 @@ importers:
         specifier: ^20.0.8
         version: 20.0.8
       typescript:
-        specifier: ^5.6.3
+        specifier: 'catalog:'
         version: 5.9.3
       vite:
         specifier: ^6.0.1
@@ -116,7 +134,7 @@ importers:
   packages/shared:
     devDependencies:
       typescript:
-        specifier: ^5.6.2
+        specifier: 'catalog:'
         version: 5.9.3
 
 packages:
