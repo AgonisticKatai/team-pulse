@@ -17,6 +17,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.5",
     "@team-pulse/shared": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
