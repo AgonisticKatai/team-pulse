@@ -7,6 +7,11 @@ import Fastify, {
 } from 'fastify'
 
 export async function buildApp(): Promise<FastifyInstance> {
+  // Validate required environment variables in production
+  if (process.env.NODE_ENV === 'production' && !process.env.FRONTEND_URL) {
+    throw new Error('FRONTEND_URL must be defined in production')
+  }
+
   const fastify = Fastify({
     logger: {
       level: process.env.LOG_LEVEL || 'info',
@@ -16,9 +21,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   // Register CORS first
   await fastify.register(cors, {
     origin:
-      process.env.NODE_ENV === 'production'
-        ? process.env.FRONTEND_URL || true
-        : 'http://localhost:5173',
+      process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL : 'http://localhost:5173',
     credentials: true,
   })
 
