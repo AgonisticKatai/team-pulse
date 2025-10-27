@@ -48,13 +48,14 @@ npm install -g pnpm
 # Install dependencies
 pnpm install
 
-# Approve Biome build scripts
-pnpm approve-builds @biomejs/biome
-pnpm install
+# Create environment file for API
+pnpm setup
 
 # Start development servers (uses Turborepo)
 pnpm dev
 ```
+
+**Note**: The `pnpm setup` command creates `apps/api/.env` from `.env.example`. This file contains your local environment variables and is git-ignored.
 
 ### Development
 

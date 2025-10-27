@@ -5,6 +5,7 @@
   "type": "module",
   "description": "Modern football team statistics platform with real-time match tracking",
   "scripts": {
+    "setup": "cp apps/api/.env.example apps/api/.env && echo '✅ Environment file created at apps/api/.env'",
     "dev": "turbo dev",
     "build": "turbo build",
     "test": "turbo test",
