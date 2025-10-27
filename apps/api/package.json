@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@fastify/cors": "^10.0.1",
+    "@team-pulse/shared": "workspace:*",
     "dotenv": "^16.4.5",
     "fastify": "^5.1.0"
   },
