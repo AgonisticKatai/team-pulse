@@ -11,20 +11,13 @@ jobs:
     name: CI Pipeline
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    container:
+      image: node:22
+      options: --user root
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3 build-essential
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -38,14 +31,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-native-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-store-docker-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-native-
+            ${{ runner.os }}-pnpm-store-docker-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        env:
-          npm_config_build_from_source: true
 
       - name: Lint
         run: pnpm lint
