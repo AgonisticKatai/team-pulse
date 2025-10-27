@@ -29,24 +29,21 @@ jobs:
         run: |
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
       - name: Install system dependencies for better-sqlite3
         run: |
           sudo apt-get update
           sudo apt-get install -y python3 build-essential
 
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-v2-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-v2-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Rebuild native dependencies
-        run: pnpm rebuild better-sqlite3
 
       - name: Lint
         run: pnpm lint
