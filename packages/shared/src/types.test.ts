@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { HealthCheckResponse, Match, User } from './types'
+import type { HealthCheckResponse, Match, User } from './index'
 
 describe('Shared Types', () => {
   describe('HealthCheckResponse', () => {
