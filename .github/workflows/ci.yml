@@ -38,15 +38,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-store-native-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-pnpm-store-native-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Rebuild native modules
-        run: pnpm --filter @team-pulse/api rebuild better-sqlite3
 
       - name: Lint
         run: pnpm lint
