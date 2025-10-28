@@ -12,6 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
+    env:
+      DATABASE_URL: postgresql://test:test@localhost:5432/test
+      NODE_ENV: test
+
     services:
       postgres:
         image: postgres:16-alpine
@@ -48,7 +52,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --no-optional
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
         run: pnpm lint
@@ -58,14 +62,9 @@ jobs:
 
       - name: Run database migrations
         run: pnpm --filter @team-pulse/api exec tsx src/infrastructure/database/migrate.ts
-        env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/test
 
       - name: Run tests
         run: pnpm test
-        env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/test
-          NODE_ENV: test
 
       - name: Build
         run: pnpm build
