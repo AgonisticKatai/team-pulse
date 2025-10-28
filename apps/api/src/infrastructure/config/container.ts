@@ -32,7 +32,7 @@ import type { Env } from './env.js'
 
 export class Container {
   // Infrastructure
-  private _database?: Database
+  private _database: Database
   private _teamRepository?: ITeamRepository
 
   // Use Cases
@@ -42,15 +42,14 @@ export class Container {
   private _updateTeamUseCase?: UpdateTeamUseCase
   private _deleteTeamUseCase?: DeleteTeamUseCase
 
-  constructor(private readonly env: Env) {}
+  constructor(_env: Env, database: Database) {
+    this._database = database
+  }
 
   /**
    * Database instance (singleton)
    */
   get database(): Database {
-    if (!this._database) {
-      this._database = createDatabase(this.env.DATABASE_URL)
-    }
     return this._database
   }
 
@@ -128,6 +127,7 @@ export class Container {
 /**
  * Create and configure the dependency injection container
  */
-export function createContainer(env: Env): Container {
-  return new Container(env)
+export async function createContainer(env: Env): Promise<Container> {
+  const database = await createDatabase(env.DATABASE_URL)
+  return new Container(env, database)
 }

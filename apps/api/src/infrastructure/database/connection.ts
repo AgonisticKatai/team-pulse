@@ -1,4 +1,3 @@
-import SQLiteDatabase from 'better-sqlite3'
 import { type BetterSQLite3Database, drizzle as drizzleSqlite } from 'drizzle-orm/better-sqlite3'
 import { type PostgresJsDatabase, drizzle as drizzlePostgres } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
@@ -11,7 +10,7 @@ import * as schema from './schema.js'
  * - SQLite: DATABASE_URL=./data/db.sqlite or :memory:
  * - PostgreSQL: DATABASE_URL=postgresql://user:pass@host:port/db
  */
-export function createDatabase(dbUrl: string): Database {
+export async function createDatabase(dbUrl: string): Promise<Database> {
   // Detect database type from URL
   const isPostgres = dbUrl.startsWith('postgres://') || dbUrl.startsWith('postgresql://')
 
@@ -21,7 +20,8 @@ export function createDatabase(dbUrl: string): Database {
     return drizzlePostgres(client, { schema }) as Database
   }
 
-  // SQLite connection (for development)
+  // SQLite connection (for development) - dynamic import to avoid loading in CI
+  const SQLiteDatabase = (await import('better-sqlite3')).default
   const sqlite = new SQLiteDatabase(dbUrl)
 
   // Enable WAL mode for better performance
