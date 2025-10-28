@@ -10,10 +10,9 @@ describe('Fastify App', () => {
   // Set test environment variables
   beforeAll(() => {
     process.env.NODE_ENV = 'test'
-    // Use PostgreSQL if DATABASE_URL is set (CI), otherwise SQLite in-memory (local)
-    if (!process.env.DATABASE_URL) {
-      process.env.DATABASE_URL = ':memory:'
-    }
+    // DATABASE_URL should be set via environment or vitest config
+    // In CI: postgresql://test:test@localhost:5432/test
+    // Locally: :memory: (set in vitest.config.ts)
   })
 
   afterEach(async () => {
