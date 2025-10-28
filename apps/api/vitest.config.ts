@@ -4,12 +4,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    env: {
-      // Default to SQLite in-memory for local tests
-      // CI will override this with PostgreSQL URL
-      DATABASE_URL: process.env.DATABASE_URL || ':memory:',
-      NODE_ENV: 'test',
-    },
+    setupFiles: ['./vitest.setup.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
