@@ -171,9 +171,14 @@ export class ApiClient {
  * Create API client instance
  *
  * Uses environment variable for base URL (Vite convention)
+ *
+ * In both development and production, we use relative URLs:
+ * - Development: Vite proxy redirects /api/* to http://localhost:3000/api/*
+ * - Production: Vercel rewrites /api/* to serverless functions
  */
 export function createApiClient(): ApiClient {
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+  // Use VITE_API_URL if explicitly set, otherwise use relative URLs
+  const baseUrl = import.meta.env.VITE_API_URL ?? ''
 
   return new ApiClient({ baseUrl })
 }
