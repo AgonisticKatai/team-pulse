@@ -1,17 +1,25 @@
-import { drizzle } from 'drizzle-orm/postgres-js'
-import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import postgres from 'postgres'
 
 /**
  * Run database migrations
  *
- * Used in tests to setup PostgreSQL schema before running tests
+ * Creates tables in PostgreSQL using raw SQL.
+ * This avoids SQLite-specific SQL migration files and ensures compatibility.
  */
 export async function runMigrations(dbUrl: string) {
   const client = postgres(dbUrl, { max: 1 })
-  const db = drizzle(client)
 
-  await migrate(db, { migrationsFolder: './drizzle' })
+  // Create teams table
+  await client`
+    CREATE TABLE IF NOT EXISTS teams (
+      id TEXT PRIMARY KEY NOT NULL,
+      name TEXT NOT NULL,
+      city TEXT NOT NULL,
+      founded_year INTEGER,
+      created_at TIMESTAMP NOT NULL,
+      updated_at TIMESTAMP NOT NULL
+    )
+  `
 
   await client.end()
 }
