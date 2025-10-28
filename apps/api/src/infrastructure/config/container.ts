@@ -120,7 +120,6 @@ export class Container {
    */
   async close(): Promise<void> {
     // Future: Close database connections, cleanup resources
-    // For now, SQLite auto-closes
   }
 }
 

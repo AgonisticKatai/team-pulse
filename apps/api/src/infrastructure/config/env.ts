@@ -23,8 +23,8 @@ const envSchema = z.object({
   // CORS
   FRONTEND_URL: z.string().url().optional().or(z.literal('')),
 
-  // Database
-  DATABASE_URL: z.string().default('./data/teampulse.db'),
+  // Database - PostgreSQL connection string
+  DATABASE_URL: z.string().default('postgresql://teampulse:teampulse@localhost:5432/teampulse'),
 })
 
 /**
@@ -65,6 +65,6 @@ export function validateProductionEnv(env: Env) {
     }
 
     // Add more production-specific validations here
-    // Example: database must be PostgreSQL in prod, not SQLite
+    // Example: ensure DATABASE_URL uses production database
   }
 }
