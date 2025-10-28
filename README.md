@@ -72,6 +72,18 @@ docker compose logs -f        # View PostgreSQL logs
 
 ### Installation
 
+#### Option 1: Using Makefile (Recommended) ⭐
+
+```bash
+# One command setup (first time only)
+make setup
+
+# Start development
+make start
+```
+
+#### Option 2: Manual Setup
+
 ```bash
 # Install pnpm globally if you don't have it
 npm install -g pnpm
@@ -82,10 +94,13 @@ pnpm install
 # Create environment file for API
 pnpm setup
 
-# Initialize database schema
-pnpm --filter @team-pulse/api db:push
+# Start PostgreSQL
+pnpm docker:up
 
-# Start development servers (uses Turborepo)
+# Initialize database schema
+pnpm db:push
+
+# Start development servers
 pnpm dev
 ```
 
@@ -98,19 +113,62 @@ The development servers will be available at:
 - **API**: `http://localhost:3000`
 - **Database**: `postgresql://teampulse:teampulse@localhost:5432/teampulse`
 
-**Quick start:**
+#### Quick Start Commands
+
+**Using Makefile:**
 ```bash
-# 1. Start PostgreSQL
-docker compose up -d
+make start        # Start everything (PostgreSQL + dev servers)
+make stop         # Stop all services
+make restart      # Restart all services
+make help         # Show all available commands
+```
 
-# 2. Initialize database
-pnpm --filter @team-pulse/api db:push
-
-# 3. Start all dev servers
-pnpm dev
+**Using pnpm:**
+```bash
+pnpm docker:up    # Start PostgreSQL
+pnpm db:push      # Initialize/update database schema
+pnpm dev          # Start dev servers
+pnpm docker:down  # Stop PostgreSQL
 ```
 
 ### Available Commands
+
+#### Makefile Commands
+
+Run `make help` to see all available commands. Most useful:
+
+```bash
+# Development
+make start           # Start all services (PostgreSQL + dev servers)
+make stop            # Stop all services
+make restart         # Restart all services
+make setup           # First time setup (deps + env + db)
+
+# Database
+make db-push         # Push schema changes to database
+make db-studio       # Open Drizzle Studio (database GUI)
+make db-reset        # Reset database (⚠️ deletes all data)
+make db-logs         # Show PostgreSQL logs
+make shell           # Open PostgreSQL shell
+
+# Development Helpers
+make logs            # Show all Docker logs
+make ps              # Show running containers
+make clean           # Stop and remove all data (⚠️ destructive)
+
+# Testing & Quality
+make test            # Run all tests
+make test-watch      # Run tests in watch mode
+make test-coverage   # Run tests with coverage
+make lint            # Lint all code
+make lint-fix        # Lint and fix all code
+make type-check      # Run TypeScript type checking
+
+# Build
+make build           # Build all apps for production
+```
+
+#### pnpm Scripts
 
 All commands use Turborepo for optimal caching and parallelization:
 
@@ -130,10 +188,16 @@ pnpm lint:fix        # Auto-fix linting issues
 pnpm format          # Format code
 pnpm type-check      # TypeScript type checking
 
-# Database (run from API workspace)
-pnpm --filter @team-pulse/api db:push      # Push schema changes to database
-pnpm --filter @team-pulse/api db:studio    # Open Drizzle Studio (database GUI)
-pnpm --filter @team-pulse/api db:generate  # Generate migrations
+# Docker
+pnpm docker:up       # Start PostgreSQL
+pnpm docker:down     # Stop PostgreSQL
+pnpm docker:logs     # Show PostgreSQL logs
+pnpm docker:ps       # Show running containers
+
+# Database
+pnpm db:push         # Push schema changes to database
+pnpm db:studio       # Open Drizzle Studio (database GUI)
+pnpm db:shell        # Open PostgreSQL shell
 ```
 
 ## 🚀 Deployment

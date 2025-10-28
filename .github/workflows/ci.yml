@@ -61,10 +61,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: pnpm lint
+        run: make lint
 
       - name: Type check
-        run: pnpm type-check
+        run: make type-check
 
       - name: Wait for PostgreSQL
         run: |
@@ -80,18 +80,18 @@ jobs:
           echo "NODE_ENV is set to: $NODE_ENV"
 
       - name: Setup database schema
-        run: pnpm --filter @team-pulse/api db:push
+        run: make db-push
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/test
 
       - name: Run tests
-        run: pnpm test
+        run: make test
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/test
           NODE_ENV: test
 
       - name: Build
-        run: pnpm build
+        run: make build
 
       - name: Upload coverage
         if: always()
