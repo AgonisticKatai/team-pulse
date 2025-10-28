@@ -65,11 +65,29 @@ jobs:
       - name: Type check
         run: pnpm type-check
 
+      - name: Wait for PostgreSQL
+        run: |
+          until pg_isready -h localhost -p 5432 -U test; do
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 1
+          done
+          echo "PostgreSQL is ready!"
+
+      - name: Debug environment variables
+        run: |
+          echo "DATABASE_URL is set to: ${DATABASE_URL:0:20}..."
+          echo "NODE_ENV is set to: $NODE_ENV"
+
       - name: Run database migrations
         run: pnpm --filter @team-pulse/api exec tsx src/infrastructure/database/migrate.ts
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
 
       - name: Run tests
         run: pnpm test
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+          NODE_ENV: test
 
       - name: Build
         run: pnpm build
