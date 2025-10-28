@@ -38,7 +38,7 @@ team-pulse/
 ### Prerequisites
 
 - Node.js >= 22.0.0
-- pnpm >= 8.0.0
+- pnpm >= 10.0.0
 - Docker and Docker Compose (for local database)
 
 ### Database Setup
@@ -82,31 +82,58 @@ pnpm install
 # Create environment file for API
 pnpm setup
 
+# Initialize database schema
+pnpm --filter @team-pulse/api db:push
+
 # Start development servers (uses Turborepo)
 pnpm dev
 ```
 
-**Note**: The `pnpm setup` command creates `apps/api/.env` from `.env.example`. Make sure to set `DATABASE_URL=postgresql://teampulse:teampulse@localhost:5432/teampulse` in your `.env` file to connect to the Docker PostgreSQL instance.
+**Note**: The `pnpm setup` command creates `apps/api/.env` from `.env.example` with the correct DATABASE_URL already configured for Docker PostgreSQL (`postgresql://teampulse:teampulse@localhost:5432/teampulse`).
 
 ### Development
 
-- Frontend will run on: `http://localhost:5173`
-- API will run on: `http://localhost:3000`
+The development servers will be available at:
+- **Frontend**: `http://localhost:5173`
+- **API**: `http://localhost:3000`
+- **Database**: `postgresql://teampulse:teampulse@localhost:5432/teampulse`
+
+**Quick start:**
+```bash
+# 1. Start PostgreSQL
+docker compose up -d
+
+# 2. Initialize database
+pnpm --filter @team-pulse/api db:push
+
+# 3. Start all dev servers
+pnpm dev
+```
 
 ### Available Commands
 
 All commands use Turborepo for optimal caching and parallelization:
 
 ```bash
+# Development
 pnpm dev             # Start all apps in development mode
 pnpm build           # Build all apps for production
+
+# Testing
 pnpm test            # Run all tests
 pnpm test:watch      # Run tests in watch mode
 pnpm test:coverage   # Run tests with coverage report
+
+# Code Quality
 pnpm lint            # Lint all workspaces
 pnpm lint:fix        # Auto-fix linting issues
 pnpm format          # Format code
 pnpm type-check      # TypeScript type checking
+
+# Database (run from API workspace)
+pnpm --filter @team-pulse/api db:push      # Push schema changes to database
+pnpm --filter @team-pulse/api db:studio    # Open Drizzle Studio (database GUI)
+pnpm --filter @team-pulse/api db:generate  # Generate migrations
 ```
 
 ## 🚀 Deployment
@@ -200,11 +227,36 @@ git push --no-verify
 
 ## 🏗️ Architecture
 
-This project follows **Hexagonal Architecture** principles with:
+This project follows **Hexagonal Architecture** (Ports & Adapters) principles with:
+
+### Layers
+- **Domain Layer**: Business entities and rules (framework-agnostic)
+- **Application Layer**: Use cases and business logic orchestration
+- **Infrastructure Layer**: Adapters for external systems (HTTP, Database, etc.)
+
+### Benefits
 - Domain-driven design (DDD)
 - Test-driven development (TDD)
 - Clean separation of concerns
 - Framework-agnostic business logic
+- Easy to swap implementations (e.g., different databases or HTTP frameworks)
+- Highly testable with dependency injection
+
+### Project Structure
+```
+apps/api/src/
+├── domain/              # Entities, value objects, domain errors
+│   ├── models/
+│   ├── repositories/    # Repository interfaces (ports)
+│   └── errors/
+├── application/         # Use cases, DTOs, business orchestration
+│   ├── use-cases/
+│   └── dtos/
+└── infrastructure/      # Adapters (implementations)
+    ├── database/        # Drizzle ORM, repositories
+    ├── http/            # Fastify routes, controllers
+    └── config/          # DI container, env validation
+```
 
 ## 🎨 Design System
 
