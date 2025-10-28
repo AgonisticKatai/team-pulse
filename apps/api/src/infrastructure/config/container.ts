@@ -127,7 +127,7 @@ export class Container {
 /**
  * Create and configure the dependency injection container
  */
-export async function createContainer(env: Env): Promise<Container> {
-  const database = await createDatabase(env.DATABASE_URL)
+export function createContainer(env: Env): Container {
+  const database = createDatabase(env.DATABASE_URL)
   return new Container(env, database)
 }

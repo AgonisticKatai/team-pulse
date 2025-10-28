@@ -11,6 +11,7 @@ Modern football team statistics platform with real-time match tracking, admin da
 
 - **Frontend**: React 19 + TypeScript + Vite 6
 - **Backend**: Fastify (local) / Vercel Serverless Functions (production)
+- **Database**: PostgreSQL (with Drizzle ORM)
 - **Styling**: CSS Custom Properties (native)
 - **Tooling**: Biome (linting + formatting)
 - **Monorepo**: Turborepo + pnpm workspaces
@@ -36,8 +37,38 @@ team-pulse/
 
 ### Prerequisites
 
-- Node.js >= 20.0.0
+- Node.js >= 22.0.0
 - pnpm >= 8.0.0
+- Docker and Docker Compose (for local database)
+
+### Database Setup
+
+This project uses **PostgreSQL** for all environments (development, tests, and production).
+
+**Start PostgreSQL with Docker Compose:**
+
+```bash
+# Start PostgreSQL in the background
+docker compose up -d
+
+# Check the container is running
+docker compose ps
+```
+
+The database will be available at:
+- **Host**: `localhost`
+- **Port**: `5432`
+- **Database**: `teampulse`
+- **User**: `teampulse`
+- **Password**: `teampulse`
+
+**Useful Docker commands:**
+
+```bash
+docker compose down           # Stop PostgreSQL
+docker compose down -v        # Stop and remove data (reset database)
+docker compose logs -f        # View PostgreSQL logs
+```
 
 ### Installation
 
@@ -55,7 +86,7 @@ pnpm setup
 pnpm dev
 ```
 
-**Note**: The `pnpm setup` command creates `apps/api/.env` from `.env.example`. This file contains your local environment variables and is git-ignored.
+**Note**: The `pnpm setup` command creates `apps/api/.env` from `.env.example`. Make sure to set `DATABASE_URL=postgresql://teampulse:teampulse@localhost:5432/teampulse` in your `.env` file to connect to the Docker PostgreSQL instance.
 
 ### Development
 

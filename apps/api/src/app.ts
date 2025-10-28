@@ -31,7 +31,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
   validateProductionEnv(env)
 
   // 2. Create dependency injection container
-  const container = await createContainer(env)
+  const container = createContainer(env)
 
   // 3. Create Fastify instance
   const fastify = Fastify({

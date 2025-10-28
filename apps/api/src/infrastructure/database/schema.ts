@@ -1,4 +1,4 @@
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 
 /**
  * Teams table schema
@@ -7,15 +7,15 @@ import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
  * This is the infrastructure layer - the actual database schema.
  * The domain model (Team entity) is separate and independent.
  */
-export const teams = sqliteTable('teams', {
+export const teams = pgTable('teams', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   city: text('city').notNull(),
   foundedYear: integer('founded_year'),
-  createdAt: integer('created_at', { mode: 'timestamp' })
+  createdAt: timestamp('created_at', { mode: 'date' })
     .notNull()
     .$defaultFn(() => new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp' })
+  updatedAt: timestamp('updated_at', { mode: 'date' })
     .notNull()
     .$defaultFn(() => new Date()),
 })

@@ -8,12 +8,21 @@
 // Set NODE_ENV to test
 process.env.NODE_ENV = 'test'
 
-// Set DATABASE_URL if not already set
-// In CI: Will use postgresql:// from workflow env vars
-// Locally: Will default to :memory: for SQLite
+// Verify DATABASE_URL is set to PostgreSQL
+// In CI: Set by GitHub Actions workflow
+// Locally: Set via environment variable or .env file
 if (!process.env.DATABASE_URL) {
-  process.env.DATABASE_URL = ':memory:'
-  console.log('Using SQLite in-memory database for tests')
-} else {
-  console.log(`Using database: ${process.env.DATABASE_URL.substring(0, 20)}...`)
+  throw new Error(
+    `DATABASE_URL is required for tests. Please set it to a PostgreSQL connection string.
+Example: DATABASE_URL=postgresql://test:test@localhost:5432/test`,
+  )
 }
+
+if (!process.env.DATABASE_URL.startsWith('postgres')) {
+  throw new Error(
+    `DATABASE_URL must be a PostgreSQL connection string (starting with postgresql:// or postgres://).
+Current value: ${process.env.DATABASE_URL}`,
+  )
+}
+
+console.log(`Using PostgreSQL: ${process.env.DATABASE_URL.substring(0, 30)}...`)
