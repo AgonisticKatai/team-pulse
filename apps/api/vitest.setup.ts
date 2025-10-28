@@ -8,16 +8,19 @@
 // Set NODE_ENV to test
 process.env.NODE_ENV = 'test'
 
-// Verify DATABASE_URL is set to PostgreSQL
+// Configure DATABASE_URL for tests
 // In CI: Set by GitHub Actions workflow
-// Locally: Set via environment variable or .env file
+// Locally: Use Docker Compose database or set via environment variable
 if (!process.env.DATABASE_URL) {
-  throw new Error(
-    `DATABASE_URL is required for tests. Please set it to a PostgreSQL connection string.
-Example: DATABASE_URL=postgresql://test:test@localhost:5432/test`,
+  // Default to Docker Compose test database for local development
+  process.env.DATABASE_URL = 'postgresql://teampulse:teampulse@localhost:5432/teampulse'
+  console.log(
+    '⚠️  DATABASE_URL not set, using Docker Compose default: postgresql://teampulse:teampulse@localhost:5432/teampulse',
   )
+  console.log('💡 Make sure PostgreSQL is running: docker compose up -d')
 }
 
+// Validate it's a PostgreSQL URL
 if (!process.env.DATABASE_URL.startsWith('postgres')) {
   throw new Error(
     `DATABASE_URL must be a PostgreSQL connection string (starting with postgresql:// or postgres://).
