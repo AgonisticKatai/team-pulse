@@ -11,9 +11,21 @@ jobs:
     name: CI Pipeline
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    container:
-      image: node:22
-      options: --user root
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
 
     steps:
       - name: Checkout code
@@ -31,9 +43,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-docker-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-docker-
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -44,8 +56,16 @@ jobs:
       - name: Type check
         run: pnpm type-check
 
+      - name: Run database migrations
+        run: pnpm --filter @team-pulse/api exec tsx src/infrastructure/database/migrate.ts
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+
       - name: Run tests
         run: pnpm test
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+          NODE_ENV: test
 
       - name: Build
         run: pnpm build

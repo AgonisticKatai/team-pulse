@@ -10,7 +10,10 @@ describe('Fastify App', () => {
   // Set test environment variables
   beforeAll(() => {
     process.env.NODE_ENV = 'test'
-    process.env.DATABASE_URL = ':memory:' // In-memory SQLite for tests
+    // Use PostgreSQL if DATABASE_URL is set (CI), otherwise SQLite in-memory (local)
+    if (!process.env.DATABASE_URL) {
+      process.env.DATABASE_URL = ':memory:'
+    }
   })
 
   afterEach(async () => {

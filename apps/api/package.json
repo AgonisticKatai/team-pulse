@@ -25,7 +25,6 @@
     "@team-pulse/shared": "workspace:*",
     "better-sqlite3": "catalog:",
     "dotenv": "^16.4.5",
-    "drizzle-orm": "^0.44.7",
     "fastify": "^5.1.0",
     "zod": "^4.1.12"
   },
@@ -34,6 +33,8 @@
     "@types/node": "catalog:",
     "@types/supertest": "^6.0.3",
     "drizzle-kit": "^0.31.5",
+    "drizzle-orm": "catalog:",
+    "postgres": "^3.4.7",
     "supertest": "^7.1.4",
     "tsx": "^4.19.2",
     "typescript": "catalog:"
