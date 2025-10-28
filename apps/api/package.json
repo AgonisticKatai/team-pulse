@@ -23,18 +23,20 @@
   "dependencies": {
     "@fastify/cors": "^10.0.1",
     "@team-pulse/shared": "workspace:*",
-    "better-sqlite3": "catalog:",
     "dotenv": "^16.4.5",
+    "drizzle-orm": "catalog:",
     "fastify": "^5.1.0",
+    "postgres": "^3.4.7",
     "zod": "^4.1.12"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "catalog:"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "catalog:",
     "@types/supertest": "^6.0.3",
     "drizzle-kit": "^0.31.5",
-    "drizzle-orm": "catalog:",
-    "postgres": "^3.4.7",
     "supertest": "^7.1.4",
     "tsx": "^4.19.2",
     "typescript": "catalog:"

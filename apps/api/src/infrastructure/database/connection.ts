@@ -20,17 +20,26 @@ export async function createDatabase(dbUrl: string): Promise<Database> {
   }
 
   // SQLite connection (for development) - all imports are dynamic to avoid loading in CI
-  const [{ default: SQLiteDatabase }, { drizzle: drizzleSqlite }] = await Promise.all([
-    import('better-sqlite3'),
-    import('drizzle-orm/better-sqlite3'),
-  ])
+  try {
+    const [{ default: SQLiteDatabase }, { drizzle: drizzleSqlite }] = await Promise.all([
+      import('better-sqlite3'),
+      import('drizzle-orm/better-sqlite3'),
+    ])
 
-  const sqlite = new SQLiteDatabase(dbUrl)
+    const sqlite = new SQLiteDatabase(dbUrl)
 
-  // Enable WAL mode for better performance
-  sqlite.pragma('journal_mode = WAL')
+    // Enable WAL mode for better performance
+    sqlite.pragma('journal_mode = WAL')
 
-  return drizzleSqlite(sqlite, { schema }) as Database
+    return drizzleSqlite(sqlite, { schema }) as Database
+  } catch (error) {
+    throw new Error(
+      `Failed to load SQLite dependencies. Make sure better-sqlite3 is installed.
+If you're in CI/test environment, set DATABASE_URL to a PostgreSQL URL.
+Current DATABASE_URL: ${dbUrl}
+Error: ${error instanceof Error ? error.message : String(error)}`,
+    )
+  }
 }
 
 /**
