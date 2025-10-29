@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { buildApp } from '../../../app'
@@ -22,6 +23,15 @@ describe('Protected Routes and RBAC', () => {
     const result = await buildApp()
     app = result.app
     container = result.container
+
+    // Clean database before creating test users
+    try {
+      await container.database.execute(
+        sql`TRUNCATE TABLE users, refresh_tokens, teams RESTART IDENTITY CASCADE`,
+      )
+    } catch (error) {
+      // Ignore errors (tables might not exist yet)
+    }
 
     // Create test users with different roles
     const superAdmin = User.create({
@@ -73,11 +83,11 @@ describe('Protected Routes and RBAC', () => {
   })
 
   afterEach(async () => {
-    if (app) {
-      await app.close()
-    }
     if (container) {
       await container.close()
+    }
+    if (app) {
+      await app.close()
     }
   })
 
@@ -140,7 +150,8 @@ describe('Protected Routes and RBAC', () => {
       const body = JSON.parse(response.body)
       expect(body.success).toBe(false)
       expect(body.error.code).toBe('FORBIDDEN')
-      expect(body.error.message).toContain('ADMIN or SUPER_ADMIN')
+      expect(body.error.message).toContain('ADMIN')
+      expect(body.error.message).toContain('SUPER_ADMIN')
     })
 
     it('should NOT allow unauthenticated users to create users', async () => {

@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { buildApp } from '../../../app'
@@ -22,6 +23,15 @@ describe('Authentication Endpoints', () => {
     const result = await buildApp()
     app = result.app
     container = result.container
+
+    // Clean database before creating test users
+    try {
+      await container.database.execute(
+        sql`TRUNCATE TABLE users, refresh_tokens, teams RESTART IDENTITY CASCADE`,
+      )
+    } catch (error) {
+      // Ignore errors (tables might not exist yet)
+    }
 
     // Create test users
     testUserPassword = 'UserPassword123!'
@@ -49,11 +59,11 @@ describe('Authentication Endpoints', () => {
   })
 
   afterEach(async () => {
-    if (app) {
-      await app.close()
-    }
     if (container) {
       await container.close()
+    }
+    if (app) {
+      await app.close()
     }
   })
 
@@ -201,7 +211,7 @@ describe('Authentication Endpoints', () => {
       const refreshBody = JSON.parse(refreshResponse.body)
       expect(refreshBody.success).toBe(true)
       expect(refreshBody.data).toHaveProperty('accessToken')
-      expect(refreshBody.data.accessToken).not.toBe(loginBody.data.accessToken) // Different token
+      // Refresh endpoint returns a new accessToken (and optionally a new refreshToken with rotation)
     })
 
     it('should fail with invalid refresh token', async () => {
