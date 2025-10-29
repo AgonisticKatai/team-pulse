@@ -39,6 +39,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const app = await getApp()
     await app.ready()
+
+    // Restore the original URL from Vercel rewrite
+    // When rewriting /api/:path* to /api, the path is available in query.path
+    const path = req.query.path
+    if (path) {
+      const pathStr = Array.isArray(path) ? path.join('/') : path
+      req.url = `/api/${pathStr}`
+    }
+
     app.server.emit('request', req, res)
   } catch (error) {
     console.error('Serverless function error:', error)
