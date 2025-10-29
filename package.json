@@ -36,9 +36,6 @@
   "keywords": ["football", "statistics", "react", "typescript", "hexagonal-architecture"],
   "author": "",
   "license": "MIT",
-  "engines": {
-    "node": "22.x"
-  },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@commitlint/cli": "^20.1.0",
