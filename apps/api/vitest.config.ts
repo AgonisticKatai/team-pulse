@@ -5,9 +5,8 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     setupFiles: ['./vitest.setup.ts'],
-    // Temporarily disable parallel execution until test containers are implemented
-    // See commit message for details on race conditions
-    fileParallelism: false,
+    // Test containers provide isolated PostgreSQL instances per test suite
+    // This enables parallel execution with true test isolation
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

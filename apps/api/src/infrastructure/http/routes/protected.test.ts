@@ -1,55 +1,66 @@
+import { sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
-import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { buildApp } from '../../../app'
 import { User } from '../../../domain/models/User'
 import { hashPassword } from '../../auth/passwordUtils'
 import type { Container } from '../../config/container'
-import { cleanDatabase, uniqueTestId } from '../../testing/testHelpers'
+import type { Database } from '../../database/connection'
+import { setupTestContainer } from '../../testing/testContainers'
 
 describe('Protected Routes and RBAC', () => {
   let app: FastifyInstance
   let container: Container
+  let db: Database
+  let cleanup: () => Promise<void>
   let superAdminToken: string
   let adminToken: string
   let userToken: string
 
-  beforeAll(() => {
+  beforeAll(async () => {
     process.env.NODE_ENV = 'test'
     process.env.JWT_SECRET = 'test-jwt-secret-key-min-32-chars-long'
     process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-min-32-chars-long'
-  })
+
+    // Setup isolated PostgreSQL container for this test suite
+    const result = await setupTestContainer()
+    db = result.db
+    cleanup = result.cleanup
+
+    // Set DATABASE_URL to use the test container
+    process.env.DATABASE_URL = result.container.getConnectionUri()
+  }, 120_000) // 2 minute timeout for container startup
 
   beforeEach(async () => {
+    // Build app with test container database
     const result = await buildApp()
     app = result.app
     container = result.container
 
-    // Clean database with advisory lock (safe for parallel execution)
-    await cleanDatabase(container.database)
+    // Clean database for test isolation
+    await db.execute(sql`TRUNCATE TABLE users, refresh_tokens, teams RESTART IDENTITY CASCADE`)
 
-    // Generate unique IDs/emails for this test run to avoid conflicts with parallel tests
-    const testId = uniqueTestId()
-    const superAdminEmail = `superadmin-${testId}@test.com`
-    const adminEmail = `admin-${testId}@test.com`
-    const userEmail = `user-${testId}@test.com`
+    // Create test users with different roles (fixed emails since we have isolated container)
+    const superAdminEmail = 'superadmin@test.com'
+    const adminEmail = 'admin@test.com'
+    const userEmail = 'user@test.com'
 
-    // Create test users with different roles
     const superAdmin = User.create({
-      id: `super-admin-${testId}`,
+      id: 'super-admin',
       email: superAdminEmail,
       passwordHash: await hashPassword('SuperAdmin123!'),
       role: 'SUPER_ADMIN',
     })
 
     const admin = User.create({
-      id: `admin-${testId}`,
+      id: 'admin',
       email: adminEmail,
       passwordHash: await hashPassword('Admin123!'),
       role: 'ADMIN',
     })
 
     const user = User.create({
-      id: `user-${testId}`,
+      id: 'user',
       email: userEmail,
       passwordHash: await hashPassword('User123!'),
       role: 'USER',
@@ -88,6 +99,13 @@ describe('Protected Routes and RBAC', () => {
     }
     if (app) {
       await app.close()
+    }
+  })
+
+  afterAll(async () => {
+    // Stop the test container
+    if (cleanup) {
+      await cleanup()
     }
   })
 

@@ -1,40 +1,50 @@
+import { sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
-import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { buildApp } from '../../../app'
 import { User } from '../../../domain/models/User'
 import { hashPassword } from '../../auth/passwordUtils'
 import type { Container } from '../../config/container'
-import { cleanDatabase, uniqueTestId } from '../../testing/testHelpers'
+import type { Database } from '../../database/connection'
+import { setupTestContainer } from '../../testing/testContainers'
 
 describe('Authentication Endpoints', () => {
   let app: FastifyInstance
   let container: Container
+  let db: Database
+  let cleanup: () => Promise<void>
   let testUserPassword: string
   let testAdminPassword: string
   let testUserEmail: string
   let testAdminEmail: string
 
-  beforeAll(() => {
+  beforeAll(async () => {
     // Set test environment
     process.env.NODE_ENV = 'test'
     process.env.JWT_SECRET = 'test-jwt-secret-key-min-32-chars-long'
     process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-min-32-chars-long'
-  })
+
+    // Setup isolated PostgreSQL container for this test suite
+    const result = await setupTestContainer()
+    db = result.db
+    cleanup = result.cleanup
+
+    // Set DATABASE_URL to use the test container
+    process.env.DATABASE_URL = result.container.getConnectionUri()
+  }, 120_000) // 2 minute timeout for container startup
 
   beforeEach(async () => {
+    // Build app with test container database
     const result = await buildApp()
     app = result.app
     container = result.container
 
-    // Clean database with advisory lock (safe for parallel execution)
-    await cleanDatabase(container.database)
+    // Clean database for test isolation
+    await db.execute(sql`TRUNCATE TABLE users, refresh_tokens, teams RESTART IDENTITY CASCADE`)
 
-    // Generate unique emails for this test run to avoid conflicts with parallel tests
-    const testId = uniqueTestId()
-    testUserEmail = `user-${testId}@test.com`
-    testAdminEmail = `admin-${testId}@test.com`
-
-    // Create test users
+    // Create test users (fixed emails since we have isolated container)
+    testUserEmail = 'user@test.com'
+    testAdminEmail = 'admin@test.com'
     testUserPassword = 'UserPassword123!'
     testAdminPassword = 'AdminPassword123!'
 
@@ -42,14 +52,14 @@ describe('Authentication Endpoints', () => {
     const adminPasswordHash = await hashPassword(testAdminPassword)
 
     const testUser = User.create({
-      id: `test-user-${testId}`,
+      id: 'test-user',
       email: testUserEmail,
       passwordHash: userPasswordHash,
       role: 'USER',
     })
 
     const testAdmin = User.create({
-      id: `test-admin-${testId}`,
+      id: 'test-admin',
       email: testAdminEmail,
       passwordHash: adminPasswordHash,
       role: 'ADMIN',
@@ -65,6 +75,13 @@ describe('Authentication Endpoints', () => {
     }
     if (app) {
       await app.close()
+    }
+  })
+
+  afterAll(async () => {
+    // Stop the test container
+    if (cleanup) {
+      await cleanup()
     }
   })
 
