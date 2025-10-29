@@ -40,19 +40,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const app = await getApp()
     await app.ready()
 
-    // Restore the original URL from Vercel rewrite
-    // Vercel rewrites /api/:path* to /api?path=:path*
-    // We need to reconstruct the original URL for Fastify routing
-    const path = req.query.path
-    if (path) {
-      const pathStr = Array.isArray(path) ? path.join('/') : path
-      req.url = `/api/${pathStr}`
-    } else {
-      // Handle /api without subpath
-      req.url = '/api'
-    }
-
-    // Forward the request to Fastify
+    // With [...path].ts, Vercel automatically preserves the full URL
+    // No URL reconstruction needed - forward directly to Fastify
     app.server.emit('request', req, res)
   } catch (error) {
     console.error('Serverless function error:', error)
