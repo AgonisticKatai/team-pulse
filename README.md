@@ -12,7 +12,10 @@ Modern football team statistics platform with real-time match tracking, admin da
 - **Frontend**: React 19 + TypeScript + Vite 6
 - **Backend**: Fastify (local) / Vercel Serverless Functions (production)
 - **Database**: PostgreSQL (with Drizzle ORM)
+- **Authentication**: JWT with Refresh Tokens + bcrypt password hashing
+- **Authorization**: Role-based access control (RBAC)
 - **Styling**: CSS Custom Properties (native)
+- **Testing**: Vitest (56+ unit tests)
 - **Tooling**: Biome (linting + formatting)
 - **Monorepo**: Turborepo + pnpm workspaces
 - **Deployment**: Vercel
@@ -241,9 +244,16 @@ Install Command: pnpm install
 Node.js Version: 22.x
 ```
 
-## 📝 Features (Coming Soon)
+## 📝 Features
 
-- [ ] Admin authentication
+### ✅ Implemented
+
+- [x] **Authentication & Authorization**: JWT-based auth with 3-tier RBAC (SUPER_ADMIN, ADMIN, USER)
+- [x] **User Management**: Create and list users with role-based permissions
+- [x] **Team Management**: CRUD operations with role-based access control
+
+### 🚧 Coming Soon
+
 - [ ] Match management (create, edit, delete)
 - [ ] Real-time match data entry
 - [ ] Player statistics
@@ -321,6 +331,59 @@ apps/api/src/
     ├── http/            # Fastify routes, controllers
     └── config/          # DI container, env validation
 ```
+
+## 🔐 Authentication & Authorization
+
+TeamPulse uses **JWT-based authentication** with refresh tokens and **role-based access control (RBAC)**.
+
+### Security Features
+
+- **Password Hashing**: bcrypt with 10 salt rounds
+- **Access Tokens**: JWT, 15 minutes expiration
+- **Refresh Tokens**: JWT, 7 days expiration, stored in database
+- **Token Rotation**: New refresh token on each refresh
+
+### Role Hierarchy
+
+| Role | Level | Permissions |
+|------|-------|-------------|
+| `SUPER_ADMIN` | 3 | Full system access (god mode) |
+| `ADMIN` | 2 | Can create users and manage teams |
+| `USER` | 1 | Read-only access to teams |
+
+### First Setup
+
+Seed the first SUPER_ADMIN user:
+
+```bash
+make db-seed
+```
+
+**Default credentials:**
+- Email: `admin@teampulse.com`
+- Password: `Admin123!`
+
+⚠️ **Change these credentials immediately in production!**
+
+### API Authentication Flow
+
+```
+1. Login: POST /api/auth/login
+   → Returns: { accessToken, refreshToken, user }
+
+2. Use token: Header: Authorization: Bearer <accessToken>
+
+3. Refresh: POST /api/auth/refresh (when token expires)
+
+4. Logout: POST /api/auth/logout
+```
+
+### Testing Coverage
+
+95+ tests covering authentication and authorization:
+- Password utilities, JWT utilities, domain entities
+- Auth endpoints, RBAC protection
+- Run: `make test`
 
 ## 🎨 Design System
 

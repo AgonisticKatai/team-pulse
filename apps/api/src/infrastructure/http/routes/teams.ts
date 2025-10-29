@@ -6,6 +6,8 @@ import type { GetTeamUseCase } from '../../../application/use-cases/GetTeamUseCa
 import type { ListTeamsUseCase } from '../../../application/use-cases/ListTeamsUseCase.js'
 import type { UpdateTeamUseCase } from '../../../application/use-cases/UpdateTeamUseCase.js'
 import { DomainError, NotFoundError, ValidationError } from '../../../domain/errors/index.js'
+import type { Env } from '../../config/env.js'
+import { requireAuth, requireRole } from '../middleware/auth.js'
 
 /**
  * Team Routes (HTTP ADAPTER)
@@ -38,6 +40,7 @@ interface TeamRouteDependencies {
   listTeamsUseCase: ListTeamsUseCase
   updateTeamUseCase: UpdateTeamUseCase
   deleteTeamUseCase: DeleteTeamUseCase
+  env: Env
 }
 
 export async function registerTeamRoutes(
@@ -50,35 +53,44 @@ export async function registerTeamRoutes(
     listTeamsUseCase,
     updateTeamUseCase,
     deleteTeamUseCase,
+    env,
   } = dependencies
 
   /**
    * POST /api/teams
    * Create a new team
+   *
+   * Requires: ADMIN or SUPER_ADMIN role
    */
-  fastify.post('/api/teams', async (request, reply) => {
-    try {
-      // Validate request body using Zod
-      const dto = CreateTeamDTOSchema.parse(request.body)
+  fastify.post(
+    '/api/teams',
+    { preHandler: [requireAuth(env), requireRole(['ADMIN', 'SUPER_ADMIN'])] },
+    async (request, reply) => {
+      try {
+        // Validate request body using Zod
+        const dto = CreateTeamDTOSchema.parse(request.body)
 
-      // Execute use case
-      const team = await createTeamUseCase.execute(dto)
+        // Execute use case
+        const team = await createTeamUseCase.execute(dto)
 
-      // Return success response
-      return reply.code(201).send({
-        success: true,
-        data: team,
-      })
-    } catch (error) {
-      return handleError(error, reply)
-    }
-  })
+        // Return success response
+        return reply.code(201).send({
+          success: true,
+          data: team,
+        })
+      } catch (error) {
+        return handleError(error, reply)
+      }
+    },
+  )
 
   /**
    * GET /api/teams
    * List all teams
+   *
+   * Requires: Authentication (any role)
    */
-  fastify.get('/api/teams', async (_request, reply) => {
+  fastify.get('/api/teams', { preHandler: requireAuth(env) }, async (_request, reply) => {
     try {
       const result = await listTeamsUseCase.execute()
 
@@ -94,60 +106,78 @@ export async function registerTeamRoutes(
   /**
    * GET /api/teams/:id
    * Get a single team by ID
+   *
+   * Requires: Authentication (any role)
    */
-  fastify.get<{ Params: { id: string } }>('/api/teams/:id', async (request, reply) => {
-    try {
-      const { id } = request.params
+  fastify.get<{ Params: { id: string } }>(
+    '/api/teams/:id',
+    { preHandler: requireAuth(env) },
+    async (request, reply) => {
+      try {
+        const { id } = request.params
 
-      const team = await getTeamUseCase.execute(id)
+        const team = await getTeamUseCase.execute(id)
 
-      return reply.code(200).send({
-        success: true,
-        data: team,
-      })
-    } catch (error) {
-      return handleError(error, reply)
-    }
-  })
+        return reply.code(200).send({
+          success: true,
+          data: team,
+        })
+      } catch (error) {
+        return handleError(error, reply)
+      }
+    },
+  )
 
   /**
    * PATCH /api/teams/:id
    * Update a team
+   *
+   * Requires: ADMIN or SUPER_ADMIN role
    */
-  fastify.patch<{ Params: { id: string } }>('/api/teams/:id', async (request, reply) => {
-    try {
-      const { id } = request.params
+  fastify.patch<{ Params: { id: string } }>(
+    '/api/teams/:id',
+    { preHandler: [requireAuth(env), requireRole(['ADMIN', 'SUPER_ADMIN'])] },
+    async (request, reply) => {
+      try {
+        const { id } = request.params
 
-      // Validate request body
-      const dto = UpdateTeamDTOSchema.parse(request.body)
+        // Validate request body
+        const dto = UpdateTeamDTOSchema.parse(request.body)
 
-      // Execute use case
-      const team = await updateTeamUseCase.execute(id, dto)
+        // Execute use case
+        const team = await updateTeamUseCase.execute(id, dto)
 
-      return reply.code(200).send({
-        success: true,
-        data: team,
-      })
-    } catch (error) {
-      return handleError(error, reply)
-    }
-  })
+        return reply.code(200).send({
+          success: true,
+          data: team,
+        })
+      } catch (error) {
+        return handleError(error, reply)
+      }
+    },
+  )
 
   /**
    * DELETE /api/teams/:id
    * Delete a team
+   *
+   * Requires: ADMIN or SUPER_ADMIN role
    */
-  fastify.delete<{ Params: { id: string } }>('/api/teams/:id', async (request, reply) => {
-    try {
-      const { id } = request.params
+  fastify.delete<{ Params: { id: string } }>(
+    '/api/teams/:id',
+    { preHandler: [requireAuth(env), requireRole(['ADMIN', 'SUPER_ADMIN'])] },
+    async (request, reply) => {
+      try {
+        const { id } = request.params
 
-      await deleteTeamUseCase.execute(id)
+        await deleteTeamUseCase.execute(id)
 
-      return reply.code(204).send()
-    } catch (error) {
-      return handleError(error, reply)
-    }
-  })
+        return reply.code(204).send()
+      } catch (error) {
+        return handleError(error, reply)
+      }
+    },
+  )
 }
 
 /**

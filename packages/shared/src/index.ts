@@ -7,14 +7,40 @@ export interface HealthCheckResponse {
   environment?: string
 }
 
-// User types
-export type UserRole = 'admin' | 'viewer'
+// User types and authentication
+export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'USER'
 
 export interface User {
   id: string
   email: string
   role: UserRole
   createdAt: Date
+  updatedAt: Date
+}
+
+export interface LoginRequest {
+  email: string
+  password: string
+}
+
+export interface LoginResponse {
+  accessToken: string
+  refreshToken: string
+  user: User
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string
+}
+
+export interface RefreshTokenResponse {
+  accessToken: string
+}
+
+export interface CreateUserRequest {
+  email: string
+  password: string
+  role: UserRole
 }
 
 // Match types (to be expanded)

@@ -7,7 +7,9 @@ import Fastify, {
 } from 'fastify'
 import { type Container, createContainer } from './infrastructure/config/container.js'
 import { type Env, validateEnv, validateProductionEnv } from './infrastructure/config/env.js'
+import { registerAuthRoutes } from './infrastructure/http/routes/auth.js'
 import { registerTeamRoutes } from './infrastructure/http/routes/teams.js'
+import { registerUserRoutes } from './infrastructure/http/routes/users.js'
 
 /**
  * Build and configure the Fastify application
@@ -47,12 +49,30 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
   })
 
   // 5. Register routes (HTTP adapters)
+
+  // Authentication routes
+  await registerAuthRoutes(fastify, {
+    loginUseCase: container.loginUseCase,
+    refreshTokenUseCase: container.refreshTokenUseCase,
+    logoutUseCase: container.logoutUseCase,
+    env,
+  })
+
+  // User management routes
+  await registerUserRoutes(fastify, {
+    createUserUseCase: container.createUserUseCase,
+    listUsersUseCase: container.listUsersUseCase,
+    env,
+  })
+
+  // Team routes
   await registerTeamRoutes(fastify, {
     createTeamUseCase: container.createTeamUseCase,
     getTeamUseCase: container.getTeamUseCase,
     listTeamsUseCase: container.listTeamsUseCase,
     updateTeamUseCase: container.updateTeamUseCase,
     deleteTeamUseCase: container.deleteTeamUseCase,
+    env,
   })
 
   // 6. Health check endpoint
@@ -74,6 +94,8 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
       description: 'Football team statistics platform API',
       endpoints: {
         health: '/api/health',
+        auth: '/api/auth/*',
+        users: '/api/users',
         teams: '/api/teams',
       },
     }

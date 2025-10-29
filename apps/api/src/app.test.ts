@@ -10,6 +10,8 @@ describe('Fastify App', () => {
   // Set test environment variables
   beforeAll(() => {
     process.env.NODE_ENV = 'test'
+    process.env.JWT_SECRET = 'test-jwt-secret-key-min-32-chars-long'
+    process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-min-32-chars-long'
     // DATABASE_URL should be set via environment or vitest config
     // In CI: postgresql://test:test@localhost:5432/test
     // Locally: :memory: (set in vitest.config.ts)

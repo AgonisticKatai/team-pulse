@@ -25,6 +25,10 @@ const envSchema = z.object({
 
   // Database - PostgreSQL connection string
   DATABASE_URL: z.string().default('postgresql://teampulse:teampulse@localhost:5432/teampulse'),
+
+  // Authentication - JWT secrets
+  JWT_SECRET: z.string().min(32),
+  JWT_REFRESH_SECRET: z.string().min(32),
 })
 
 /**

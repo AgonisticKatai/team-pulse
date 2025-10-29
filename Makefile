@@ -1,4 +1,4 @@
-.PHONY: help setup start stop restart clean logs db-push db-studio db-reset test build
+.PHONY: help setup start stop restart clean logs db-push db-studio db-reset db-seed test build
 
 # Default target
 help: ## Show this help message
@@ -8,7 +8,7 @@ help: ## Show this help message
 	@echo ""
 
 # Development
-setup: ## First time setup (install deps + create env files + start db + init schema)
+setup: ## First time setup (install deps + create env files + start db + init schema + seed)
 	@echo "📦 Installing dependencies..."
 	pnpm install
 	@echo "📝 Creating environment files..."
@@ -19,6 +19,8 @@ setup: ## First time setup (install deps + create env files + start db + init sc
 	@sleep 3
 	@echo "🗄️  Initializing database schema..."
 	pnpm --filter @team-pulse/api db:push
+	@echo "🌱 Seeding database with SUPER_ADMIN..."
+	pnpm --filter @team-pulse/api db:seed
 	@echo "✅ Setup complete! Run 'make start' to begin"
 
 start: docker-up ## Start all services (PostgreSQL + dev servers)
@@ -81,6 +83,10 @@ db-reset: ## Reset database (drop all data and recreate schema)
 	@sleep 3
 	@pnpm --filter @team-pulse/api db:push
 	@echo "✅ Database reset complete!"
+
+db-seed: ## Seed database with initial SUPER_ADMIN user
+	@echo "🌱 Seeding database..."
+	pnpm --filter @team-pulse/api db:seed
 
 db-logs: ## Show PostgreSQL logs (alias for docker-logs)
 	@docker compose logs -f postgres

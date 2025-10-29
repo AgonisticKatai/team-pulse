@@ -22,14 +22,16 @@ describe('Shared Types', () => {
       const user: User = {
         id: '123',
         email: 'test@example.com',
-        role: 'admin',
+        role: 'ADMIN',
         createdAt: new Date(),
+        updatedAt: new Date(),
       }
 
       expect(user.id).toBe('123')
       expect(user.email).toBe('test@example.com')
-      expect(user.role).toBe('admin')
+      expect(user.role).toBe('ADMIN')
       expect(user.createdAt).toBeInstanceOf(Date)
+      expect(user.updatedAt).toBeInstanceOf(Date)
     })
   })
 
