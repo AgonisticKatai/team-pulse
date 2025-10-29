@@ -1,6 +1,12 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { AuthProvider } from './application/context/AuthContext'
 import { createApiClient } from './infrastructure/api/apiClient'
+import { createAuthApiClient } from './infrastructure/api/authApiClient'
 import { createTeamApiClient } from './infrastructure/api/teamApiClient'
+import { ProtectedRoute } from './presentation/components/auth/ProtectedRoute'
+import { DashboardPage } from './presentation/pages/DashboardPage'
+import { LoginPage } from './presentation/pages/LoginPage'
 import { TeamsPage } from './presentation/pages/TeamsPage'
 import './App.css'
 
@@ -27,9 +33,9 @@ const queryClient = new QueryClient({
  * Create API client instances
  *
  * These are created once at the module level and reused.
- * In a larger app, you might use dependency injection or React Context.
  */
 const apiClient = createApiClient()
+const authApiClient = createAuthApiClient(apiClient)
 const teamApiClient = createTeamApiClient(apiClient)
 
 /**
@@ -37,27 +43,55 @@ const teamApiClient = createTeamApiClient(apiClient)
  *
  * Root component that:
  * - Provides React Query context
- * - Initializes API clients
- * - Sets up routing (future: React Router)
- * - Wraps the application
+ * - Provides Authentication context
+ * - Sets up React Router with protected routes
+ * - Handles role-based access control
  */
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="app">
-        <header className="app-header">
-          <h1>⚽ TeamPulse</h1>
-          <p>Football Team Statistics Platform</p>
-        </header>
+      <AuthProvider authApiClient={authApiClient} apiClient={apiClient}>
+        <BrowserRouter>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/login" element={<LoginPage />} />
 
-        <main className="app-main">
-          <TeamsPage teamApiClient={teamApiClient} />
-        </main>
+            {/* Protected routes */}
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
 
-        <footer className="app-footer">
-          <p>Built with React + TypeScript + Vite + Hexagonal Architecture</p>
-        </footer>
-      </div>
+            <Route
+              path="/teams"
+              element={
+                <ProtectedRoute>
+                  <TeamsPage teamApiClient={teamApiClient} />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/users"
+              element={
+                <ProtectedRoute requiredRoles={['SUPER_ADMIN', 'ADMIN']}>
+                  <div>
+                    <h1>User Management</h1>
+                    <p>Coming soon...</p>
+                  </div>
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Catch-all: redirect to home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </QueryClientProvider>
   )
 }

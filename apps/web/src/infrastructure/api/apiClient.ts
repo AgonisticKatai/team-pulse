@@ -62,15 +62,30 @@ export interface ApiClientConfig {
 /**
  * Base API Client
  *
- * Provides HTTP methods with automatic error handling
+ * Provides HTTP methods with automatic error handling and JWT token management
  */
 export class ApiClient {
   private readonly baseUrl: string
   private readonly timeout: number
+  private accessToken: string | null = null
 
   constructor(config: ApiClientConfig) {
     this.baseUrl = config.baseUrl
     this.timeout = config.timeout ?? 30000 // 30s default
+  }
+
+  /**
+   * Set the access token for authenticated requests
+   */
+  setAccessToken(token: string | null): void {
+    this.accessToken = token
+  }
+
+  /**
+   * Get the current access token
+   */
+  getAccessToken(): string | null {
+    return this.accessToken
   }
 
   /**
@@ -115,6 +130,11 @@ export class ApiClient {
       const headers: Record<string, string> = {}
       if (data) {
         headers['Content-Type'] = 'application/json'
+      }
+
+      // Add Authorization header if access token is available
+      if (this.accessToken) {
+        headers['Authorization'] = `Bearer ${this.accessToken}`
       }
 
       const response = await fetch(url, {

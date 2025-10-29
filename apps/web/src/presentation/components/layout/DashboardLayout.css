@@ -1,0 +1,220 @@
+/**
+ * Dashboard Layout Styles
+ */
+
+.dashboard-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-gray-50);
+}
+
+.dashboard-header {
+  background-color: white;
+  border-bottom: 1px solid var(--color-gray-200);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.dashboard-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--space-md) var(--space-lg);
+  gap: var(--space-lg);
+}
+
+.dashboard-brand h1 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-900);
+  margin: 0;
+}
+
+.dashboard-brand a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.dashboard-nav {
+  display: flex;
+  gap: var(--space-md);
+  flex: 1;
+}
+
+.nav-link {
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-gray-600);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+  color: var(--color-gray-900);
+  background-color: var(--color-gray-100);
+}
+
+.dashboard-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2xs);
+}
+
+.user-email {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-gray-900);
+}
+
+.user-role {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-2xs) var(--space-xs);
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.role-super_admin {
+  background-color: rgb(220, 38, 38);
+  color: white;
+}
+
+.role-admin {
+  background-color: rgb(249, 115, 22);
+  color: white;
+}
+
+.role-user {
+  background-color: rgb(59, 130, 246);
+  color: white;
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--color-gray-700);
+  border: 1px solid var(--color-gray-300);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background-color: var(--color-gray-100);
+  border-color: var(--color-gray-400);
+}
+
+.btn-sm {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+}
+
+.dashboard-main {
+  flex: 1;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-2xl) var(--space-lg);
+}
+
+.dashboard-footer {
+  background-color: white;
+  border-top: 1px solid var(--color-gray-200);
+  padding: var(--space-lg);
+  text-align: center;
+}
+
+.dashboard-footer p {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-600);
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard-header-content {
+    flex-wrap: wrap;
+  }
+
+  .dashboard-nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .user-info {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-nav {
+    gap: var(--space-xs);
+  }
+
+  .nav-link {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-size-sm);
+  }
+}
+
+/* Loading and error states */
+.protected-route-loading,
+.forbidden-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--space-xl);
+}
+
+.protected-route-loading {
+  flex-direction: column;
+  gap: var(--space-md);
+  color: var(--color-gray-600);
+}
+
+.forbidden-container {
+  max-width: 500px;
+  text-align: center;
+  background: white;
+  padding: var(--space-2xl);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.forbidden-container h1 {
+  font-size: var(--font-size-3xl);
+  margin-bottom: var(--space-md);
+  color: var(--color-gray-900);
+}
+
+.forbidden-container > p {
+  font-size: var(--font-size-lg);
+  color: var(--color-gray-600);
+  margin-bottom: var(--space-xl);
+}
+
+.forbidden-details {
+  background-color: var(--color-gray-50);
+  padding: var(--space-lg);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-xl);
+}
+
+.forbidden-details p {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-700);
+  margin: var(--space-xs) 0;
+}
