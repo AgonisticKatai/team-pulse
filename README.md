@@ -389,41 +389,79 @@ make db-seed
 
 TeamPulse uses **Docker-based test containers** to achieve true test isolation, enabling parallel test execution without race conditions.
 
-### Why Test Containers?
+### Architecture Comparison
 
-**❌ Traditional Approach (Shared Database):**
+```mermaid
+graph TB
+    subgraph traditional["❌ Traditional Approach - Shared Database"]
+        SharedDB[(PostgreSQL<br/>localhost:5432)]
+        TestA1[Test A<br/>Truncate users]
+        TestB1[Test B<br/>Truncate users]
+        TestC1[Test C<br/>Truncate users]
+
+        TestA1 -.->|Race<br/>Condition| SharedDB
+        TestB1 -.->|Race<br/>Condition| SharedDB
+        TestC1 -.->|Race<br/>Condition| SharedDB
+
+        SharedDB -.->|Conflicts| TestA1
+        SharedDB -.->|Conflicts| TestB1
+        SharedDB -.->|Conflicts| TestC1
+    end
+
+    subgraph containers["✅ Test Containers - Isolated Databases"]
+        TestA2[Test Suite A<br/>auth.test.ts]
+        TestB2[Test Suite B<br/>protected.test.ts]
+        TestC2[Test Suite C<br/>teams.test.ts]
+
+        DBA[(PostgreSQL<br/>:49153<br/>Container 1)]
+        DBB[(PostgreSQL<br/>:49154<br/>Container 2)]
+        DBC[(PostgreSQL<br/>:49155<br/>Container 3)]
+
+        TestA2 ==>|Isolated| DBA
+        TestB2 ==>|Isolated| DBB
+        TestC2 ==>|Isolated| DBC
+    end
+
+    style traditional fill:#ffe6e6
+    style containers fill:#e6ffe6
+    style SharedDB fill:#ff6b6b
+    style DBA fill:#51cf66
+    style DBB fill:#51cf66
+    style DBC fill:#51cf66
 ```
-┌─────────────────────────────────────────────────┐
-│  Shared PostgreSQL: localhost:5432/teampulse   │
-└─────────────────────────────────────────────────┘
-       ↑                ↑                ↑
-       │                │                │
-   [Test A]        [Test B]        [Test C]
-   Truncate        Truncate        Truncate
-   Create user     Create user     Create user
 
-   ⚠️ RACE CONDITIONS:
-   - Tests interfere with each other
-   - Flaky tests due to timing issues
-   - Sequential execution required (slow)
-```
+### Test Container Lifecycle
 
-**✅ Test Containers (Isolated Databases):**
-```
-┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
-│ PostgreSQL:49153 │  │ PostgreSQL:49154 │  │ PostgreSQL:49155 │
-│  Container #1    │  │  Container #2    │  │  Container #3    │
-└──────────────────┘  └──────────────────┘  └──────────────────┘
-       ↑                     ↑                     ↑
-       │                     │                     │
-   [Test A]             [Test B]             [Test C]
-   Own DB               Own DB               Own DB
-   Isolated             Isolated             Isolated
+```mermaid
+sequenceDiagram
+    participant Test as Test Suite
+    participant TC as setupTestContainer()
+    participant Docker as Docker Engine
+    participant PG as PostgreSQL Container
+    participant DB as Database Instance
 
-   ✅ NO CONFLICTS:
-   - Complete isolation per test suite
-   - Parallel execution (fast)
-   - No flaky tests
+    Note over Test,DB: beforeAll Hook (runs once per suite)
+    Test->>TC: setupTestContainer()
+    TC->>Docker: Start PostgreSQL container
+    Docker->>PG: Create container (random port)
+    PG->>PG: Initialize PostgreSQL
+    TC->>DB: Push schema (drizzle-kit)
+    DB-->>TC: Schema ready
+    TC-->>Test: Return {db, cleanup}
+
+    Note over Test,DB: beforeEach Hook (runs per test)
+    Test->>DB: TRUNCATE all tables
+    Test->>DB: Insert test data
+    Test->>Test: Run test assertions
+
+    Note over Test,DB: afterEach Hook
+    Test->>Test: Close app & container connections
+
+    Note over Test,DB: afterAll Hook (cleanup)
+    Test->>TC: cleanup()
+    TC->>Docker: Stop container
+    Docker->>PG: Remove container
+    PG-->>Test: Resources freed
 ```
 
 ### How It Works
