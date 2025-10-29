@@ -3,36 +3,34 @@ import { describe, expect, it } from 'vitest'
 import App from './App'
 
 describe('App Component', () => {
-  it('should render the app title', () => {
+  it('should render login page when not authenticated', () => {
     render(<App />)
-    expect(screen.getByRole('heading', { name: /⚽ TeamPulse/i, level: 1 })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /⚽ TeamPulse/i })).toBeInTheDocument()
   })
 
-  it('should render the subtitle', () => {
+  it('should render sign in text on login page', () => {
     render(<App />)
-    expect(screen.getByText(/Football Team Statistics Platform/i)).toBeInTheDocument()
+    expect(screen.getByText(/Sign in to your account/i)).toBeInTheDocument()
   })
 
-  it('should render Teams page heading', () => {
+  it('should render email input field', () => {
     render(<App />)
-    expect(screen.getByRole('heading', { name: /Teams/i })).toBeInTheDocument()
+    expect(screen.getByLabelText(/Email address/i)).toBeInTheDocument()
   })
 
-  it('should render the footer', () => {
+  it('should render password input field', () => {
     render(<App />)
-    expect(
-      screen.getByText(/Built with React \+ TypeScript \+ Vite \+ Hexagonal Architecture/i),
-    ).toBeInTheDocument()
+    expect(screen.getByLabelText(/Password/i)).toBeInTheDocument()
   })
 
-  it('should render create team button', () => {
+  it('should render sign in button', () => {
     render(<App />)
-    expect(screen.getByRole('button', { name: /\+ Create Team/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Sign in/i })).toBeInTheDocument()
   })
 
-  it('should wrap app with QueryClientProvider', () => {
+  it('should wrap app with required providers', () => {
     const { container } = render(<App />)
-    // If it renders without errors, QueryClientProvider is working
+    // If it renders without errors, all providers are working
     expect(container).toBeTruthy()
   })
 })
