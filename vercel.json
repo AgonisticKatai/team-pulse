@@ -3,10 +3,5 @@
   "buildCommand": "turbo build",
   "outputDirectory": "apps/web/dist",
   "installCommand": "pnpm install",
-  "framework": null,
-  "functions": {
-    "api/**/*.ts": {
-      "runtime": "@vercel/node@3.2.17"
-    }
-  }
+  "framework": null
 }
