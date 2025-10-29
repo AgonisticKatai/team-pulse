@@ -1,10 +1,10 @@
-import { sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { buildApp } from '../../../app'
 import { User } from '../../../domain/models/User'
 import { hashPassword } from '../../auth/passwordUtils'
 import type { Container } from '../../config/container'
+import { cleanDatabase, uniqueTestId } from '../../testing/testHelpers'
 
 describe('Protected Routes and RBAC', () => {
   let app: FastifyInstance
@@ -24,33 +24,33 @@ describe('Protected Routes and RBAC', () => {
     app = result.app
     container = result.container
 
-    // Clean database before creating test users
-    try {
-      await container.database.execute(
-        sql`TRUNCATE TABLE users, refresh_tokens, teams RESTART IDENTITY CASCADE`,
-      )
-    } catch (error) {
-      // Ignore errors (tables might not exist yet)
-    }
+    // Clean database with advisory lock (safe for parallel execution)
+    await cleanDatabase(container.database)
+
+    // Generate unique IDs/emails for this test run to avoid conflicts with parallel tests
+    const testId = uniqueTestId()
+    const superAdminEmail = `superadmin-${testId}@test.com`
+    const adminEmail = `admin-${testId}@test.com`
+    const userEmail = `user-${testId}@test.com`
 
     // Create test users with different roles
     const superAdmin = User.create({
-      id: 'super-admin-id',
-      email: 'superadmin@test.com',
+      id: `super-admin-${testId}`,
+      email: superAdminEmail,
       passwordHash: await hashPassword('SuperAdmin123!'),
       role: 'SUPER_ADMIN',
     })
 
     const admin = User.create({
-      id: 'admin-id',
-      email: 'admin@test.com',
+      id: `admin-${testId}`,
+      email: adminEmail,
       passwordHash: await hashPassword('Admin123!'),
       role: 'ADMIN',
     })
 
     const user = User.create({
-      id: 'user-id',
-      email: 'user@test.com',
+      id: `user-${testId}`,
+      email: userEmail,
       passwordHash: await hashPassword('User123!'),
       role: 'USER',
     })
@@ -63,21 +63,21 @@ describe('Protected Routes and RBAC', () => {
     const superAdminLogin = await app.inject({
       method: 'POST',
       url: '/api/auth/login',
-      payload: { email: 'superadmin@test.com', password: 'SuperAdmin123!' },
+      payload: { email: superAdminEmail, password: 'SuperAdmin123!' },
     })
     superAdminToken = JSON.parse(superAdminLogin.body).data.accessToken
 
     const adminLogin = await app.inject({
       method: 'POST',
       url: '/api/auth/login',
-      payload: { email: 'admin@test.com', password: 'Admin123!' },
+      payload: { email: adminEmail, password: 'Admin123!' },
     })
     adminToken = JSON.parse(adminLogin.body).data.accessToken
 
     const userLogin = await app.inject({
       method: 'POST',
       url: '/api/auth/login',
-      payload: { email: 'user@test.com', password: 'User123!' },
+      payload: { email: userEmail, password: 'User123!' },
     })
     userToken = JSON.parse(userLogin.body).data.accessToken
   })

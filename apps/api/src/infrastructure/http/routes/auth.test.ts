@@ -1,16 +1,18 @@
-import { sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { buildApp } from '../../../app'
 import { User } from '../../../domain/models/User'
 import { hashPassword } from '../../auth/passwordUtils'
 import type { Container } from '../../config/container'
+import { cleanDatabase, uniqueTestId } from '../../testing/testHelpers'
 
 describe('Authentication Endpoints', () => {
   let app: FastifyInstance
   let container: Container
   let testUserPassword: string
   let testAdminPassword: string
+  let testUserEmail: string
+  let testAdminEmail: string
 
   beforeAll(() => {
     // Set test environment
@@ -24,14 +26,13 @@ describe('Authentication Endpoints', () => {
     app = result.app
     container = result.container
 
-    // Clean database before creating test users
-    try {
-      await container.database.execute(
-        sql`TRUNCATE TABLE users, refresh_tokens, teams RESTART IDENTITY CASCADE`,
-      )
-    } catch (error) {
-      // Ignore errors (tables might not exist yet)
-    }
+    // Clean database with advisory lock (safe for parallel execution)
+    await cleanDatabase(container.database)
+
+    // Generate unique emails for this test run to avoid conflicts with parallel tests
+    const testId = uniqueTestId()
+    testUserEmail = `user-${testId}@test.com`
+    testAdminEmail = `admin-${testId}@test.com`
 
     // Create test users
     testUserPassword = 'UserPassword123!'
@@ -41,15 +42,15 @@ describe('Authentication Endpoints', () => {
     const adminPasswordHash = await hashPassword(testAdminPassword)
 
     const testUser = User.create({
-      id: 'test-user-id',
-      email: 'user@test.com',
+      id: `test-user-${testId}`,
+      email: testUserEmail,
       passwordHash: userPasswordHash,
       role: 'USER',
     })
 
     const testAdmin = User.create({
-      id: 'test-admin-id',
-      email: 'admin@test.com',
+      id: `test-admin-${testId}`,
+      email: testAdminEmail,
       passwordHash: adminPasswordHash,
       role: 'ADMIN',
     })
@@ -73,7 +74,7 @@ describe('Authentication Endpoints', () => {
         method: 'POST',
         url: '/api/auth/login',
         payload: {
-          email: 'user@test.com',
+          email: testUserEmail,
           password: testUserPassword,
         },
       })
@@ -84,7 +85,7 @@ describe('Authentication Endpoints', () => {
       expect(body.data).toHaveProperty('accessToken')
       expect(body.data).toHaveProperty('refreshToken')
       expect(body.data.user).toMatchObject({
-        email: 'user@test.com',
+        email: testUserEmail,
         role: 'USER',
       })
       expect(body.data.user).not.toHaveProperty('passwordHash')
@@ -112,7 +113,7 @@ describe('Authentication Endpoints', () => {
         method: 'POST',
         url: '/api/auth/login',
         payload: {
-          email: 'user@test.com',
+          email: testUserEmail,
           password: 'WrongPassword123!',
         },
       })
@@ -158,7 +159,7 @@ describe('Authentication Endpoints', () => {
         method: 'POST',
         url: '/api/auth/login',
         payload: {
-          email: 'user@test.com',
+          email: testUserEmail,
         },
       })
 
@@ -172,7 +173,7 @@ describe('Authentication Endpoints', () => {
         method: 'POST',
         url: '/api/auth/login',
         payload: {
-          email: 'admin@test.com',
+          email: testAdminEmail,
           password: testAdminPassword,
         },
       })
@@ -190,7 +191,7 @@ describe('Authentication Endpoints', () => {
         method: 'POST',
         url: '/api/auth/login',
         payload: {
-          email: 'user@test.com',
+          email: testUserEmail,
           password: testUserPassword,
         },
       })
@@ -248,7 +249,7 @@ describe('Authentication Endpoints', () => {
         method: 'POST',
         url: '/api/auth/login',
         payload: {
-          email: 'user@test.com',
+          email: testUserEmail,
           password: testUserPassword,
         },
       })
@@ -269,7 +270,7 @@ describe('Authentication Endpoints', () => {
       const body = JSON.parse(meResponse.body)
       expect(body.success).toBe(true)
       expect(body.data).toMatchObject({
-        email: 'user@test.com',
+        email: testUserEmail,
         role: 'USER',
       })
     })
@@ -323,7 +324,7 @@ describe('Authentication Endpoints', () => {
         method: 'POST',
         url: '/api/auth/login',
         payload: {
-          email: 'user@test.com',
+          email: testUserEmail,
           password: testUserPassword,
         },
       })

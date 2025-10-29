@@ -5,7 +5,8 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     setupFiles: ['./vitest.setup.ts'],
-    // Run tests sequentially to avoid database conflicts
+    // Temporarily disable parallel execution until test containers are implemented
+    // See commit message for details on race conditions
     fileParallelism: false,
     coverage: {
       provider: 'v8',
