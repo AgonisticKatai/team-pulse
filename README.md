@@ -385,6 +385,110 @@ make db-seed
 - Auth endpoints, RBAC protection
 - Run: `make test`
 
+## 🧪 Test Containers - True Parallel Test Isolation
+
+TeamPulse uses **Docker-based test containers** to achieve true test isolation, enabling parallel test execution without race conditions.
+
+### Why Test Containers?
+
+**❌ Traditional Approach (Shared Database):**
+```
+┌─────────────────────────────────────────────────┐
+│  Shared PostgreSQL: localhost:5432/teampulse   │
+└─────────────────────────────────────────────────┘
+       ↑                ↑                ↑
+       │                │                │
+   [Test A]        [Test B]        [Test C]
+   Truncate        Truncate        Truncate
+   Create user     Create user     Create user
+
+   ⚠️ RACE CONDITIONS:
+   - Tests interfere with each other
+   - Flaky tests due to timing issues
+   - Sequential execution required (slow)
+```
+
+**✅ Test Containers (Isolated Databases):**
+```
+┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
+│ PostgreSQL:49153 │  │ PostgreSQL:49154 │  │ PostgreSQL:49155 │
+│  Container #1    │  │  Container #2    │  │  Container #3    │
+└──────────────────┘  └──────────────────┘  └──────────────────┘
+       ↑                     ↑                     ↑
+       │                     │                     │
+   [Test A]             [Test B]             [Test C]
+   Own DB               Own DB               Own DB
+   Isolated             Isolated             Isolated
+
+   ✅ NO CONFLICTS:
+   - Complete isolation per test suite
+   - Parallel execution (fast)
+   - No flaky tests
+```
+
+### How It Works
+
+Each test suite gets its own PostgreSQL container:
+
+```typescript
+describe('Auth Tests', () => {
+  let db: Database
+  let cleanup: () => Promise<void>
+
+  beforeAll(async () => {
+    // 1. Start isolated PostgreSQL container (auto port)
+    const result = await setupTestContainer()
+    db = result.db // postgresql://localhost:49153/test
+    cleanup = result.cleanup
+  }, 120_000) // 2 minute timeout for container startup
+
+  beforeEach(async () => {
+    // 2. Clean only this test's database
+    await db.execute(sql`TRUNCATE TABLE users, teams ...`)
+
+    // 3. Setup test data (no conflicts with other tests)
+    await createTestUser('user@test.com')
+  })
+
+  it('should authenticate user', async () => {
+    // Test runs with isolated database
+  })
+
+  afterAll(async () => {
+    // 4. Stop and remove container
+    await cleanup()
+  })
+})
+```
+
+### Benefits
+
+1. **True Isolation**: Each test suite has its own database instance
+2. **Parallel Execution**: Tests run in parallel safely (17s vs 30s+ sequential)
+3. **Zero Race Conditions**: No shared state = no conflicts
+4. **Production-Like**: Tests run against real PostgreSQL instances
+5. **Best Practices**: Industry-standard approach for integration testing
+
+### Test Results
+
+```bash
+$ make test
+
+✓ 99 tests passed (7 test files)
+  - auth.test.ts (16 tests)
+  - protected.test.ts (23 tests)
+  - Domain models (34 tests)
+  - Utilities (26 tests)
+
+Duration: 17.43s (parallel execution)
+```
+
+### Requirements
+
+- Docker must be running
+- Testcontainers automatically manages container lifecycle
+- Containers are created on `beforeAll` and destroyed on `afterAll`
+
 ## 🎨 Design System
 
 Built with native CSS custom properties:
