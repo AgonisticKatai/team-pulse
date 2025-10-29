@@ -70,9 +70,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const app = await getApp()
     await app.ready()
 
+    // Debug logging
+    console.log('[Vercel Handler] Original URL:', req.url)
+    console.log('[Vercel Handler] Query params:', req.query)
+    console.log('[Vercel Handler] Path param:', req.query.path)
+
     // Reconstruct the original URL path for Fastify routing
     // This is the standard pattern for Vercel catch-all routes with [...path].ts
     req.url = reconstructApiPath(req.query.path)
+
+    console.log('[Vercel Handler] Reconstructed URL:', req.url)
+    console.log('[Vercel Handler] Method:', req.method)
 
     // Forward the request to Fastify
     app.server.emit('request', req, res)
