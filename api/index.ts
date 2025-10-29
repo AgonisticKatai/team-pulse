@@ -1,14 +1,15 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { buildApp } from '../apps/api/src/app.js'
 
-// Cache the Fastify app instance (singleton pattern for serverless)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let cachedApp: any = null
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let appPromise: Promise<any> | null = null
+// Extract the app type from buildApp's return type
+type BuildAppResult = Awaited<ReturnType<typeof buildApp>>
+type FastifyApp = BuildAppResult['app']
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function getApp(): Promise<any> {
+// Cache the Fastify app instance (singleton pattern for serverless)
+let cachedApp: FastifyApp | null = null
+let appPromise: Promise<FastifyApp> | null = null
+
+async function getApp(): Promise<FastifyApp> {
   // Return cached instance if available
   if (cachedApp) {
     return cachedApp
@@ -62,16 +63,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const app = await getApp()
     await app.ready()
 
-    // Debug logging
-    console.log('[Vercel Handler] Original URL:', req.url)
-    console.log('[Vercel Handler] Method:', req.method)
-
     // Reconstruct the original URL path for Fastify routing
     // With routes configuration, Vercel preserves the URL
     const originalUrl = typeof req.url === 'string' ? req.url : '/'
     req.url = reconstructApiPath(originalUrl)
-
-    console.log('[Vercel Handler] Final URL for Fastify:', req.url)
 
     // Forward the request to Fastify
     app.server.emit('request', req, res)
