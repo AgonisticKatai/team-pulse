@@ -35,33 +35,25 @@ async function getApp(): Promise<any> {
 }
 
 /**
- * Reconstruct the original API path from Vercel catch-all route parameters
+ * Reconstruct the original API path for Fastify routing
  *
- * With [...path].ts, Vercel captures route segments and passes them in req.query.path
- * as string | string[] | undefined. This function reconstructs the original URL path
- * that Fastify expects for routing.
+ * With Vercel routes configuration, the URL is preserved in req.url.
+ * If it starts with /api/index.ts, we need to extract the original path.
+ * Otherwise, the URL should already be correct.
  *
- * This is the standard pattern for Vercel catch-all routes - see official docs:
- * https://vercel.com/docs/functions/serverless-functions/runtimes/node-js#dynamic-routing
- *
- * @example
- * // Request: /api/auth/login
- * // req.query.path = ['auth', 'login']
- * // Result: '/api/auth/login'
- *
- * @param path - The path parameter(s) from Vercel's catch-all route
- * @returns The reconstructed API path with /api prefix
+ * @param url - The request URL
+ * @returns The reconstructed API path
  */
-function reconstructApiPath(path: string | string[] | undefined): string {
-  if (!path) {
-    return '/api'
+function reconstructApiPath(url: string): string {
+  // If URL was rewritten to /api/index.ts, extract original path
+  if (url.startsWith('/api/index.ts')) {
+    // The original path should be after /api/index.ts
+    const afterFunction = url.substring('/api/index.ts'.length)
+    return afterFunction || '/api'
   }
 
-  // Normalize path to array of segments
-  const segments = Array.isArray(path) ? path : [path]
-
-  // Reconstruct full API path
-  return `/api/${segments.join('/')}`
+  // URL should already be correct (e.g., /api/auth/login)
+  return url
 }
 
 // Export the handler for Vercel
@@ -72,15 +64,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Debug logging
     console.log('[Vercel Handler] Original URL:', req.url)
-    console.log('[Vercel Handler] Query params:', req.query)
-    console.log('[Vercel Handler] Path param:', req.query.path)
+    console.log('[Vercel Handler] Method:', req.method)
 
     // Reconstruct the original URL path for Fastify routing
-    // This is the standard pattern for Vercel catch-all routes with [...path].ts
-    req.url = reconstructApiPath(req.query.path)
+    // With routes configuration, Vercel preserves the URL
+    const originalUrl = typeof req.url === 'string' ? req.url : '/'
+    req.url = reconstructApiPath(originalUrl)
 
-    console.log('[Vercel Handler] Reconstructed URL:', req.url)
-    console.log('[Vercel Handler] Method:', req.method)
+    console.log('[Vercel Handler] Final URL for Fastify:', req.url)
 
     // Forward the request to Fastify
     app.server.emit('request', req, res)

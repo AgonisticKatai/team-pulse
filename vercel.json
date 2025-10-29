@@ -5,15 +5,22 @@
   "installCommand": "pnpm install",
   "framework": null,
   "functions": {
-    "api/[...path].ts": {
+    "api/index.ts": {
       "memory": 1024,
       "maxDuration": 10
     }
   },
-  "rewrites": [
+  "routes": [
     {
-      "source": "/((?!api/).*)",
-      "destination": "/index.html"
+      "src": "/api/(.*)",
+      "dest": "/api/index.ts"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
