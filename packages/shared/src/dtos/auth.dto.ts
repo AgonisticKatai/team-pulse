@@ -1,5 +1,5 @@
-import type { UserRole } from '@team-pulse/shared'
 import { z } from 'zod'
+import type { UserRole } from '../types'
 
 /**
  * Authentication Data Transfer Objects (DTOs)

@@ -1,7 +1,7 @@
+import type { TeamResponseDTO, UpdateTeamDTO } from '@team-pulse/shared'
 import { NotFoundError, ValidationError } from '../../domain/errors/index.js'
 import type { Team } from '../../domain/models/Team.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
-import type { TeamResponseDTO, UpdateTeamDTO } from '../dtos/TeamDTO.js'
 
 /**
  * Update Team Use Case

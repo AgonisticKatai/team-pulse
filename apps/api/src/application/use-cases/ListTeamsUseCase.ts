@@ -1,6 +1,6 @@
+import type { TeamResponseDTO, TeamsListResponseDTO } from '@team-pulse/shared'
 import type { Team } from '../../domain/models/Team.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
-import type { TeamResponseDTO, TeamsListResponseDTO } from '../dtos/TeamDTO.js'
 
 /**
  * List Teams Use Case

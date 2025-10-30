@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { HealthCheckResponse, Match, User } from './index'
+import type { UserResponseDTO } from './dtos'
+import type { HealthCheckResponse, Match } from './types'
 
 describe('Shared Types', () => {
   describe('HealthCheckResponse', () => {
@@ -17,21 +18,21 @@ describe('Shared Types', () => {
     })
   })
 
-  describe('User', () => {
+  describe('UserResponseDTO', () => {
     it('should have correct structure', () => {
-      const user: User = {
+      const user: UserResponseDTO = {
         id: '123',
         email: 'test@example.com',
         role: 'ADMIN',
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       }
 
       expect(user.id).toBe('123')
       expect(user.email).toBe('test@example.com')
       expect(user.role).toBe('ADMIN')
-      expect(user.createdAt).toBeInstanceOf(Date)
-      expect(user.updatedAt).toBeInstanceOf(Date)
+      expect(typeof user.createdAt).toBe('string')
+      expect(typeof user.updatedAt).toBe('string')
     })
   })
 

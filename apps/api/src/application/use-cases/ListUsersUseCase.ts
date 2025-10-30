@@ -1,5 +1,5 @@
+import type { UserResponseDTO, UsersListResponseDTO } from '@team-pulse/shared'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
-import type { UserResponseDTO, UsersListResponseDTO } from '../dtos/AuthDTO.js'
 
 /**
  * List Users Use Case

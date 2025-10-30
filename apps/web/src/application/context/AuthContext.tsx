@@ -106,12 +106,16 @@ export function AuthProvider({ children, authApiClient, apiClient }: AuthProvide
   const refreshAccessToken = useCallback(async (): Promise<boolean> => {
     try {
       const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
-      if (!refreshToken) {
+      const userJson = localStorage.getItem(STORAGE_KEYS.USER)
+      if (!refreshToken || !userJson) {
         return false
       }
 
       const response = await authApiClient.refreshToken({ refreshToken })
-      saveAuthData(response.accessToken, response.refreshToken, response.user)
+      const userData = JSON.parse(userJson) as UserResponseDTO
+
+      // Only update the access token, keep existing refresh token and user
+      saveAuthData(response.accessToken, refreshToken, userData)
       return true
     } catch {
       clearAuthData()

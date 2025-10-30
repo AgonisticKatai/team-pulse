@@ -1,3 +1,4 @@
+import type { RefreshTokenDTO, RefreshTokenResponseDTO } from '@team-pulse/shared'
 import { ValidationError } from '../../domain/errors/index.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
@@ -7,7 +8,6 @@ import {
   verifyRefreshToken,
 } from '../../infrastructure/auth/jwtUtils.js'
 import type { Env } from '../../infrastructure/config/env.js'
-import type { RefreshTokenDTO, RefreshTokenResponseDTO } from '../dtos/AuthDTO.js'
 
 /**
  * Refresh Token Use Case

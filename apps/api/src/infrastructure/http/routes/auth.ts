@@ -1,5 +1,5 @@
+import { LoginDTOSchema, RefreshTokenDTOSchema } from '@team-pulse/shared'
 import type { FastifyInstance, FastifyReply } from 'fastify'
-import { LoginDTOSchema, RefreshTokenDTOSchema } from '../../../application/dtos/AuthDTO.js'
 import type { LoginUseCase } from '../../../application/use-cases/LoginUseCase.js'
 import type { LogoutUseCase } from '../../../application/use-cases/LogoutUseCase.js'
 import type { RefreshTokenUseCase } from '../../../application/use-cases/RefreshTokenUseCase.js'

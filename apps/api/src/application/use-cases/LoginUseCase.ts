@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import type { LoginDTO, LoginResponseDTO, UserResponseDTO } from '@team-pulse/shared'
 import { ValidationError } from '../../domain/errors/index.js'
 import { RefreshToken } from '../../domain/models/RefreshToken.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
@@ -10,7 +11,6 @@ import {
 } from '../../infrastructure/auth/jwtUtils.js'
 import { verifyPassword } from '../../infrastructure/auth/passwordUtils.js'
 import type { Env } from '../../infrastructure/config/env.js'
-import type { LoginDTO, LoginResponseDTO, UserResponseDTO } from '../dtos/AuthDTO.js'
 
 /**
  * Login Use Case

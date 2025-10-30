@@ -24,6 +24,9 @@ catalogs:
     vitest:
       specifier: ^4.0.3
       version: 4.0.3
+    zod:
+      specifier: ^4.1.12
+      version: 4.1.12
 
 importers:
 
@@ -177,6 +180,10 @@ importers:
         version: 6.4.1(@types/node@22.18.12)(jiti@2.6.1)(tsx@4.20.6)(yaml@2.8.1)
 
   packages/shared:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 4.1.12
     devDependencies:
       typescript:
         specifier: 'catalog:'

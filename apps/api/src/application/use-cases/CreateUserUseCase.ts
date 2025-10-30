@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto'
+import type { CreateUserDTO, UserResponseDTO } from '@team-pulse/shared'
 import { ValidationError } from '../../domain/errors/index.js'
 import { User } from '../../domain/models/User.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import { hashPassword } from '../../infrastructure/auth/passwordUtils.js'
-import type { CreateUserDTO, UserResponseDTO } from '../dtos/AuthDTO.js'
 
 /**
  * Create User Use Case

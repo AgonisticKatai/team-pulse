@@ -1,5 +1,5 @@
+import { CreateUserDTOSchema } from '@team-pulse/shared'
 import type { FastifyInstance, FastifyReply } from 'fastify'
-import { CreateUserDTOSchema } from '../../../application/dtos/AuthDTO.js'
 import type { CreateUserUseCase } from '../../../application/use-cases/CreateUserUseCase.js'
 import type { ListUsersUseCase } from '../../../application/use-cases/ListUsersUseCase.js'
 import { DomainError, ValidationError } from '../../../domain/errors/index.js'

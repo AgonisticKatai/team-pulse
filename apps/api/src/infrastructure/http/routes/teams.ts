@@ -1,5 +1,5 @@
+import { CreateTeamDTOSchema, UpdateTeamDTOSchema } from '@team-pulse/shared'
 import type { FastifyInstance, FastifyReply } from 'fastify'
-import { CreateTeamDTOSchema, UpdateTeamDTOSchema } from '../../../application/dtos/TeamDTO.js'
 import type { CreateTeamUseCase } from '../../../application/use-cases/CreateTeamUseCase.js'
 import type { DeleteTeamUseCase } from '../../../application/use-cases/DeleteTeamUseCase.js'
 import type { GetTeamUseCase } from '../../../application/use-cases/GetTeamUseCase.js'

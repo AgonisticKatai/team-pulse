@@ -12,10 +12,9 @@
  */
 
 import type {
-  LoginRequestDTO,
+  LoginDTO,
   LoginResponseDTO,
-  LogoutRequestDTO,
-  RefreshTokenRequestDTO,
+  RefreshTokenDTO,
   RefreshTokenResponseDTO,
   UserResponseDTO,
 } from '@team-pulse/shared'
@@ -30,21 +29,21 @@ export class AuthApiClient {
   /**
    * Login with email and password
    */
-  async login(credentials: LoginRequestDTO): Promise<LoginResponseDTO> {
+  async login(credentials: LoginDTO): Promise<LoginResponseDTO> {
     return this.apiClient.post<LoginResponseDTO>('/api/auth/login', credentials)
   }
 
   /**
    * Logout and invalidate refresh token
    */
-  async logout(request: LogoutRequestDTO): Promise<void> {
+  async logout(request: RefreshTokenDTO): Promise<void> {
     return this.apiClient.post<void>('/api/auth/logout', request)
   }
 
   /**
    * Refresh access token using refresh token
    */
-  async refreshToken(request: RefreshTokenRequestDTO): Promise<RefreshTokenResponseDTO> {
+  async refreshToken(request: RefreshTokenDTO): Promise<RefreshTokenResponseDTO> {
     return this.apiClient.post<RefreshTokenResponseDTO>('/api/auth/refresh', request)
   }
 
