@@ -121,6 +121,10 @@ type-check: ## Run TypeScript type checking
 	@echo "📘 Type checking..."
 	@pnpm exec turbo type-check
 
+validate-imports: ## Validate ESM imports have .js extensions
+	@echo "🔍 Validating ESM imports..."
+	@packages/shared/scripts/validate-imports.sh
+
 # Build
 build: ## Build all apps for production
 	@echo "🏗️  Building for production..."
