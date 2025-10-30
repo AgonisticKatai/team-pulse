@@ -21,7 +21,7 @@ import type { UserRole } from '../types/index.js'
  * Schema for login request
  */
 export const LoginDTOSchema = z.object({
-  email: z.string().email('Invalid email format').trim().toLowerCase(),
+  email: z.string().trim().toLowerCase().email('Invalid email format'),
   password: z.string().min(1, 'Password is required'),
 })
 
@@ -31,7 +31,7 @@ export type LoginDTO = z.infer<typeof LoginDTOSchema>
  * Schema for creating a new user
  */
 export const CreateUserDTOSchema = z.object({
-  email: z.string().email('Invalid email format').trim().toLowerCase(),
+  email: z.string().trim().toLowerCase().email('Invalid email format'),
   password: z
     .string()
     .min(8, 'Password must be at least 8 characters')

@@ -24,11 +24,11 @@ import { z } from 'zod'
 export const CreateTeamDTOSchema = z.object({
   name: z
     .string()
+    .trim()
     .min(1, 'Team name is required')
-    .max(100, 'Team name cannot exceed 100 characters')
-    .trim(),
+    .max(100, 'Team name cannot exceed 100 characters'),
 
-  city: z.string().min(1, 'City is required').max(100, 'City cannot exceed 100 characters').trim(),
+  city: z.string().trim().min(1, 'City is required').max(100, 'City cannot exceed 100 characters'),
 
   foundedYear: z
     .number()
@@ -49,16 +49,16 @@ export type CreateTeamDTO = z.infer<typeof CreateTeamDTOSchema>
 export const UpdateTeamDTOSchema = z.object({
   name: z
     .string()
+    .trim()
     .min(1, 'Team name cannot be empty')
     .max(100, 'Team name cannot exceed 100 characters')
-    .trim()
     .optional(),
 
   city: z
     .string()
+    .trim()
     .min(1, 'City cannot be empty')
     .max(100, 'City cannot exceed 100 characters')
-    .trim()
     .optional(),
 
   foundedYear: z
