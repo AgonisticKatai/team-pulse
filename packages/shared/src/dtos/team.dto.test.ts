@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { expectZodError } from '../test-utils.js'
 import { CreateTeamDTOSchema, UpdateTeamDTOSchema } from './team.dto.js'
 
 describe('Team DTOs', () => {
@@ -84,11 +85,7 @@ describe('Team DTOs', () => {
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
-        expect(result.success).toBe(false)
-        if (!result.success) {
-          expect(result.error.issues.length).toBeGreaterThan(0)
-          expect(result.error.issues[0].message).toBe('Team name is required')
-        }
+        expectZodError(result, 'Team name is required')
       })
 
       it('should reject name that becomes empty after trim', () => {
@@ -108,11 +105,7 @@ describe('Team DTOs', () => {
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
-        expect(result.success).toBe(false)
-        if (!result.success) {
-          expect(result.error.issues.length).toBeGreaterThan(0)
-          expect(result.error.issues[0].message).toBe('Team name cannot exceed 100 characters')
-        }
+        expectZodError(result, 'Team name cannot exceed 100 characters')
       })
 
       it('should accept name at maximum length boundary (100 chars)', () => {
@@ -143,11 +136,7 @@ describe('Team DTOs', () => {
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
-        expect(result.success).toBe(false)
-        if (!result.success) {
-          expect(result.error.issues.length).toBeGreaterThan(0)
-          expect(result.error.issues[0].message).toBe('City is required')
-        }
+        expectZodError(result, 'City is required')
       })
 
       it('should reject city that becomes empty after trim', () => {
@@ -167,11 +156,7 @@ describe('Team DTOs', () => {
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
-        expect(result.success).toBe(false)
-        if (!result.success) {
-          expect(result.error.issues.length).toBeGreaterThan(0)
-          expect(result.error.issues[0].message).toBe('City cannot exceed 100 characters')
-        }
+        expectZodError(result, 'City cannot exceed 100 characters')
       })
 
       it('should accept city at maximum length boundary (100 chars)', () => {
@@ -203,11 +188,7 @@ describe('Team DTOs', () => {
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
-        expect(result.success).toBe(false)
-        if (!result.success) {
-          expect(result.error.issues.length).toBeGreaterThan(0)
-          expect(result.error.issues[0].message).toBe('Founded year must be after 1800')
-        }
+        expectZodError(result, 'Founded year must be after 1800')
       })
 
       it('should accept year at minimum boundary (1800)', () => {
@@ -230,11 +211,7 @@ describe('Team DTOs', () => {
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
-        expect(result.success).toBe(false)
-        if (!result.success) {
-          expect(result.error.issues.length).toBeGreaterThan(0)
-          expect(result.error.issues[0].message).toBe('Founded year cannot be in the future')
-        }
+        expectZodError(result, 'Founded year cannot be in the future')
       })
 
       it('should accept current year', () => {
@@ -257,11 +234,7 @@ describe('Team DTOs', () => {
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
-        expect(result.success).toBe(false)
-        if (!result.success) {
-          expect(result.error.issues.length).toBeGreaterThan(0)
-          expect(result.error.issues[0].message).toBe('Founded year must be an integer')
-        }
+        expectZodError(result, 'Founded year must be an integer')
       })
 
       it('should reject non-number year', () => {
@@ -378,11 +351,7 @@ describe('Team DTOs', () => {
         }
 
         const result = UpdateTeamDTOSchema.safeParse(data)
-        expect(result.success).toBe(false)
-        if (!result.success) {
-          expect(result.error.issues.length).toBeGreaterThan(0)
-          expect(result.error.issues[0].message).toBe('Team name cannot be empty')
-        }
+        expectZodError(result, 'Team name cannot be empty')
       })
 
       it('should reject name that becomes empty after trim', () => {
@@ -400,11 +369,7 @@ describe('Team DTOs', () => {
         }
 
         const result = UpdateTeamDTOSchema.safeParse(data)
-        expect(result.success).toBe(false)
-        if (!result.success) {
-          expect(result.error.issues.length).toBeGreaterThan(0)
-          expect(result.error.issues[0].message).toBe('Team name cannot exceed 100 characters')
-        }
+        expectZodError(result, 'Team name cannot exceed 100 characters')
       })
     })
 
@@ -415,11 +380,7 @@ describe('Team DTOs', () => {
         }
 
         const result = UpdateTeamDTOSchema.safeParse(data)
-        expect(result.success).toBe(false)
-        if (!result.success) {
-          expect(result.error.issues.length).toBeGreaterThan(0)
-          expect(result.error.issues[0].message).toBe('City cannot be empty')
-        }
+        expectZodError(result, 'City cannot be empty')
       })
 
       it('should reject city that becomes empty after trim', () => {
@@ -437,11 +398,7 @@ describe('Team DTOs', () => {
         }
 
         const result = UpdateTeamDTOSchema.safeParse(data)
-        expect(result.success).toBe(false)
-        if (!result.success) {
-          expect(result.error.issues.length).toBeGreaterThan(0)
-          expect(result.error.issues[0].message).toBe('City cannot exceed 100 characters')
-        }
+        expectZodError(result, 'City cannot exceed 100 characters')
       })
     })
 
@@ -452,11 +409,7 @@ describe('Team DTOs', () => {
         }
 
         const result = UpdateTeamDTOSchema.safeParse(data)
-        expect(result.success).toBe(false)
-        if (!result.success) {
-          expect(result.error.issues.length).toBeGreaterThan(0)
-          expect(result.error.issues[0].message).toBe('Founded year must be after 1800')
-        }
+        expectZodError(result, 'Founded year must be after 1800')
       })
 
       it('should accept year at minimum boundary (1800)', () => {
@@ -475,11 +428,7 @@ describe('Team DTOs', () => {
         }
 
         const result = UpdateTeamDTOSchema.safeParse(data)
-        expect(result.success).toBe(false)
-        if (!result.success) {
-          expect(result.error.issues.length).toBeGreaterThan(0)
-          expect(result.error.issues[0].message).toBe('Founded year cannot be in the future')
-        }
+        expectZodError(result, 'Founded year cannot be in the future')
       })
 
       it('should accept current year', () => {
@@ -498,11 +447,7 @@ describe('Team DTOs', () => {
         }
 
         const result = UpdateTeamDTOSchema.safeParse(data)
-        expect(result.success).toBe(false)
-        if (!result.success) {
-          expect(result.error.issues.length).toBeGreaterThan(0)
-          expect(result.error.issues[0].message).toBe('Founded year must be an integer')
-        }
+        expectZodError(result, 'Founded year must be an integer')
       })
     })
   })

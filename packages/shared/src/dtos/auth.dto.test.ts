@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { expectZodError } from '../test-utils.js'
 import { CreateUserDTOSchema, LoginDTOSchema, RefreshTokenDTOSchema } from './auth.dto.js'
 
 describe('Auth DTOs', () => {
@@ -40,11 +41,7 @@ describe('Auth DTOs', () => {
         }
 
         const result = LoginDTOSchema.safeParse(invalidData)
-        expect(result.success).toBe(false)
-        if (!result.success) {
-          expect(result.error.issues.length).toBeGreaterThan(0)
-          expect(result.error.issues[0].message).toBe('Invalid email format')
-        }
+        expectZodError(result, 'Invalid email format')
       })
 
       it('should reject empty password', () => {
@@ -54,11 +51,7 @@ describe('Auth DTOs', () => {
         }
 
         const result = LoginDTOSchema.safeParse(invalidData)
-        expect(result.success).toBe(false)
-        if (!result.success) {
-          expect(result.error.issues.length).toBeGreaterThan(0)
-          expect(result.error.issues[0].message).toBe('Password is required')
-        }
+        expectZodError(result, 'Password is required')
       })
 
       it('should reject missing fields', () => {
@@ -117,11 +110,7 @@ describe('Auth DTOs', () => {
         }
 
         const result = CreateUserDTOSchema.safeParse(data)
-        expect(result.success).toBe(false)
-        if (!result.success) {
-          expect(result.error.issues.length).toBeGreaterThan(0)
-          expect(result.error.issues[0].message).toBe('Invalid email format')
-        }
+        expectZodError(result, 'Invalid email format')
       })
 
       it('should trim and lowercase email', () => {
@@ -148,11 +137,7 @@ describe('Auth DTOs', () => {
         }
 
         const result = CreateUserDTOSchema.safeParse(data)
-        expect(result.success).toBe(false)
-        if (!result.success) {
-          expect(result.error.issues.length).toBeGreaterThan(0)
-          expect(result.error.issues[0].message).toBe('Password must be at least 8 characters')
-        }
+        expectZodError(result, 'Password must be at least 8 characters')
       })
 
       it('should reject password longer than 100 characters', () => {
@@ -163,11 +148,7 @@ describe('Auth DTOs', () => {
         }
 
         const result = CreateUserDTOSchema.safeParse(data)
-        expect(result.success).toBe(false)
-        if (!result.success) {
-          expect(result.error.issues.length).toBeGreaterThan(0)
-          expect(result.error.issues[0].message).toBe('Password cannot exceed 100 characters')
-        }
+        expectZodError(result, 'Password cannot exceed 100 characters')
       })
 
       it('should reject password without uppercase letter', () => {
@@ -288,11 +269,7 @@ describe('Auth DTOs', () => {
         }
 
         const result = RefreshTokenDTOSchema.safeParse(invalidData)
-        expect(result.success).toBe(false)
-        if (!result.success) {
-          expect(result.error.issues.length).toBeGreaterThan(0)
-          expect(result.error.issues[0].message).toBe('Refresh token is required')
-        }
+        expectZodError(result, 'Refresh token is required')
       })
 
       it('should reject missing refresh token', () => {
