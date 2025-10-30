@@ -5,6 +5,8 @@
 
 Modern football team statistics platform with real-time match tracking, admin dashboard and analytics.
 
+🔒 **Security**: All credentials rotated and repository sanitized (Last update: Oct 30, 2025)
+
 **🌐 Live Demo**: [Coming soon after deployment]
 
 ## 🚀 Tech Stack
