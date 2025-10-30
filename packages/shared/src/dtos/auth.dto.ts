@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { UserRole } from '../types'
+import type { UserRole } from '../types/index.js'
 
 /**
  * Authentication Data Transfer Objects (DTOs)

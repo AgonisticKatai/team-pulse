@@ -11,7 +11,7 @@
  */
 
 // Export all types
-export * from './types'
+export * from './types/index.js'
 
 // Export all DTOs (with Zod schemas)
-export * from './dtos'
+export * from './dtos/index.js'
