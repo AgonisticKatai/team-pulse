@@ -1,6 +1,6 @@
 import { execSync } from 'node:child_process'
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql'
-import { type Database, createDatabase } from '../database/connection'
+import { type Database, createDatabase } from '../database/connection.js'
 
 /**
  * Test Container Setup for Integration Tests

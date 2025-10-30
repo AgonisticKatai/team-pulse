@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { ValidationError } from '../errors/index'
-import { RefreshToken } from './RefreshToken'
+import { ValidationError } from '../errors/index.js'
+import { RefreshToken } from './RefreshToken.js'
 
 describe('RefreshToken Domain Entity', () => {
   describe('create', () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { hashPassword, verifyPassword } from './passwordUtils'
+import { hashPassword, verifyPassword } from './passwordUtils.js'
 
 describe('Password Utilities', () => {
   describe('hashPassword', () => {

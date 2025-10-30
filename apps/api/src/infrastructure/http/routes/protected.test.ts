@@ -1,12 +1,12 @@
 import { sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { buildApp } from '../../../app'
-import { User } from '../../../domain/models/User'
-import { hashPassword } from '../../auth/passwordUtils'
-import type { Container } from '../../config/container'
-import type { Database } from '../../database/connection'
-import { setupTestContainer } from '../../testing/testContainers'
+import { buildApp } from '../../../app.js'
+import { User } from '../../../domain/models/User.js'
+import { hashPassword } from '../../auth/passwordUtils.js'
+import type { Container } from '../../config/container.js'
+import type { Database } from '../../database/connection.js'
+import { setupTestContainer } from '../../testing/testContainers.js'
 
 describe('Protected Routes and RBAC', () => {
   let app: FastifyInstance

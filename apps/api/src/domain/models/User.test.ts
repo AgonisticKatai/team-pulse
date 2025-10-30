@@ -1,7 +1,7 @@
 import type { UserRole } from '@team-pulse/shared'
 import { describe, expect, it } from 'vitest'
-import { ValidationError } from '../errors/index'
-import { User } from './User'
+import { ValidationError } from '../errors/index.js'
+import { User } from './User.js'
 
 describe('User Domain Entity', () => {
   describe('create', () => {

@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest'
-import type { Env } from '../config/env'
+import type { Env } from '../config/env.js'
 import {
   type AccessTokenPayload,
   type RefreshTokenPayload,
@@ -8,7 +8,7 @@ import {
   getRefreshTokenExpirationDate,
   verifyAccessToken,
   verifyRefreshToken,
-} from './jwtUtils'
+} from './jwtUtils.js'
 
 describe('JWT Utilities', () => {
   let testEnv: Env
