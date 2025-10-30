@@ -86,6 +86,7 @@ describe('Team DTOs', () => {
         const result = CreateTeamDTOSchema.safeParse(data)
         expect(result.success).toBe(false)
         if (!result.success) {
+          expect(result.error.issues.length).toBeGreaterThan(0)
           expect(result.error.issues[0].message).toBe('Team name is required')
         }
       })
@@ -109,6 +110,7 @@ describe('Team DTOs', () => {
         const result = CreateTeamDTOSchema.safeParse(data)
         expect(result.success).toBe(false)
         if (!result.success) {
+          expect(result.error.issues.length).toBeGreaterThan(0)
           expect(result.error.issues[0].message).toBe('Team name cannot exceed 100 characters')
         }
       })
@@ -143,6 +145,7 @@ describe('Team DTOs', () => {
         const result = CreateTeamDTOSchema.safeParse(data)
         expect(result.success).toBe(false)
         if (!result.success) {
+          expect(result.error.issues.length).toBeGreaterThan(0)
           expect(result.error.issues[0].message).toBe('City is required')
         }
       })
@@ -166,6 +169,7 @@ describe('Team DTOs', () => {
         const result = CreateTeamDTOSchema.safeParse(data)
         expect(result.success).toBe(false)
         if (!result.success) {
+          expect(result.error.issues.length).toBeGreaterThan(0)
           expect(result.error.issues[0].message).toBe('City cannot exceed 100 characters')
         }
       })
@@ -201,6 +205,7 @@ describe('Team DTOs', () => {
         const result = CreateTeamDTOSchema.safeParse(data)
         expect(result.success).toBe(false)
         if (!result.success) {
+          expect(result.error.issues.length).toBeGreaterThan(0)
           expect(result.error.issues[0].message).toBe('Founded year must be after 1800')
         }
       })
@@ -227,6 +232,7 @@ describe('Team DTOs', () => {
         const result = CreateTeamDTOSchema.safeParse(data)
         expect(result.success).toBe(false)
         if (!result.success) {
+          expect(result.error.issues.length).toBeGreaterThan(0)
           expect(result.error.issues[0].message).toBe('Founded year cannot be in the future')
         }
       })
@@ -253,6 +259,7 @@ describe('Team DTOs', () => {
         const result = CreateTeamDTOSchema.safeParse(data)
         expect(result.success).toBe(false)
         if (!result.success) {
+          expect(result.error.issues.length).toBeGreaterThan(0)
           expect(result.error.issues[0].message).toBe('Founded year must be an integer')
         }
       })
@@ -373,6 +380,7 @@ describe('Team DTOs', () => {
         const result = UpdateTeamDTOSchema.safeParse(data)
         expect(result.success).toBe(false)
         if (!result.success) {
+          expect(result.error.issues.length).toBeGreaterThan(0)
           expect(result.error.issues[0].message).toBe('Team name cannot be empty')
         }
       })
@@ -394,6 +402,7 @@ describe('Team DTOs', () => {
         const result = UpdateTeamDTOSchema.safeParse(data)
         expect(result.success).toBe(false)
         if (!result.success) {
+          expect(result.error.issues.length).toBeGreaterThan(0)
           expect(result.error.issues[0].message).toBe('Team name cannot exceed 100 characters')
         }
       })
@@ -408,6 +417,7 @@ describe('Team DTOs', () => {
         const result = UpdateTeamDTOSchema.safeParse(data)
         expect(result.success).toBe(false)
         if (!result.success) {
+          expect(result.error.issues.length).toBeGreaterThan(0)
           expect(result.error.issues[0].message).toBe('City cannot be empty')
         }
       })
@@ -429,6 +439,7 @@ describe('Team DTOs', () => {
         const result = UpdateTeamDTOSchema.safeParse(data)
         expect(result.success).toBe(false)
         if (!result.success) {
+          expect(result.error.issues.length).toBeGreaterThan(0)
           expect(result.error.issues[0].message).toBe('City cannot exceed 100 characters')
         }
       })
@@ -443,6 +454,7 @@ describe('Team DTOs', () => {
         const result = UpdateTeamDTOSchema.safeParse(data)
         expect(result.success).toBe(false)
         if (!result.success) {
+          expect(result.error.issues.length).toBeGreaterThan(0)
           expect(result.error.issues[0].message).toBe('Founded year must be after 1800')
         }
       })
@@ -465,6 +477,7 @@ describe('Team DTOs', () => {
         const result = UpdateTeamDTOSchema.safeParse(data)
         expect(result.success).toBe(false)
         if (!result.success) {
+          expect(result.error.issues.length).toBeGreaterThan(0)
           expect(result.error.issues[0].message).toBe('Founded year cannot be in the future')
         }
       })
@@ -487,6 +500,7 @@ describe('Team DTOs', () => {
         const result = UpdateTeamDTOSchema.safeParse(data)
         expect(result.success).toBe(false)
         if (!result.success) {
+          expect(result.error.issues.length).toBeGreaterThan(0)
           expect(result.error.issues[0].message).toBe('Founded year must be an integer')
         }
       })

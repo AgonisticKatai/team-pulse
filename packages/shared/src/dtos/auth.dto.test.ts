@@ -42,6 +42,7 @@ describe('Auth DTOs', () => {
         const result = LoginDTOSchema.safeParse(invalidData)
         expect(result.success).toBe(false)
         if (!result.success) {
+          expect(result.error.issues.length).toBeGreaterThan(0)
           expect(result.error.issues[0].message).toBe('Invalid email format')
         }
       })
@@ -55,6 +56,7 @@ describe('Auth DTOs', () => {
         const result = LoginDTOSchema.safeParse(invalidData)
         expect(result.success).toBe(false)
         if (!result.success) {
+          expect(result.error.issues.length).toBeGreaterThan(0)
           expect(result.error.issues[0].message).toBe('Password is required')
         }
       })
@@ -117,6 +119,7 @@ describe('Auth DTOs', () => {
         const result = CreateUserDTOSchema.safeParse(data)
         expect(result.success).toBe(false)
         if (!result.success) {
+          expect(result.error.issues.length).toBeGreaterThan(0)
           expect(result.error.issues[0].message).toBe('Invalid email format')
         }
       })
@@ -147,6 +150,7 @@ describe('Auth DTOs', () => {
         const result = CreateUserDTOSchema.safeParse(data)
         expect(result.success).toBe(false)
         if (!result.success) {
+          expect(result.error.issues.length).toBeGreaterThan(0)
           expect(result.error.issues[0].message).toBe('Password must be at least 8 characters')
         }
       })
@@ -161,6 +165,7 @@ describe('Auth DTOs', () => {
         const result = CreateUserDTOSchema.safeParse(data)
         expect(result.success).toBe(false)
         if (!result.success) {
+          expect(result.error.issues.length).toBeGreaterThan(0)
           expect(result.error.issues[0].message).toBe('Password cannot exceed 100 characters')
         }
       })
@@ -285,6 +290,7 @@ describe('Auth DTOs', () => {
         const result = RefreshTokenDTOSchema.safeParse(invalidData)
         expect(result.success).toBe(false)
         if (!result.success) {
+          expect(result.error.issues.length).toBeGreaterThan(0)
           expect(result.error.issues[0].message).toBe('Refresh token is required')
         }
       })
