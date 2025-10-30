@@ -16,7 +16,7 @@ export {
   type LoginResponseDTO,
   type RefreshTokenResponseDTO,
   type UsersListResponseDTO,
-} from './auth.dto'
+} from './auth.dto.js'
 
 // Team DTOs
 export {
@@ -26,4 +26,4 @@ export {
   type UpdateTeamDTO,
   type TeamResponseDTO,
   type TeamsListResponseDTO,
-} from './team.dto'
+} from './team.dto.js'
