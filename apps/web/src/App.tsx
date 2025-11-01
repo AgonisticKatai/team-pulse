@@ -21,10 +21,10 @@ import './App.css'
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 0,
       gcTime: 1000 * 60 * 5, // 5 minutes
-      retry: 3,
       refetchOnWindowFocus: true,
+      retry: 3,
+      staleTime: 0,
     },
   },
 })

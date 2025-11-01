@@ -51,11 +51,11 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
 
     // Convert to database format
     const row = {
+      createdAt: obj.createdAt,
+      expiresAt: obj.expiresAt,
       id: obj.id,
       token: obj.token,
       userId: obj.userId,
-      expiresAt: obj.expiresAt,
-      createdAt: obj.createdAt,
     }
 
     // Upsert: insert or update if exists
@@ -63,12 +63,12 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
       .insert(refreshTokens)
       .values(row)
       .onConflictDoUpdate({
-        target: refreshTokens.id,
         set: {
+          expiresAt: row.expiresAt,
           token: row.token,
           userId: row.userId,
-          expiresAt: row.expiresAt,
         },
+        target: refreshTokens.id,
       })
 
     return refreshToken
@@ -98,11 +98,11 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
    */
   private mapToDomain(row: typeof refreshTokens.$inferSelect): RefreshToken {
     return RefreshToken.fromPersistence({
+      createdAt: new Date(row.createdAt),
+      expiresAt: new Date(row.expiresAt),
       id: row.id,
       token: row.token,
       userId: row.userId,
-      expiresAt: new Date(row.expiresAt),
-      createdAt: new Date(row.createdAt),
     })
   }
 }

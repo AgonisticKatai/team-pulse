@@ -7,9 +7,9 @@ describe('Team DTOs', () => {
     describe('valid cases', () => {
       it('should validate correct team data with foundedYear', () => {
         const validData = {
-          name: 'FC Barcelona',
           city: 'Barcelona',
           foundedYear: 1899,
+          name: 'FC Barcelona',
         }
 
         const result = CreateTeamDTOSchema.safeParse(validData)
@@ -23,8 +23,8 @@ describe('Team DTOs', () => {
 
       it('should accept team without foundedYear', () => {
         const validData = {
-          name: 'New Team',
           city: 'Madrid',
+          name: 'New Team',
         }
 
         const result = CreateTeamDTOSchema.safeParse(validData)
@@ -36,9 +36,9 @@ describe('Team DTOs', () => {
 
       it('should accept team with null foundedYear', () => {
         const validData = {
-          name: 'Another Team',
           city: 'Valencia',
           foundedYear: null,
+          name: 'Another Team',
         }
 
         const result = CreateTeamDTOSchema.safeParse(validData)
@@ -50,9 +50,9 @@ describe('Team DTOs', () => {
 
       it('should trim team name', () => {
         const data = {
-          name: '  FC Barcelona  ',
           city: 'Barcelona',
           foundedYear: 1899,
+          name: '  FC Barcelona  ',
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
@@ -64,9 +64,9 @@ describe('Team DTOs', () => {
 
       it('should trim city name', () => {
         const data = {
-          name: 'FC Barcelona',
           city: '  Barcelona  ',
           foundedYear: 1899,
+          name: 'FC Barcelona',
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
@@ -80,8 +80,8 @@ describe('Team DTOs', () => {
     describe('name validation', () => {
       it('should reject empty name', () => {
         const data = {
-          name: '',
           city: 'Barcelona',
+          name: '',
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
@@ -90,8 +90,8 @@ describe('Team DTOs', () => {
 
       it('should reject name that becomes empty after trim', () => {
         const data = {
-          name: '   ',
           city: 'Barcelona',
+          name: '   ',
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
@@ -100,8 +100,8 @@ describe('Team DTOs', () => {
 
       it('should reject name longer than 100 characters', () => {
         const data = {
-          name: 'A'.repeat(101),
           city: 'Barcelona',
+          name: 'A'.repeat(101),
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
@@ -110,8 +110,8 @@ describe('Team DTOs', () => {
 
       it('should accept name at maximum length boundary (100 chars)', () => {
         const data = {
-          name: 'A'.repeat(100),
           city: 'Barcelona',
+          name: 'A'.repeat(100),
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
@@ -131,8 +131,8 @@ describe('Team DTOs', () => {
     describe('city validation', () => {
       it('should reject empty city', () => {
         const data = {
-          name: 'FC Barcelona',
           city: '',
+          name: 'FC Barcelona',
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
@@ -141,8 +141,8 @@ describe('Team DTOs', () => {
 
       it('should reject city that becomes empty after trim', () => {
         const data = {
-          name: 'FC Barcelona',
           city: '   ',
+          name: 'FC Barcelona',
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
@@ -151,8 +151,8 @@ describe('Team DTOs', () => {
 
       it('should reject city longer than 100 characters', () => {
         const data = {
-          name: 'FC Barcelona',
           city: 'B'.repeat(101),
+          name: 'FC Barcelona',
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
@@ -161,8 +161,8 @@ describe('Team DTOs', () => {
 
       it('should accept city at maximum length boundary (100 chars)', () => {
         const data = {
-          name: 'FC Barcelona',
           city: 'B'.repeat(100),
+          name: 'FC Barcelona',
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
@@ -182,9 +182,9 @@ describe('Team DTOs', () => {
     describe('foundedYear validation', () => {
       it('should reject year before 1800', () => {
         const data = {
-          name: 'Old Team',
           city: 'Madrid',
           foundedYear: 1799,
+          name: 'Old Team',
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
@@ -193,9 +193,9 @@ describe('Team DTOs', () => {
 
       it('should accept year at minimum boundary (1800)', () => {
         const data = {
-          name: 'Historic Team',
           city: 'Madrid',
           foundedYear: 1800,
+          name: 'Historic Team',
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
@@ -205,9 +205,9 @@ describe('Team DTOs', () => {
       it('should reject future year', () => {
         const currentYear = new Date().getFullYear()
         const data = {
-          name: 'Future Team',
           city: 'Madrid',
           foundedYear: currentYear + 1,
+          name: 'Future Team',
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
@@ -217,9 +217,9 @@ describe('Team DTOs', () => {
       it('should accept current year', () => {
         const currentYear = new Date().getFullYear()
         const data = {
-          name: 'New Team',
           city: 'Madrid',
           foundedYear: currentYear,
+          name: 'New Team',
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
@@ -228,9 +228,9 @@ describe('Team DTOs', () => {
 
       it('should reject non-integer year', () => {
         const data = {
-          name: 'Team',
           city: 'Madrid',
           foundedYear: 1899.5,
+          name: 'Team',
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
@@ -239,9 +239,9 @@ describe('Team DTOs', () => {
 
       it('should reject non-number year', () => {
         const data = {
-          name: 'Team',
           city: 'Madrid',
           foundedYear: '1899',
+          name: 'Team',
         }
 
         const result = CreateTeamDTOSchema.safeParse(data)
@@ -254,9 +254,9 @@ describe('Team DTOs', () => {
     describe('valid cases', () => {
       it('should validate partial update with all fields', () => {
         const validData = {
-          name: 'Updated Name',
           city: 'Updated City',
           foundedYear: 1900,
+          name: 'Updated Name',
         }
 
         const result = UpdateTeamDTOSchema.safeParse(validData)

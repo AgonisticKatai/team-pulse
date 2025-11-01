@@ -31,9 +31,9 @@ export function TeamForm({ initialData, onSubmit, onCancel, isSubmitting, error 
     e.preventDefault()
 
     const data: CreateTeamDTO = {
-      name: name.trim(),
       city: city.trim(),
       foundedYear: foundedYear ? Number.parseInt(foundedYear, 10) : undefined,
+      name: name.trim(),
     }
 
     onSubmit(data)
@@ -45,23 +45,23 @@ export function TeamForm({ initialData, onSubmit, onCancel, isSubmitting, error 
     <form
       onSubmit={handleSubmit}
       style={{
-        padding: '1.5rem',
         backgroundColor: '#1a1a1a',
-        borderRadius: '8px',
         border: '1px solid #333',
+        borderRadius: '8px',
+        padding: '1.5rem',
       }}
     >
-      <h3 style={{ marginTop: 0, color: '#fff' }}>{isEdit ? 'Edit Team' : 'Create New Team'}</h3>
+      <h3 style={{ color: '#fff', marginTop: 0 }}>{isEdit ? 'Edit Team' : 'Create New Team'}</h3>
 
       {error && (
         <div
           style={{
-            padding: '0.75rem',
-            marginBottom: '1rem',
             backgroundColor: '#ffebee',
-            color: '#c62828',
             borderRadius: '4px',
+            color: '#c62828',
             fontSize: '0.875rem',
+            marginBottom: '1rem',
+            padding: '0.75rem',
           }}
         >
           <strong>Error:</strong> {error.message}
@@ -72,10 +72,10 @@ export function TeamForm({ initialData, onSubmit, onCancel, isSubmitting, error 
         <label
           htmlFor="name"
           style={{
-            display: 'block',
-            marginBottom: '0.5rem',
             color: '#ccc',
+            display: 'block',
             fontSize: '0.875rem',
+            marginBottom: '0.5rem',
           }}
         >
           Team Name *
@@ -90,13 +90,13 @@ export function TeamForm({ initialData, onSubmit, onCancel, isSubmitting, error 
           maxLength={100}
           disabled={isSubmitting}
           style={{
-            width: '100%',
-            padding: '0.5rem',
-            fontSize: '1rem',
+            backgroundColor: '#2a2a2a',
             border: '1px solid #444',
             borderRadius: '4px',
-            backgroundColor: '#2a2a2a',
             color: '#fff',
+            fontSize: '1rem',
+            padding: '0.5rem',
+            width: '100%',
           }}
           placeholder="e.g., FC Barcelona"
         />
@@ -106,10 +106,10 @@ export function TeamForm({ initialData, onSubmit, onCancel, isSubmitting, error 
         <label
           htmlFor="city"
           style={{
-            display: 'block',
-            marginBottom: '0.5rem',
             color: '#ccc',
+            display: 'block',
             fontSize: '0.875rem',
+            marginBottom: '0.5rem',
           }}
         >
           City *
@@ -124,13 +124,13 @@ export function TeamForm({ initialData, onSubmit, onCancel, isSubmitting, error 
           maxLength={100}
           disabled={isSubmitting}
           style={{
-            width: '100%',
-            padding: '0.5rem',
-            fontSize: '1rem',
+            backgroundColor: '#2a2a2a',
             border: '1px solid #444',
             borderRadius: '4px',
-            backgroundColor: '#2a2a2a',
             color: '#fff',
+            fontSize: '1rem',
+            padding: '0.5rem',
+            width: '100%',
           }}
           placeholder="e.g., Barcelona"
         />
@@ -140,10 +140,10 @@ export function TeamForm({ initialData, onSubmit, onCancel, isSubmitting, error 
         <label
           htmlFor="foundedYear"
           style={{
-            display: 'block',
-            marginBottom: '0.5rem',
             color: '#ccc',
+            display: 'block',
             fontSize: '0.875rem',
+            marginBottom: '0.5rem',
           }}
         >
           Founded Year (optional)
@@ -157,13 +157,13 @@ export function TeamForm({ initialData, onSubmit, onCancel, isSubmitting, error 
           max={new Date().getFullYear()}
           disabled={isSubmitting}
           style={{
-            width: '100%',
-            padding: '0.5rem',
-            fontSize: '1rem',
+            backgroundColor: '#2a2a2a',
             border: '1px solid #444',
             borderRadius: '4px',
-            backgroundColor: '#2a2a2a',
             color: '#fff',
+            fontSize: '1rem',
+            padding: '0.5rem',
+            width: '100%',
           }}
           placeholder="e.g., 1899"
         />
@@ -174,15 +174,15 @@ export function TeamForm({ initialData, onSubmit, onCancel, isSubmitting, error 
           type="submit"
           disabled={isSubmitting || !name.trim() || !city.trim()}
           style={{
-            flex: 1,
-            padding: '0.75rem 1.5rem',
             backgroundColor: '#646cff',
-            color: 'white',
             border: 'none',
             borderRadius: '4px',
+            color: 'white',
             cursor: isSubmitting ? 'not-allowed' : 'pointer',
+            flex: 1,
             fontSize: '1rem',
             opacity: isSubmitting ? 0.7 : 1,
+            padding: '0.75rem 1.5rem',
           }}
         >
           {isSubmitting ? 'Saving...' : isEdit ? 'Update Team' : 'Create Team'}
@@ -194,14 +194,14 @@ export function TeamForm({ initialData, onSubmit, onCancel, isSubmitting, error 
             onClick={onCancel}
             disabled={isSubmitting}
             style={{
-              flex: 1,
-              padding: '0.75rem 1.5rem',
               backgroundColor: '#555',
-              color: 'white',
               border: 'none',
               borderRadius: '4px',
+              color: 'white',
               cursor: isSubmitting ? 'not-allowed' : 'pointer',
+              flex: 1,
               fontSize: '1rem',
+              padding: '0.75rem 1.5rem',
             }}
           >
             Cancel

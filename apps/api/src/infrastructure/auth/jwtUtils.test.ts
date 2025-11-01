@@ -2,10 +2,10 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import type { Env } from '../config/env.js'
 import {
   type AccessTokenPayload,
-  type RefreshTokenPayload,
   generateAccessToken,
   generateRefreshToken,
   getRefreshTokenExpirationDate,
+  type RefreshTokenPayload,
   verifyAccessToken,
   verifyRefreshToken,
 } from './jwtUtils.js'
@@ -16,23 +16,23 @@ describe('JWT Utilities', () => {
   beforeAll(() => {
     // Create test environment with mock JWT secrets
     testEnv = {
+      DATABASE_URL: 'postgresql://test:test@localhost:5432/test',
+      FRONTEND_URL: 'http://localhost:5173',
+      HOST: '0.0.0.0',
+      JWT_REFRESH_SECRET: 'test-refresh-secret-key-min-32-chars-long',
+      JWT_SECRET: 'test-jwt-secret-key-min-32-chars-long',
+      LOG_LEVEL: 'info',
       NODE_ENV: 'test',
       PORT: 3000,
-      HOST: '0.0.0.0',
-      LOG_LEVEL: 'info',
-      FRONTEND_URL: 'http://localhost:5173',
-      DATABASE_URL: 'postgresql://test:test@localhost:5432/test',
-      JWT_SECRET: 'test-jwt-secret-key-min-32-chars-long',
-      JWT_REFRESH_SECRET: 'test-refresh-secret-key-min-32-chars-long',
     }
   })
 
   describe('generateAccessToken', () => {
     it('should generate a valid access token', () => {
       const payload: AccessTokenPayload = {
-        userId: 'user-123',
         email: 'test@example.com',
         role: 'USER',
+        userId: 'user-123',
       }
 
       const token = generateAccessToken(payload, testEnv)
@@ -44,9 +44,9 @@ describe('JWT Utilities', () => {
 
     it('should include payload data in token', () => {
       const payload: AccessTokenPayload = {
-        userId: 'user-123',
         email: 'test@example.com',
         role: 'ADMIN',
+        userId: 'user-123',
       }
 
       const token = generateAccessToken(payload, testEnv)
@@ -61,8 +61,8 @@ describe('JWT Utilities', () => {
   describe('generateRefreshToken', () => {
     it('should generate a valid refresh token', () => {
       const payload: RefreshTokenPayload = {
-        userId: 'user-123',
         tokenId: 'token-abc',
+        userId: 'user-123',
       }
 
       const token = generateRefreshToken(payload, testEnv)
@@ -74,8 +74,8 @@ describe('JWT Utilities', () => {
 
     it('should include payload data in refresh token', () => {
       const payload: RefreshTokenPayload = {
-        userId: 'user-123',
         tokenId: 'token-abc',
+        userId: 'user-123',
       }
 
       const token = generateRefreshToken(payload, testEnv)
@@ -89,9 +89,9 @@ describe('JWT Utilities', () => {
   describe('verifyAccessToken', () => {
     it('should verify a valid access token', () => {
       const payload: AccessTokenPayload = {
-        userId: 'user-123',
         email: 'test@example.com',
         role: 'USER',
+        userId: 'user-123',
       }
 
       const token = generateAccessToken(payload, testEnv)
@@ -109,9 +109,9 @@ describe('JWT Utilities', () => {
 
     it('should throw error for token with wrong secret', () => {
       const payload: AccessTokenPayload = {
-        userId: 'user-123',
         email: 'test@example.com',
         role: 'USER',
+        userId: 'user-123',
       }
 
       const token = generateAccessToken(payload, testEnv)
@@ -132,8 +132,8 @@ describe('JWT Utilities', () => {
   describe('verifyRefreshToken', () => {
     it('should verify a valid refresh token', () => {
       const payload: RefreshTokenPayload = {
-        userId: 'user-123',
         tokenId: 'token-abc',
+        userId: 'user-123',
       }
 
       const token = generateRefreshToken(payload, testEnv)
@@ -152,9 +152,9 @@ describe('JWT Utilities', () => {
 
     it('should throw error for access token used as refresh token', () => {
       const accessPayload: AccessTokenPayload = {
-        userId: 'user-123',
         email: 'test@example.com',
         role: 'USER',
+        userId: 'user-123',
       }
 
       const accessToken = generateAccessToken(accessPayload, testEnv)
@@ -194,9 +194,9 @@ describe('JWT Utilities', () => {
   describe('Token expiration', () => {
     it('should include expiration claim in access token', () => {
       const payload: AccessTokenPayload = {
-        userId: 'user-123',
         email: 'test@example.com',
         role: 'USER',
+        userId: 'user-123',
       }
 
       const token = generateAccessToken(payload, testEnv)
@@ -208,9 +208,9 @@ describe('JWT Utilities', () => {
 
     it('should include issuer and audience in tokens', () => {
       const payload: AccessTokenPayload = {
-        userId: 'user-123',
         email: 'test@example.com',
         role: 'USER',
+        userId: 'user-123',
       }
 
       const token = generateAccessToken(payload, testEnv)

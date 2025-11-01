@@ -10,8 +10,8 @@ import { RefreshTokenUseCase } from './RefreshTokenUseCase.js'
 
 // Mock external dependencies
 vi.mock('../../infrastructure/auth/jwtUtils.js', () => ({
-  verifyRefreshToken: vi.fn(),
   generateAccessToken: vi.fn(() => 'new-access-token'),
+  verifyRefreshToken: vi.fn(),
 }))
 
 describe('RefreshTokenUseCase', () => {
@@ -22,27 +22,27 @@ describe('RefreshTokenUseCase', () => {
 
   // Mock user data
   const mockUser = User.fromPersistence({
-    id: 'user-123',
+    createdAt: new Date('2025-01-01T00:00:00Z'),
     email: 'test@example.com',
+    id: 'user-123',
     passwordHash: 'hashed-password',
     role: 'USER',
-    createdAt: new Date('2025-01-01T00:00:00Z'),
     updatedAt: new Date('2025-01-15T12:00:00Z'),
   })
 
   // Mock refresh token (valid, not expired)
   const mockRefreshToken = RefreshToken.fromPersistence({
+    createdAt: new Date('2025-01-01T00:00:00Z'),
+    expiresAt: new Date('2025-12-31T23:59:59Z'), // Future date
     id: 'token-123',
     token: 'valid-refresh-token',
     userId: 'user-123',
-    expiresAt: new Date('2025-12-31T23:59:59Z'), // Future date
-    createdAt: new Date('2025-01-01T00:00:00Z'),
   })
 
   // Mock JWT payload
   const mockPayload = {
-    userId: 'user-123',
     tokenId: 'token-123',
+    userId: 'user-123',
   }
 
   beforeEach(() => {
@@ -51,34 +51,34 @@ describe('RefreshTokenUseCase', () => {
 
     // Mock environment
     env = {
+      DATABASE_URL: 'postgresql://test:test@localhost:5432/test',
+      FRONTEND_URL: 'http://localhost:5173',
+      HOST: '0.0.0.0',
+      JWT_REFRESH_SECRET: 'test-refresh-secret-at-least-32-chars-long',
+      JWT_SECRET: 'test-jwt-secret-at-least-32-chars-long',
+      LOG_LEVEL: 'info',
       NODE_ENV: 'test',
       PORT: 3000,
-      HOST: '0.0.0.0',
-      LOG_LEVEL: 'info',
-      DATABASE_URL: 'postgresql://test:test@localhost:5432/test',
-      JWT_SECRET: 'test-jwt-secret-at-least-32-chars-long',
-      JWT_REFRESH_SECRET: 'test-refresh-secret-at-least-32-chars-long',
-      FRONTEND_URL: 'http://localhost:5173',
     }
 
     // Mock repositories
     userRepository = {
+      count: vi.fn(),
+      delete: vi.fn(),
+      existsByEmail: vi.fn(),
+      findAll: vi.fn(),
       findByEmail: vi.fn(),
       findById: vi.fn(),
       save: vi.fn(),
-      findAll: vi.fn(),
-      delete: vi.fn(),
-      existsByEmail: vi.fn(),
-      count: vi.fn(),
     }
 
     refreshTokenRepository = {
-      save: vi.fn(),
-      findByToken: vi.fn(),
-      findByUserId: vi.fn(),
       deleteByToken: vi.fn(),
       deleteByUserId: vi.fn(),
       deleteExpired: vi.fn(),
+      findByToken: vi.fn(),
+      findByUserId: vi.fn(),
+      save: vi.fn(),
     }
 
     // Create use case instance
@@ -182,9 +182,9 @@ describe('RefreshTokenUseCase', () => {
         // Assert
         expect(generateAccessToken).toHaveBeenCalledWith(
           {
-            userId: 'user-123',
             email: 'test@example.com',
             role: 'USER',
+            userId: 'user-123',
           },
           env,
         )
@@ -240,11 +240,11 @@ describe('RefreshTokenUseCase', () => {
 
         // Create expired token
         const expiredToken = RefreshToken.fromPersistence({
+          createdAt: new Date('2019-01-01T00:00:00Z'),
+          expiresAt: new Date('2020-01-01T00:00:00Z'), // Past date
           id: 'token-123',
           token: 'expired-token',
           userId: 'user-123',
-          expiresAt: new Date('2020-01-01T00:00:00Z'), // Past date
-          createdAt: new Date('2019-01-01T00:00:00Z'),
         })
 
         const { verifyRefreshToken } = await import('../../infrastructure/auth/jwtUtils.js')
@@ -328,11 +328,11 @@ describe('RefreshTokenUseCase', () => {
       it('should handle user with ADMIN role', async () => {
         // Arrange
         const adminUser = User.fromPersistence({
-          id: 'admin-123',
+          createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'admin@example.com',
+          id: 'admin-123',
           passwordHash: 'hashed-password',
           role: 'ADMIN',
-          createdAt: new Date('2025-01-01T00:00:00Z'),
           updatedAt: new Date('2025-01-01T00:00:00Z'),
         })
 
@@ -343,7 +343,7 @@ describe('RefreshTokenUseCase', () => {
         const { verifyRefreshToken, generateAccessToken } = await import(
           '../../infrastructure/auth/jwtUtils.js'
         )
-        vi.mocked(verifyRefreshToken).mockReturnValue({ userId: 'admin-123', tokenId: 'token-123' })
+        vi.mocked(verifyRefreshToken).mockReturnValue({ tokenId: 'token-123', userId: 'admin-123' })
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(mockRefreshToken)
         vi.mocked(userRepository.findById).mockResolvedValue(adminUser)
 
@@ -353,9 +353,9 @@ describe('RefreshTokenUseCase', () => {
         // Assert
         expect(generateAccessToken).toHaveBeenCalledWith(
           {
-            userId: 'admin-123',
             email: 'admin@example.com',
             role: 'ADMIN',
+            userId: 'admin-123',
           },
           env,
         )
@@ -364,11 +364,11 @@ describe('RefreshTokenUseCase', () => {
       it('should handle user with SUPER_ADMIN role', async () => {
         // Arrange
         const superAdminUser = User.fromPersistence({
-          id: 'super-admin-123',
+          createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'superadmin@example.com',
+          id: 'super-admin-123',
           passwordHash: 'hashed-password',
           role: 'SUPER_ADMIN',
-          createdAt: new Date('2025-01-01T00:00:00Z'),
           updatedAt: new Date('2025-01-01T00:00:00Z'),
         })
 
@@ -380,8 +380,8 @@ describe('RefreshTokenUseCase', () => {
           '../../infrastructure/auth/jwtUtils.js'
         )
         vi.mocked(verifyRefreshToken).mockReturnValue({
-          userId: 'super-admin-123',
           tokenId: 'token-123',
+          userId: 'super-admin-123',
         })
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(mockRefreshToken)
         vi.mocked(userRepository.findById).mockResolvedValue(superAdminUser)
@@ -392,9 +392,9 @@ describe('RefreshTokenUseCase', () => {
         // Assert
         expect(generateAccessToken).toHaveBeenCalledWith(
           {
-            userId: 'super-admin-123',
             email: 'superadmin@example.com',
             role: 'SUPER_ADMIN',
+            userId: 'super-admin-123',
           },
           env,
         )

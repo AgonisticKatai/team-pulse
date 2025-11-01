@@ -36,15 +36,15 @@ export function TeamCard({ team, onEdit, onDelete }: TeamCardProps) {
   return (
     <div
       style={{
+        backgroundColor: '#1a1a1a',
         border: '1px solid #333',
         borderRadius: '8px',
         padding: '1.5rem',
-        backgroundColor: '#1a1a1a',
       }}
     >
-      <h3 style={{ margin: '0 0 0.5rem 0', color: '#fff' }}>{team.name}</h3>
+      <h3 style={{ color: '#fff', margin: '0 0 0.5rem 0' }}>{team.name}</h3>
 
-      <div style={{ marginBottom: '1rem', color: '#888' }}>
+      <div style={{ color: '#888', marginBottom: '1rem' }}>
         <p style={{ margin: '0.25rem 0' }}>
           <strong>City:</strong> {team.city}
         </p>
@@ -53,7 +53,7 @@ export function TeamCard({ team, onEdit, onDelete }: TeamCardProps) {
             <strong>Founded:</strong> {team.foundedYear}
           </p>
         )}
-        <p style={{ margin: '0.25rem 0', fontSize: '0.875rem' }}>
+        <p style={{ fontSize: '0.875rem', margin: '0.25rem 0' }}>
           <strong>Created:</strong> {new Date(team.createdAt).toLocaleDateString()}
         </p>
       </div>

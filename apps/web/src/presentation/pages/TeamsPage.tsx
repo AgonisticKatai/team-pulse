@@ -68,8 +68,8 @@ export function TeamsPage({ teamApiClient }: TeamsPageProps) {
       if (editingTeam) {
         // Update existing team
         await updateMutation.mutateAsync({
-          id: editingTeam.id,
           data: formData as UpdateTeamDTO,
+          id: editingTeam.id,
         })
       } else {
         // Create new team
@@ -88,7 +88,7 @@ export function TeamsPage({ teamApiClient }: TeamsPageProps) {
   const handleDelete = async (id: string) => {
     try {
       await deleteMutation.mutateAsync(id)
-    } catch (error) {
+    } catch (_error) {
       // Error is handled by the mutation
       alert('Failed to delete team. Please try again.')
     }
@@ -99,19 +99,19 @@ export function TeamsPage({ teamApiClient }: TeamsPageProps) {
 
   return (
     <DashboardLayout>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      <div style={{ margin: '0 auto', maxWidth: '1200px' }}>
         {/* Header */}
         <div
           style={{
+            alignItems: 'center',
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: 'center',
             marginBottom: '2rem',
           }}
         >
           <div>
-            <h1 style={{ margin: 0, color: '#1f2937' }}>Teams</h1>
-            <p style={{ margin: '0.5rem 0 0 0', color: '#6b7280' }}>
+            <h1 style={{ color: '#1f2937', margin: 0 }}>Teams</h1>
+            <p style={{ color: '#6b7280', margin: '0.5rem 0 0 0' }}>
               {canEdit ? 'Manage your football teams' : 'View football teams'}
             </p>
           </div>
@@ -157,11 +157,11 @@ export function TeamsPage({ teamApiClient }: TeamsPageProps) {
         {!isLoading && !error && (
           <div
             style={{
+              color: '#6b7280',
+              fontSize: '0.875rem',
               marginTop: '2rem',
               padding: '1rem',
               textAlign: 'center',
-              color: '#6b7280',
-              fontSize: '0.875rem',
             }}
           >
             Total teams: {data?.total || 0}

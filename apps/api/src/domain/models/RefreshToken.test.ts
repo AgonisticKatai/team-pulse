@@ -8,10 +8,10 @@ describe('RefreshToken Domain Entity', () => {
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
 
       const token = RefreshToken.create({
+        expiresAt,
         id: 'token-123',
         token: 'refresh-token-string',
         userId: 'user-123',
-        expiresAt,
       })
 
       expect(token).toBeInstanceOf(RefreshToken)
@@ -27,10 +27,10 @@ describe('RefreshToken Domain Entity', () => {
 
       expect(() =>
         RefreshToken.create({
+          expiresAt,
           id: 'token-123',
           token: '',
           userId: 'user-123',
-          expiresAt,
         }),
       ).toThrow(ValidationError)
     })
@@ -40,10 +40,10 @@ describe('RefreshToken Domain Entity', () => {
 
       expect(() =>
         RefreshToken.create({
+          expiresAt,
           id: 'token-123',
           token: 'refresh-token',
           userId: '',
-          expiresAt,
         }),
       ).toThrow(ValidationError)
     })
@@ -52,10 +52,10 @@ describe('RefreshToken Domain Entity', () => {
       const expiresAt = new Date(Date.now() - 1000) // Expired
 
       const token = RefreshToken.create({
+        expiresAt,
         id: 'token-123',
         token: 'refresh-token',
         userId: 'user-123',
-        expiresAt,
       })
 
       expect(token).toBeInstanceOf(RefreshToken)
@@ -69,11 +69,11 @@ describe('RefreshToken Domain Entity', () => {
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
       const token = RefreshToken.fromPersistence({
+        createdAt: now,
+        expiresAt,
         id: 'token-123',
         token: 'refresh-token',
         userId: 'user-123',
-        expiresAt,
-        createdAt: now,
       })
 
       expect(token).toBeInstanceOf(RefreshToken)
@@ -86,10 +86,10 @@ describe('RefreshToken Domain Entity', () => {
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days future
 
       const token = RefreshToken.create({
+        expiresAt,
         id: 'token-123',
         token: 'refresh-token',
         userId: 'user-123',
-        expiresAt,
       })
 
       expect(token.isExpired()).toBe(false)
@@ -99,10 +99,10 @@ describe('RefreshToken Domain Entity', () => {
       const expiresAt = new Date(Date.now() - 1000) // 1 second ago
 
       const token = RefreshToken.create({
+        expiresAt,
         id: 'token-123',
         token: 'refresh-token',
         userId: 'user-123',
-        expiresAt,
       })
 
       expect(token.isExpired()).toBe(true)
@@ -112,10 +112,10 @@ describe('RefreshToken Domain Entity', () => {
       const expiresAt = new Date() // Right now
 
       const token = RefreshToken.create({
+        expiresAt,
         id: 'token-123',
         token: 'refresh-token',
         userId: 'user-123',
-        expiresAt,
       })
 
       // Since we're comparing > , equal time means expired
@@ -129,10 +129,10 @@ describe('RefreshToken Domain Entity', () => {
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
       const token = RefreshToken.create({
+        expiresAt,
         id: 'token-123',
         token: 'refresh-token',
         userId: 'user-123',
-        expiresAt,
       })
 
       expect(token.isValid()).toBe(true)
@@ -142,10 +142,10 @@ describe('RefreshToken Domain Entity', () => {
       const expiresAt = new Date(Date.now() - 1000)
 
       const token = RefreshToken.create({
+        expiresAt,
         id: 'token-123',
         token: 'refresh-token',
         userId: 'user-123',
-        expiresAt,
       })
 
       expect(token.isValid()).toBe(false)
@@ -153,17 +153,17 @@ describe('RefreshToken Domain Entity', () => {
 
     it('should be opposite of isExpired', () => {
       const expiredToken = RefreshToken.create({
+        expiresAt: new Date(Date.now() - 1000),
         id: 'token-1',
         token: 'expired-token',
         userId: 'user-123',
-        expiresAt: new Date(Date.now() - 1000),
       })
 
       const validToken = RefreshToken.create({
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         id: 'token-2',
         token: 'valid-token',
         userId: 'user-123',
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       })
 
       expect(expiredToken.isValid()).toBe(!expiredToken.isExpired())
@@ -176,10 +176,10 @@ describe('RefreshToken Domain Entity', () => {
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
       const token = RefreshToken.create({
+        expiresAt,
         id: 'token-123',
         token: 'refresh-token-string',
         userId: 'user-123',
-        expiresAt,
       })
 
       const obj = token.toObject()
@@ -195,10 +195,10 @@ describe('RefreshToken Domain Entity', () => {
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
       const token = RefreshToken.create({
+        expiresAt,
         id: 'token-123',
         token: 'secret-refresh-token',
         userId: 'user-123',
-        expiresAt,
       })
 
       const obj = token.toObject()

@@ -12,23 +12,22 @@ import { z } from 'zod'
  * - Single source of truth for configuration
  */
 const envSchema = z.object({
-  // Server configuration
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  PORT: z.string().default('3000').transform(Number),
-  HOST: z.string().default('0.0.0.0'),
-
-  // Logging
-  LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
-
-  // CORS
-  FRONTEND_URL: z.string().url().optional().or(z.literal('')),
-
   // Database - PostgreSQL connection string
   DATABASE_URL: z.string().default('postgresql://teampulse:teampulse@localhost:5432/teampulse'),
 
+  // CORS
+  FRONTEND_URL: z.string().url().optional().or(z.literal('')),
+  HOST: z.string().default('0.0.0.0'),
+  JWT_REFRESH_SECRET: z.string().min(32),
+
   // Authentication - JWT secrets
   JWT_SECRET: z.string().min(32),
-  JWT_REFRESH_SECRET: z.string().min(32),
+
+  // Logging
+  LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
+  // Server configuration
+  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  PORT: z.string().default('3000').transform(Number),
 })
 
 /**

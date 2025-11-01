@@ -11,7 +11,7 @@ import { UpdateTeamUseCase } from '../../application/use-cases/UpdateTeamUseCase
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
-import { type Database, createDatabase } from '../database/connection.js'
+import { createDatabase, type Database } from '../database/connection.js'
 import { DrizzleRefreshTokenRepository } from '../database/repositories/DrizzleRefreshTokenRepository.js'
 import { DrizzleTeamRepository } from '../database/repositories/DrizzleTeamRepository.js'
 import { DrizzleUserRepository } from '../database/repositories/DrizzleUserRepository.js'

@@ -22,12 +22,6 @@ import { z } from 'zod'
  * This validates INPUT data from HTTP requests
  */
 export const CreateTeamDTOSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, 'Team name is required')
-    .max(100, 'Team name cannot exceed 100 characters'),
-
   city: z.string().trim().min(1, 'City is required').max(100, 'City cannot exceed 100 characters'),
 
   foundedYear: z
@@ -37,6 +31,11 @@ export const CreateTeamDTOSchema = z.object({
     .max(new Date().getFullYear(), 'Founded year cannot be in the future')
     .optional()
     .nullable(),
+  name: z
+    .string()
+    .trim()
+    .min(1, 'Team name is required')
+    .max(100, 'Team name cannot exceed 100 characters'),
 })
 
 export type CreateTeamDTO = z.infer<typeof CreateTeamDTOSchema>
@@ -47,13 +46,6 @@ export type CreateTeamDTO = z.infer<typeof CreateTeamDTOSchema>
  * All fields are optional (partial update)
  */
 export const UpdateTeamDTOSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, 'Team name cannot be empty')
-    .max(100, 'Team name cannot exceed 100 characters')
-    .optional(),
-
   city: z
     .string()
     .trim()
@@ -68,6 +60,12 @@ export const UpdateTeamDTOSchema = z.object({
     .max(new Date().getFullYear(), 'Founded year cannot be in the future')
     .optional()
     .nullable(),
+  name: z
+    .string()
+    .trim()
+    .min(1, 'Team name cannot be empty')
+    .max(100, 'Team name cannot exceed 100 characters')
+    .optional(),
 })
 
 export type UpdateTeamDTO = z.infer<typeof UpdateTeamDTOSchema>

@@ -49,9 +49,9 @@ const REFRESH_TOKEN_EXPIRATION = '7d'
  */
 export function generateAccessToken(payload: AccessTokenPayload, env: Env): string {
   return jwt.sign(payload, env.JWT_SECRET, {
+    audience: 'team-pulse-app',
     expiresIn: ACCESS_TOKEN_EXPIRATION,
     issuer: 'team-pulse-api',
-    audience: 'team-pulse-app',
   })
 }
 
@@ -64,9 +64,9 @@ export function generateAccessToken(payload: AccessTokenPayload, env: Env): stri
  */
 export function generateRefreshToken(payload: RefreshTokenPayload, env: Env): string {
   return jwt.sign(payload, env.JWT_REFRESH_SECRET, {
+    audience: 'team-pulse-app',
     expiresIn: REFRESH_TOKEN_EXPIRATION,
     issuer: 'team-pulse-api',
-    audience: 'team-pulse-app',
   })
 }
 
@@ -81,8 +81,8 @@ export function generateRefreshToken(payload: RefreshTokenPayload, env: Env): st
 export function verifyAccessToken(token: string, env: Env): AccessTokenPayload {
   try {
     const payload = jwt.verify(token, env.JWT_SECRET, {
-      issuer: 'team-pulse-api',
       audience: 'team-pulse-app',
+      issuer: 'team-pulse-api',
     }) as AccessTokenPayload
 
     return payload
@@ -108,8 +108,8 @@ export function verifyAccessToken(token: string, env: Env): AccessTokenPayload {
 export function verifyRefreshToken(token: string, env: Env): RefreshTokenPayload {
   try {
     const payload = jwt.verify(token, env.JWT_REFRESH_SECRET, {
-      issuer: 'team-pulse-api',
       audience: 'team-pulse-app',
+      issuer: 'team-pulse-api',
     }) as RefreshTokenPayload
 
     return payload

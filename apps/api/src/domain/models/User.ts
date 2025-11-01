@@ -134,8 +134,8 @@ export class User {
    */
   hasRoleLevel(minimumRole: UserRole): boolean {
     const roleHierarchy: Record<UserRole, number> = {
-      SUPER_ADMIN: 3,
       ADMIN: 2,
+      SUPER_ADMIN: 3,
       USER: 1,
     }
 
@@ -169,10 +169,10 @@ export class User {
     updatedAt: Date
   } {
     return {
-      id: this.id,
-      email: this.email,
-      role: this.role,
       createdAt: this.createdAt,
+      email: this.email,
+      id: this.id,
+      role: this.role,
       updatedAt: this.updatedAt,
     }
   }

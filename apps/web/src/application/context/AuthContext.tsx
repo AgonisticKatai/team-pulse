@@ -18,8 +18,8 @@
  */
 
 import type { UserResponseDTO } from '@team-pulse/shared'
-import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
+import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
 import type { ApiClient } from '../../infrastructure/api/apiClient'
 import type { AuthApiClient } from '../../infrastructure/api/authApiClient'
 
@@ -233,13 +233,13 @@ export function AuthProvider({ children, authApiClient, apiClient }: AuthProvide
    */
   const value = useMemo<AuthContextValue>(
     () => ({
-      user,
+      clearError,
+      error,
       isAuthenticated: user !== null,
       isLoading,
-      error,
       login,
       logout,
-      clearError,
+      user,
     }),
     [user, isLoading, error, login, logout, clearError],
   )

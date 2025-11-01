@@ -75,8 +75,8 @@ export async function registerTeamRoutes(
 
         // Return success response
         return reply.code(201).send({
-          success: true,
           data: team,
+          success: true,
         })
       } catch (error) {
         return handleError(error, reply)
@@ -95,8 +95,8 @@ export async function registerTeamRoutes(
       const result = await listTeamsUseCase.execute()
 
       return reply.code(200).send({
-        success: true,
         data: result,
+        success: true,
       })
     } catch (error) {
       return handleError(error, reply)
@@ -119,8 +119,8 @@ export async function registerTeamRoutes(
         const team = await getTeamUseCase.execute(id)
 
         return reply.code(200).send({
-          success: true,
           data: team,
+          success: true,
         })
       } catch (error) {
         return handleError(error, reply)
@@ -148,8 +148,8 @@ export async function registerTeamRoutes(
         const team = await updateTeamUseCase.execute(id, dto)
 
         return reply.code(200).send({
-          success: true,
           data: team,
+          success: true,
         })
       } catch (error) {
         return handleError(error, reply)
@@ -190,57 +190,57 @@ function handleError(error: unknown, reply: FastifyReply) {
   // Zod validation errors
   if (error instanceof Error && error.name === 'ZodError') {
     return reply.code(400).send({
-      success: false,
       error: {
         code: 'VALIDATION_ERROR',
-        message: 'Invalid request data',
         details: error,
+        message: 'Invalid request data',
       },
+      success: false,
     })
   }
 
   // Domain validation errors
   if (error instanceof ValidationError) {
     return reply.code(400).send({
-      success: false,
       error: {
         code: error.code,
-        message: error.message,
-        field: error.field,
         details: error.details,
+        field: error.field,
+        message: error.message,
       },
+      success: false,
     })
   }
 
   // Not found errors
   if (error instanceof NotFoundError) {
     return reply.code(404).send({
-      success: false,
       error: {
         code: error.code,
         message: error.message,
       },
+      success: false,
     })
   }
 
   // Other domain errors
   if (error instanceof DomainError) {
     return reply.code(400).send({
-      success: false,
       error: {
         code: error.code,
         message: error.message,
       },
+      success: false,
     })
   }
 
   // Unknown errors (don't expose details)
   console.error('Unexpected error:', error)
   return reply.code(500).send({
-    success: false,
     error: {
       code: 'INTERNAL_SERVER_ERROR',
       message: 'An unexpected error occurred',
     },
+    success: false,
   })
 }

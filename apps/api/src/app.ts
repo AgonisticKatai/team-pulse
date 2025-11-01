@@ -1,9 +1,9 @@
 import cors from '@fastify/cors'
 import Fastify, {
-  type FastifyRequest,
-  type FastifyReply,
-  type FastifyInstance,
   type FastifyError,
+  type FastifyInstance,
+  type FastifyReply,
+  type FastifyRequest,
 } from 'fastify'
 import { type Container, createContainer } from './infrastructure/config/container.js'
 import { type Env, validateEnv, validateProductionEnv } from './infrastructure/config/env.js'
@@ -44,44 +44,44 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
 
   // 4. Register CORS plugin
   await fastify.register(cors, {
-    origin: env.NODE_ENV === 'production' ? env.FRONTEND_URL : 'http://localhost:5173',
     credentials: true,
+    origin: env.NODE_ENV === 'production' ? env.FRONTEND_URL : 'http://localhost:5173',
   })
 
   // 5. Register routes (HTTP adapters)
 
   // Authentication routes
   await registerAuthRoutes(fastify, {
-    loginUseCase: container.loginUseCase,
-    refreshTokenUseCase: container.refreshTokenUseCase,
-    logoutUseCase: container.logoutUseCase,
     env,
+    loginUseCase: container.loginUseCase,
+    logoutUseCase: container.logoutUseCase,
+    refreshTokenUseCase: container.refreshTokenUseCase,
   })
 
   // User management routes
   await registerUserRoutes(fastify, {
     createUserUseCase: container.createUserUseCase,
-    listUsersUseCase: container.listUsersUseCase,
     env,
+    listUsersUseCase: container.listUsersUseCase,
   })
 
   // Team routes
   await registerTeamRoutes(fastify, {
     createTeamUseCase: container.createTeamUseCase,
+    deleteTeamUseCase: container.deleteTeamUseCase,
+    env,
     getTeamUseCase: container.getTeamUseCase,
     listTeamsUseCase: container.listTeamsUseCase,
     updateTeamUseCase: container.updateTeamUseCase,
-    deleteTeamUseCase: container.deleteTeamUseCase,
-    env,
   })
 
   // 6. Health check endpoint
   fastify.get('/api/health', async () => {
     return {
-      status: 'ok',
-      message: 'TeamPulse API is running',
-      timestamp: new Date().toISOString(),
       environment: env.NODE_ENV,
+      message: 'TeamPulse API is running',
+      status: 'ok',
+      timestamp: new Date().toISOString(),
       version: '1.0.0',
     }
   })
@@ -89,26 +89,26 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
   // 7. API info endpoint
   fastify.get('/api', async () => {
     return {
-      name: 'TeamPulse API',
-      version: '1.0.0',
       description: 'Football team statistics platform API',
       endpoints: {
-        health: '/api/health',
         auth: '/api/auth/*',
-        users: '/api/users',
+        health: '/api/health',
         teams: '/api/teams',
+        users: '/api/users',
       },
+      name: 'TeamPulse API',
+      version: '1.0.0',
     }
   })
 
   // 8. 404 handler
   fastify.setNotFoundHandler(async (request: FastifyRequest, reply: FastifyReply) => {
     return reply.code(404).send({
-      success: false,
       error: {
         code: 'NOT_FOUND',
         message: `Route ${request.url} not found`,
       },
+      success: false,
     })
   })
 
@@ -120,11 +120,11 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
       const statusCode = error.statusCode || 500
 
       return reply.code(statusCode).send({
-        success: false,
         error: {
           code: error.name || 'INTERNAL_SERVER_ERROR',
           message: env.NODE_ENV === 'production' ? 'Something went wrong' : error.message,
         },
+        success: false,
       })
     },
   )

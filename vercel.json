@@ -1,26 +1,26 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "turbo build",
-  "outputDirectory": "apps/web/dist",
-  "installCommand": "pnpm install",
   "framework": null,
   "functions": {
     "api/index.ts": {
-      "memory": 1024,
-      "maxDuration": 10
+      "maxDuration": 10,
+      "memory": 1024
     }
   },
+  "installCommand": "pnpm install",
+  "outputDirectory": "apps/web/dist",
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/index.ts"
+      "dest": "/api/index.ts",
+      "src": "/api/(.*)"
     },
     {
       "handle": "filesystem"
     },
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "/index.html",
+      "src": "/(.*)"
     }
   ]
 }

@@ -7,8 +7,8 @@ describe('User Domain Entity', () => {
   describe('create', () => {
     it('should create a valid user', () => {
       const user = User.create({
-        id: 'user-123',
         email: 'test@example.com',
+        id: 'user-123',
         passwordHash: 'hashed-password',
         role: 'USER',
       })
@@ -23,22 +23,22 @@ describe('User Domain Entity', () => {
 
     it('should create user with different roles', () => {
       const user1 = User.create({
-        id: 'user-1',
         email: 'user@example.com',
+        id: 'user-1',
         passwordHash: 'hash',
         role: 'USER',
       })
 
       const user2 = User.create({
-        id: 'user-2',
         email: 'admin@example.com',
+        id: 'user-2',
         passwordHash: 'hash',
         role: 'ADMIN',
       })
 
       const user3 = User.create({
-        id: 'user-3',
         email: 'superadmin@example.com',
+        id: 'user-3',
         passwordHash: 'hash',
         role: 'SUPER_ADMIN',
       })
@@ -51,8 +51,8 @@ describe('User Domain Entity', () => {
     it('should throw error for empty email', () => {
       expect(() =>
         User.create({
-          id: 'user-123',
           email: '',
+          id: 'user-123',
           passwordHash: 'hash',
           role: 'USER',
         }),
@@ -62,8 +62,8 @@ describe('User Domain Entity', () => {
     it('should throw error for invalid email format', () => {
       expect(() =>
         User.create({
-          id: 'user-123',
           email: 'invalid-email',
+          id: 'user-123',
           passwordHash: 'hash',
           role: 'USER',
         }),
@@ -73,8 +73,8 @@ describe('User Domain Entity', () => {
     it('should throw error for email without domain', () => {
       expect(() =>
         User.create({
-          id: 'user-123',
           email: 'test@',
+          id: 'user-123',
           passwordHash: 'hash',
           role: 'USER',
         }),
@@ -85,8 +85,8 @@ describe('User Domain Entity', () => {
       const longEmail = `${'a'.repeat(250)}@example.com` // > 255 chars
       expect(() =>
         User.create({
-          id: 'user-123',
           email: longEmail,
+          id: 'user-123',
           passwordHash: 'hash',
           role: 'USER',
         }),
@@ -96,8 +96,8 @@ describe('User Domain Entity', () => {
     it('should throw error for invalid role', () => {
       expect(() =>
         User.create({
-          id: 'user-123',
           email: 'test@example.com',
+          id: 'user-123',
           passwordHash: 'hash',
           role: 'INVALID_ROLE' as UserRole,
         }),
@@ -107,8 +107,8 @@ describe('User Domain Entity', () => {
     it('should throw error for empty password hash', () => {
       expect(() =>
         User.create({
-          id: 'user-123',
           email: 'test@example.com',
+          id: 'user-123',
           passwordHash: '',
           role: 'USER',
         }),
@@ -120,11 +120,11 @@ describe('User Domain Entity', () => {
     it('should reconstitute user from database', () => {
       const now = new Date()
       const user = User.fromPersistence({
-        id: 'user-123',
+        createdAt: now,
         email: 'test@example.com',
+        id: 'user-123',
         passwordHash: 'hash',
         role: 'ADMIN',
-        createdAt: now,
         updatedAt: now,
       })
 
@@ -138,8 +138,8 @@ describe('User Domain Entity', () => {
   describe('update', () => {
     it('should update user email', () => {
       const user = User.create({
-        id: 'user-123',
         email: 'old@example.com',
+        id: 'user-123',
         passwordHash: 'hash',
         role: 'USER',
       })
@@ -153,8 +153,8 @@ describe('User Domain Entity', () => {
 
     it('should update user role', () => {
       const user = User.create({
-        id: 'user-123',
         email: 'test@example.com',
+        id: 'user-123',
         passwordHash: 'hash',
         role: 'USER',
       })
@@ -166,8 +166,8 @@ describe('User Domain Entity', () => {
 
     it('should update password hash', () => {
       const user = User.create({
-        id: 'user-123',
         email: 'test@example.com',
+        id: 'user-123',
         passwordHash: 'old-hash',
         role: 'USER',
       })
@@ -179,8 +179,8 @@ describe('User Domain Entity', () => {
 
     it('should preserve original values if not updated', () => {
       const user = User.create({
-        id: 'user-123',
         email: 'test@example.com',
+        id: 'user-123',
         passwordHash: 'hash',
         role: 'USER',
       })
@@ -193,8 +193,8 @@ describe('User Domain Entity', () => {
 
     it('should return new instance (immutability)', () => {
       const user = User.create({
-        id: 'user-123',
         email: 'test@example.com',
+        id: 'user-123',
         passwordHash: 'hash',
         role: 'USER',
       })
@@ -209,8 +209,8 @@ describe('User Domain Entity', () => {
   describe('role checking methods', () => {
     it('hasRole should check exact role', () => {
       const user = User.create({
-        id: 'user-123',
         email: 'test@example.com',
+        id: 'user-123',
         passwordHash: 'hash',
         role: 'ADMIN',
       })
@@ -222,22 +222,22 @@ describe('User Domain Entity', () => {
 
     it('hasRoleLevel should check role hierarchy', () => {
       const superAdmin = User.create({
-        id: 'user-1',
         email: 'super@example.com',
+        id: 'user-1',
         passwordHash: 'hash',
         role: 'SUPER_ADMIN',
       })
 
       const admin = User.create({
-        id: 'user-2',
         email: 'admin@example.com',
+        id: 'user-2',
         passwordHash: 'hash',
         role: 'ADMIN',
       })
 
       const user = User.create({
-        id: 'user-3',
         email: 'user@example.com',
+        id: 'user-3',
         passwordHash: 'hash',
         role: 'USER',
       })
@@ -260,15 +260,15 @@ describe('User Domain Entity', () => {
 
     it('isSuperAdmin should identify SUPER_ADMIN', () => {
       const superAdmin = User.create({
-        id: 'user-1',
         email: 'super@example.com',
+        id: 'user-1',
         passwordHash: 'hash',
         role: 'SUPER_ADMIN',
       })
 
       const admin = User.create({
-        id: 'user-2',
         email: 'admin@example.com',
+        id: 'user-2',
         passwordHash: 'hash',
         role: 'ADMIN',
       })
@@ -279,22 +279,22 @@ describe('User Domain Entity', () => {
 
     it('isAdmin should identify ADMIN or SUPER_ADMIN', () => {
       const superAdmin = User.create({
-        id: 'user-1',
         email: 'super@example.com',
+        id: 'user-1',
         passwordHash: 'hash',
         role: 'SUPER_ADMIN',
       })
 
       const admin = User.create({
-        id: 'user-2',
         email: 'admin@example.com',
+        id: 'user-2',
         passwordHash: 'hash',
         role: 'ADMIN',
       })
 
       const user = User.create({
-        id: 'user-3',
         email: 'user@example.com',
+        id: 'user-3',
         passwordHash: 'hash',
         role: 'USER',
       })
@@ -308,8 +308,8 @@ describe('User Domain Entity', () => {
   describe('toObject', () => {
     it('should convert to plain object', () => {
       const user = User.create({
-        id: 'user-123',
         email: 'test@example.com',
+        id: 'user-123',
         passwordHash: 'hash',
         role: 'USER',
       })
@@ -325,8 +325,8 @@ describe('User Domain Entity', () => {
 
     it('should NOT include password hash in toObject', () => {
       const user = User.create({
-        id: 'user-123',
         email: 'test@example.com',
+        id: 'user-123',
         passwordHash: 'secret-hash',
         role: 'USER',
       })
@@ -341,8 +341,8 @@ describe('User Domain Entity', () => {
   describe('getPasswordHash', () => {
     it('should return password hash', () => {
       const user = User.create({
-        id: 'user-123',
         email: 'test@example.com',
+        id: 'user-123',
         passwordHash: 'secret-hash',
         role: 'USER',
       })

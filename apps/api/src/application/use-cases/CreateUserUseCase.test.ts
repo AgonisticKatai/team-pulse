@@ -21,11 +21,11 @@ describe('CreateUserUseCase', () => {
 
   // Mock user data
   const mockUser = User.fromPersistence({
-    id: 'mock-uuid',
+    createdAt: new Date('2025-01-01T00:00:00Z'),
     email: 'newuser@example.com',
+    id: 'mock-uuid',
     passwordHash: 'hashed-password',
     role: 'USER',
-    createdAt: new Date('2025-01-01T00:00:00Z'),
     updatedAt: new Date('2025-01-01T00:00:00Z'),
   })
 
@@ -35,13 +35,13 @@ describe('CreateUserUseCase', () => {
 
     // Mock repository
     userRepository = {
+      count: vi.fn(),
+      delete: vi.fn(),
+      existsByEmail: vi.fn(),
+      findAll: vi.fn(),
       findByEmail: vi.fn(),
       findById: vi.fn(),
       save: vi.fn(),
-      findAll: vi.fn(),
-      delete: vi.fn(),
-      existsByEmail: vi.fn(),
-      count: vi.fn(),
     }
 
     // Create use case instance
@@ -151,10 +151,10 @@ describe('CreateUserUseCase', () => {
         // Assert
         expect(result).not.toHaveProperty('passwordHash')
         expect(result).toEqual({
-          id: 'mock-uuid',
-          email: 'newuser@example.com',
-          role: 'USER',
           createdAt: '2025-01-01T00:00:00.000Z',
+          email: 'newuser@example.com',
+          id: 'mock-uuid',
+          role: 'USER',
           updatedAt: '2025-01-01T00:00:00.000Z',
         })
       })
@@ -185,11 +185,11 @@ describe('CreateUserUseCase', () => {
       it('should throw ValidationError when email already exists', async () => {
         // Arrange
         const existingUser = User.fromPersistence({
-          id: 'existing-123',
+          createdAt: new Date(),
           email: 'existing@example.com',
+          id: 'existing-123',
           passwordHash: 'hashed',
           role: 'USER',
-          createdAt: new Date(),
           updatedAt: new Date(),
         })
 
@@ -219,11 +219,11 @@ describe('CreateUserUseCase', () => {
       it('should not hash password when email already exists', async () => {
         // Arrange
         const existingUser = User.fromPersistence({
-          id: 'existing-123',
+          createdAt: new Date(),
           email: 'existing@example.com',
+          id: 'existing-123',
           passwordHash: 'hashed',
           role: 'USER',
-          createdAt: new Date(),
           updatedAt: new Date(),
         })
 
@@ -254,11 +254,11 @@ describe('CreateUserUseCase', () => {
       it('should handle user with ADMIN role', async () => {
         // Arrange
         const adminUser = User.fromPersistence({
-          id: 'mock-uuid',
+          createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'admin@example.com',
+          id: 'mock-uuid',
           passwordHash: 'hashed-password',
           role: 'ADMIN',
-          createdAt: new Date('2025-01-01T00:00:00Z'),
           updatedAt: new Date('2025-01-01T00:00:00Z'),
         })
 
@@ -283,11 +283,11 @@ describe('CreateUserUseCase', () => {
       it('should handle user with SUPER_ADMIN role', async () => {
         // Arrange
         const superAdminUser = User.fromPersistence({
-          id: 'mock-uuid',
+          createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'superadmin@example.com',
+          id: 'mock-uuid',
           passwordHash: 'hashed-password',
           role: 'SUPER_ADMIN',
-          createdAt: new Date('2025-01-01T00:00:00Z'),
           updatedAt: new Date('2025-01-01T00:00:00Z'),
         })
 

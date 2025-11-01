@@ -32,11 +32,11 @@ describe('LoginUseCase', () => {
 
   // Mock user data (using fromPersistence to control dates in tests)
   const mockUser = User.fromPersistence({
-    id: 'user-123',
+    createdAt: new Date('2025-01-01T00:00:00Z'),
     email: 'test@example.com',
+    id: 'user-123',
     passwordHash: 'hashed-password',
     role: 'USER',
-    createdAt: new Date('2025-01-01T00:00:00Z'),
     updatedAt: new Date('2025-01-15T12:00:00Z'),
   })
 
@@ -46,34 +46,34 @@ describe('LoginUseCase', () => {
 
     // Mock environment (only JWT secrets are used by LoginUseCase)
     env = {
+      DATABASE_URL: 'postgresql://test:test@localhost:5432/test',
+      FRONTEND_URL: 'http://localhost:5173',
+      HOST: '0.0.0.0',
+      JWT_REFRESH_SECRET: 'test-refresh-secret-at-least-32-chars-long',
+      JWT_SECRET: 'test-jwt-secret-at-least-32-chars-long',
+      LOG_LEVEL: 'info',
       NODE_ENV: 'test',
       PORT: 3000,
-      HOST: '0.0.0.0',
-      LOG_LEVEL: 'info',
-      DATABASE_URL: 'postgresql://test:test@localhost:5432/test',
-      JWT_SECRET: 'test-jwt-secret-at-least-32-chars-long',
-      JWT_REFRESH_SECRET: 'test-refresh-secret-at-least-32-chars-long',
-      FRONTEND_URL: 'http://localhost:5173',
     }
 
     // Mock repositories
     userRepository = {
+      count: vi.fn(),
+      delete: vi.fn(),
+      existsByEmail: vi.fn(),
+      findAll: vi.fn(),
       findByEmail: vi.fn(),
       findById: vi.fn(),
       save: vi.fn(),
-      findAll: vi.fn(),
-      delete: vi.fn(),
-      existsByEmail: vi.fn(),
-      count: vi.fn(),
     }
 
     refreshTokenRepository = {
-      save: vi.fn(),
-      findByToken: vi.fn(),
-      findByUserId: vi.fn(),
       deleteByToken: vi.fn(),
       deleteByUserId: vi.fn(),
       deleteExpired: vi.fn(),
+      findByToken: vi.fn(),
+      findByUserId: vi.fn(),
+      save: vi.fn(),
     }
 
     // Create use case instance
@@ -101,10 +101,10 @@ describe('LoginUseCase', () => {
         expect(result.accessToken).toBe('mock-access-token')
         expect(result.refreshToken).toBe('mock-refresh-token')
         expect(result.user).toEqual({
-          id: 'user-123',
-          email: 'test@example.com',
-          role: 'USER',
           createdAt: '2025-01-01T00:00:00.000Z',
+          email: 'test@example.com',
+          id: 'user-123',
+          role: 'USER',
           updatedAt: '2025-01-15T12:00:00.000Z',
         })
       })
@@ -166,9 +166,9 @@ describe('LoginUseCase', () => {
         // Assert
         expect(generateAccessToken).toHaveBeenCalledWith(
           {
-            userId: 'user-123',
             email: 'test@example.com',
             role: 'USER',
+            userId: 'user-123',
           },
           env,
         )
@@ -194,8 +194,8 @@ describe('LoginUseCase', () => {
         // Assert
         expect(generateRefreshToken).toHaveBeenCalledWith(
           {
-            userId: 'user-123',
             tokenId: 'mock-uuid',
+            userId: 'user-123',
           },
           env,
         )
@@ -243,10 +243,10 @@ describe('LoginUseCase', () => {
         // Assert
         expect(result.user).not.toHaveProperty('passwordHash')
         expect(result.user).toEqual({
-          id: 'user-123',
-          email: 'test@example.com',
-          role: 'USER',
           createdAt: '2025-01-01T00:00:00.000Z',
+          email: 'test@example.com',
+          id: 'user-123',
+          role: 'USER',
           updatedAt: '2025-01-15T12:00:00.000Z',
         })
       })
@@ -363,11 +363,11 @@ describe('LoginUseCase', () => {
       it('should handle user with ADMIN role', async () => {
         // Arrange
         const adminUser = User.fromPersistence({
-          id: 'admin-123',
+          createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'admin@example.com',
+          id: 'admin-123',
           passwordHash: 'hashed-password',
           role: 'ADMIN',
-          createdAt: new Date('2025-01-01T00:00:00Z'),
           updatedAt: new Date('2025-01-01T00:00:00Z'),
         })
 
@@ -390,11 +390,11 @@ describe('LoginUseCase', () => {
       it('should handle user with SUPER_ADMIN role', async () => {
         // Arrange
         const superAdminUser = User.fromPersistence({
-          id: 'super-admin-123',
+          createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'superadmin@example.com',
+          id: 'super-admin-123',
           passwordHash: 'hashed-password',
           role: 'SUPER_ADMIN',
-          createdAt: new Date('2025-01-01T00:00:00Z'),
           updatedAt: new Date('2025-01-01T00:00:00Z'),
         })
 

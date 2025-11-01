@@ -12,12 +12,12 @@ describe('LogoutUseCase', () => {
 
     // Mock repository
     refreshTokenRepository = {
-      save: vi.fn(),
-      findByToken: vi.fn(),
-      findByUserId: vi.fn(),
       deleteByToken: vi.fn(),
       deleteByUserId: vi.fn(),
       deleteExpired: vi.fn(),
+      findByToken: vi.fn(),
+      findByUserId: vi.fn(),
+      save: vi.fn(),
     }
 
     // Create use case instance

@@ -103,11 +103,11 @@ export class RefreshToken {
     createdAt: Date
   } {
     return {
+      createdAt: this.createdAt,
+      expiresAt: this.expiresAt,
       id: this.id,
       token: this.token,
       userId: this.userId,
-      expiresAt: this.expiresAt,
-      createdAt: this.createdAt,
     }
   }
 }

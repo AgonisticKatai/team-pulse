@@ -46,22 +46,22 @@ describe('Protected Routes and RBAC', () => {
     const userEmail = 'user@test.com'
 
     const superAdmin = User.create({
-      id: 'super-admin',
       email: superAdminEmail,
+      id: 'super-admin',
       passwordHash: await hashPassword('SuperAdmin123!'),
       role: 'SUPER_ADMIN',
     })
 
     const admin = User.create({
-      id: 'admin',
       email: adminEmail,
+      id: 'admin',
       passwordHash: await hashPassword('Admin123!'),
       role: 'ADMIN',
     })
 
     const user = User.create({
-      id: 'user',
       email: userEmail,
+      id: 'user',
       passwordHash: await hashPassword('User123!'),
       role: 'USER',
     })
@@ -73,22 +73,22 @@ describe('Protected Routes and RBAC', () => {
     // Get tokens for each user
     const superAdminLogin = await app.inject({
       method: 'POST',
-      url: '/api/auth/login',
       payload: { email: superAdminEmail, password: 'SuperAdmin123!' },
+      url: '/api/auth/login',
     })
     superAdminToken = JSON.parse(superAdminLogin.body).data.accessToken
 
     const adminLogin = await app.inject({
       method: 'POST',
-      url: '/api/auth/login',
       payload: { email: adminEmail, password: 'Admin123!' },
+      url: '/api/auth/login',
     })
     adminToken = JSON.parse(adminLogin.body).data.accessToken
 
     const userLogin = await app.inject({
       method: 'POST',
-      url: '/api/auth/login',
       payload: { email: userEmail, password: 'User123!' },
+      url: '/api/auth/login',
     })
     userToken = JSON.parse(userLogin.body).data.accessToken
   })
@@ -112,16 +112,16 @@ describe('Protected Routes and RBAC', () => {
   describe('POST /api/users - Create User', () => {
     it('should allow SUPER_ADMIN to create users', async () => {
       const response = await app.inject({
-        method: 'POST',
-        url: '/api/users',
         headers: {
           authorization: `Bearer ${superAdminToken}`,
         },
+        method: 'POST',
         payload: {
           email: 'newuser@test.com',
           password: 'NewUser123!',
           role: 'USER',
         },
+        url: '/api/users',
       })
 
       expect(response.statusCode).toBe(201)
@@ -133,16 +133,16 @@ describe('Protected Routes and RBAC', () => {
 
     it('should allow ADMIN to create users', async () => {
       const response = await app.inject({
-        method: 'POST',
-        url: '/api/users',
         headers: {
           authorization: `Bearer ${adminToken}`,
         },
+        method: 'POST',
         payload: {
           email: 'newuser2@test.com',
           password: 'NewUser123!',
           role: 'USER',
         },
+        url: '/api/users',
       })
 
       expect(response.statusCode).toBe(201)
@@ -152,16 +152,16 @@ describe('Protected Routes and RBAC', () => {
 
     it('should NOT allow USER to create users', async () => {
       const response = await app.inject({
-        method: 'POST',
-        url: '/api/users',
         headers: {
           authorization: `Bearer ${userToken}`,
         },
+        method: 'POST',
         payload: {
           email: 'newuser3@test.com',
           password: 'NewUser123!',
           role: 'USER',
         },
+        url: '/api/users',
       })
 
       expect(response.statusCode).toBe(403)
@@ -175,12 +175,12 @@ describe('Protected Routes and RBAC', () => {
     it('should NOT allow unauthenticated users to create users', async () => {
       const response = await app.inject({
         method: 'POST',
-        url: '/api/users',
         payload: {
           email: 'newuser4@test.com',
           password: 'NewUser123!',
           role: 'USER',
         },
+        url: '/api/users',
       })
 
       expect(response.statusCode).toBe(401)
@@ -188,16 +188,16 @@ describe('Protected Routes and RBAC', () => {
 
     it('should validate password strength', async () => {
       const response = await app.inject({
-        method: 'POST',
-        url: '/api/users',
         headers: {
           authorization: `Bearer ${superAdminToken}`,
         },
+        method: 'POST',
         payload: {
           email: 'weak@test.com',
           password: 'weak', // Too weak
           role: 'USER',
         },
+        url: '/api/users',
       })
 
       expect(response.statusCode).toBe(400)
@@ -207,29 +207,29 @@ describe('Protected Routes and RBAC', () => {
 
     it('should prevent duplicate emails', async () => {
       await app.inject({
-        method: 'POST',
-        url: '/api/users',
         headers: {
           authorization: `Bearer ${superAdminToken}`,
         },
+        method: 'POST',
         payload: {
           email: 'duplicate@test.com',
           password: 'Password123!',
           role: 'USER',
         },
+        url: '/api/users',
       })
 
       const response = await app.inject({
-        method: 'POST',
-        url: '/api/users',
         headers: {
           authorization: `Bearer ${superAdminToken}`,
         },
+        method: 'POST',
         payload: {
           email: 'duplicate@test.com',
           password: 'Password123!',
           role: 'USER',
         },
+        url: '/api/users',
       })
 
       expect(response.statusCode).toBe(400)
@@ -241,11 +241,11 @@ describe('Protected Routes and RBAC', () => {
   describe('GET /api/users - List Users', () => {
     it('should allow SUPER_ADMIN to list users', async () => {
       const response = await app.inject({
-        method: 'GET',
-        url: '/api/users',
         headers: {
           authorization: `Bearer ${superAdminToken}`,
         },
+        method: 'GET',
+        url: '/api/users',
       })
 
       expect(response.statusCode).toBe(200)
@@ -257,11 +257,11 @@ describe('Protected Routes and RBAC', () => {
 
     it('should allow ADMIN to list users', async () => {
       const response = await app.inject({
-        method: 'GET',
-        url: '/api/users',
         headers: {
           authorization: `Bearer ${adminToken}`,
         },
+        method: 'GET',
+        url: '/api/users',
       })
 
       expect(response.statusCode).toBe(200)
@@ -271,11 +271,11 @@ describe('Protected Routes and RBAC', () => {
 
     it('should NOT allow USER to list users', async () => {
       const response = await app.inject({
-        method: 'GET',
-        url: '/api/users',
         headers: {
           authorization: `Bearer ${userToken}`,
         },
+        method: 'GET',
+        url: '/api/users',
       })
 
       expect(response.statusCode).toBe(403)
@@ -285,11 +285,11 @@ describe('Protected Routes and RBAC', () => {
 
     it('should NOT expose password hashes', async () => {
       const response = await app.inject({
-        method: 'GET',
-        url: '/api/users',
         headers: {
           authorization: `Bearer ${superAdminToken}`,
         },
+        method: 'GET',
+        url: '/api/users',
       })
 
       const body = JSON.parse(response.body)
@@ -306,16 +306,16 @@ describe('Protected Routes and RBAC', () => {
     describe('POST /api/teams - Create Team', () => {
       it('should allow SUPER_ADMIN to create teams', async () => {
         const response = await app.inject({
-          method: 'POST',
-          url: '/api/teams',
           headers: {
             authorization: `Bearer ${superAdminToken}`,
           },
+          method: 'POST',
           payload: {
-            name: 'Real Madrid',
             city: 'Madrid',
             foundedYear: 1902,
+            name: 'Real Madrid',
           },
+          url: '/api/teams',
         })
 
         expect(response.statusCode).toBe(201)
@@ -326,16 +326,16 @@ describe('Protected Routes and RBAC', () => {
 
       it('should allow ADMIN to create teams', async () => {
         const response = await app.inject({
-          method: 'POST',
-          url: '/api/teams',
           headers: {
             authorization: `Bearer ${adminToken}`,
           },
+          method: 'POST',
           payload: {
-            name: 'Barcelona',
             city: 'Barcelona',
             foundedYear: 1899,
+            name: 'Barcelona',
           },
+          url: '/api/teams',
         })
 
         expect(response.statusCode).toBe(201)
@@ -345,16 +345,16 @@ describe('Protected Routes and RBAC', () => {
 
       it('should NOT allow USER to create teams', async () => {
         const response = await app.inject({
-          method: 'POST',
-          url: '/api/teams',
           headers: {
             authorization: `Bearer ${userToken}`,
           },
+          method: 'POST',
           payload: {
-            name: 'Atletico Madrid',
             city: 'Madrid',
             foundedYear: 1903,
+            name: 'Atletico Madrid',
           },
+          url: '/api/teams',
         })
 
         expect(response.statusCode).toBe(403)
@@ -367,26 +367,26 @@ describe('Protected Routes and RBAC', () => {
       beforeEach(async () => {
         // Create a test team
         await app.inject({
-          method: 'POST',
-          url: '/api/teams',
           headers: {
             authorization: `Bearer ${superAdminToken}`,
           },
+          method: 'POST',
           payload: {
-            name: 'Test Team',
             city: 'Test City',
             foundedYear: 2000,
+            name: 'Test Team',
           },
+          url: '/api/teams',
         })
       })
 
       it('should allow SUPER_ADMIN to view teams', async () => {
         const response = await app.inject({
-          method: 'GET',
-          url: '/api/teams',
           headers: {
             authorization: `Bearer ${superAdminToken}`,
           },
+          method: 'GET',
+          url: '/api/teams',
         })
 
         expect(response.statusCode).toBe(200)
@@ -396,11 +396,11 @@ describe('Protected Routes and RBAC', () => {
 
       it('should allow ADMIN to view teams', async () => {
         const response = await app.inject({
-          method: 'GET',
-          url: '/api/teams',
           headers: {
             authorization: `Bearer ${adminToken}`,
           },
+          method: 'GET',
+          url: '/api/teams',
         })
 
         expect(response.statusCode).toBe(200)
@@ -408,11 +408,11 @@ describe('Protected Routes and RBAC', () => {
 
       it('should allow USER to view teams (read-only)', async () => {
         const response = await app.inject({
-          method: 'GET',
-          url: '/api/teams',
           headers: {
             authorization: `Bearer ${userToken}`,
           },
+          method: 'GET',
+          url: '/api/teams',
         })
 
         expect(response.statusCode).toBe(200)
@@ -436,30 +436,30 @@ describe('Protected Routes and RBAC', () => {
 
       beforeEach(async () => {
         const createResponse = await app.inject({
-          method: 'POST',
-          url: '/api/teams',
           headers: {
             authorization: `Bearer ${superAdminToken}`,
           },
+          method: 'POST',
           payload: {
-            name: 'Team To Update',
             city: 'City',
             foundedYear: 2000,
+            name: 'Team To Update',
           },
+          url: '/api/teams',
         })
         teamId = JSON.parse(createResponse.body).data.id
       })
 
       it('should allow SUPER_ADMIN to update teams', async () => {
         const response = await app.inject({
-          method: 'PATCH',
-          url: `/api/teams/${teamId}`,
           headers: {
             authorization: `Bearer ${superAdminToken}`,
           },
+          method: 'PATCH',
           payload: {
             name: 'Updated Team Name',
           },
+          url: `/api/teams/${teamId}`,
         })
 
         expect(response.statusCode).toBe(200)
@@ -469,14 +469,14 @@ describe('Protected Routes and RBAC', () => {
 
       it('should allow ADMIN to update teams', async () => {
         const response = await app.inject({
-          method: 'PATCH',
-          url: `/api/teams/${teamId}`,
           headers: {
             authorization: `Bearer ${adminToken}`,
           },
+          method: 'PATCH',
           payload: {
             name: 'Admin Updated',
           },
+          url: `/api/teams/${teamId}`,
         })
 
         expect(response.statusCode).toBe(200)
@@ -484,14 +484,14 @@ describe('Protected Routes and RBAC', () => {
 
       it('should NOT allow USER to update teams', async () => {
         const response = await app.inject({
-          method: 'PATCH',
-          url: `/api/teams/${teamId}`,
           headers: {
             authorization: `Bearer ${userToken}`,
           },
+          method: 'PATCH',
           payload: {
             name: 'Unauthorized Update',
           },
+          url: `/api/teams/${teamId}`,
         })
 
         expect(response.statusCode).toBe(403)
@@ -503,27 +503,27 @@ describe('Protected Routes and RBAC', () => {
 
       beforeEach(async () => {
         const createResponse = await app.inject({
-          method: 'POST',
-          url: '/api/teams',
           headers: {
             authorization: `Bearer ${superAdminToken}`,
           },
+          method: 'POST',
           payload: {
-            name: 'Team To Delete',
             city: 'City',
             foundedYear: 2000,
+            name: 'Team To Delete',
           },
+          url: '/api/teams',
         })
         teamId = JSON.parse(createResponse.body).data.id
       })
 
       it('should allow SUPER_ADMIN to delete teams', async () => {
         const response = await app.inject({
-          method: 'DELETE',
-          url: `/api/teams/${teamId}`,
           headers: {
             authorization: `Bearer ${superAdminToken}`,
           },
+          method: 'DELETE',
+          url: `/api/teams/${teamId}`,
         })
 
         expect(response.statusCode).toBe(204)
@@ -531,11 +531,11 @@ describe('Protected Routes and RBAC', () => {
 
       it('should allow ADMIN to delete teams', async () => {
         const response = await app.inject({
-          method: 'DELETE',
-          url: `/api/teams/${teamId}`,
           headers: {
             authorization: `Bearer ${adminToken}`,
           },
+          method: 'DELETE',
+          url: `/api/teams/${teamId}`,
         })
 
         expect(response.statusCode).toBe(204)
@@ -543,11 +543,11 @@ describe('Protected Routes and RBAC', () => {
 
       it('should NOT allow USER to delete teams', async () => {
         const response = await app.inject({
-          method: 'DELETE',
-          url: `/api/teams/${teamId}`,
           headers: {
             authorization: `Bearer ${userToken}`,
           },
+          method: 'DELETE',
+          url: `/api/teams/${teamId}`,
         })
 
         expect(response.statusCode).toBe(403)

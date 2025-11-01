@@ -28,7 +28,7 @@ process.on('SIGTERM', () => closeGracefully('SIGTERM'))
 
 // Start server
 try {
-  await app.listen({ port: PORT, host: HOST })
+  await app.listen({ host: HOST, port: PORT })
   app.log.info(`🚀 TeamPulse API running on http://${HOST}:${PORT}`)
   app.log.info(`📊 Health check: http://${HOST}:${PORT}/api/health`)
   app.log.info(`🏆 Teams API: http://${HOST}:${PORT}/api/teams`)

@@ -49,8 +49,8 @@ export async function registerAuthRoutes(
 
       // Return success response
       return reply.code(200).send({
-        success: true,
         data: result,
+        success: true,
       })
     } catch (error) {
       return handleError(error, reply)
@@ -71,8 +71,8 @@ export async function registerAuthRoutes(
 
       // Return success response
       return reply.code(200).send({
-        success: true,
         data: result,
+        success: true,
       })
     } catch (error) {
       return handleError(error, reply)
@@ -112,8 +112,8 @@ export async function registerAuthRoutes(
       const user = request.user
 
       return reply.code(200).send({
-        success: true,
         data: user,
+        success: true,
       })
     } catch (error) {
       return handleError(error, reply)
@@ -130,12 +130,12 @@ function handleError(error: unknown, reply: FastifyReply) {
   // Zod validation errors
   if (error instanceof Error && error.name === 'ZodError') {
     return reply.code(400).send({
-      success: false,
       error: {
         code: 'VALIDATION_ERROR',
-        message: 'Invalid request data',
         details: error,
+        message: 'Invalid request data',
       },
+      success: false,
     })
   }
 
@@ -144,43 +144,43 @@ function handleError(error: unknown, reply: FastifyReply) {
     // Special handling for authentication errors
     if (error.field === 'credentials' || error.field === 'refreshToken') {
       return reply.code(401).send({
-        success: false,
         error: {
           code: 'AUTHENTICATION_ERROR',
           message: error.message,
         },
+        success: false,
       })
     }
 
     return reply.code(400).send({
-      success: false,
       error: {
         code: error.code,
-        message: error.message,
-        field: error.field,
         details: error.details,
+        field: error.field,
+        message: error.message,
       },
+      success: false,
     })
   }
 
   // Other domain errors
   if (error instanceof DomainError) {
     return reply.code(400).send({
-      success: false,
       error: {
         code: error.code,
         message: error.message,
       },
+      success: false,
     })
   }
 
   // Unknown errors (don't expose details)
   console.error('Unexpected error:', error)
   return reply.code(500).send({
-    success: false,
     error: {
       code: 'INTERNAL_SERVER_ERROR',
       message: 'An unexpected error occurred',
     },
+    success: false,
   })
 }

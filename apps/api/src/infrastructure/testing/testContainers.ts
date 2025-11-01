@@ -1,6 +1,6 @@
 import { execSync } from 'node:child_process'
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql'
-import { type Database, createDatabase } from '../database/connection.js'
+import { createDatabase, type Database } from '../database/connection.js'
 
 /**
  * Test Container Setup for Integration Tests
@@ -64,8 +64,8 @@ export async function setupTestContainer(): Promise<TestContainerResult> {
   try {
     execSync(`DATABASE_URL="${connectionUri}" pnpm db:push`, {
       cwd: process.cwd(),
-      stdio: 'pipe', // Suppress output
       encoding: 'utf-8',
+      stdio: 'pipe', // Suppress output
     })
   } catch (error) {
     // If push fails, stop the container and rethrow
@@ -81,5 +81,5 @@ export async function setupTestContainer(): Promise<TestContainerResult> {
     await container.stop()
   }
 
-  return { db, container, cleanup }
+  return { cleanup, container, db }
 }

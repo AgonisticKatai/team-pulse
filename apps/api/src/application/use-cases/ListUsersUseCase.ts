@@ -27,17 +27,17 @@ export class ListUsersUseCase {
     const userDTOs = users.map((user): UserResponseDTO => {
       const obj = user.toObject()
       return {
-        id: obj.id,
-        email: obj.email,
-        role: obj.role,
         createdAt: obj.createdAt.toISOString(),
+        email: obj.email,
+        id: obj.id,
+        role: obj.role,
         updatedAt: obj.updatedAt.toISOString(),
       }
     })
 
     return {
-      users: userDTOs,
       total: userDTOs.length,
+      users: userDTOs,
     }
   }
 }

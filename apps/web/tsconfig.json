@@ -1,18 +1,18 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "jsx": "react-jsx",
-    "noEmit": true,
     "allowImportingTsExtensions": true,
-    "moduleResolution": "bundler",
 
     /* Path aliases */
     "baseUrl": ".",
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "moduleResolution": "bundler",
+    "noEmit": true,
     "paths": {
       "@/*": ["./src/*"]
     }
   },
+  "extends": "../../tsconfig.json",
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -24,11 +24,11 @@ export class GetTeamUseCase {
   private mapToResponseDTO(team: Team): TeamResponseDTO {
     const obj = team.toObject()
     return {
+      city: obj.city,
+      createdAt: obj.createdAt.toISOString(),
+      foundedYear: obj.foundedYear,
       id: obj.id,
       name: obj.name,
-      city: obj.city,
-      foundedYear: obj.foundedYear,
-      createdAt: obj.createdAt.toISOString(),
       updatedAt: obj.updatedAt.toISOString(),
     }
   }

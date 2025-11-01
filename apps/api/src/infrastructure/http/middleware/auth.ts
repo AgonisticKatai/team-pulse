@@ -80,17 +80,17 @@ export function requireAuth(env: Env) {
 
       // Attach user to request for use in route handlers
       request.user = {
-        userId: payload.userId,
         email: payload.email,
         role: payload.role,
+        userId: payload.userId,
       }
     } catch (error) {
       return reply.code(401).send({
-        success: false,
         error: {
           code: 'UNAUTHORIZED',
           message: error instanceof Error ? error.message : 'Authentication required',
         },
+        success: false,
       })
     }
   }
@@ -115,22 +115,22 @@ export function requireRole(allowedRoles: UserRole[]) {
     // Ensure user is authenticated (should be done by requireAuth)
     if (!request.user) {
       return reply.code(401).send({
-        success: false,
         error: {
           code: 'UNAUTHORIZED',
           message: 'Authentication required',
         },
+        success: false,
       })
     }
 
     // Check if user has required role
     if (!allowedRoles.includes(request.user.role)) {
       return reply.code(403).send({
-        success: false,
         error: {
           code: 'FORBIDDEN',
           message: `Access denied. Required role: ${allowedRoles.join(' or ')}`,
         },
+        success: false,
       })
     }
   }

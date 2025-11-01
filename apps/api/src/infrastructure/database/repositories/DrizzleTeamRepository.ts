@@ -60,11 +60,11 @@ export class DrizzleTeamRepository implements ITeamRepository {
     // Convert to database format
     // Drizzle with mode: 'timestamp' handles Date <-> timestamp conversion automatically
     const row = {
+      city: obj.city,
+      createdAt: obj.createdAt,
+      foundedYear: obj.foundedYear,
       id: obj.id,
       name: obj.name,
-      city: obj.city,
-      foundedYear: obj.foundedYear,
-      createdAt: obj.createdAt,
       updatedAt: obj.updatedAt,
     }
 
@@ -73,13 +73,13 @@ export class DrizzleTeamRepository implements ITeamRepository {
       .insert(teams)
       .values(row)
       .onConflictDoUpdate({
-        target: teams.id,
         set: {
-          name: row.name,
           city: row.city,
           foundedYear: row.foundedYear,
+          name: row.name,
           updatedAt: row.updatedAt,
         },
+        target: teams.id,
       })
 
     return team
@@ -108,11 +108,11 @@ export class DrizzleTeamRepository implements ITeamRepository {
    */
   private mapToDomain(row: typeof teams.$inferSelect): Team {
     return Team.fromPersistence({
+      city: row.city,
+      createdAt: new Date(row.createdAt), // Convert from timestamp
+      foundedYear: row.foundedYear,
       id: row.id,
       name: row.name,
-      city: row.city,
-      foundedYear: row.foundedYear,
-      createdAt: new Date(row.createdAt), // Convert from timestamp
       updatedAt: new Date(row.updatedAt), // Convert from timestamp
     })
   }

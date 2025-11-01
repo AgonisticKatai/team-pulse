@@ -52,15 +52,15 @@ describe('Authentication Endpoints', () => {
     const adminPasswordHash = await hashPassword(testAdminPassword)
 
     const testUser = User.create({
-      id: 'test-user',
       email: testUserEmail,
+      id: 'test-user',
       passwordHash: userPasswordHash,
       role: 'USER',
     })
 
     const testAdmin = User.create({
-      id: 'test-admin',
       email: testAdminEmail,
+      id: 'test-admin',
       passwordHash: adminPasswordHash,
       role: 'ADMIN',
     })
@@ -89,11 +89,11 @@ describe('Authentication Endpoints', () => {
     it('should login with valid credentials', async () => {
       const response = await app.inject({
         method: 'POST',
-        url: '/api/auth/login',
         payload: {
           email: testUserEmail,
           password: testUserPassword,
         },
+        url: '/api/auth/login',
       })
 
       expect(response.statusCode).toBe(200)
@@ -111,11 +111,11 @@ describe('Authentication Endpoints', () => {
     it('should fail with invalid email', async () => {
       const response = await app.inject({
         method: 'POST',
-        url: '/api/auth/login',
         payload: {
           email: 'nonexistent@test.com',
           password: 'SomePassword123!',
         },
+        url: '/api/auth/login',
       })
 
       expect(response.statusCode).toBe(401)
@@ -128,11 +128,11 @@ describe('Authentication Endpoints', () => {
     it('should fail with invalid password', async () => {
       const response = await app.inject({
         method: 'POST',
-        url: '/api/auth/login',
         payload: {
           email: testUserEmail,
           password: 'WrongPassword123!',
         },
+        url: '/api/auth/login',
       })
 
       expect(response.statusCode).toBe(401)
@@ -144,11 +144,11 @@ describe('Authentication Endpoints', () => {
     it('should fail with invalid email format', async () => {
       const response = await app.inject({
         method: 'POST',
-        url: '/api/auth/login',
         payload: {
           email: 'not-an-email',
           password: testUserPassword,
         },
+        url: '/api/auth/login',
       })
 
       expect(response.statusCode).toBe(400)
@@ -160,10 +160,10 @@ describe('Authentication Endpoints', () => {
     it('should fail with missing email', async () => {
       const response = await app.inject({
         method: 'POST',
-        url: '/api/auth/login',
         payload: {
           password: testUserPassword,
         },
+        url: '/api/auth/login',
       })
 
       expect(response.statusCode).toBe(400)
@@ -174,10 +174,10 @@ describe('Authentication Endpoints', () => {
     it('should fail with missing password', async () => {
       const response = await app.inject({
         method: 'POST',
-        url: '/api/auth/login',
         payload: {
           email: testUserEmail,
         },
+        url: '/api/auth/login',
       })
 
       expect(response.statusCode).toBe(400)
@@ -188,11 +188,11 @@ describe('Authentication Endpoints', () => {
     it('should login ADMIN users', async () => {
       const response = await app.inject({
         method: 'POST',
-        url: '/api/auth/login',
         payload: {
           email: testAdminEmail,
           password: testAdminPassword,
         },
+        url: '/api/auth/login',
       })
 
       expect(response.statusCode).toBe(200)
@@ -206,11 +206,11 @@ describe('Authentication Endpoints', () => {
       // First login to get refresh token
       const loginResponse = await app.inject({
         method: 'POST',
-        url: '/api/auth/login',
         payload: {
           email: testUserEmail,
           password: testUserPassword,
         },
+        url: '/api/auth/login',
       })
 
       const loginBody = JSON.parse(loginResponse.body)
@@ -219,10 +219,10 @@ describe('Authentication Endpoints', () => {
       // Now use refresh token
       const refreshResponse = await app.inject({
         method: 'POST',
-        url: '/api/auth/refresh',
         payload: {
           refreshToken,
         },
+        url: '/api/auth/refresh',
       })
 
       expect(refreshResponse.statusCode).toBe(200)
@@ -235,10 +235,10 @@ describe('Authentication Endpoints', () => {
     it('should fail with invalid refresh token', async () => {
       const response = await app.inject({
         method: 'POST',
-        url: '/api/auth/refresh',
         payload: {
           refreshToken: 'invalid.token.here',
         },
+        url: '/api/auth/refresh',
       })
 
       expect(response.statusCode).toBe(401)
@@ -249,8 +249,8 @@ describe('Authentication Endpoints', () => {
     it('should fail with missing refresh token', async () => {
       const response = await app.inject({
         method: 'POST',
-        url: '/api/auth/refresh',
         payload: {},
+        url: '/api/auth/refresh',
       })
 
       expect(response.statusCode).toBe(400)
@@ -264,11 +264,11 @@ describe('Authentication Endpoints', () => {
       // Login first
       const loginResponse = await app.inject({
         method: 'POST',
-        url: '/api/auth/login',
         payload: {
           email: testUserEmail,
           password: testUserPassword,
         },
+        url: '/api/auth/login',
       })
 
       const loginBody = JSON.parse(loginResponse.body)
@@ -276,11 +276,11 @@ describe('Authentication Endpoints', () => {
 
       // Get current user
       const meResponse = await app.inject({
-        method: 'GET',
-        url: '/api/auth/me',
         headers: {
           authorization: `Bearer ${accessToken}`,
         },
+        method: 'GET',
+        url: '/api/auth/me',
       })
 
       expect(meResponse.statusCode).toBe(200)
@@ -306,11 +306,11 @@ describe('Authentication Endpoints', () => {
 
     it('should fail with invalid JWT', async () => {
       const response = await app.inject({
-        method: 'GET',
-        url: '/api/auth/me',
         headers: {
           authorization: 'Bearer invalid.token.here',
         },
+        method: 'GET',
+        url: '/api/auth/me',
       })
 
       expect(response.statusCode).toBe(401)
@@ -320,11 +320,11 @@ describe('Authentication Endpoints', () => {
 
     it('should fail with malformed authorization header', async () => {
       const response = await app.inject({
-        method: 'GET',
-        url: '/api/auth/me',
         headers: {
           authorization: 'InvalidFormat token',
         },
+        method: 'GET',
+        url: '/api/auth/me',
       })
 
       expect(response.statusCode).toBe(401)
@@ -339,11 +339,11 @@ describe('Authentication Endpoints', () => {
       // Login first
       const loginResponse = await app.inject({
         method: 'POST',
-        url: '/api/auth/login',
         payload: {
           email: testUserEmail,
           password: testUserPassword,
         },
+        url: '/api/auth/login',
       })
 
       const loginBody = JSON.parse(loginResponse.body)
@@ -352,14 +352,14 @@ describe('Authentication Endpoints', () => {
 
       // Logout
       const logoutResponse = await app.inject({
-        method: 'POST',
-        url: '/api/auth/logout',
         headers: {
           authorization: `Bearer ${accessToken}`,
         },
+        method: 'POST',
         payload: {
           refreshToken,
         },
+        url: '/api/auth/logout',
       })
 
       expect(logoutResponse.statusCode).toBe(204)
@@ -367,10 +367,10 @@ describe('Authentication Endpoints', () => {
       // Try to use refresh token after logout (should fail)
       const refreshResponse = await app.inject({
         method: 'POST',
-        url: '/api/auth/refresh',
         payload: {
           refreshToken,
         },
+        url: '/api/auth/refresh',
       })
 
       expect(refreshResponse.statusCode).toBe(401)
@@ -379,10 +379,10 @@ describe('Authentication Endpoints', () => {
     it('should fail without authentication', async () => {
       const response = await app.inject({
         method: 'POST',
-        url: '/api/auth/logout',
         payload: {
           refreshToken: 'some-token',
         },
+        url: '/api/auth/logout',
       })
 
       expect(response.statusCode).toBe(401)

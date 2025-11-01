@@ -22,7 +22,7 @@ export function TeamList({ teams, onEdit, onDelete, isLoading, error }: TeamList
   // Loading state
   if (isLoading) {
     return (
-      <div style={{ textAlign: 'center', padding: '2rem', color: '#888' }}>
+      <div style={{ color: '#888', padding: '2rem', textAlign: 'center' }}>
         <p>Loading teams...</p>
       </div>
     )
@@ -33,11 +33,11 @@ export function TeamList({ teams, onEdit, onDelete, isLoading, error }: TeamList
     return (
       <div
         style={{
-          textAlign: 'center',
-          padding: '2rem',
-          color: '#f44336',
           backgroundColor: '#ffebee',
           borderRadius: '8px',
+          color: '#f44336',
+          padding: '2rem',
+          textAlign: 'center',
         }}
       >
         <p>
@@ -51,7 +51,7 @@ export function TeamList({ teams, onEdit, onDelete, isLoading, error }: TeamList
   // Empty state
   if (teams.length === 0) {
     return (
-      <div style={{ textAlign: 'center', padding: '2rem', color: '#888' }}>
+      <div style={{ color: '#888', padding: '2rem', textAlign: 'center' }}>
         <p>No teams found. Create your first team!</p>
       </div>
     )
@@ -62,8 +62,8 @@ export function TeamList({ teams, onEdit, onDelete, isLoading, error }: TeamList
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
         gap: '1.5rem',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
       }}
     >
       {teams.map((team) => (

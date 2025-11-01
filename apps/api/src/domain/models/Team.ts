@@ -34,12 +34,7 @@ export class Team {
    *
    * Use this instead of constructor for new teams (not from DB)
    */
-  static create(data: {
-    id: string
-    name: string
-    city: string
-    foundedYear?: number
-  }): Team {
+  static create(data: { id: string; name: string; city: string; foundedYear?: number }): Team {
     return new Team(data.id, data.name, data.city, data.foundedYear ?? null, new Date(), new Date())
   }
 
@@ -125,11 +120,11 @@ export class Team {
     updatedAt: Date
   } {
     return {
+      city: this.city,
+      createdAt: this.createdAt,
+      foundedYear: this.foundedYear,
       id: this.id,
       name: this.name,
-      city: this.city,
-      foundedYear: this.foundedYear,
-      createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     }
   }

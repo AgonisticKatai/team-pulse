@@ -1,37 +1,39 @@
 {
-  "name": "@team-pulse/shared",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./test-utils": {
-      "types": "./dist/test-utils.d.ts",
-      "import": "./dist/test-utils.js"
-    }
-  },
-  "files": ["dist"],
-  "scripts": {
-    "build": "tsc --build",
-    "dev": "tsc --build --watch",
-    "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "lint": "biome check .",
-    "lint:fix": "biome check --write .",
-    "format": "biome format --write .",
-    "type-check": "tsc --noEmit"
+  "dependencies": {
+    "zod": "catalog:"
   },
   "devDependencies": {
     "typescript": "catalog:"
   },
-  "dependencies": {
-    "zod": "catalog:"
-  }
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./test-utils": {
+      "import": "./dist/test-utils.js",
+      "types": "./dist/test-utils.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "name": "@team-pulse/shared",
+  "private": true,
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "dev": "tsc --build --watch",
+    "format": "biome format --write .",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "type-check": "tsc --noEmit"
+  },
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "version": "1.0.0"
 }

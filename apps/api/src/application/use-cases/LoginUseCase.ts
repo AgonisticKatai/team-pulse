@@ -57,27 +57,27 @@ export class LoginUseCase {
 
     const accessToken = generateAccessToken(
       {
-        userId: user.id,
         email: user.email,
         role: user.role,
+        userId: user.id,
       },
       this.env,
     )
 
     const refreshTokenString = generateRefreshToken(
       {
-        userId: user.id,
         tokenId: refreshTokenId,
+        userId: user.id,
       },
       this.env,
     )
 
     // Store refresh token in database
     const refreshToken = RefreshToken.create({
+      expiresAt: getRefreshTokenExpirationDate(),
       id: refreshTokenId,
       token: refreshTokenString,
       userId: user.id,
-      expiresAt: getRefreshTokenExpirationDate(),
     })
 
     await this.refreshTokenRepository.save(refreshToken)
@@ -98,10 +98,10 @@ export class LoginUseCase {
   ): UserResponseDTO {
     const obj = user.toObject()
     return {
-      id: obj.id,
-      email: obj.email,
-      role: obj.role,
       createdAt: obj.createdAt.toISOString(),
+      email: obj.email,
+      id: obj.id,
+      role: obj.role,
       updatedAt: obj.updatedAt.toISOString(),
     }
   }

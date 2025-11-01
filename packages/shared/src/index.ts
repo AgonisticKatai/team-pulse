@@ -10,8 +10,7 @@
  * - @team-pulse/web (frontend)
  */
 
-// Export all types (type-only exports)
-export type { UserRole, HealthCheckResponse, Match } from './types/index.js'
-
 // Export all DTOs (with Zod schemas - includes both runtime and types)
 export * from './dtos/index.js'
+// Export all types (type-only exports)
+export type { HealthCheckResponse, Match, UserRole } from './types/index.js'

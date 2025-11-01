@@ -64,11 +64,11 @@ export class DrizzleUserRepository implements IUserRepository {
 
     // Convert to database format
     const row = {
-      id: obj.id,
+      createdAt: obj.createdAt,
       email: obj.email,
+      id: obj.id,
       passwordHash: user.getPasswordHash(), // Access private field via getter
       role: obj.role,
-      createdAt: obj.createdAt,
       updatedAt: obj.updatedAt,
     }
 
@@ -77,13 +77,13 @@ export class DrizzleUserRepository implements IUserRepository {
       .insert(users)
       .values(row)
       .onConflictDoUpdate({
-        target: users.id,
         set: {
           email: row.email,
           passwordHash: row.passwordHash,
           role: row.role,
           updatedAt: row.updatedAt,
         },
+        target: users.id,
       })
 
     return user
@@ -117,11 +117,11 @@ export class DrizzleUserRepository implements IUserRepository {
    */
   private mapToDomain(row: typeof users.$inferSelect): User {
     return User.fromPersistence({
-      id: row.id,
+      createdAt: new Date(row.createdAt),
       email: row.email,
+      id: row.id,
       passwordHash: row.passwordHash,
       role: row.role as UserRole, // Type assertion safe because DB enforces valid values
-      createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
     })
   }

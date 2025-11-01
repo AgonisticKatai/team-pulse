@@ -13,13 +13,13 @@ describe('ListUsersUseCase', () => {
 
     // Mock repository
     userRepository = {
+      count: vi.fn(),
+      delete: vi.fn(),
+      existsByEmail: vi.fn(),
+      findAll: vi.fn(),
       findByEmail: vi.fn(),
       findById: vi.fn(),
       save: vi.fn(),
-      findAll: vi.fn(),
-      delete: vi.fn(),
-      existsByEmail: vi.fn(),
-      count: vi.fn(),
     }
 
     // Create use case instance
@@ -31,19 +31,19 @@ describe('ListUsersUseCase', () => {
       // Arrange
       const mockUsers = [
         User.fromPersistence({
-          id: 'user-1',
+          createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'user1@example.com',
+          id: 'user-1',
           passwordHash: 'hash1',
           role: 'USER',
-          createdAt: new Date('2025-01-01T00:00:00Z'),
           updatedAt: new Date('2025-01-01T00:00:00Z'),
         }),
         User.fromPersistence({
-          id: 'user-2',
+          createdAt: new Date('2025-01-02T00:00:00Z'),
           email: 'user2@example.com',
+          id: 'user-2',
           passwordHash: 'hash2',
           role: 'ADMIN',
-          createdAt: new Date('2025-01-02T00:00:00Z'),
           updatedAt: new Date('2025-01-02T00:00:00Z'),
         }),
       ]
@@ -74,11 +74,11 @@ describe('ListUsersUseCase', () => {
       // Arrange
       const mockUsers = [
         User.fromPersistence({
-          id: 'user-1',
+          createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'user1@example.com',
+          id: 'user-1',
           passwordHash: 'secret-hash-1',
           role: 'USER',
-          createdAt: new Date('2025-01-01T00:00:00Z'),
           updatedAt: new Date('2025-01-01T00:00:00Z'),
         }),
       ]
@@ -91,10 +91,10 @@ describe('ListUsersUseCase', () => {
       // Assert
       expect(result.users[0]).not.toHaveProperty('passwordHash')
       expect(result.users[0]).toEqual({
-        id: 'user-1',
-        email: 'user1@example.com',
-        role: 'USER',
         createdAt: '2025-01-01T00:00:00.000Z',
+        email: 'user1@example.com',
+        id: 'user-1',
+        role: 'USER',
         updatedAt: '2025-01-01T00:00:00.000Z',
       })
     })
@@ -103,11 +103,11 @@ describe('ListUsersUseCase', () => {
       // Arrange
       const mockUsers = [
         User.fromPersistence({
-          id: 'user-1',
+          createdAt: new Date('2025-01-01T10:30:45Z'),
           email: 'user1@example.com',
+          id: 'user-1',
           passwordHash: 'hash1',
           role: 'USER',
-          createdAt: new Date('2025-01-01T10:30:45Z'),
           updatedAt: new Date('2025-01-02T14:20:30Z'),
         }),
       ]
@@ -142,11 +142,11 @@ describe('ListUsersUseCase', () => {
       // Arrange
       const mockUsers = [
         User.fromPersistence({
-          id: 'user-1',
+          createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'only@example.com',
+          id: 'user-1',
           passwordHash: 'hash1',
           role: 'SUPER_ADMIN',
-          createdAt: new Date('2025-01-01T00:00:00Z'),
           updatedAt: new Date('2025-01-01T00:00:00Z'),
         }),
       ]
@@ -166,27 +166,27 @@ describe('ListUsersUseCase', () => {
       // Arrange
       const mockUsers = [
         User.fromPersistence({
-          id: 'user-1',
+          createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'user@example.com',
+          id: 'user-1',
           passwordHash: 'hash1',
           role: 'USER',
-          createdAt: new Date('2025-01-01T00:00:00Z'),
           updatedAt: new Date('2025-01-01T00:00:00Z'),
         }),
         User.fromPersistence({
-          id: 'admin-1',
+          createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'admin@example.com',
+          id: 'admin-1',
           passwordHash: 'hash2',
           role: 'ADMIN',
-          createdAt: new Date('2025-01-01T00:00:00Z'),
           updatedAt: new Date('2025-01-01T00:00:00Z'),
         }),
         User.fromPersistence({
-          id: 'super-1',
+          createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'super@example.com',
+          id: 'super-1',
           passwordHash: 'hash3',
           role: 'SUPER_ADMIN',
-          createdAt: new Date('2025-01-01T00:00:00Z'),
           updatedAt: new Date('2025-01-01T00:00:00Z'),
         }),
       ]
@@ -207,11 +207,11 @@ describe('ListUsersUseCase', () => {
       // Arrange
       const mockUsers = Array.from({ length: 10 }, (_, i) =>
         User.fromPersistence({
-          id: `user-${i}`,
+          createdAt: new Date('2025-01-01T00:00:00Z'),
           email: `user${i}@example.com`,
+          id: `user-${i}`,
           passwordHash: `hash${i}`,
           role: 'USER',
-          createdAt: new Date('2025-01-01T00:00:00Z'),
           updatedAt: new Date('2025-01-01T00:00:00Z'),
         }),
       )
@@ -230,27 +230,27 @@ describe('ListUsersUseCase', () => {
       // Arrange
       const mockUsers = [
         User.fromPersistence({
-          id: 'user-3',
+          createdAt: new Date('2025-01-03T00:00:00Z'),
           email: 'third@example.com',
+          id: 'user-3',
           passwordHash: 'hash3',
           role: 'USER',
-          createdAt: new Date('2025-01-03T00:00:00Z'),
           updatedAt: new Date('2025-01-03T00:00:00Z'),
         }),
         User.fromPersistence({
-          id: 'user-1',
+          createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'first@example.com',
+          id: 'user-1',
           passwordHash: 'hash1',
           role: 'USER',
-          createdAt: new Date('2025-01-01T00:00:00Z'),
           updatedAt: new Date('2025-01-01T00:00:00Z'),
         }),
         User.fromPersistence({
-          id: 'user-2',
+          createdAt: new Date('2025-01-02T00:00:00Z'),
           email: 'second@example.com',
+          id: 'user-2',
           passwordHash: 'hash2',
           role: 'USER',
-          createdAt: new Date('2025-01-02T00:00:00Z'),
           updatedAt: new Date('2025-01-02T00:00:00Z'),
         }),
       ]

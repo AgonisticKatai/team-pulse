@@ -138,9 +138,9 @@ export class ApiClient {
       }
 
       const response = await fetch(url, {
-        method,
-        headers,
         body: data ? JSON.stringify(data) : undefined,
+        headers,
+        method,
         signal: controller.signal,
       })
 

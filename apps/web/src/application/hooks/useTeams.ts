@@ -16,10 +16,10 @@ import type { TeamApiClient } from '../../infrastructure/api/teamApiClient'
  */
 export const teamsKeys = {
   all: ['teams'] as const,
-  lists: () => [...teamsKeys.all, 'list'] as const,
-  list: (filters?: Record<string, unknown>) => [...teamsKeys.lists(), filters] as const,
-  details: () => [...teamsKeys.all, 'detail'] as const,
   detail: (id: string) => [...teamsKeys.details(), id] as const,
+  details: () => [...teamsKeys.all, 'detail'] as const,
+  list: (filters?: Record<string, unknown>) => [...teamsKeys.lists(), filters] as const,
+  lists: () => [...teamsKeys.all, 'list'] as const,
 }
 
 /**
@@ -38,10 +38,10 @@ export const teamsKeys = {
  */
 export function useTeams(teamApiClient: TeamApiClient) {
   return useQuery<TeamsListResponseDTO, ApiError>({
-    queryKey: teamsKeys.list(),
-    queryFn: () => teamApiClient.getTeams(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 30, // 30 minutes (formerly cacheTime)
+    queryFn: () => teamApiClient.getTeams(),
+    queryKey: teamsKeys.list(),
+    staleTime: 1000 * 60 * 5, // 5 minutes
   })
 }
 
@@ -56,9 +56,9 @@ export function useTeams(teamApiClient: TeamApiClient) {
  */
 export function useTeam(teamApiClient: TeamApiClient, id: string) {
   return useQuery<TeamResponseDTO, ApiError>({
-    queryKey: teamsKeys.detail(id),
-    queryFn: () => teamApiClient.getTeam(id),
     enabled: !!id, // Only run if ID is provided
+    queryFn: () => teamApiClient.getTeam(id),
+    queryKey: teamsKeys.detail(id),
     staleTime: 1000 * 60 * 5, // 5 minutes
   })
 }

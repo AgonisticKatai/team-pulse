@@ -3,8 +3,8 @@ import { ValidationError } from '../../domain/errors/index.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import {
-  type RefreshTokenPayload,
   generateAccessToken,
+  type RefreshTokenPayload,
   verifyRefreshToken,
 } from '../../infrastructure/auth/jwtUtils.js'
 import type { Env } from '../../infrastructure/config/env.js'
@@ -69,9 +69,9 @@ export class RefreshTokenUseCase {
     // Generate new access token
     const accessToken = generateAccessToken(
       {
-        userId: user.id,
         email: user.email,
         role: user.role,
+        userId: user.id,
       },
       this.env,
     )

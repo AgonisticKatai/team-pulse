@@ -61,7 +61,9 @@
     font-size: var(--font-size-base);
     border-radius: var(--radius-md);
     margin-block: var(--space-md);
-    transition: transform var(--transition-base), box-shadow var(--transition-base);
+    transition:
+      transform var(--transition-base),
+      box-shadow var(--transition-base);
 
     &:hover {
       transform: translateY(-2px);

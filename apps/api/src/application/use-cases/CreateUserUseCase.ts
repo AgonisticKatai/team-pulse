@@ -40,8 +40,8 @@ export class CreateUserUseCase {
     // Create domain entity
     // The User entity validates its own invariants
     const user = User.create({
-      id: randomUUID(),
       email: dto.email,
+      id: randomUUID(),
       passwordHash,
       role: dto.role,
     })
@@ -61,10 +61,10 @@ export class CreateUserUseCase {
   private mapToResponseDTO(user: User): UserResponseDTO {
     const obj = user.toObject()
     return {
-      id: obj.id,
-      email: obj.email,
-      role: obj.role,
       createdAt: obj.createdAt.toISOString(),
+      email: obj.email,
+      id: obj.id,
+      role: obj.role,
       updatedAt: obj.updatedAt.toISOString(),
     }
   }

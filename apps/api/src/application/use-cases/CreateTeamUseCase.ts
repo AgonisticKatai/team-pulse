@@ -37,10 +37,10 @@ export class CreateTeamUseCase {
     // Create domain entity
     // The Team entity validates its own invariants
     const team = Team.create({
-      id: randomUUID(),
-      name: dto.name,
       city: dto.city,
       foundedYear: dto.foundedYear ?? undefined,
+      id: randomUUID(),
+      name: dto.name,
     })
 
     // Persist
@@ -58,11 +58,11 @@ export class CreateTeamUseCase {
   private mapToResponseDTO(team: Team): TeamResponseDTO {
     const obj = team.toObject()
     return {
+      city: obj.city,
+      createdAt: obj.createdAt.toISOString(),
+      foundedYear: obj.foundedYear,
       id: obj.id,
       name: obj.name,
-      city: obj.city,
-      foundedYear: obj.foundedYear,
-      createdAt: obj.createdAt.toISOString(),
       updatedAt: obj.updatedAt.toISOString(),
     }
   }

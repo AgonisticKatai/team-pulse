@@ -73,12 +73,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   } catch (error) {
     console.error('Serverless function error:', error)
     res.status(500).json({
-      success: false,
       error: {
         code: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to initialize API',
         details: error instanceof Error ? error.message : 'Unknown error',
+        message: 'Failed to initialize API',
       },
+      success: false,
     })
   }
 }

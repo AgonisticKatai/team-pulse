@@ -70,7 +70,10 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
 function ForbiddenPage({
   userRole,
   requiredRoles,
-}: { userRole: UserRole; requiredRoles: UserRole[] }) {
+}: {
+  userRole: UserRole
+  requiredRoles: UserRole[]
+}) {
   return (
     <div className="forbidden-page">
       <div className="forbidden-container">
