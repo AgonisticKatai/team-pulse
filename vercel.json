@@ -10,17 +10,14 @@
   },
   "installCommand": "pnpm install",
   "outputDirectory": "apps/web/dist",
-  "routes": [
+  "rewrites": [
     {
-      "dest": "/api/index.ts",
-      "src": "/api/(.*)"
+      "destination": "/api/index.ts",
+      "source": "/api/(.*)"
     },
     {
-      "handle": "filesystem"
-    },
-    {
-      "dest": "/index.html",
-      "src": "/(.*)"
+      "destination": "/index.html",
+      "source": "/(.*)"
     }
   ]
 }
