@@ -32,6 +32,10 @@ pnpm-debug.log*
 *.swo
 *~
 
+# AI tooling (personal)
+.claude/
+.claudeignore
+
 # OS
 .DS_Store
 Thumbs.db
