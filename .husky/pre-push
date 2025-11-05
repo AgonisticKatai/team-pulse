@@ -1,5 +1,7 @@
-echo "🧪 Running tests before push..."
+echo "🧪 Running unit and application tests before push..."
+echo "(Integration tests run in CI)"
 
-pnpm test
+# Run tests excluding integration tests that require Docker
+pnpm test -- --exclude "**/routes/**"
 
-echo "✅ All tests passed! Pushing to remote..."
+echo "✅ All unit tests passed! Pushing to remote..."
