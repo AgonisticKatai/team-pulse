@@ -31,9 +31,10 @@ interface TeamPrimitiveFields {
 }
 
 /**
- * Team creation data - uses primitives with optional dates
+ * Team creation data - uses primitives with optional dates and founded year
  */
-export type CreateTeamData = TeamPrimitiveFields & {
+export type CreateTeamData = Omit<TeamPrimitiveFields, 'foundedYear'> & {
+  foundedYear?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
