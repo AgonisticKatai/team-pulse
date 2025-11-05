@@ -24,6 +24,18 @@ export class ValidationError extends DomainError {
   }
 
   /**
+   * Create validation error for a specific field
+   * TODO (Tech Debt): ValidationError should follow our architectural patterns:
+   * - Private constructor
+   * - Named parameters in constructor
+   * - Static create() method with Result<T, E> pattern
+   * - This will be addressed when migrating error classes
+   */
+  static forField({ field, message }: { field: string; message: string }): ValidationError {
+    return new ValidationError(message, field)
+  }
+
+  /**
    * Create from Zod validation error
    */
   static fromZodError(error: {
