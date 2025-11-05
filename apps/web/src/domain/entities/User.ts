@@ -3,42 +3,35 @@ import type { ValidationError } from '../errors'
 import type { Result } from '../types/Result'
 import { Err, Ok } from '../types/Result'
 import { Email, EntityId, Role, type UserRole } from '../value-objects'
+import type { CreateUserData, UserConstructorProps, UserData, UserProps } from './User.types'
 
-/**
- * User properties for creation
- */
-export interface UserProps {
-  createdAt: Date
-  email: Email
-  id: EntityId
-  role: Role
-  updatedAt: Date
-}
+// Re-export public types
+export type { CreateUserData, UserData, UserProps }
 
 /**
  * User Entity
  * Rich domain model with business logic
  */
 export class User {
-  private constructor(
-    private readonly id: EntityId,
-    private readonly email: Email,
-    private readonly role: Role,
-    private readonly createdAt: Date,
-    private readonly updatedAt: Date,
-  ) {}
+  private readonly id: EntityId
+  private readonly email: Email
+  private readonly role: Role
+  private readonly createdAt: Date
+  private readonly updatedAt: Date
+
+  private constructor(props: UserConstructorProps) {
+    this.id = props.id
+    this.email = props.email
+    this.role = props.role
+    this.createdAt = props.createdAt
+    this.updatedAt = props.updatedAt
+  }
 
   /**
    * Factory method to create a User from domain primitives
    * Returns [error, null] or [null, user]
    */
-  static create(data: {
-    createdAt?: Date | string
-    email: string
-    id: string
-    role: string
-    updatedAt?: Date | string
-  }): Result<User, ValidationError> {
+  static create(data: CreateUserData): Result<User, ValidationError> {
     // Validate and create EntityId
     const [idError, entityId] = EntityId.create(data.id)
     if (idError) return Err(idError)
@@ -66,7 +59,15 @@ export class User {
           ? new Date(data.updatedAt)
           : new Date()
 
-    return Ok(new User(entityId, email, role, createdAt, updatedAt))
+    return Ok(
+      new User({
+        createdAt,
+        email,
+        id: entityId,
+        role,
+        updatedAt,
+      }),
+    )
   }
 
   /**
@@ -74,7 +75,7 @@ export class User {
    * No validation needed (Value Objects are already validated)
    */
   static fromValueObjects(props: UserProps): User {
-    return new User(props.id, props.email, props.role, props.createdAt, props.updatedAt)
+    return new User(props)
   }
 
   /**

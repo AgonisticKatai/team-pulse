@@ -6,7 +6,7 @@ export type {
   UpdateTokensData,
 } from './Session'
 export { Session } from './Session'
-export type { TeamProps, TeamUpdateData } from './Team'
+export type { CreateTeamData, TeamData, TeamProps, TeamUpdateData } from './Team'
 export { Team } from './Team'
-export type { UserProps } from './User'
+export type { CreateUserData, UserData, UserProps } from './User'
 export { User } from './User'

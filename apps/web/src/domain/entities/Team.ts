@@ -3,54 +3,43 @@ import type { ValidationError } from '../errors'
 import type { Result } from '../types/Result'
 import { Err, Ok } from '../types/Result'
 import { City, EntityId, FoundedYear, TeamName } from '../value-objects'
+import type {
+  CreateTeamData,
+  TeamConstructorProps,
+  TeamData,
+  TeamProps,
+  TeamUpdateData,
+} from './Team.types'
 
-/**
- * Team properties for creation
- */
-export interface TeamProps {
-  city: City
-  createdAt: Date
-  foundedYear: FoundedYear | null
-  id: EntityId
-  name: TeamName
-  updatedAt: Date
-}
-
-/**
- * Team update data
- */
-export interface TeamUpdateData {
-  city?: string
-  foundedYear?: number | null
-  name?: string
-}
+// Re-export public types
+export type { CreateTeamData, TeamData, TeamProps, TeamUpdateData }
 
 /**
  * Team Entity
  * Rich domain model with business logic
  */
 export class Team {
-  private constructor(
-    private readonly id: EntityId,
-    private readonly name: TeamName,
-    private readonly city: City,
-    private readonly foundedYear: FoundedYear | null,
-    private readonly createdAt: Date,
-    private readonly updatedAt: Date,
-  ) {}
+  private readonly id: EntityId
+  private readonly name: TeamName
+  private readonly city: City
+  private readonly foundedYear: FoundedYear | null
+  private readonly createdAt: Date
+  private readonly updatedAt: Date
+
+  private constructor(props: TeamConstructorProps) {
+    this.id = props.id
+    this.name = props.name
+    this.city = props.city
+    this.foundedYear = props.foundedYear
+    this.createdAt = props.createdAt
+    this.updatedAt = props.updatedAt
+  }
 
   /**
    * Factory method to create a Team from domain primitives
    * Returns [error, null] or [null, team]
    */
-  static create(data: {
-    city: string
-    createdAt?: Date | string
-    foundedYear?: number | null
-    id: string
-    name: string
-    updatedAt?: Date | string
-  }): Result<Team, ValidationError> {
+  static create(data: CreateTeamData): Result<Team, ValidationError> {
     // Validate and create EntityId
     const [idError, entityId] = EntityId.create(data.id)
     if (idError) return Err(idError)
@@ -82,7 +71,16 @@ export class Team {
           ? new Date(data.updatedAt)
           : new Date()
 
-    return Ok(new Team(entityId, name, city, foundedYear, createdAt, updatedAt))
+    return Ok(
+      new Team({
+        city,
+        createdAt,
+        foundedYear,
+        id: entityId,
+        name,
+        updatedAt,
+      }),
+    )
   }
 
   /**
@@ -90,14 +88,7 @@ export class Team {
    * No validation needed (Value Objects are already validated)
    */
   static fromValueObjects(props: TeamProps): Team {
-    return new Team(
-      props.id,
-      props.name,
-      props.city,
-      props.foundedYear,
-      props.createdAt,
-      props.updatedAt,
-    )
+    return new Team(props)
   }
 
   /**
@@ -228,7 +219,16 @@ export class Team {
     }
 
     // Create new Team instance with updated values
-    return Ok(new Team(this.id, name, city, foundedYear, this.createdAt, new Date()))
+    return Ok(
+      new Team({
+        city,
+        createdAt: this.createdAt,
+        foundedYear,
+        id: this.id,
+        name,
+        updatedAt: new Date(),
+      }),
+    )
   }
 
   /**
