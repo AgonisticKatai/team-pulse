@@ -1,10 +1,9 @@
-import type { Session } from '../../../domain/entities'
+import { Session } from '../../../domain/entities'
 import type { DomainError } from '../../../domain/errors'
 import type { IAuthRepository } from '../../../domain/repositories'
 import { validateLoginCredentials } from '../../../domain/services'
 import type { Result } from '../../../domain/types/Result'
 import { Err } from '../../../domain/types/Result'
-import { sessionToDomain } from '../../mappers'
 
 /**
  * Login Use Case input
@@ -43,21 +42,15 @@ export class LoginUseCase {
       return Err(loginError)
     }
 
-    // Map response to session domain entity
-    const [mapError, session] = sessionToDomain({
+    // Create session domain entity from login response
+    const [sessionError, session] = Session.fromDTO({
       accessToken: loginResponse.accessToken,
       refreshToken: loginResponse.refreshToken,
-      user: {
-        createdAt: loginResponse.user.getCreatedAt().toISOString(),
-        email: loginResponse.user.getEmail().getValue(),
-        id: loginResponse.user.getId().getValue(),
-        role: loginResponse.user.getRole().getValue(),
-        updatedAt: loginResponse.user.getUpdatedAt().toISOString(),
-      },
+      user: loginResponse.user.toDTO(),
     })
 
-    if (mapError) {
-      return Err(mapError)
+    if (sessionError) {
+      return Err(sessionError)
     }
 
     return [null, session]

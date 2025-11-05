@@ -1,7 +1,8 @@
+import type { LoginResponseDTO } from '@team-pulse/shared'
 import { ValidationError } from '../errors'
 import type { Result } from '../types/Result'
 import { Err, Ok } from '../types/Result'
-import type { User } from './User'
+import { User } from './User'
 
 /**
  * Token Value Object for JWT tokens
@@ -84,6 +85,39 @@ export class Session {
    */
   static fromValueObjects(props: SessionProps): Session {
     return new Session(props.user, props.accessToken, props.refreshToken, new Date())
+  }
+
+  /**
+   * Factory method to create a Session from LoginResponseDTO
+   * Returns [error, null] or [null, session]
+   */
+  static fromDTO(dto: LoginResponseDTO): Result<Session, ValidationError> {
+    // Map user DTO to domain
+    const [userError, user] = User.fromDTO(dto.user)
+    if (userError) {
+      return Err(
+        new ValidationError(`Failed to create Session from DTO: ${userError.message}`, {
+          details: { dto, originalError: userError.toObject() },
+        }),
+      )
+    }
+
+    // Create session
+    const [sessionError, session] = Session.create({
+      accessToken: dto.accessToken,
+      refreshToken: dto.refreshToken,
+      user,
+    })
+
+    if (sessionError) {
+      return Err(
+        new ValidationError(`Failed to create Session from DTO: ${sessionError.message}`, {
+          details: { dto, originalError: sessionError.toObject() },
+        }),
+      )
+    }
+
+    return Ok(session)
   }
 
   /**
@@ -196,6 +230,17 @@ export class Session {
       createdAt: this.createdAt.toISOString(),
       refreshToken: this.refreshToken.getValue(),
       user: this.user.toObject(),
+    }
+  }
+
+  /**
+   * Convert to DTO (for storage/API communication)
+   */
+  toDTO(): LoginResponseDTO {
+    return {
+      accessToken: this.accessToken.getValue(),
+      refreshToken: this.refreshToken.getValue(),
+      user: this.user.toDTO(),
     }
   }
 

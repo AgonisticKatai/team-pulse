@@ -1,3 +1,4 @@
+import type { TeamResponseDTO } from '@team-pulse/shared'
 import type { ValidationError } from '../errors'
 import type { Result } from '../types/Result'
 import { Err, Ok } from '../types/Result'
@@ -97,6 +98,38 @@ export class Team {
       props.createdAt,
       props.updatedAt,
     )
+  }
+
+  /**
+   * Factory method to create a Team from DTO
+   * Returns [error, null] or [null, team]
+   */
+  static fromDTO(dto: TeamResponseDTO): Result<Team, ValidationError> {
+    return Team.create({
+      city: dto.city,
+      createdAt: dto.createdAt,
+      foundedYear: dto.foundedYear,
+      id: dto.id,
+      name: dto.name,
+      updatedAt: dto.updatedAt,
+    })
+  }
+
+  /**
+   * Factory method to create array of Teams from array of DTOs
+   * Returns [error, null] or [null, teams[]]
+   * If any DTO fails to map, returns error for the first failure
+   */
+  static fromDTOList(dtos: TeamResponseDTO[]): Result<Team[], ValidationError> {
+    const teams: Team[] = []
+
+    for (const dto of dtos) {
+      const [error, team] = Team.fromDTO(dto)
+      if (error) return Err(error)
+      teams.push(team)
+    }
+
+    return Ok(teams)
   }
 
   /**
@@ -216,6 +249,20 @@ export class Team {
     name: string
     updatedAt: string
   } {
+    return {
+      city: this.city.getValue(),
+      createdAt: this.createdAt.toISOString(),
+      foundedYear: this.foundedYear ? this.foundedYear.getValue() : null,
+      id: this.id.getValue(),
+      name: this.name.getValue(),
+      updatedAt: this.updatedAt.toISOString(),
+    }
+  }
+
+  /**
+   * Convert to DTO (for API communication)
+   */
+  toDTO(): TeamResponseDTO {
     return {
       city: this.city.getValue(),
       createdAt: this.createdAt.toISOString(),

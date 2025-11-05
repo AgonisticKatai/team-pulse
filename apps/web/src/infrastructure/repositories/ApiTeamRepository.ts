@@ -1,5 +1,4 @@
-import { teamToDomain, teamToDomainList } from '../../application/mappers'
-import type { Team } from '../../domain/entities'
+import { Team } from '../../domain/entities'
 import { DomainError, NotFoundError, ValidationError } from '../../domain/errors'
 import type {
   CreateTeamData,
@@ -29,7 +28,7 @@ export class ApiTeamRepository implements ITeamRepository {
       const teamDTO = await this.teamApiClient.getTeam(id)
 
       // Map team DTO to domain entity
-      const [error, team] = teamToDomain(teamDTO)
+      const [error, team] = Team.fromDTO(teamDTO)
       if (error) {
         return Err(error)
       }
@@ -61,7 +60,7 @@ export class ApiTeamRepository implements ITeamRepository {
       }
 
       // Map team DTO to domain entity
-      const [error, team] = teamToDomain(teamDTO)
+      const [error, team] = Team.fromDTO(teamDTO)
       if (error) {
         return Err(error)
       }
@@ -81,7 +80,7 @@ export class ApiTeamRepository implements ITeamRepository {
       const response = await this.teamApiClient.getTeams()
 
       // Map team DTOs to domain entities
-      const [error, teams] = teamToDomainList(response.teams)
+      const [error, teams] = Team.fromDTOList(response.teams)
       if (error) {
         return Err(error)
       }
@@ -108,7 +107,7 @@ export class ApiTeamRepository implements ITeamRepository {
       })
 
       // Map team DTO to domain entity
-      const [error, team] = teamToDomain(teamDTO)
+      const [error, team] = Team.fromDTO(teamDTO)
       if (error) {
         return Err(error)
       }
@@ -132,7 +131,7 @@ export class ApiTeamRepository implements ITeamRepository {
       })
 
       // Map team DTO to domain entity
-      const [error, team] = teamToDomain(teamDTO)
+      const [error, team] = Team.fromDTO(teamDTO)
       if (error) {
         return Err(error)
       }

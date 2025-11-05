@@ -1,3 +1,4 @@
+import type { UserResponseDTO } from '@team-pulse/shared'
 import type { ValidationError } from '../errors'
 import type { Result } from '../types/Result'
 import { Err, Ok } from '../types/Result'
@@ -74,6 +75,37 @@ export class User {
    */
   static fromValueObjects(props: UserProps): User {
     return new User(props.id, props.email, props.role, props.createdAt, props.updatedAt)
+  }
+
+  /**
+   * Factory method to create a User from DTO
+   * Returns [error, null] or [null, user]
+   */
+  static fromDTO(dto: UserResponseDTO): Result<User, ValidationError> {
+    return User.create({
+      createdAt: dto.createdAt,
+      email: dto.email,
+      id: dto.id,
+      role: dto.role,
+      updatedAt: dto.updatedAt,
+    })
+  }
+
+  /**
+   * Factory method to create array of Users from array of DTOs
+   * Returns [error, null] or [null, users[]]
+   * If any DTO fails to map, returns error for the first failure
+   */
+  static fromDTOList(dtos: UserResponseDTO[]): Result<User[], ValidationError> {
+    const users: User[] = []
+
+    for (const dto of dtos) {
+      const [error, user] = User.fromDTO(dto)
+      if (error) return Err(error)
+      users.push(user)
+    }
+
+    return Ok(users)
   }
 
   /**
@@ -160,6 +192,19 @@ export class User {
     role: string
     updatedAt: string
   } {
+    return {
+      createdAt: this.createdAt.toISOString(),
+      email: this.email.getValue(),
+      id: this.id.getValue(),
+      role: this.role.getValue(),
+      updatedAt: this.updatedAt.toISOString(),
+    }
+  }
+
+  /**
+   * Convert to DTO (for API communication)
+   */
+  toDTO(): UserResponseDTO {
     return {
       createdAt: this.createdAt.toISOString(),
       email: this.email.getValue(),

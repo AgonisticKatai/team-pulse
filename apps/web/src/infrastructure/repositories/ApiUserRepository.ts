@@ -1,6 +1,5 @@
 import type { CreateUserDTO, UserResponseDTO } from '@team-pulse/shared'
-import { userToDomain, userToDomainList } from '../../application/mappers'
-import type { User } from '../../domain/entities'
+import { User } from '../../domain/entities'
 import { DomainError, NotFoundError, ValidationError } from '../../domain/errors'
 import type { CreateUserData, IUserRepository } from '../../domain/repositories'
 import type { Result } from '../../domain/types/Result'
@@ -25,7 +24,7 @@ export class ApiUserRepository implements IUserRepository {
       const userDTO = await this.apiClient.get<UserResponseDTO>(`/api/users/${id}`)
 
       // Map user DTO to domain entity
-      const [error, user] = userToDomain(userDTO)
+      const [error, user] = User.fromDTO(userDTO)
       if (error) {
         return Err(error)
       }
@@ -57,7 +56,7 @@ export class ApiUserRepository implements IUserRepository {
       }
 
       // Map user DTO to domain entity
-      const [error, user] = userToDomain(userDTO)
+      const [error, user] = User.fromDTO(userDTO)
       if (error) {
         return Err(error)
       }
@@ -77,7 +76,7 @@ export class ApiUserRepository implements IUserRepository {
       const userDTOs = await this.apiClient.get<UserResponseDTO[]>('/api/users')
 
       // Map user DTOs to domain entities
-      const [error, users] = userToDomainList(userDTOs)
+      const [error, users] = User.fromDTOList(userDTOs)
       if (error) {
         return Err(error)
       }
@@ -103,7 +102,7 @@ export class ApiUserRepository implements IUserRepository {
       const userDTO = await this.apiClient.post<UserResponseDTO>('/api/users', createDTO)
 
       // Map user DTO to domain entity
-      const [error, user] = userToDomain(userDTO)
+      const [error, user] = User.fromDTO(userDTO)
       if (error) {
         return Err(error)
       }

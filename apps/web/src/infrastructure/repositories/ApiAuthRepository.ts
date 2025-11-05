@@ -1,5 +1,4 @@
-import { userToDomain } from '../../application/mappers'
-import type { User } from '../../domain/entities'
+import { User } from '../../domain/entities'
 import { DomainError, NotFoundError, ValidationError } from '../../domain/errors'
 import type { IAuthRepository, LoginCredentials, LoginResponse } from '../../domain/repositories'
 import type { Result } from '../../domain/types/Result'
@@ -27,7 +26,7 @@ export class ApiAuthRepository implements IAuthRepository {
       })
 
       // Map user DTO to domain entity
-      const [userError, user] = userToDomain(response.user)
+      const [userError, user] = User.fromDTO(response.user)
       if (userError) {
         return Err(userError)
       }
@@ -82,7 +81,7 @@ export class ApiAuthRepository implements IAuthRepository {
       const userDTO = await this.authApiClient.getCurrentUser()
 
       // Map user DTO to domain entity
-      const [error, user] = userToDomain(userDTO)
+      const [error, user] = User.fromDTO(userDTO)
       if (error) {
         return Err(error)
       }
