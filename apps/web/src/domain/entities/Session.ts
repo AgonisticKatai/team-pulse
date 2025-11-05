@@ -2,50 +2,25 @@ import type { LoginResponseDTO } from '@team-pulse/shared'
 import { ValidationError } from '../errors'
 import type { Result } from '../types/Result'
 import { Err, Ok } from '../types/Result'
+import { Token } from '../value-objects'
+import type {
+  CreateSessionData,
+  SessionConstructorProps,
+  SessionData,
+  SessionValueObjectsProps,
+  UpdateAccessTokenData,
+  UpdateTokensData,
+  ValidateSessionData,
+} from './Session.types'
 import { User } from './User'
 
-/**
- * Token Value Object for JWT tokens
- */
-class Token {
-  private constructor(private readonly value: string) {}
-
-  static create(value: string): Result<Token, ValidationError> {
-    if (!value || value.trim().length === 0) {
-      return Err(ValidationError.forField('token', 'Token is required'))
-    }
-
-    const trimmedValue = value.trim()
-
-    // Basic JWT format validation (3 parts separated by dots)
-    const parts = trimmedValue.split('.')
-    if (parts.length !== 3) {
-      return Err(ValidationError.forField('token', 'Invalid token format'))
-    }
-
-    return Ok(new Token(trimmedValue))
-  }
-
-  getValue(): string {
-    return this.value
-  }
-
-  equals(other: Token): boolean {
-    return this.value === other.value
-  }
-
-  toString(): string {
-    return this.value
-  }
-}
-
-/**
- * Session properties for creation
- */
-export interface SessionProps {
-  accessToken: Token
-  refreshToken: Token
-  user: User
+// Re-export public types
+export type {
+  CreateSessionData,
+  SessionData,
+  SessionValueObjectsProps,
+  UpdateAccessTokenData,
+  UpdateTokensData,
 }
 
 /**
@@ -53,38 +28,73 @@ export interface SessionProps {
  * Represents an authenticated user session with tokens
  */
 export class Session {
-  private constructor(
-    private readonly user: User,
-    private readonly accessToken: Token,
-    private readonly refreshToken: Token,
-    private readonly createdAt: Date,
-  ) {}
+  private readonly user: User
+  private readonly accessToken: Token
+  private readonly refreshToken: Token
+  private readonly createdAt: Date
+
+  private constructor(props: SessionConstructorProps) {
+    this.accessToken = props.accessToken
+    this.createdAt = props.createdAt
+    this.refreshToken = props.refreshToken
+    this.user = props.user
+  }
 
   /**
    * Factory method to create a Session from domain primitives
    * Returns [error, null] or [null, session]
    */
-  static create(data: {
-    accessToken: string
-    refreshToken: string
-    user: User
-  }): Result<Session, ValidationError> {
-    // Validate and create access token
-    const [accessError, accessToken] = Token.create(data.accessToken)
-    if (accessError) return Err(accessError)
+  static create(data: CreateSessionData): Result<Session, ValidationError> {
+    // Validate first
+    const error = Session.validate(data)
+    if (error) return Err(error)
 
-    // Validate and create refresh token
-    const [refreshError, refreshToken] = Token.create(data.refreshToken)
-    if (refreshError) return Err(refreshError)
+    // Create tokens (we know they're valid now)
+    const [, accessToken] = Token.create({ value: data.accessToken })
+    const [, refreshToken] = Token.create({ value: data.refreshToken })
 
-    return Ok(new Session(data.user, accessToken, refreshToken, new Date()))
+    return Ok(
+      new Session({
+        accessToken: accessToken!,
+        createdAt: data.createdAt,
+        refreshToken: refreshToken!,
+        user: data.user,
+      }),
+    )
+  }
+
+  /**
+   * Validate Session data
+   * Returns error if validation fails, null if valid
+   */
+  private static validate(data: ValidateSessionData): ValidationError | null {
+    // Validate access token
+    const [accessError] = Token.create({ value: data.accessToken })
+    if (accessError) return accessError
+
+    // Validate refresh token
+    const [refreshError] = Token.create({ value: data.refreshToken })
+    if (refreshError) return refreshError
+
+    // Validate createdAt
+    if (!(data.createdAt instanceof Date) || Number.isNaN(data.createdAt.getTime())) {
+      return ValidationError.forField('createdAt', 'Invalid date')
+    }
+
+    return null
   }
 
   /**
    * Factory method to create a Session from Token Value Objects
+   * Returns [error, null] or [null, session]
    */
-  static fromValueObjects(props: SessionProps): Session {
-    return new Session(props.user, props.accessToken, props.refreshToken, new Date())
+  static fromValueObjects(props: SessionValueObjectsProps): Result<Session, ValidationError> {
+    return Session.create({
+      accessToken: props.accessToken.getValue(),
+      createdAt: new Date(),
+      refreshToken: props.refreshToken.getValue(),
+      user: props.user,
+    })
   }
 
   /**
@@ -105,6 +115,7 @@ export class Session {
     // Create session
     const [sessionError, session] = Session.create({
       accessToken: dto.accessToken,
+      createdAt: new Date(),
       refreshToken: dto.refreshToken,
       user,
     })
@@ -132,25 +143,26 @@ export class Session {
    * Update session with new access token (after refresh)
    * Returns new Session instance (immutability)
    */
-  updateAccessToken(newAccessToken: string): Result<Session, ValidationError> {
-    const [error, token] = Token.create(newAccessToken)
-    if (error) return Err(error)
-
-    return Ok(new Session(this.user, token, this.refreshToken, this.createdAt))
+  updateAccessToken(data: UpdateAccessTokenData): Result<Session, ValidationError> {
+    return Session.create({
+      accessToken: data.newAccessToken,
+      createdAt: this.createdAt,
+      refreshToken: this.refreshToken.getValue(),
+      user: this.user,
+    })
   }
 
   /**
    * Update session with new tokens (after full refresh)
    * Returns new Session instance (immutability)
    */
-  updateTokens(newAccessToken: string, newRefreshToken: string): Result<Session, ValidationError> {
-    const [accessError, accessToken] = Token.create(newAccessToken)
-    if (accessError) return Err(accessError)
-
-    const [refreshError, refreshToken] = Token.create(newRefreshToken)
-    if (refreshError) return Err(refreshError)
-
-    return Ok(new Session(this.user, accessToken, refreshToken, this.createdAt))
+  updateTokens(data: UpdateTokensData): Result<Session, ValidationError> {
+    return Session.create({
+      accessToken: data.newAccessToken,
+      createdAt: this.createdAt,
+      refreshToken: data.newRefreshToken,
+      user: this.user,
+    })
   }
 
   // Getters
@@ -218,18 +230,14 @@ export class Session {
 
   /**
    * Convert to plain object (for serialization)
+   * Matches the create() signature for symmetry
    */
-  toObject(): {
-    accessToken: string
-    createdAt: string
-    refreshToken: string
-    user: ReturnType<User['toObject']>
-  } {
+  toObject(): SessionData {
     return {
       accessToken: this.accessToken.getValue(),
-      createdAt: this.createdAt.toISOString(),
+      createdAt: this.createdAt,
       refreshToken: this.refreshToken.getValue(),
-      user: this.user.toObject(),
+      user: this.user,
     }
   }
 
