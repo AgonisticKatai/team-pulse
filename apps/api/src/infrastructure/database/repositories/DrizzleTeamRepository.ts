@@ -107,7 +107,7 @@ export class DrizzleTeamRepository implements ITeamRepository {
    * to domain entities. The domain entity validates itself.
    */
   private mapToDomain(row: typeof teams.$inferSelect): Team {
-    return Team.fromPersistence({
+    const [error, team] = Team.create({
       city: row.city,
       createdAt: new Date(row.createdAt), // Convert from timestamp
       foundedYear: row.foundedYear,
@@ -115,5 +115,13 @@ export class DrizzleTeamRepository implements ITeamRepository {
       name: row.name,
       updatedAt: new Date(row.updatedAt), // Convert from timestamp
     })
+
+    if (error) {
+      // This should never happen with data from the database
+      // since it was validated on creation
+      throw error
+    }
+
+    return team!
   }
 }

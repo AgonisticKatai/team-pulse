@@ -23,6 +23,15 @@ function createUser(data: Parameters<typeof User.create>[0]): User {
   return user!
 }
 
+// Helper to create refresh token and unwrap Result
+function createRefreshToken(data: Parameters<typeof RefreshToken.create>[0]): RefreshToken {
+  const [error, token] = RefreshToken.create(data)
+  if (error) {
+    throw error
+  }
+  return token!
+}
+
 describe('RefreshTokenUseCase', () => {
   let refreshTokenUseCase: RefreshTokenUseCase
   let userRepository: IUserRepository
@@ -40,7 +49,7 @@ describe('RefreshTokenUseCase', () => {
   })
 
   // Mock refresh token (valid, not expired)
-  const mockRefreshToken = RefreshToken.fromPersistence({
+  const mockRefreshToken = createRefreshToken({
     createdAt: new Date('2025-01-01T00:00:00Z'),
     expiresAt: new Date('2025-12-31T23:59:59Z'), // Future date
     id: 'token-123',
@@ -248,7 +257,7 @@ describe('RefreshTokenUseCase', () => {
         }
 
         // Create expired token
-        const expiredToken = RefreshToken.fromPersistence({
+        const expiredToken = createRefreshToken({
           createdAt: new Date('2019-01-01T00:00:00Z'),
           expiresAt: new Date('2020-01-01T00:00:00Z'), // Past date
           id: 'token-123',

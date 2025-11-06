@@ -1,4 +1,11 @@
-import { ValidationError } from '../errors/index.js'
+import type { TeamResponseDTO } from '@team-pulse/shared'
+import type { ValidationError } from '../errors/index.js'
+import { Err, Ok, type Result } from '../types/index.js'
+import { City, EntityId, FoundedYear, TeamName } from '../value-objects/index.js'
+import type { TeamFactoryInput, TeamUpdateInput, TeamValueObjects } from './Team.types.js'
+
+// Re-export public types
+export type { TeamFactoryInput, TeamUpdateInput, TeamValueObjects }
 
 /**
  * Team Domain Entity
@@ -15,97 +22,127 @@ import { ValidationError } from '../errors/index.js'
  * - Pure TypeScript/JavaScript
  *
  * The infrastructure layer is responsible for persisting this entity.
+ *
+ * IMPORTANT: Follows the same pattern as User:
+ * - Uses separate .types.ts file
+ * - NO fromPersistence() method (use create() with timestamps)
+ * - update() calls create() internally
+ * - Self-contained DTO mapping
  */
 export class Team {
-  constructor(
-    public readonly id: string,
-    public readonly name: string,
-    public readonly city: string,
-    public readonly foundedYear: number | null,
-    public readonly createdAt: Date,
-    public readonly updatedAt: Date,
-  ) {
-    // Validate business invariants
-    this.validateInvariants()
+  public readonly id: EntityId
+  public readonly name: TeamName
+  public readonly city: City
+  public readonly foundedYear: FoundedYear | null
+  public readonly createdAt: Date
+  public readonly updatedAt: Date
+
+  private constructor({ id, name, city, foundedYear, createdAt, updatedAt }: TeamValueObjects) {
+    this.id = id
+    this.name = name
+    this.city = city
+    this.foundedYear = foundedYear
+    this.createdAt = createdAt
+    this.updatedAt = updatedAt
   }
 
   /**
-   * Factory method to create a new Team
-   *
-   * Use this instead of constructor for new teams (not from DB)
+   * Validate optional foundedYear
    */
-  static create(data: { id: string; name: string; city: string; foundedYear?: number }): Team {
-    return new Team(data.id, data.name, data.city, data.foundedYear ?? null, new Date(), new Date())
+  private static validateOptionalFoundedYear({
+    foundedYear,
+  }: {
+    foundedYear: number | null | undefined
+  }): Result<FoundedYear | null, ValidationError> {
+    if (foundedYear === null || foundedYear === undefined) {
+      return Ok(null)
+    }
+
+    const [error, foundedYearVO] = FoundedYear.create({ value: foundedYear })
+    if (error) {
+      return Err(error)
+    }
+
+    return Ok(foundedYearVO!)
   }
 
   /**
-   * Factory method to reconstitute a Team from persistence
+   * Factory method to create a new Team from primitives
    *
-   * Use this when loading from database
+   * Use this for:
+   * - Creating new teams
+   * - Reconstituting from database (pass timestamps)
+   * - Any scenario where you have primitive values
+   *
+   * Timestamps are optional - if not provided, will use new Date()
    */
-  static fromPersistence(data: {
-    id: string
-    name: string
-    city: string
-    foundedYear: number | null
-    createdAt: Date
-    updatedAt: Date
-  }): Team {
-    return new Team(data.id, data.name, data.city, data.foundedYear, data.createdAt, data.updatedAt)
+  static create(data: TeamFactoryInput): Result<Team, ValidationError> {
+    // Validate id
+    const [errorId, entityId] = EntityId.create({ value: data.id })
+    if (errorId) {
+      return Err(errorId)
+    }
+
+    // Validate name
+    const [errorName, nameVO] = TeamName.create({ value: data.name })
+    if (errorName) {
+      return Err(errorName)
+    }
+
+    // Validate city
+    const [errorCity, cityVO] = City.create({ value: data.city })
+    if (errorCity) {
+      return Err(errorCity)
+    }
+
+    // Validate foundedYear (optional)
+    const [errorFoundedYear, foundedYearVO] = Team.validateOptionalFoundedYear({
+      foundedYear: data.foundedYear,
+    })
+    if (errorFoundedYear) {
+      return Err(errorFoundedYear)
+    }
+
+    return Ok(
+      new Team({
+        city: cityVO!,
+        createdAt: data.createdAt ?? new Date(),
+        foundedYear: foundedYearVO,
+        id: entityId!,
+        name: nameVO!,
+        updatedAt: data.updatedAt ?? new Date(),
+      }),
+    )
   }
 
   /**
-   * Validate business invariants
+   * Factory method to create Team from validated Value Objects
    *
-   * These are the BUSINESS RULES that must always be true
+   * Use this when you already have validated Value Objects
+   * and don't want to re-validate them.
+   *
+   * NO validation is performed (Value Objects are already validated)
    */
-  private validateInvariants(): void {
-    // Name must not be empty and must be reasonable length
-    if (!this.name || this.name.trim().length === 0) {
-      throw new ValidationError('Team name cannot be empty', 'name')
-    }
-
-    if (this.name.length > 100) {
-      throw new ValidationError('Team name cannot exceed 100 characters', 'name')
-    }
-
-    // City must not be empty
-    if (!this.city || this.city.trim().length === 0) {
-      throw new ValidationError('Team city cannot be empty', 'city')
-    }
-
-    if (this.city.length > 100) {
-      throw new ValidationError('Team city cannot exceed 100 characters', 'city')
-    }
-
-    // Founded year validation (if provided)
-    if (this.foundedYear !== null) {
-      const currentYear = new Date().getFullYear()
-      const minYear = 1800 // Football modern rules started ~1860s
-
-      if (this.foundedYear < minYear || this.foundedYear > currentYear) {
-        throw new ValidationError(
-          `Team founded year must be between ${minYear} and ${currentYear}`,
-          'foundedYear',
-        )
-      }
-    }
+  static fromValueObjects(props: TeamValueObjects): Team {
+    return new Team(props)
   }
 
   /**
    * Update team information
    *
    * Returns a new Team instance (immutability)
+   * Internally calls create() to ensure validation
    */
-  update(data: { name?: string; city?: string; foundedYear?: number | null }): Team {
-    return new Team(
-      this.id,
-      data.name ?? this.name,
-      data.city ?? this.city,
-      data.foundedYear === undefined ? this.foundedYear : data.foundedYear,
-      this.createdAt,
-      new Date(), // Update timestamp
-    )
+  update(data: TeamUpdateInput): Result<Team, ValidationError> {
+    return Team.create({
+      city: data.city ?? this.city.getValue(),
+      createdAt: this.createdAt,
+      foundedYear:
+        data.foundedYear === undefined ? (this.foundedYear?.getValue() ?? null) : data.foundedYear,
+      id: this.id.getValue(),
+      name: data.name ?? this.name.getValue(),
+      updatedAt: new Date(),
+    })
   }
 
   /**
@@ -120,12 +157,28 @@ export class Team {
     updatedAt: Date
   } {
     return {
-      city: this.city,
+      city: this.city.getValue(),
       createdAt: this.createdAt,
-      foundedYear: this.foundedYear,
-      id: this.id,
-      name: this.name,
+      foundedYear: this.foundedYear?.getValue() ?? null,
+      id: this.id.getValue(),
+      name: this.name.getValue(),
       updatedAt: this.updatedAt,
+    }
+  }
+
+  /**
+   * Convert to TeamResponseDTO (for API responses)
+   *
+   * Dates are converted to ISO strings for JSON serialization
+   */
+  toDTO(): TeamResponseDTO {
+    return {
+      city: this.city.getValue(),
+      createdAt: this.createdAt.toISOString(),
+      foundedYear: this.foundedYear?.getValue() ?? null,
+      id: this.id.getValue(),
+      name: this.name.getValue(),
+      updatedAt: this.updatedAt.toISOString(),
     }
   }
 }

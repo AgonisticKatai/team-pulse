@@ -1,3 +1,6 @@
+export { City } from './City.js'
 export { Email } from './Email.js'
 export { EntityId } from './EntityId.js'
+export { FoundedYear } from './FoundedYear.js'
 export { Role, UserRole } from './Role.js'
+export { TeamName } from './TeamName.js'

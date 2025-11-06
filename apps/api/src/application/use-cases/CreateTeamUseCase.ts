@@ -36,34 +36,21 @@ export class CreateTeamUseCase {
 
     // Create domain entity
     // The Team entity validates its own invariants
-    const team = Team.create({
+    const [error, team] = Team.create({
       city: dto.city,
       foundedYear: dto.foundedYear ?? undefined,
       id: randomUUID(),
       name: dto.name,
     })
 
+    if (error) {
+      throw error
+    }
+
     // Persist
-    const savedTeam = await this.teamRepository.save(team)
+    const savedTeam = await this.teamRepository.save(team!)
 
     // Map to response DTO
-    return this.mapToResponseDTO(savedTeam)
-  }
-
-  /**
-   * Map domain entity to response DTO
-   *
-   * This is where you control what data goes to the client
-   */
-  private mapToResponseDTO(team: Team): TeamResponseDTO {
-    const obj = team.toObject()
-    return {
-      city: obj.city,
-      createdAt: obj.createdAt.toISOString(),
-      foundedYear: obj.foundedYear,
-      id: obj.id,
-      name: obj.name,
-      updatedAt: obj.updatedAt.toISOString(),
-    }
+    return savedTeam.toDTO()
   }
 }

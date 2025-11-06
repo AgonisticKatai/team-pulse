@@ -229,9 +229,9 @@ describe('LoginUseCase', () => {
         expect(refreshTokenRepository.save).toHaveBeenCalledTimes(1)
         const savedToken = expectMockCallArg<RefreshToken>(vi.mocked(refreshTokenRepository.save))
         expect(savedToken).toBeInstanceOf(RefreshToken)
-        expect(savedToken.id).toBe('mock-uuid')
+        expect(savedToken.id.getValue()).toBe('mock-uuid')
         expect(savedToken.token).toBe('mock-refresh-token')
-        expect(savedToken.userId).toBe('user-123')
+        expect(savedToken.userId.getValue()).toBe('user-123')
         expect(savedToken.expiresAt).toEqual(new Date('2025-12-31T23:59:59Z'))
       })
 

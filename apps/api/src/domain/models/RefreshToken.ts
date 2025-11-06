@@ -1,4 +1,10 @@
 import { ValidationError } from '../errors/index.js'
+import { Err, Ok, type Result } from '../types/index.js'
+import { EntityId } from '../value-objects/index.js'
+import type { RefreshTokenFactoryInput, RefreshTokenValueObjects } from './RefreshToken.types.js'
+
+// Re-export public types
+export type { RefreshTokenFactoryInput, RefreshTokenValueObjects }
 
 /**
  * RefreshToken Domain Entity
@@ -15,67 +21,89 @@ import { ValidationError } from '../errors/index.js'
  * - No database dependencies
  * - No HTTP dependencies
  * - Pure TypeScript/JavaScript
+ *
+ * IMPORTANT: Follows the same pattern as User and Team:
+ * - Uses separate .types.ts file
+ * - NO fromPersistence() method (use create() with timestamps)
+ * - Returns Result for error handling
  */
 export class RefreshToken {
-  constructor(
-    public readonly id: string,
-    public readonly token: string,
-    public readonly userId: string,
-    public readonly expiresAt: Date,
-    public readonly createdAt: Date,
-  ) {
-    // Validate business invariants
-    this.validateInvariants()
+  public readonly id: EntityId
+  public readonly token: string
+  public readonly userId: EntityId
+  public readonly expiresAt: Date
+  public readonly createdAt: Date
+
+  private constructor({ id, token, userId, expiresAt, createdAt }: RefreshTokenValueObjects) {
+    this.id = id
+    this.token = token
+    this.userId = userId
+    this.expiresAt = expiresAt
+    this.createdAt = createdAt
   }
 
   /**
-   * Factory method to create a new RefreshToken
-   *
-   * Use this instead of constructor for new tokens (not from DB)
+   * Validate token is not empty
    */
-  static create(data: {
-    id: string
-    token: string
-    userId: string
-    expiresAt: Date
-  }): RefreshToken {
-    return new RefreshToken(data.id, data.token, data.userId, data.expiresAt, new Date())
+  private static validateToken({ token }: { token: string }): Result<string, ValidationError> {
+    if (!token || token.trim().length === 0) {
+      return Err(
+        ValidationError.forField({ field: 'token', message: 'Refresh token cannot be empty' }),
+      )
+    }
+    return Ok(token)
   }
 
   /**
-   * Factory method to reconstitute a RefreshToken from persistence
+   * Factory method to create a new RefreshToken from primitives
    *
-   * Use this when loading from database
-   */
-  static fromPersistence(data: {
-    id: string
-    token: string
-    userId: string
-    expiresAt: Date
-    createdAt: Date
-  }): RefreshToken {
-    return new RefreshToken(data.id, data.token, data.userId, data.expiresAt, data.createdAt)
-  }
-
-  /**
-   * Validate business invariants
+   * Use this for:
+   * - Creating new refresh tokens
+   * - Reconstituting from database (pass timestamps)
+   * - Any scenario where you have primitive values
    *
-   * These are the BUSINESS RULES that must always be true
+   * Timestamps are optional - if not provided, will use new Date()
    */
-  private validateInvariants(): void {
-    // Token must not be empty
-    if (!this.token || this.token.trim().length === 0) {
-      throw new ValidationError('Refresh token cannot be empty', 'token')
+  static create(data: RefreshTokenFactoryInput): Result<RefreshToken, ValidationError> {
+    // Validate id
+    const [errorId, entityId] = EntityId.create({ value: data.id })
+    if (errorId) {
+      return Err(errorId)
     }
 
-    // User ID must not be empty
-    if (!this.userId || this.userId.trim().length === 0) {
-      throw new ValidationError('User ID cannot be empty', 'userId')
+    // Validate token
+    const [errorToken, validatedToken] = RefreshToken.validateToken({ token: data.token })
+    if (errorToken) {
+      return Err(errorToken)
     }
 
-    // Expiration date must be in the future (when creating)
-    // Note: We allow expired tokens to exist for historical purposes
-    // The isExpired() method will handle runtime expiration checks
+    // Validate userId
+    const [errorUserId, userIdVO] = EntityId.create({ value: data.userId })
+    if (errorUserId) {
+      return Err(errorUserId)
+    }
+
+    return Ok(
+      new RefreshToken({
+        createdAt: data.createdAt ?? new Date(),
+        expiresAt: data.expiresAt,
+        id: entityId!,
+        token: validatedToken!,
+        userId: userIdVO!,
+      }),
+    )
+  }
+
+  /**
+   * Factory method to create RefreshToken from validated Value Objects
+   *
+   * Use this when you already have validated Value Objects
+   * and don't want to re-validate them.
+   *
+   * NO validation is performed (Value Objects are already validated)
+   */
+  static fromValueObjects(props: RefreshTokenValueObjects): RefreshToken {
+    return new RefreshToken(props)
   }
 
   /**
@@ -105,9 +133,9 @@ export class RefreshToken {
     return {
       createdAt: this.createdAt,
       expiresAt: this.expiresAt,
-      id: this.id,
+      id: this.id.getValue(),
       token: this.token,
-      userId: this.userId,
+      userId: this.userId.getValue(),
     }
   }
 }

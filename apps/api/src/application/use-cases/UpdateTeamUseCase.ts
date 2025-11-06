@@ -1,6 +1,5 @@
 import type { TeamResponseDTO, UpdateTeamDTO } from '@team-pulse/shared'
 import { NotFoundError, ValidationError } from '../../domain/errors/index.js'
-import type { Team } from '../../domain/models/Team.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
 
 /**
@@ -19,35 +18,27 @@ export class UpdateTeamUseCase {
     }
 
     // Business Rule: If updating name, check uniqueness
-    if (dto.name && dto.name !== existingTeam.name) {
+    if (dto.name && dto.name !== existingTeam.name.getValue()) {
       const teamWithSameName = await this.teamRepository.findByName(dto.name)
-      if (teamWithSameName && teamWithSameName.id !== id) {
+      if (teamWithSameName && teamWithSameName.id.getValue() !== id) {
         throw new ValidationError(`A team with name "${dto.name}" already exists`, 'name')
       }
     }
 
     // Update domain entity (immutable update)
-    const updatedTeam = existingTeam.update({
+    const [error, updatedTeam] = existingTeam.update({
       city: dto.city,
       foundedYear: dto.foundedYear,
       name: dto.name,
     })
 
-    // Persist
-    const savedTeam = await this.teamRepository.save(updatedTeam)
-
-    return this.mapToResponseDTO(savedTeam)
-  }
-
-  private mapToResponseDTO(team: Team): TeamResponseDTO {
-    const obj = team.toObject()
-    return {
-      city: obj.city,
-      createdAt: obj.createdAt.toISOString(),
-      foundedYear: obj.foundedYear,
-      id: obj.id,
-      name: obj.name,
-      updatedAt: obj.updatedAt.toISOString(),
+    if (error) {
+      throw error
     }
+
+    // Persist
+    const savedTeam = await this.teamRepository.save(updatedTeam!)
+
+    return savedTeam.toDTO()
   }
 }
