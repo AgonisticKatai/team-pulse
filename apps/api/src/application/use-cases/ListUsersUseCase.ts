@@ -1,4 +1,4 @@
-import type { UserResponseDTO, UsersListResponseDTO } from '@team-pulse/shared'
+import type { UsersListResponseDTO } from '@team-pulse/shared'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 
 /**
@@ -24,16 +24,7 @@ export class ListUsersUseCase {
     const users = await this.userRepository.findAll()
 
     // Map to response DTOs
-    const userDTOs = users.map((user): UserResponseDTO => {
-      const obj = user.toObject()
-      return {
-        createdAt: obj.createdAt.toISOString(),
-        email: obj.email,
-        id: obj.id,
-        role: obj.role,
-        updatedAt: obj.updatedAt.toISOString(),
-      }
-    })
+    const userDTOs = users.map((user) => user.toDTO())
 
     return {
       total: userDTOs.length,

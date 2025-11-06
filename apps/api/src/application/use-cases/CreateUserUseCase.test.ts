@@ -20,7 +20,7 @@ describe('CreateUserUseCase', () => {
   let userRepository: IUserRepository
 
   // Mock user data
-  const mockUser = User.fromPersistence({
+  const [, mockUser] = User.create({
     createdAt: new Date('2025-01-01T00:00:00Z'),
     email: 'newuser@example.com',
     id: 'mock-uuid',
@@ -59,7 +59,7 @@ describe('CreateUserUseCase', () => {
         }
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.save).mockResolvedValue(mockUser!)
 
         // Act
         const result = await createUserUseCase.execute(dto)
@@ -80,7 +80,7 @@ describe('CreateUserUseCase', () => {
         }
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.save).mockResolvedValue(mockUser!)
 
         // Act
         await createUserUseCase.execute(dto)
@@ -99,7 +99,7 @@ describe('CreateUserUseCase', () => {
         }
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.save).mockResolvedValue(mockUser!)
 
         const { hashPassword } = await import('../../infrastructure/auth/passwordUtils.js')
 
@@ -120,7 +120,7 @@ describe('CreateUserUseCase', () => {
         }
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.save).mockResolvedValue(mockUser!)
 
         // Act
         await createUserUseCase.execute(dto)
@@ -129,9 +129,9 @@ describe('CreateUserUseCase', () => {
         expect(userRepository.save).toHaveBeenCalledTimes(1)
         const savedUser = expectMockCallArg<User>(vi.mocked(userRepository.save))
         expect(savedUser).toBeInstanceOf(User)
-        expect(savedUser.email).toBe('newuser@example.com')
+        expect(savedUser.email.getValue()).toBe('newuser@example.com')
         expect(savedUser.getPasswordHash()).toBe('hashed-password')
-        expect(savedUser.role).toBe('USER')
+        expect(savedUser.role.getValue()).toBe('USER')
       })
 
       it('should return user DTO without password hash', async () => {
@@ -143,7 +143,7 @@ describe('CreateUserUseCase', () => {
         }
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.save).mockResolvedValue(mockUser!)
 
         // Act
         const result = await createUserUseCase.execute(dto)
@@ -168,7 +168,7 @@ describe('CreateUserUseCase', () => {
         }
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.save).mockResolvedValue(mockUser!)
 
         // Act
         const result = await createUserUseCase.execute(dto)
@@ -184,7 +184,7 @@ describe('CreateUserUseCase', () => {
     describe('error cases', () => {
       it('should throw ValidationError when email already exists', async () => {
         // Arrange
-        const existingUser = User.fromPersistence({
+        const [, existingUser] = User.create({
           createdAt: new Date(),
           email: 'existing@example.com',
           id: 'existing-123',
@@ -199,7 +199,7 @@ describe('CreateUserUseCase', () => {
           role: 'USER',
         }
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(existingUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(existingUser!)
 
         // Act
         let error: ValidationError | undefined
@@ -218,7 +218,7 @@ describe('CreateUserUseCase', () => {
 
       it('should not hash password when email already exists', async () => {
         // Arrange
-        const existingUser = User.fromPersistence({
+        const [, existingUser] = User.create({
           createdAt: new Date(),
           email: 'existing@example.com',
           id: 'existing-123',
@@ -233,7 +233,7 @@ describe('CreateUserUseCase', () => {
           role: 'USER',
         }
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(existingUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(existingUser!)
 
         const { hashPassword } = await import('../../infrastructure/auth/passwordUtils.js')
 
@@ -253,7 +253,7 @@ describe('CreateUserUseCase', () => {
     describe('edge cases', () => {
       it('should handle user with ADMIN role', async () => {
         // Arrange
-        const adminUser = User.fromPersistence({
+        const [, adminUser] = User.create({
           createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'admin@example.com',
           id: 'mock-uuid',
@@ -269,7 +269,7 @@ describe('CreateUserUseCase', () => {
         }
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(adminUser)
+        vi.mocked(userRepository.save).mockResolvedValue(adminUser!)
 
         // Act
         const result = await createUserUseCase.execute(dto)
@@ -277,12 +277,12 @@ describe('CreateUserUseCase', () => {
         // Assert
         expect(result.role).toBe('ADMIN')
         const savedUser = expectMockCallArg<User>(vi.mocked(userRepository.save))
-        expect(savedUser.role).toBe('ADMIN')
+        expect(savedUser.role.getValue()).toBe('ADMIN')
       })
 
       it('should handle user with SUPER_ADMIN role', async () => {
         // Arrange
-        const superAdminUser = User.fromPersistence({
+        const [, superAdminUser] = User.create({
           createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'superadmin@example.com',
           id: 'mock-uuid',
@@ -298,7 +298,7 @@ describe('CreateUserUseCase', () => {
         }
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(superAdminUser)
+        vi.mocked(userRepository.save).mockResolvedValue(superAdminUser!)
 
         // Act
         const result = await createUserUseCase.execute(dto)
@@ -306,7 +306,7 @@ describe('CreateUserUseCase', () => {
         // Assert
         expect(result.role).toBe('SUPER_ADMIN')
         const savedUser = expectMockCallArg<User>(vi.mocked(userRepository.save))
-        expect(savedUser.role).toBe('SUPER_ADMIN')
+        expect(savedUser.role.getValue()).toBe('SUPER_ADMIN')
       })
 
       it('should generate UUID for new user', async () => {
@@ -318,7 +318,7 @@ describe('CreateUserUseCase', () => {
         }
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.save).mockResolvedValue(mockUser!)
 
         const { randomUUID } = await import('node:crypto')
 
@@ -328,7 +328,7 @@ describe('CreateUserUseCase', () => {
         // Assert
         expect(randomUUID).toHaveBeenCalled()
         const savedUser = expectMockCallArg<User>(vi.mocked(userRepository.save))
-        expect(savedUser.id).toBe('mock-uuid')
+        expect(savedUser.id.getValue()).toBe('mock-uuid')
       })
     })
   })

@@ -1,5 +1,17 @@
-import type { UserRole } from '@team-pulse/shared'
+import type { UserResponseDTO } from '@team-pulse/shared'
 import { ValidationError } from '../errors/index.js'
+import { Err, Ok, type Result } from '../types/index.js'
+import { Email, EntityId, Role, UserRole } from '../value-objects/index.js'
+import type {
+  CreateUserData,
+  UpdateUserData,
+  UserConstructorProps,
+  UserData,
+  UserProps,
+} from './User.types.js'
+
+// Re-export public types
+export type { CreateUserData, UpdateUserData, UserData, UserProps }
 
 /**
  * User Domain Entity
@@ -16,83 +28,112 @@ import { ValidationError } from '../errors/index.js'
  * - Pure TypeScript/JavaScript
  *
  * The infrastructure layer is responsible for persisting this entity.
+ *
+ * IMPORTANT: Follows the same pattern as Frontend User:
+ * - Uses separate .types.ts file
+ * - NO fromPersistence() method (use create() with timestamps)
+ * - update() calls create() internally
+ * - Self-contained DTO mapping
  */
 export class User {
-  constructor(
-    public readonly id: string,
-    public readonly email: string,
-    private readonly passwordHash: string,
-    public readonly role: UserRole,
-    public readonly createdAt: Date,
-    public readonly updatedAt: Date,
-  ) {
-    // Validate business invariants
-    this.validateInvariants()
+  public readonly id: EntityId
+  public readonly email: Email
+  private readonly passwordHash: string
+  public readonly role: Role
+  public readonly createdAt: Date
+  public readonly updatedAt: Date
+
+  private constructor({
+    id,
+    email,
+    passwordHash,
+    role,
+    createdAt,
+    updatedAt,
+  }: UserConstructorProps) {
+    this.id = id
+    this.email = email
+    this.passwordHash = passwordHash
+    this.role = role
+    this.createdAt = createdAt
+    this.updatedAt = updatedAt
   }
 
   /**
-   * Factory method to create a new User
-   *
-   * Use this instead of constructor for new users (not from DB)
+   * Validate password hash
    */
-  static create(data: { id: string; email: string; passwordHash: string; role: UserRole }): User {
-    return new User(data.id, data.email, data.passwordHash, data.role, new Date(), new Date())
-  }
-
-  /**
-   * Factory method to reconstitute a User from persistence
-   *
-   * Use this when loading from database
-   */
-  static fromPersistence(data: {
-    id: string
-    email: string
+  private static validatePasswordHash({
+    passwordHash,
+  }: {
     passwordHash: string
-    role: UserRole
-    createdAt: Date
-    updatedAt: Date
-  }): User {
-    return new User(
-      data.id,
-      data.email,
-      data.passwordHash,
-      data.role,
-      data.createdAt,
-      data.updatedAt,
+  }): Result<string, ValidationError> {
+    if (!passwordHash || passwordHash.trim().length === 0) {
+      return Err(
+        ValidationError.forField({ field: 'password', message: 'Password hash is required' }),
+      )
+    }
+    return Ok(passwordHash)
+  }
+
+  /**
+   * Factory method to create a new User from primitives
+   *
+   * Use this for:
+   * - Creating new users
+   * - Reconstituting from database (pass timestamps)
+   * - Any scenario where you have primitive values
+   *
+   * Timestamps are optional - if not provided, will use new Date()
+   */
+  static create(data: CreateUserData): Result<User, ValidationError> {
+    // Validate id
+    const [errorId, entityId] = EntityId.create({ value: data.id })
+    if (errorId) {
+      return Err(errorId)
+    }
+
+    // Validate email
+    const [errorEmail, emailVO] = Email.create({ value: data.email })
+    if (errorEmail) {
+      return Err(errorEmail)
+    }
+
+    // Validate password hash
+    const [errorPassword, validatedPasswordHash] = User.validatePasswordHash({
+      passwordHash: data.passwordHash,
+    })
+    if (errorPassword) {
+      return Err(errorPassword)
+    }
+
+    // Validate role
+    const [errorRole, roleVO] = Role.create({ value: data.role })
+    if (errorRole) {
+      return Err(errorRole)
+    }
+
+    return Ok(
+      new User({
+        createdAt: data.createdAt ?? new Date(),
+        email: emailVO!,
+        id: entityId!,
+        passwordHash: validatedPasswordHash!,
+        role: roleVO!,
+        updatedAt: data.updatedAt ?? new Date(),
+      }),
     )
   }
 
   /**
-   * Validate business invariants
+   * Factory method to create User from validated Value Objects
    *
-   * These are the BUSINESS RULES that must always be true
+   * Use this when you already have validated Value Objects
+   * and don't want to re-validate them.
+   *
+   * NO validation is performed (Value Objects are already validated)
    */
-  private validateInvariants(): void {
-    // Email validation - basic format check
-    if (!this.email || this.email.trim().length === 0) {
-      throw new ValidationError('Email cannot be empty', 'email')
-    }
-
-    // Simple email regex validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(this.email)) {
-      throw new ValidationError('Invalid email format', 'email')
-    }
-
-    if (this.email.length > 255) {
-      throw new ValidationError('Email cannot exceed 255 characters', 'email')
-    }
-
-    // Role validation
-    const validRoles: UserRole[] = ['SUPER_ADMIN', 'ADMIN', 'USER']
-    if (!validRoles.includes(this.role)) {
-      throw new ValidationError(`Invalid role. Must be one of: ${validRoles.join(', ')}`, 'role')
-    }
-
-    // Password hash validation
-    if (!this.passwordHash || this.passwordHash.trim().length === 0) {
-      throw new ValidationError('Password hash cannot be empty', 'password')
-    }
+  static fromValueObjects(props: UserProps): User {
+    return new User(props)
   }
 
   /**
@@ -109,51 +150,55 @@ export class User {
    * Update user information
    *
    * Returns a new User instance (immutability)
+   * Internally calls create() to ensure validation
    */
-  update(data: { email?: string; passwordHash?: string; role?: UserRole }): User {
-    return new User(
-      this.id,
-      data.email ?? this.email,
-      data.passwordHash ?? this.passwordHash,
-      data.role ?? this.role,
-      this.createdAt,
-      new Date(), // Update timestamp
-    )
+  update(data: UpdateUserData): Result<User, ValidationError> {
+    return User.create({
+      createdAt: this.createdAt,
+      email: data.email ?? this.email.getValue(),
+      id: this.id.getValue(),
+      passwordHash: data.passwordHash ?? this.passwordHash,
+      role: data.role ?? this.role.getValue(),
+      updatedAt: new Date(),
+    })
   }
 
   /**
    * Check if user has a specific role
    */
-  hasRole(role: UserRole): boolean {
-    return this.role === role
+  hasRole(role: string): boolean {
+    const [, roleVO] = Role.create({ value: role })
+    if (!roleVO) {
+      return false
+    }
+    return this.role.equals({ other: roleVO })
   }
 
   /**
    * Check if user has at least the specified role level
    * SUPER_ADMIN > ADMIN > USER
    */
-  hasRoleLevel(minimumRole: UserRole): boolean {
-    const roleHierarchy: Record<UserRole, number> = {
-      ADMIN: 2,
-      SUPER_ADMIN: 3,
-      USER: 1,
+  hasRoleLevel(minimumRole: string): boolean {
+    const [, minimumRoleVO] = Role.create({ value: minimumRole })
+    if (!minimumRoleVO) {
+      return false
     }
-
-    return roleHierarchy[this.role] >= roleHierarchy[minimumRole]
+    return this.role.hasLevelOf({ other: minimumRoleVO })
   }
 
   /**
    * Check if user is SUPER_ADMIN
    */
   isSuperAdmin(): boolean {
-    return this.role === 'SUPER_ADMIN'
+    return this.role.getValue() === UserRole.SUPER_ADMIN
   }
 
   /**
    * Check if user is ADMIN or SUPER_ADMIN
    */
   isAdmin(): boolean {
-    return this.role === 'ADMIN' || this.role === 'SUPER_ADMIN'
+    const roleValue = this.role.getValue()
+    return roleValue === UserRole.ADMIN || roleValue === UserRole.SUPER_ADMIN
   }
 
   /**
@@ -161,19 +206,29 @@ export class User {
    *
    * IMPORTANT: Does NOT include passwordHash for security
    */
-  toObject(): {
-    id: string
-    email: string
-    role: UserRole
-    createdAt: Date
-    updatedAt: Date
-  } {
+  toObject(): UserData {
     return {
       createdAt: this.createdAt,
-      email: this.email,
-      id: this.id,
-      role: this.role,
+      email: this.email.getValue(),
+      id: this.id.getValue(),
+      role: this.role.getValue(),
       updatedAt: this.updatedAt,
+    }
+  }
+
+  /**
+   * Convert to UserResponseDTO (for API responses)
+   *
+   * Dates are converted to ISO strings for JSON serialization
+   * IMPORTANT: Does NOT include passwordHash for security
+   */
+  toDTO(): UserResponseDTO {
+    return {
+      createdAt: this.createdAt.toISOString(),
+      email: this.email.getValue(),
+      id: this.id.getValue(),
+      role: this.role.getValue(),
+      updatedAt: this.updatedAt.toISOString(),
     }
   }
 }

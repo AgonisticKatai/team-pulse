@@ -39,15 +39,19 @@ export class CreateUserUseCase {
 
     // Create domain entity
     // The User entity validates its own invariants
-    const user = User.create({
+    const [error, user] = User.create({
       email: dto.email,
       id: randomUUID(),
       passwordHash,
       role: dto.role,
     })
 
+    if (error) {
+      throw error
+    }
+
     // Persist
-    const savedUser = await this.userRepository.save(user)
+    const savedUser = await this.userRepository.save(user!)
 
     // Map to response DTO (WITHOUT password hash)
     return this.mapToResponseDTO(savedUser)
@@ -59,13 +63,6 @@ export class CreateUserUseCase {
    * IMPORTANT: Does NOT include password hash for security
    */
   private mapToResponseDTO(user: User): UserResponseDTO {
-    const obj = user.toObject()
-    return {
-      createdAt: obj.createdAt.toISOString(),
-      email: obj.email,
-      id: obj.id,
-      role: obj.role,
-      updatedAt: obj.updatedAt.toISOString(),
-    }
+    return user.toDTO()
   }
 }

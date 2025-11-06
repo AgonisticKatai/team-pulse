@@ -114,9 +114,12 @@ export class DrizzleUserRepository implements IUserRepository {
    *
    * This is where we convert infrastructure data structures
    * to domain entities. The domain entity validates itself.
+   *
+   * TODO (Tech Debt): This throws when validation fails. After error handling migration,
+   * this should return Result and propagate to use cases.
    */
   private mapToDomain(row: typeof users.$inferSelect): User {
-    return User.fromPersistence({
+    const [error, user] = User.create({
       createdAt: new Date(row.createdAt),
       email: row.email,
       id: row.id,
@@ -124,5 +127,14 @@ export class DrizzleUserRepository implements IUserRepository {
       role: row.role as UserRole, // Type assertion safe because DB enforces valid values
       updatedAt: new Date(row.updatedAt),
     })
+
+    if (error) {
+      // Data corruption - should never happen in production
+      throw new Error(
+        `Failed to map database row to User entity: ${error.message}. User ID: ${row.id}`,
+      )
+    }
+
+    return user!
   }
 }

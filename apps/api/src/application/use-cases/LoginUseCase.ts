@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import type { LoginDTO, LoginResponseDTO, UserResponseDTO } from '@team-pulse/shared'
 import { ValidationError } from '../../domain/errors/index.js'
 import { RefreshToken } from '../../domain/models/RefreshToken.js'
+import type { User } from '../../domain/models/User.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import {
@@ -57,9 +58,9 @@ export class LoginUseCase {
 
     const accessToken = generateAccessToken(
       {
-        email: user.email,
-        role: user.role,
-        userId: user.id,
+        email: user.email.getValue(),
+        role: user.role.getValue(),
+        userId: user.id.getValue(),
       },
       this.env,
     )
@@ -67,7 +68,7 @@ export class LoginUseCase {
     const refreshTokenString = generateRefreshToken(
       {
         tokenId: refreshTokenId,
-        userId: user.id,
+        userId: user.id.getValue(),
       },
       this.env,
     )
@@ -77,7 +78,7 @@ export class LoginUseCase {
       expiresAt: getRefreshTokenExpirationDate(),
       id: refreshTokenId,
       token: refreshTokenString,
-      userId: user.id,
+      userId: user.id.getValue(),
     })
 
     await this.refreshTokenRepository.save(refreshToken)
@@ -93,16 +94,7 @@ export class LoginUseCase {
   /**
    * Map domain entity to user response DTO
    */
-  private mapToUserDTO(
-    user: typeof import('../../domain/models/User.js').User.prototype,
-  ): UserResponseDTO {
-    const obj = user.toObject()
-    return {
-      createdAt: obj.createdAt.toISOString(),
-      email: obj.email,
-      id: obj.id,
-      role: obj.role,
-      updatedAt: obj.updatedAt.toISOString(),
-    }
+  private mapToUserDTO(user: User): UserResponseDTO {
+    return user.toDTO()
   }
 }

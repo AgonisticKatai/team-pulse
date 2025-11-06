@@ -24,6 +24,15 @@ vi.mock('node:crypto', () => ({
   randomUUID: vi.fn(() => 'mock-uuid'),
 }))
 
+// Helper to create user from persistence and unwrap Result
+function createUser(data: Parameters<typeof User.create>[0]): User {
+  const [error, user] = User.create(data)
+  if (error) {
+    throw error
+  }
+  return user!
+}
+
 describe('LoginUseCase', () => {
   let loginUseCase: LoginUseCase
   let userRepository: IUserRepository
@@ -31,7 +40,7 @@ describe('LoginUseCase', () => {
   let env: Env
 
   // Mock user data (using fromPersistence to control dates in tests)
-  const mockUser = User.fromPersistence({
+  const mockUser = createUser({
     createdAt: new Date('2025-01-01T00:00:00Z'),
     email: 'test@example.com',
     id: 'user-123',
@@ -362,7 +371,7 @@ describe('LoginUseCase', () => {
     describe('edge cases', () => {
       it('should handle user with ADMIN role', async () => {
         // Arrange
-        const adminUser = User.fromPersistence({
+        const adminUser = createUser({
           createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'admin@example.com',
           id: 'admin-123',
@@ -389,7 +398,7 @@ describe('LoginUseCase', () => {
 
       it('should handle user with SUPER_ADMIN role', async () => {
         // Arrange
-        const superAdminUser = User.fromPersistence({
+        const superAdminUser = createUser({
           createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'superadmin@example.com',
           id: 'super-admin-123',

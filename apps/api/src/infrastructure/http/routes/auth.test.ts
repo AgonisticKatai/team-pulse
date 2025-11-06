@@ -51,22 +51,22 @@ describe('Authentication Endpoints', () => {
     const userPasswordHash = await hashPassword(testUserPassword)
     const adminPasswordHash = await hashPassword(testAdminPassword)
 
-    const testUser = User.create({
+    const [, testUser] = User.create({
       email: testUserEmail,
       id: 'test-user',
       passwordHash: userPasswordHash,
       role: 'USER',
     })
 
-    const testAdmin = User.create({
+    const [, testAdmin] = User.create({
       email: testAdminEmail,
       id: 'test-admin',
       passwordHash: adminPasswordHash,
       role: 'ADMIN',
     })
 
-    await container.userRepository.save(testUser)
-    await container.userRepository.save(testAdmin)
+    await container.userRepository.save(testUser!)
+    await container.userRepository.save(testAdmin!)
   })
 
   afterEach(async () => {

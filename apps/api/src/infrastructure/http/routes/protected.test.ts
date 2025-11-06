@@ -45,30 +45,30 @@ describe('Protected Routes and RBAC', () => {
     const adminEmail = 'admin@test.com'
     const userEmail = 'user@test.com'
 
-    const superAdmin = User.create({
+    const [, superAdmin] = User.create({
       email: superAdminEmail,
       id: 'super-admin',
       passwordHash: await hashPassword('SuperAdmin123!'),
       role: 'SUPER_ADMIN',
     })
 
-    const admin = User.create({
+    const [, admin] = User.create({
       email: adminEmail,
       id: 'admin',
       passwordHash: await hashPassword('Admin123!'),
       role: 'ADMIN',
     })
 
-    const user = User.create({
+    const [, user] = User.create({
       email: userEmail,
       id: 'user',
       passwordHash: await hashPassword('User123!'),
       role: 'USER',
     })
 
-    await container.userRepository.save(superAdmin)
-    await container.userRepository.save(admin)
-    await container.userRepository.save(user)
+    await container.userRepository.save(superAdmin!)
+    await container.userRepository.save(admin!)
+    await container.userRepository.save(user!)
 
     // Get tokens for each user
     const superAdminLogin = await app.inject({

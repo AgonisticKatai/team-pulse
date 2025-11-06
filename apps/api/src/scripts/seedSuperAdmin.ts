@@ -56,15 +56,19 @@ async function seedSuperAdmin() {
     const passwordHash = await hashPassword(password)
 
     // 6. Create user entity
-    const user = User.create({
+    const [error, user] = User.create({
       email,
       id: randomUUID(),
       passwordHash,
       role: 'SUPER_ADMIN',
     })
 
+    if (error) {
+      throw new Error(`Failed to create SUPER_ADMIN user: ${error.message}`)
+    }
+
     // 7. Save to database
-    await userRepository.save(user)
+    await userRepository.save(user!)
 
     console.log('✅ SUPER_ADMIN user created successfully!')
     console.log('')

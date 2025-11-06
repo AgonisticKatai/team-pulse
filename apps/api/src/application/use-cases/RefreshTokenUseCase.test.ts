@@ -14,6 +14,15 @@ vi.mock('../../infrastructure/auth/jwtUtils.js', () => ({
   verifyRefreshToken: vi.fn(),
 }))
 
+// Helper to create user from persistence and unwrap Result
+function createUser(data: Parameters<typeof User.create>[0]): User {
+  const [error, user] = User.create(data)
+  if (error) {
+    throw error
+  }
+  return user!
+}
+
 describe('RefreshTokenUseCase', () => {
   let refreshTokenUseCase: RefreshTokenUseCase
   let userRepository: IUserRepository
@@ -21,7 +30,7 @@ describe('RefreshTokenUseCase', () => {
   let env: Env
 
   // Mock user data
-  const mockUser = User.fromPersistence({
+  const mockUser = createUser({
     createdAt: new Date('2025-01-01T00:00:00Z'),
     email: 'test@example.com',
     id: 'user-123',
@@ -327,7 +336,7 @@ describe('RefreshTokenUseCase', () => {
     describe('edge cases', () => {
       it('should handle user with ADMIN role', async () => {
         // Arrange
-        const adminUser = User.fromPersistence({
+        const adminUser = createUser({
           createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'admin@example.com',
           id: 'admin-123',
@@ -363,7 +372,7 @@ describe('RefreshTokenUseCase', () => {
 
       it('should handle user with SUPER_ADMIN role', async () => {
         // Arrange
-        const superAdminUser = User.fromPersistence({
+        const superAdminUser = createUser({
           createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'superadmin@example.com',
           id: 'super-admin-123',

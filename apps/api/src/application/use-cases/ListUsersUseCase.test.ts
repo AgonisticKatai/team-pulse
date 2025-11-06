@@ -3,6 +3,15 @@ import { User } from '../../domain/models/User.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import { ListUsersUseCase } from './ListUsersUseCase.js'
 
+// Helper to create user from persistence and unwrap Result
+function createUser(data: Parameters<typeof User.create>[0]): User {
+  const [error, user] = User.create(data)
+  if (error) {
+    throw error
+  }
+  return user!
+}
+
 describe('ListUsersUseCase', () => {
   let listUsersUseCase: ListUsersUseCase
   let userRepository: IUserRepository
@@ -30,7 +39,7 @@ describe('ListUsersUseCase', () => {
     it('should list all users successfully', async () => {
       // Arrange
       const mockUsers = [
-        User.fromPersistence({
+        createUser({
           createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'user1@example.com',
           id: 'user-1',
@@ -38,7 +47,7 @@ describe('ListUsersUseCase', () => {
           role: 'USER',
           updatedAt: new Date('2025-01-01T00:00:00Z'),
         }),
-        User.fromPersistence({
+        createUser({
           createdAt: new Date('2025-01-02T00:00:00Z'),
           email: 'user2@example.com',
           id: 'user-2',
@@ -73,7 +82,7 @@ describe('ListUsersUseCase', () => {
     it('should return users without password hashes', async () => {
       // Arrange
       const mockUsers = [
-        User.fromPersistence({
+        createUser({
           createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'user1@example.com',
           id: 'user-1',
@@ -102,7 +111,7 @@ describe('ListUsersUseCase', () => {
     it('should convert dates to ISO strings', async () => {
       // Arrange
       const mockUsers = [
-        User.fromPersistence({
+        createUser({
           createdAt: new Date('2025-01-01T10:30:45Z'),
           email: 'user1@example.com',
           id: 'user-1',
@@ -141,7 +150,7 @@ describe('ListUsersUseCase', () => {
     it('should handle single user', async () => {
       // Arrange
       const mockUsers = [
-        User.fromPersistence({
+        createUser({
           createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'only@example.com',
           id: 'user-1',
@@ -165,7 +174,7 @@ describe('ListUsersUseCase', () => {
     it('should handle users with different roles', async () => {
       // Arrange
       const mockUsers = [
-        User.fromPersistence({
+        createUser({
           createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'user@example.com',
           id: 'user-1',
@@ -173,7 +182,7 @@ describe('ListUsersUseCase', () => {
           role: 'USER',
           updatedAt: new Date('2025-01-01T00:00:00Z'),
         }),
-        User.fromPersistence({
+        createUser({
           createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'admin@example.com',
           id: 'admin-1',
@@ -181,7 +190,7 @@ describe('ListUsersUseCase', () => {
           role: 'ADMIN',
           updatedAt: new Date('2025-01-01T00:00:00Z'),
         }),
-        User.fromPersistence({
+        createUser({
           createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'super@example.com',
           id: 'super-1',
@@ -206,7 +215,7 @@ describe('ListUsersUseCase', () => {
     it('should return correct total count', async () => {
       // Arrange
       const mockUsers = Array.from({ length: 10 }, (_, i) =>
-        User.fromPersistence({
+        createUser({
           createdAt: new Date('2025-01-01T00:00:00Z'),
           email: `user${i}@example.com`,
           id: `user-${i}`,
@@ -229,7 +238,7 @@ describe('ListUsersUseCase', () => {
     it('should maintain user order from repository', async () => {
       // Arrange
       const mockUsers = [
-        User.fromPersistence({
+        createUser({
           createdAt: new Date('2025-01-03T00:00:00Z'),
           email: 'third@example.com',
           id: 'user-3',
@@ -237,7 +246,7 @@ describe('ListUsersUseCase', () => {
           role: 'USER',
           updatedAt: new Date('2025-01-03T00:00:00Z'),
         }),
-        User.fromPersistence({
+        createUser({
           createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'first@example.com',
           id: 'user-1',
@@ -245,7 +254,7 @@ describe('ListUsersUseCase', () => {
           role: 'USER',
           updatedAt: new Date('2025-01-01T00:00:00Z'),
         }),
-        User.fromPersistence({
+        createUser({
           createdAt: new Date('2025-01-02T00:00:00Z'),
           email: 'second@example.com',
           id: 'user-2',
