@@ -47,13 +47,13 @@ export class CreateTeamUseCase {
     dto: CreateTeamDTO,
   ): Promise<Result<TeamResponseDTO, ValidationError | RepositoryError>> {
     // Business Rule: Team name must be unique
-    const [findError, existingTeam] = await this.teamRepository.findByName(dto.name)
+    const findResult = await this.teamRepository.findByName(dto.name)
 
-    if (findError) {
-      return Err(findError)
+    if (!findResult.ok) {
+      return Err(findResult.error)
     }
 
-    if (existingTeam) {
+    if (findResult.value) {
       return Err(
         ValidationError.forField({
           field: 'name',
@@ -64,25 +64,25 @@ export class CreateTeamUseCase {
 
     // Create domain entity
     // The Team entity validates its own invariants
-    const [error, team] = Team.create({
+    const createResult = Team.create({
       city: dto.city,
       foundedYear: dto.foundedYear ?? undefined,
       id: randomUUID(),
       name: dto.name,
     })
 
-    if (error) {
-      return Err(error)
+    if (!createResult.ok) {
+      return Err(createResult.error)
     }
 
-    // Persist
-    const [saveError, savedTeam] = await this.teamRepository.save(team!)
+    // Persist - TypeScript knows createResult.value is Team (no ! needed)
+    const saveResult = await this.teamRepository.save(createResult.value)
 
-    if (saveError) {
-      return Err(saveError)
+    if (!saveResult.ok) {
+      return Err(saveResult.error)
     }
 
-    // Map to response DTO
-    return Ok(savedTeam!.toDTO())
+    // Map to response DTO - TypeScript knows saveResult.value is Team (no ! needed)
+    return Ok(saveResult.value.toDTO())
   }
 }

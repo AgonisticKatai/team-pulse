@@ -87,38 +87,38 @@ export class User {
    */
   static create(data: CreateUserData): Result<User, ValidationError> {
     // Validate id
-    const [errorId, entityId] = EntityId.create({ value: data.id })
-    if (errorId) {
-      return Err(errorId)
+    const idResult = EntityId.create({ value: data.id })
+    if (!idResult.ok) {
+      return Err(idResult.error)
     }
 
     // Validate email
-    const [errorEmail, emailVO] = Email.create({ value: data.email })
-    if (errorEmail) {
-      return Err(errorEmail)
+    const emailResult = Email.create({ value: data.email })
+    if (!emailResult.ok) {
+      return Err(emailResult.error)
     }
 
     // Validate password hash
-    const [errorPassword, validatedPasswordHash] = User.validatePasswordHash({
+    const passwordResult = User.validatePasswordHash({
       passwordHash: data.passwordHash,
     })
-    if (errorPassword) {
-      return Err(errorPassword)
+    if (!passwordResult.ok) {
+      return Err(passwordResult.error)
     }
 
     // Validate role
-    const [errorRole, roleVO] = Role.create({ value: data.role })
-    if (errorRole) {
-      return Err(errorRole)
+    const roleResult = Role.create({ value: data.role })
+    if (!roleResult.ok) {
+      return Err(roleResult.error)
     }
 
     return Ok(
       new User({
         createdAt: data.createdAt ?? new Date(),
-        email: emailVO!,
-        id: entityId!,
-        passwordHash: validatedPasswordHash!,
-        role: roleVO!,
+        email: emailResult.value,
+        id: idResult.value,
+        passwordHash: passwordResult.value,
+        role: roleResult.value,
         updatedAt: data.updatedAt ?? new Date(),
       }),
     )
@@ -167,11 +167,11 @@ export class User {
    * Check if user has a specific role
    */
   hasRole(role: string): boolean {
-    const [, roleVO] = Role.create({ value: role })
-    if (!roleVO) {
+    const roleResult = Role.create({ value: role })
+    if (!roleResult.ok) {
       return false
     }
-    return this.role.equals({ other: roleVO })
+    return this.role.equals({ other: roleResult.value })
   }
 
   /**
@@ -179,11 +179,11 @@ export class User {
    * SUPER_ADMIN > ADMIN > USER
    */
   hasRoleLevel(minimumRole: string): boolean {
-    const [, minimumRoleVO] = Role.create({ value: minimumRole })
-    if (!minimumRoleVO) {
+    const roleResult = Role.create({ value: minimumRole })
+    if (!roleResult.ok) {
       return false
     }
-    return this.role.hasLevelOf({ other: minimumRoleVO })
+    return this.role.hasLevelOf({ other: roleResult.value })
   }
 
   /**

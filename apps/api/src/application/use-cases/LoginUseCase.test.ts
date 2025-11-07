@@ -7,6 +7,7 @@ import { User } from '../../domain/models/User.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import type { Env } from '../../infrastructure/config/env.js'
+import { expectSuccess } from '../../infrastructure/testing/result-helpers.js'
 import { LoginUseCase } from './LoginUseCase.js'
 
 // Mock external dependencies
@@ -26,11 +27,7 @@ vi.mock('node:crypto', () => ({
 
 // Helper to create user from persistence and unwrap Result
 function createUser(data: Parameters<typeof User.create>[0]): User {
-  const [error, user] = User.create(data)
-  if (error) {
-    throw error
-  }
-  return user!
+  return expectSuccess(User.create(data))
 }
 
 describe('LoginUseCase', () => {
@@ -371,14 +368,16 @@ describe('LoginUseCase', () => {
     describe('edge cases', () => {
       it('should handle user with ADMIN role', async () => {
         // Arrange
-        const adminUser = createUser({
-          createdAt: new Date('2025-01-01T00:00:00Z'),
-          email: 'admin@example.com',
-          id: 'admin-123',
-          passwordHash: 'hashed-password',
-          role: 'ADMIN',
-          updatedAt: new Date('2025-01-01T00:00:00Z'),
-        })
+        const adminUser = expectSuccess(
+          User.create({
+            createdAt: new Date('2025-01-01T00:00:00Z'),
+            email: 'admin@example.com',
+            id: 'admin-123',
+            passwordHash: 'hashed-password',
+            role: 'ADMIN',
+            updatedAt: new Date('2025-01-01T00:00:00Z'),
+          }),
+        )
 
         const loginDTO: LoginDTO = {
           email: 'admin@example.com',
@@ -398,14 +397,16 @@ describe('LoginUseCase', () => {
 
       it('should handle user with SUPER_ADMIN role', async () => {
         // Arrange
-        const superAdminUser = createUser({
-          createdAt: new Date('2025-01-01T00:00:00Z'),
-          email: 'superadmin@example.com',
-          id: 'super-admin-123',
-          passwordHash: 'hashed-password',
-          role: 'SUPER_ADMIN',
-          updatedAt: new Date('2025-01-01T00:00:00Z'),
-        })
+        const superAdminUser = expectSuccess(
+          User.create({
+            createdAt: new Date('2025-01-01T00:00:00Z'),
+            email: 'superadmin@example.com',
+            id: 'super-admin-123',
+            passwordHash: 'hashed-password',
+            role: 'SUPER_ADMIN',
+            updatedAt: new Date('2025-01-01T00:00:00Z'),
+          }),
+        )
 
         const loginDTO: LoginDTO = {
           email: 'superadmin@example.com',

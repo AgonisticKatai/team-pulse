@@ -58,12 +58,12 @@ export class Team {
       return Ok(null)
     }
 
-    const [error, foundedYearVO] = FoundedYear.create({ value: foundedYear })
-    if (error) {
-      return Err(error)
+    const result = FoundedYear.create({ value: foundedYear })
+    if (!result.ok) {
+      return Err(result.error)
     }
 
-    return Ok(foundedYearVO!)
+    return Ok(result.value)
   }
 
   /**
@@ -78,38 +78,38 @@ export class Team {
    */
   static create(data: TeamFactoryInput): Result<Team, ValidationError> {
     // Validate id
-    const [errorId, entityId] = EntityId.create({ value: data.id })
-    if (errorId) {
-      return Err(errorId)
+    const idResult = EntityId.create({ value: data.id })
+    if (!idResult.ok) {
+      return Err(idResult.error)
     }
 
     // Validate name
-    const [errorName, nameVO] = TeamName.create({ value: data.name })
-    if (errorName) {
-      return Err(errorName)
+    const nameResult = TeamName.create({ value: data.name })
+    if (!nameResult.ok) {
+      return Err(nameResult.error)
     }
 
     // Validate city
-    const [errorCity, cityVO] = City.create({ value: data.city })
-    if (errorCity) {
-      return Err(errorCity)
+    const cityResult = City.create({ value: data.city })
+    if (!cityResult.ok) {
+      return Err(cityResult.error)
     }
 
     // Validate foundedYear (optional)
-    const [errorFoundedYear, foundedYearVO] = Team.validateOptionalFoundedYear({
+    const foundedYearResult = Team.validateOptionalFoundedYear({
       foundedYear: data.foundedYear,
     })
-    if (errorFoundedYear) {
-      return Err(errorFoundedYear)
+    if (!foundedYearResult.ok) {
+      return Err(foundedYearResult.error)
     }
 
     return Ok(
       new Team({
-        city: cityVO!,
+        city: cityResult.value,
         createdAt: data.createdAt ?? new Date(),
-        foundedYear: foundedYearVO,
-        id: entityId!,
-        name: nameVO!,
+        foundedYear: foundedYearResult.value,
+        id: idResult.value,
+        name: nameResult.value,
         updatedAt: data.updatedAt ?? new Date(),
       }),
     )

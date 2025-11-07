@@ -40,22 +40,22 @@ export class EntityId {
 
   /**
    * Factory method to create an EntityId (creational pattern)
-   * Returns [error, null] or [null, entityId]
+   * Returns Ok(entityId) or Err(validationError)
    */
   static create({ value }: { value: string }): Result<EntityId, ValidationError> {
     // Validate not empty
-    const [errorNotEmpty, trimmedValue] = EntityId.validateNotEmpty({ value })
-    if (errorNotEmpty) {
-      return Err(errorNotEmpty)
+    const notEmptyResult = EntityId.validateNotEmpty({ value })
+    if (!notEmptyResult.ok) {
+      return Err(notEmptyResult.error)
     }
 
     // Validate format
-    const [errorFormat] = EntityId.validateFormat({ value: trimmedValue! })
-    if (errorFormat) {
-      return Err(errorFormat)
+    const formatResult = EntityId.validateFormat({ value: notEmptyResult.value })
+    if (!formatResult.ok) {
+      return Err(formatResult.error)
     }
 
-    return Ok(new EntityId({ value: trimmedValue! }))
+    return Ok(new EntityId({ value: notEmptyResult.value }))
   }
 
   /**

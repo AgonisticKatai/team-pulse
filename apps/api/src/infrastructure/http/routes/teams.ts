@@ -71,16 +71,16 @@ export async function registerTeamRoutes(
         const dto = CreateTeamDTOSchema.parse(request.body)
 
         // Execute use case - Returns Result<TeamResponseDTO, ValidationError>
-        const [error, team] = await createTeamUseCase.execute(dto)
+        const result = await createTeamUseCase.execute(dto)
 
         // Handle use case error
-        if (error) {
-          return handleError(error, reply)
+        if (!result.ok) {
+          return handleError(result.error, reply)
         }
 
         // Return success response
         return reply.code(201).send({
-          data: team,
+          data: result.value,
           success: true,
         })
       } catch (error) {
@@ -98,14 +98,14 @@ export async function registerTeamRoutes(
    */
   fastify.get('/api/teams', { preHandler: requireAuth(env) }, async (_request, reply) => {
     try {
-      const [error, data] = await listTeamsUseCase.execute()
+      const result = await listTeamsUseCase.execute()
 
-      if (error) {
-        return handleError(error, reply)
+      if (!result.ok) {
+        return handleError(result.error, reply)
       }
 
       return reply.code(200).send({
-        data,
+        data: result.value,
         success: true,
       })
     } catch (error) {
@@ -155,15 +155,15 @@ export async function registerTeamRoutes(
         const dto = UpdateTeamDTOSchema.parse(request.body)
 
         // Execute use case - Returns Result<TeamResponseDTO, NotFoundError | ValidationError | RepositoryError>
-        const [error, team] = await updateTeamUseCase.execute(id, dto)
+        const result = await updateTeamUseCase.execute(id, dto)
 
         // Handle use case error
-        if (error) {
-          return handleError(error, reply)
+        if (!result.ok) {
+          return handleError(result.error, reply)
         }
 
         return reply.code(200).send({
-          data: team,
+          data: result.value,
           success: true,
         })
       } catch (error) {

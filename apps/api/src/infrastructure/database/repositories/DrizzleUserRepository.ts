@@ -119,7 +119,7 @@ export class DrizzleUserRepository implements IUserRepository {
    * this should return Result and propagate to use cases.
    */
   private mapToDomain(row: typeof users.$inferSelect): User {
-    const [error, user] = User.create({
+    const result = User.create({
       createdAt: new Date(row.createdAt),
       email: row.email,
       id: row.id,
@@ -128,13 +128,13 @@ export class DrizzleUserRepository implements IUserRepository {
       updatedAt: new Date(row.updatedAt),
     })
 
-    if (error) {
+    if (!result.ok) {
       // Data corruption - should never happen in production
       throw new Error(
-        `Failed to map database row to User entity: ${error.message}. User ID: ${row.id}`,
+        `Failed to map database row to User entity: ${result.error.message}. User ID: ${row.id}`,
       )
     }
 
-    return user!
+    return result.value
   }
 }

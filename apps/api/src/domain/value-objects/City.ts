@@ -42,22 +42,22 @@ export class City {
 
   /**
    * Factory method to create a City (creational pattern)
-   * Returns [error, null] or [null, city]
+   * Returns Ok(city) or Err(validationError)
    */
   static create({ value }: { value: string }): Result<City, ValidationError> {
     // Validate not empty
-    const [errorNotEmpty, trimmedValue] = City.validateNotEmpty({ value })
-    if (errorNotEmpty) {
-      return Err(errorNotEmpty)
+    const notEmptyResult = City.validateNotEmpty({ value })
+    if (!notEmptyResult.ok) {
+      return Err(notEmptyResult.error)
     }
 
     // Validate length
-    const [errorLength] = City.validateLength({ value: trimmedValue! })
-    if (errorLength) {
-      return Err(errorLength)
+    const lengthResult = City.validateLength({ value: notEmptyResult.value })
+    if (!lengthResult.ok) {
+      return Err(lengthResult.error)
     }
 
-    return Ok(new City({ value: trimmedValue! }))
+    return Ok(new City({ value: notEmptyResult.value }))
   }
 
   /**

@@ -55,28 +55,27 @@ export class Email {
 
   /**
    * Factory method to create an Email (creational pattern)
-   * Returns [error, null] or [null, email]
    */
   static create({ value }: { value: string }): Result<Email, ValidationError> {
     // Validate not empty
-    const [errorNotEmpty, trimmedValue] = Email.validateNotEmpty({ value })
-    if (errorNotEmpty) {
-      return Err(errorNotEmpty)
+    const notEmptyResult = Email.validateNotEmpty({ value })
+    if (!notEmptyResult.ok) {
+      return Err(notEmptyResult.error)
     }
 
     // Validate format
-    const [errorFormat] = Email.validateFormat({ value: trimmedValue! })
-    if (errorFormat) {
-      return Err(errorFormat)
+    const formatResult = Email.validateFormat({ value: notEmptyResult.value })
+    if (!formatResult.ok) {
+      return Err(formatResult.error)
     }
 
     // Validate length
-    const [errorLength] = Email.validateLength({ value: trimmedValue! })
-    if (errorLength) {
-      return Err(errorLength)
+    const lengthResult = Email.validateLength({ value: formatResult.value })
+    if (!lengthResult.ok) {
+      return Err(lengthResult.error)
     }
 
-    return Ok(new Email({ value: trimmedValue! }))
+    return Ok(new Email({ value: lengthResult.value }))
   }
 
   /**

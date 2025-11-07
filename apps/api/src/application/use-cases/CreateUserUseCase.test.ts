@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ValidationError } from '../../domain/errors/index.js'
 import { User } from '../../domain/models/User.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
+import { expectSuccess } from '../../infrastructure/testing/result-helpers.js'
 import { CreateUserUseCase } from './CreateUserUseCase.js'
 
 // Mock external dependencies
@@ -15,12 +16,17 @@ vi.mock('node:crypto', () => ({
   randomUUID: vi.fn(() => 'mock-uuid'),
 }))
 
+// Helper to create user from persistence and unwrap Result
+function createUser(data: Parameters<typeof User.create>[0]): User {
+  return expectSuccess(User.create(data))
+}
+
 describe('CreateUserUseCase', () => {
   let createUserUseCase: CreateUserUseCase
   let userRepository: IUserRepository
 
   // Mock user data
-  const [, mockUser] = User.create({
+  const mockUser = createUser({
     createdAt: new Date('2025-01-01T00:00:00Z'),
     email: 'newuser@example.com',
     id: 'mock-uuid',
@@ -59,7 +65,7 @@ describe('CreateUserUseCase', () => {
         }
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(mockUser!)
+        vi.mocked(userRepository.save).mockResolvedValue(mockUser)
 
         // Act
         const result = await createUserUseCase.execute(dto)
@@ -80,7 +86,7 @@ describe('CreateUserUseCase', () => {
         }
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(mockUser!)
+        vi.mocked(userRepository.save).mockResolvedValue(mockUser)
 
         // Act
         await createUserUseCase.execute(dto)
@@ -99,7 +105,7 @@ describe('CreateUserUseCase', () => {
         }
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(mockUser!)
+        vi.mocked(userRepository.save).mockResolvedValue(mockUser)
 
         const { hashPassword } = await import('../../infrastructure/auth/passwordUtils.js')
 
@@ -120,7 +126,7 @@ describe('CreateUserUseCase', () => {
         }
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(mockUser!)
+        vi.mocked(userRepository.save).mockResolvedValue(mockUser)
 
         // Act
         await createUserUseCase.execute(dto)
@@ -143,7 +149,7 @@ describe('CreateUserUseCase', () => {
         }
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(mockUser!)
+        vi.mocked(userRepository.save).mockResolvedValue(mockUser)
 
         // Act
         const result = await createUserUseCase.execute(dto)
@@ -168,7 +174,7 @@ describe('CreateUserUseCase', () => {
         }
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(mockUser!)
+        vi.mocked(userRepository.save).mockResolvedValue(mockUser)
 
         // Act
         const result = await createUserUseCase.execute(dto)
@@ -184,14 +190,16 @@ describe('CreateUserUseCase', () => {
     describe('error cases', () => {
       it('should throw ValidationError when email already exists', async () => {
         // Arrange
-        const [, existingUser] = User.create({
-          createdAt: new Date(),
-          email: 'existing@example.com',
-          id: 'existing-123',
-          passwordHash: 'hashed',
-          role: 'USER',
-          updatedAt: new Date(),
-        })
+        const existingUser = expectSuccess(
+          User.create({
+            createdAt: new Date(),
+            email: 'existing@example.com',
+            id: 'existing-123',
+            passwordHash: 'hashed',
+            role: 'USER',
+            updatedAt: new Date(),
+          }),
+        )
 
         const dto: CreateUserDTO = {
           email: 'existing@example.com',
@@ -218,14 +226,16 @@ describe('CreateUserUseCase', () => {
 
       it('should not hash password when email already exists', async () => {
         // Arrange
-        const [, existingUser] = User.create({
-          createdAt: new Date(),
-          email: 'existing@example.com',
-          id: 'existing-123',
-          passwordHash: 'hashed',
-          role: 'USER',
-          updatedAt: new Date(),
-        })
+        const existingUser = expectSuccess(
+          User.create({
+            createdAt: new Date(),
+            email: 'existing@example.com',
+            id: 'existing-123',
+            passwordHash: 'hashed',
+            role: 'USER',
+            updatedAt: new Date(),
+          }),
+        )
 
         const dto: CreateUserDTO = {
           email: 'existing@example.com',
@@ -253,14 +263,16 @@ describe('CreateUserUseCase', () => {
     describe('edge cases', () => {
       it('should handle user with ADMIN role', async () => {
         // Arrange
-        const [, adminUser] = User.create({
-          createdAt: new Date('2025-01-01T00:00:00Z'),
-          email: 'admin@example.com',
-          id: 'mock-uuid',
-          passwordHash: 'hashed-password',
-          role: 'ADMIN',
-          updatedAt: new Date('2025-01-01T00:00:00Z'),
-        })
+        const adminUser = expectSuccess(
+          User.create({
+            createdAt: new Date('2025-01-01T00:00:00Z'),
+            email: 'admin@example.com',
+            id: 'mock-uuid',
+            passwordHash: 'hashed-password',
+            role: 'ADMIN',
+            updatedAt: new Date('2025-01-01T00:00:00Z'),
+          }),
+        )
 
         const dto: CreateUserDTO = {
           email: 'admin@example.com',
@@ -282,14 +294,16 @@ describe('CreateUserUseCase', () => {
 
       it('should handle user with SUPER_ADMIN role', async () => {
         // Arrange
-        const [, superAdminUser] = User.create({
-          createdAt: new Date('2025-01-01T00:00:00Z'),
-          email: 'superadmin@example.com',
-          id: 'mock-uuid',
-          passwordHash: 'hashed-password',
-          role: 'SUPER_ADMIN',
-          updatedAt: new Date('2025-01-01T00:00:00Z'),
-        })
+        const superAdminUser = expectSuccess(
+          User.create({
+            createdAt: new Date('2025-01-01T00:00:00Z'),
+            email: 'superadmin@example.com',
+            id: 'mock-uuid',
+            passwordHash: 'hashed-password',
+            role: 'SUPER_ADMIN',
+            updatedAt: new Date('2025-01-01T00:00:00Z'),
+          }),
+        )
 
         const dto: CreateUserDTO = {
           email: 'superadmin@example.com',
@@ -318,7 +332,7 @@ describe('CreateUserUseCase', () => {
         }
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(mockUser!)
+        vi.mocked(userRepository.save).mockResolvedValue(mockUser)
 
         const { randomUUID } = await import('node:crypto')
 

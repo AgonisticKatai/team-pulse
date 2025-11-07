@@ -35,13 +35,13 @@ export class FoundedYear {
 
   /**
    * Factory method to create a FoundedYear (creational pattern)
-   * Returns [error, null] or [null, foundedYear]
+   * Returns Ok(foundedYear) or Err(validationError)
    */
   static create({ value }: { value: number }): Result<FoundedYear, ValidationError> {
     // Validate range
-    const [errorRange] = FoundedYear.validateRange({ value })
-    if (errorRange) {
-      return Err(errorRange)
+    const rangeResult = FoundedYear.validateRange({ value })
+    if (!rangeResult.ok) {
+      return Err(rangeResult.error)
     }
 
     return Ok(new FoundedYear({ value }))

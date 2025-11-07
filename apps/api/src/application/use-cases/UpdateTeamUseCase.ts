@@ -23,35 +23,35 @@ export class UpdateTeamUseCase {
 
     // Business Rule: If updating name, check uniqueness
     if (dto.name && dto.name !== existingTeam.name.getValue()) {
-      const [findError, teamWithSameName] = await this.teamRepository.findByName(dto.name)
+      const findResult = await this.teamRepository.findByName(dto.name)
 
-      if (findError) {
-        return Err(findError)
+      if (!findResult.ok) {
+        return Err(findResult.error)
       }
 
-      if (teamWithSameName && teamWithSameName.id.getValue() !== id) {
+      if (findResult.value && findResult.value.id.getValue() !== id) {
         return Err(new ValidationError(`A team with name "${dto.name}" already exists`, 'name'))
       }
     }
 
     // Update domain entity (immutable update)
-    const [error, updatedTeam] = existingTeam.update({
+    const updateResult = existingTeam.update({
       city: dto.city,
       foundedYear: dto.foundedYear,
       name: dto.name,
     })
 
-    if (error) {
-      return Err(error)
+    if (!updateResult.ok) {
+      return Err(updateResult.error)
     }
 
-    // Persist
-    const [saveError, savedTeam] = await this.teamRepository.save(updatedTeam!)
+    // Persist - TypeScript knows updateResult.value is Team (no ! needed)
+    const saveResult = await this.teamRepository.save(updateResult.value)
 
-    if (saveError) {
-      return Err(saveError)
+    if (!saveResult.ok) {
+      return Err(saveResult.error)
     }
 
-    return Ok(savedTeam!.toDTO())
+    return Ok(saveResult.value.toDTO())
   }
 }

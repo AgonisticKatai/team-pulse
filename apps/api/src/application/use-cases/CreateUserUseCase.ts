@@ -39,19 +39,19 @@ export class CreateUserUseCase {
 
     // Create domain entity
     // The User entity validates its own invariants
-    const [error, user] = User.create({
+    const userResult = User.create({
       email: dto.email,
       id: randomUUID(),
       passwordHash,
       role: dto.role,
     })
 
-    if (error) {
-      throw error
+    if (!userResult.ok) {
+      throw userResult.error
     }
 
     // Persist
-    const savedUser = await this.userRepository.save(user!)
+    const savedUser = await this.userRepository.save(userResult.value)
 
     // Map to response DTO (WITHOUT password hash)
     return this.mapToResponseDTO(savedUser)

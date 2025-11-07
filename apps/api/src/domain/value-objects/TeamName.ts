@@ -42,22 +42,22 @@ export class TeamName {
 
   /**
    * Factory method to create a TeamName (creational pattern)
-   * Returns [error, null] or [null, teamName]
+   * Returns Ok(teamName) or Err(validationError)
    */
   static create({ value }: { value: string }): Result<TeamName, ValidationError> {
     // Validate not empty
-    const [errorNotEmpty, trimmedValue] = TeamName.validateNotEmpty({ value })
-    if (errorNotEmpty) {
-      return Err(errorNotEmpty)
+    const notEmptyResult = TeamName.validateNotEmpty({ value })
+    if (!notEmptyResult.ok) {
+      return Err(notEmptyResult.error)
     }
 
     // Validate length
-    const [errorLength] = TeamName.validateLength({ value: trimmedValue! })
-    if (errorLength) {
-      return Err(errorLength)
+    const lengthResult = TeamName.validateLength({ value: notEmptyResult.value })
+    if (!lengthResult.ok) {
+      return Err(lengthResult.error)
     }
 
-    return Ok(new TeamName({ value: trimmedValue! }))
+    return Ok(new TeamName({ value: notEmptyResult.value }))
   }
 
   /**

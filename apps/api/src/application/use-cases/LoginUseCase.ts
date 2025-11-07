@@ -74,18 +74,18 @@ export class LoginUseCase {
     )
 
     // Store refresh token in database
-    const [errorRefreshToken, refreshToken] = RefreshToken.create({
+    const refreshTokenResult = RefreshToken.create({
       expiresAt: getRefreshTokenExpirationDate(),
       id: refreshTokenId,
       token: refreshTokenString,
       userId: user.id.getValue(),
     })
 
-    if (errorRefreshToken) {
-      throw errorRefreshToken
+    if (!refreshTokenResult.ok) {
+      throw refreshTokenResult.error
     }
 
-    await this.refreshTokenRepository.save(refreshToken!)
+    await this.refreshTokenRepository.save(refreshTokenResult.value)
 
     // Return response
     return {

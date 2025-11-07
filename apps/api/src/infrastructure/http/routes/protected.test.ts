@@ -6,6 +6,7 @@ import { User } from '../../../domain/models/User.js'
 import { hashPassword } from '../../auth/passwordUtils.js'
 import type { Container } from '../../config/container.js'
 import type { Database } from '../../database/connection.js'
+import { expectSuccess } from '../../testing/result-helpers.js'
 import { setupTestContainer } from '../../testing/testContainers.js'
 
 describe('Protected Routes and RBAC', () => {
@@ -45,26 +46,32 @@ describe('Protected Routes and RBAC', () => {
     const adminEmail = 'admin@test.com'
     const userEmail = 'user@test.com'
 
-    const [, superAdmin] = User.create({
-      email: superAdminEmail,
-      id: 'super-admin',
-      passwordHash: await hashPassword('SuperAdmin123!'),
-      role: 'SUPER_ADMIN',
-    })
+    const superAdmin = expectSuccess(
+      User.create({
+        email: superAdminEmail,
+        id: 'super-admin',
+        passwordHash: await hashPassword('SuperAdmin123!'),
+        role: 'SUPER_ADMIN',
+      }),
+    )
 
-    const [, admin] = User.create({
-      email: adminEmail,
-      id: 'admin',
-      passwordHash: await hashPassword('Admin123!'),
-      role: 'ADMIN',
-    })
+    const admin = expectSuccess(
+      User.create({
+        email: adminEmail,
+        id: 'admin',
+        passwordHash: await hashPassword('Admin123!'),
+        role: 'ADMIN',
+      }),
+    )
 
-    const [, user] = User.create({
-      email: userEmail,
-      id: 'user',
-      passwordHash: await hashPassword('User123!'),
-      role: 'USER',
-    })
+    const user = expectSuccess(
+      User.create({
+        email: userEmail,
+        id: 'user',
+        passwordHash: await hashPassword('User123!'),
+        role: 'USER',
+      }),
+    )
 
     await container.userRepository.save(superAdmin!)
     await container.userRepository.save(admin!)

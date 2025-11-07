@@ -6,6 +6,7 @@ import { User } from '../../domain/models/User.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import type { Env } from '../../infrastructure/config/env.js'
+import { expectSuccess } from '../../infrastructure/testing/result-helpers.js'
 import { RefreshTokenUseCase } from './RefreshTokenUseCase.js'
 
 // Mock external dependencies
@@ -16,20 +17,12 @@ vi.mock('../../infrastructure/auth/jwtUtils.js', () => ({
 
 // Helper to create user from persistence and unwrap Result
 function createUser(data: Parameters<typeof User.create>[0]): User {
-  const [error, user] = User.create(data)
-  if (error) {
-    throw error
-  }
-  return user!
+  return expectSuccess(User.create(data))
 }
 
 // Helper to create refresh token and unwrap Result
 function createRefreshToken(data: Parameters<typeof RefreshToken.create>[0]): RefreshToken {
-  const [error, token] = RefreshToken.create(data)
-  if (error) {
-    throw error
-  }
-  return token!
+  return expectSuccess(RefreshToken.create(data))
 }
 
 describe('RefreshTokenUseCase', () => {

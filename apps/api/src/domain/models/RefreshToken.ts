@@ -66,30 +66,30 @@ export class RefreshToken {
    */
   static create(data: RefreshTokenFactoryInput): Result<RefreshToken, ValidationError> {
     // Validate id
-    const [errorId, entityId] = EntityId.create({ value: data.id })
-    if (errorId) {
-      return Err(errorId)
+    const idResult = EntityId.create({ value: data.id })
+    if (!idResult.ok) {
+      return Err(idResult.error)
     }
 
     // Validate token
-    const [errorToken, validatedToken] = RefreshToken.validateToken({ token: data.token })
-    if (errorToken) {
-      return Err(errorToken)
+    const tokenResult = RefreshToken.validateToken({ token: data.token })
+    if (!tokenResult.ok) {
+      return Err(tokenResult.error)
     }
 
     // Validate userId
-    const [errorUserId, userIdVO] = EntityId.create({ value: data.userId })
-    if (errorUserId) {
-      return Err(errorUserId)
+    const userIdResult = EntityId.create({ value: data.userId })
+    if (!userIdResult.ok) {
+      return Err(userIdResult.error)
     }
 
     return Ok(
       new RefreshToken({
         createdAt: data.createdAt ?? new Date(),
         expiresAt: data.expiresAt,
-        id: entityId!,
-        token: validatedToken!,
-        userId: userIdVO!,
+        id: idResult.value,
+        token: tokenResult.value,
+        userId: userIdResult.value,
       }),
     )
   }

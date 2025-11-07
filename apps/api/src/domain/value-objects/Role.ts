@@ -59,22 +59,21 @@ export class Role {
 
   /**
    * Factory method to create a Role (creational pattern)
-   * Returns [error, null] or [null, role]
    */
   static create({ value }: { value: string }): Result<Role, ValidationError> {
     // Validate not empty
-    const [errorNotEmpty, normalizedValue] = Role.validateNotEmpty({ value })
-    if (errorNotEmpty) {
-      return Err(errorNotEmpty)
+    const notEmptyResult = Role.validateNotEmpty({ value })
+    if (!notEmptyResult.ok) {
+      return Err(notEmptyResult.error)
     }
 
     // Validate role value
-    const [errorRole, roleValue] = Role.validateRole({ value: normalizedValue! })
-    if (errorRole) {
-      return Err(errorRole)
+    const roleResult = Role.validateRole({ value: notEmptyResult.value })
+    if (!roleResult.ok) {
+      return Err(roleResult.error)
     }
 
-    return Ok(new Role({ value: roleValue! }))
+    return Ok(new Role({ value: roleResult.value }))
   }
 
   /**

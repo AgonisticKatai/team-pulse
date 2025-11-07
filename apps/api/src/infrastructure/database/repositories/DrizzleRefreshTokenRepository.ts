@@ -97,7 +97,7 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
    * to domain entities. The domain entity validates itself.
    */
   private mapToDomain(row: typeof refreshTokens.$inferSelect): RefreshToken {
-    const [error, refreshToken] = RefreshToken.create({
+    const result = RefreshToken.create({
       createdAt: new Date(row.createdAt),
       expiresAt: new Date(row.expiresAt),
       id: row.id,
@@ -105,12 +105,12 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
       userId: row.userId,
     })
 
-    if (error) {
+    if (!result.ok) {
       // This should never happen with data from the database
       // since it was validated on creation
-      throw error
+      throw result.error
     }
 
-    return refreshToken!
+    return result.value
   }
 }

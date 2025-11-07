@@ -1,15 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { User } from '../../domain/models/User.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
+import { expectSuccess } from '../../infrastructure/testing/result-helpers.js'
 import { ListUsersUseCase } from './ListUsersUseCase.js'
 
 // Helper to create user from persistence and unwrap Result
 function createUser(data: Parameters<typeof User.create>[0]): User {
-  const [error, user] = User.create(data)
-  if (error) {
-    throw error
-  }
-  return user!
+  return expectSuccess(User.create(data))
 }
 
 describe('ListUsersUseCase', () => {
@@ -224,7 +221,6 @@ describe('ListUsersUseCase', () => {
           updatedAt: new Date('2025-01-01T00:00:00Z'),
         }),
       )
-
       vi.mocked(userRepository.findAll).mockResolvedValue(mockUsers)
 
       // Act
@@ -246,6 +242,7 @@ describe('ListUsersUseCase', () => {
           role: 'USER',
           updatedAt: new Date('2025-01-03T00:00:00Z'),
         }),
+
         createUser({
           createdAt: new Date('2025-01-01T00:00:00Z'),
           email: 'first@example.com',

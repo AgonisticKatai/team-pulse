@@ -6,6 +6,7 @@ import { User } from '../../../domain/models/User.js'
 import { hashPassword } from '../../auth/passwordUtils.js'
 import type { Container } from '../../config/container.js'
 import type { Database } from '../../database/connection.js'
+import { expectSuccess } from '../../testing/result-helpers.js'
 import { setupTestContainer } from '../../testing/testContainers.js'
 
 describe('Authentication Endpoints', () => {
@@ -51,22 +52,26 @@ describe('Authentication Endpoints', () => {
     const userPasswordHash = await hashPassword(testUserPassword)
     const adminPasswordHash = await hashPassword(testAdminPassword)
 
-    const [, testUser] = User.create({
-      email: testUserEmail,
-      id: 'test-user',
-      passwordHash: userPasswordHash,
-      role: 'USER',
-    })
+    const testUser = expectSuccess(
+      User.create({
+        email: testUserEmail,
+        id: 'test-user',
+        passwordHash: userPasswordHash,
+        role: 'USER',
+      }),
+    )
 
-    const [, testAdmin] = User.create({
-      email: testAdminEmail,
-      id: 'test-admin',
-      passwordHash: adminPasswordHash,
-      role: 'ADMIN',
-    })
+    const testAdmin = expectSuccess(
+      User.create({
+        email: testAdminEmail,
+        id: 'test-admin',
+        passwordHash: adminPasswordHash,
+        role: 'ADMIN',
+      }),
+    )
 
-    await container.userRepository.save(testUser!)
-    await container.userRepository.save(testAdmin!)
+    await container.userRepository.save(testUser)
+    await container.userRepository.save(testAdmin)
   })
 
   afterEach(async () => {
