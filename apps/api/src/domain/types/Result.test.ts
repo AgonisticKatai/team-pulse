@@ -388,7 +388,7 @@ describe('Result Type', () => {
     it('should handle entity creation pattern', () => {
       // Arrange
       const createUser = (email: string): Result<{ id: string; email: string }, Error> => {
-        if (email.includes('@')) {
+        if (!email.includes('@')) {
           return Err(new Error('Invalid email'))
         }
         return Ok({ email, id: '123' })
