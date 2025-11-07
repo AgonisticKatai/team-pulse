@@ -1,8 +1,11 @@
 import { randomUUID } from 'node:crypto'
+
 import type { CreateTeamDTO, TeamResponseDTO } from '@team-pulse/shared'
-import { ValidationError } from '../../domain/errors/index.js'
+
+import { type RepositoryError, ValidationError } from '../../domain/errors/index.js'
 import { Team } from '../../domain/models/Team.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
+import { Err, Ok, type Result } from '../../domain/types/index.js'
 
 /**
  * Create Team Use Case
@@ -25,13 +28,38 @@ import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.
  * It's PURE business logic.
  */
 export class CreateTeamUseCase {
-  constructor(private readonly teamRepository: ITeamRepository) {}
+  private readonly teamRepository: ITeamRepository
 
-  async execute(dto: CreateTeamDTO): Promise<TeamResponseDTO> {
+  private constructor({ teamRepository }: { teamRepository: ITeamRepository }) {
+    this.teamRepository = teamRepository
+  }
+
+  /**
+   * Factory method to create the use case
+   *
+   * Use named parameters for consistency with domain entities
+   */
+  static create({ teamRepository }: { teamRepository: ITeamRepository }): CreateTeamUseCase {
+    return new CreateTeamUseCase({ teamRepository })
+  }
+
+  async execute(
+    dto: CreateTeamDTO,
+  ): Promise<Result<TeamResponseDTO, ValidationError | RepositoryError>> {
     // Business Rule: Team name must be unique
-    const existingTeam = await this.teamRepository.findByName(dto.name)
+    const [findError, existingTeam] = await this.teamRepository.findByName(dto.name)
+
+    if (findError) {
+      return Err(findError)
+    }
+
     if (existingTeam) {
-      throw new ValidationError(`A team with name "${dto.name}" already exists`, 'name')
+      return Err(
+        ValidationError.forField({
+          field: 'name',
+          message: `A team with name "${dto.name}" already exists`,
+        }),
+      )
     }
 
     // Create domain entity
@@ -44,13 +72,17 @@ export class CreateTeamUseCase {
     })
 
     if (error) {
-      throw error
+      return Err(error)
     }
 
     // Persist
-    const savedTeam = await this.teamRepository.save(team!)
+    const [saveError, savedTeam] = await this.teamRepository.save(team!)
+
+    if (saveError) {
+      return Err(saveError)
+    }
 
     // Map to response DTO
-    return savedTeam.toDTO()
+    return Ok(savedTeam!.toDTO())
   }
 }

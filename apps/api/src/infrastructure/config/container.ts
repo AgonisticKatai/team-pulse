@@ -111,7 +111,7 @@ export class Container {
    */
   get createTeamUseCase(): CreateTeamUseCase {
     if (!this._createTeamUseCase) {
-      this._createTeamUseCase = new CreateTeamUseCase(this.teamRepository)
+      this._createTeamUseCase = CreateTeamUseCase.create({ teamRepository: this.teamRepository })
     }
     return this._createTeamUseCase
   }

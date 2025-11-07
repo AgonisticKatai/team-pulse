@@ -1,6 +1,7 @@
 import type { TeamResponseDTO } from '@team-pulse/shared'
 import { NotFoundError } from '../../domain/errors/index.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
+import { Err, Ok, type Result } from '../../domain/types/index.js'
 
 /**
  * Get Team Use Case
@@ -10,13 +11,13 @@ import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.
 export class GetTeamUseCase {
   constructor(private readonly teamRepository: ITeamRepository) {}
 
-  async execute(id: string): Promise<TeamResponseDTO> {
+  async execute(id: string): Promise<Result<TeamResponseDTO, NotFoundError>> {
     const team = await this.teamRepository.findById(id)
 
     if (!team) {
-      throw new NotFoundError('Team', id)
+      return Err(new NotFoundError('Team', id))
     }
 
-    return team.toDTO()
+    return Ok(team.toDTO())
   }
 }

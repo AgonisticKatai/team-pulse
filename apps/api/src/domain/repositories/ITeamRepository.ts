@@ -1,4 +1,6 @@
+import type { RepositoryError } from '../errors/index.js'
 import type { Team } from '../models/Team.js'
+import type { Result } from '../types/index.js'
 
 /**
  * Team Repository Interface (PORT)
@@ -15,6 +17,9 @@ import type { Team } from '../models/Team.js'
  * - Follows Dependency Inversion Principle (SOLID)
  *
  * The domain defines the contract, infrastructure implements it.
+ *
+ * IMPORTANT: All methods return Result<T, RepositoryError> for explicit error handling.
+ * No exceptions should be thrown from repository operations.
  */
 export interface ITeamRepository {
   /**
@@ -36,9 +41,9 @@ export interface ITeamRepository {
    * Find a team by name
    *
    * @param name - The team's name (case-insensitive search)
-   * @returns The team if found, null otherwise
+   * @returns Result with the team if found (null if not found), or RepositoryError if operation fails
    */
-  findByName(name: string): Promise<Team | null>
+  findByName(name: string): Promise<Result<Team | null, RepositoryError>>
 
   /**
    * Save a team (create or update)
@@ -47,9 +52,9 @@ export interface ITeamRepository {
    * If it exists, it will be updated.
    *
    * @param team - The team entity to save
-   * @returns The saved team
+   * @returns Result with the saved team, or RepositoryError if operation fails
    */
-  save(team: Team): Promise<Team>
+  save(team: Team): Promise<Result<Team, RepositoryError>>
 
   /**
    * Delete a team by its identifier

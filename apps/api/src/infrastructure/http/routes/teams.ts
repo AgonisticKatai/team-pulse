@@ -70,8 +70,13 @@ export async function registerTeamRoutes(
         // Validate request body using Zod
         const dto = CreateTeamDTOSchema.parse(request.body)
 
-        // Execute use case
-        const team = await createTeamUseCase.execute(dto)
+        // Execute use case - Returns Result<TeamResponseDTO, ValidationError>
+        const [error, team] = await createTeamUseCase.execute(dto)
+
+        // Handle use case error
+        if (error) {
+          return handleError(error, reply)
+        }
 
         // Return success response
         return reply.code(201).send({
@@ -79,6 +84,7 @@ export async function registerTeamRoutes(
           success: true,
         })
       } catch (error) {
+        // Handle unexpected errors (Zod validation, etc.)
         return handleError(error, reply)
       }
     },
@@ -92,10 +98,14 @@ export async function registerTeamRoutes(
    */
   fastify.get('/api/teams', { preHandler: requireAuth(env) }, async (_request, reply) => {
     try {
-      const result = await listTeamsUseCase.execute()
+      const [error, data] = await listTeamsUseCase.execute()
+
+      if (error) {
+        return handleError(error, reply)
+      }
 
       return reply.code(200).send({
-        data: result,
+        data,
         success: true,
       })
     } catch (error) {
@@ -144,14 +154,20 @@ export async function registerTeamRoutes(
         // Validate request body
         const dto = UpdateTeamDTOSchema.parse(request.body)
 
-        // Execute use case
-        const team = await updateTeamUseCase.execute(id, dto)
+        // Execute use case - Returns Result<TeamResponseDTO, NotFoundError | ValidationError | RepositoryError>
+        const [error, team] = await updateTeamUseCase.execute(id, dto)
+
+        // Handle use case error
+        if (error) {
+          return handleError(error, reply)
+        }
 
         return reply.code(200).send({
           data: team,
           success: true,
         })
       } catch (error) {
+        // Handle unexpected errors (Zod validation, etc.)
         return handleError(error, reply)
       }
     },

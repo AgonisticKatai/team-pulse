@@ -1,5 +1,6 @@
-import { NotFoundError } from '../../domain/errors/index.js'
+import { NotFoundError, RepositoryError } from '../../domain/errors/index.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
+import { Err, Ok, type Result } from '../../domain/types/index.js'
 
 /**
  * Delete Team Use Case
@@ -9,11 +10,11 @@ import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.
 export class DeleteTeamUseCase {
   constructor(private readonly teamRepository: ITeamRepository) {}
 
-  async execute(id: string): Promise<void> {
+  async execute(id: string): Promise<Result<void, NotFoundError | RepositoryError>> {
     // Verify team exists before deleting
     const team = await this.teamRepository.findById(id)
     if (!team) {
-      throw new NotFoundError('Team', id)
+      return Err(new NotFoundError('Team', id))
     }
 
     // Delete
@@ -21,7 +22,14 @@ export class DeleteTeamUseCase {
 
     // This should never happen if findById succeeded, but defensive programming
     if (!deleted) {
-      throw new Error('Failed to delete team')
+      return Err(
+        RepositoryError.forOperation({
+          message: 'Failed to delete team',
+          operation: 'delete',
+        }),
+      )
     }
+
+    return Ok(undefined)
   }
 }

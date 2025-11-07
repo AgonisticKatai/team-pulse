@@ -1,6 +1,8 @@
 import { eq } from 'drizzle-orm'
+import { RepositoryError } from '../../../domain/errors/index.js'
 import { Team } from '../../../domain/models/Team.js'
 import type { ITeamRepository } from '../../../domain/repositories/ITeamRepository.js'
+import { Err, Ok, type Result } from '../../../domain/types/index.js'
 import type { Database } from '../connection.js'
 import { teams } from '../schema.js'
 
@@ -42,47 +44,65 @@ export class DrizzleTeamRepository implements ITeamRepository {
     return rows.map((row: typeof teams.$inferSelect) => this.mapToDomain(row))
   }
 
-  async findByName(name: string): Promise<Team | null> {
-    // Case-insensitive search using SQL LOWER
-    const rows = await this.db.select().from(teams).where(eq(teams.name, name)).limit(1)
+  async findByName(name: string): Promise<Result<Team | null, RepositoryError>> {
+    try {
+      const [row] = await this.db.select().from(teams).where(eq(teams.name, name)).limit(1)
 
-    const row = rows[0]
-    if (!row) {
-      return null
+      if (!row) {
+        return Ok(null)
+      }
+
+      return Ok(this.mapToDomain(row))
+    } catch (error) {
+      return Err(
+        RepositoryError.forOperation({
+          cause: error instanceof Error ? error : new Error(String(error)),
+          message: 'Failed to find team by name',
+          operation: 'findByName',
+        }),
+      )
     }
-
-    return this.mapToDomain(row)
   }
 
-  async save(team: Team): Promise<Team> {
-    const obj = team.toObject()
+  async save(team: Team): Promise<Result<Team, RepositoryError>> {
+    try {
+      const obj = team.toObject()
 
-    // Convert to database format
-    // Drizzle with mode: 'timestamp' handles Date <-> timestamp conversion automatically
-    const row = {
-      city: obj.city,
-      createdAt: obj.createdAt,
-      foundedYear: obj.foundedYear,
-      id: obj.id,
-      name: obj.name,
-      updatedAt: obj.updatedAt,
+      // Convert to database format
+      // Drizzle with mode: 'timestamp' handles Date <-> timestamp conversion automatically
+      const row = {
+        city: obj.city,
+        createdAt: obj.createdAt,
+        foundedYear: obj.foundedYear,
+        id: obj.id,
+        name: obj.name,
+        updatedAt: obj.updatedAt,
+      }
+
+      // Upsert: insert or update if exists
+      await this.db
+        .insert(teams)
+        .values(row)
+        .onConflictDoUpdate({
+          set: {
+            city: row.city,
+            foundedYear: row.foundedYear,
+            name: row.name,
+            updatedAt: row.updatedAt,
+          },
+          target: teams.id,
+        })
+
+      return Ok(team)
+    } catch (error) {
+      return Err(
+        RepositoryError.forOperation({
+          cause: error instanceof Error ? error : new Error(String(error)),
+          message: 'Failed to save team',
+          operation: 'save',
+        }),
+      )
     }
-
-    // Upsert: insert or update if exists
-    await this.db
-      .insert(teams)
-      .values(row)
-      .onConflictDoUpdate({
-        set: {
-          city: row.city,
-          foundedYear: row.foundedYear,
-          name: row.name,
-          updatedAt: row.updatedAt,
-        },
-        target: teams.id,
-      })
-
-    return team
   }
 
   async delete(id: string): Promise<boolean> {

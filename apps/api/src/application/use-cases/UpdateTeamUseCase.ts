@@ -1,6 +1,7 @@
 import type { TeamResponseDTO, UpdateTeamDTO } from '@team-pulse/shared'
-import { NotFoundError, ValidationError } from '../../domain/errors/index.js'
+import { NotFoundError, type RepositoryError, ValidationError } from '../../domain/errors/index.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
+import { Err, Ok, type Result } from '../../domain/types/index.js'
 
 /**
  * Update Team Use Case
@@ -10,18 +11,26 @@ import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.
 export class UpdateTeamUseCase {
   constructor(private readonly teamRepository: ITeamRepository) {}
 
-  async execute(id: string, dto: UpdateTeamDTO): Promise<TeamResponseDTO> {
+  async execute(
+    id: string,
+    dto: UpdateTeamDTO,
+  ): Promise<Result<TeamResponseDTO, NotFoundError | ValidationError | RepositoryError>> {
     // Find existing team
     const existingTeam = await this.teamRepository.findById(id)
     if (!existingTeam) {
-      throw new NotFoundError('Team', id)
+      return Err(new NotFoundError('Team', id))
     }
 
     // Business Rule: If updating name, check uniqueness
     if (dto.name && dto.name !== existingTeam.name.getValue()) {
-      const teamWithSameName = await this.teamRepository.findByName(dto.name)
+      const [findError, teamWithSameName] = await this.teamRepository.findByName(dto.name)
+
+      if (findError) {
+        return Err(findError)
+      }
+
       if (teamWithSameName && teamWithSameName.id.getValue() !== id) {
-        throw new ValidationError(`A team with name "${dto.name}" already exists`, 'name')
+        return Err(new ValidationError(`A team with name "${dto.name}" already exists`, 'name'))
       }
     }
 
@@ -33,12 +42,16 @@ export class UpdateTeamUseCase {
     })
 
     if (error) {
-      throw error
+      return Err(error)
     }
 
     // Persist
-    const savedTeam = await this.teamRepository.save(updatedTeam!)
+    const [saveError, savedTeam] = await this.teamRepository.save(updatedTeam!)
 
-    return savedTeam.toDTO()
+    if (saveError) {
+      return Err(saveError)
+    }
+
+    return Ok(savedTeam!.toDTO())
   }
 }
