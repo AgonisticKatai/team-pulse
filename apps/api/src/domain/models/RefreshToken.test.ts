@@ -259,8 +259,8 @@ describe('RefreshToken Domain Entity', () => {
       })
 
       // Assert
-      expect(expiredToken.isValid()).toBe(expiredToken.isExpired())
-      expect(validToken.isValid()).toBe(validToken.isExpired())
+      expect(expiredToken.isValid()).toBe(!expiredToken.isExpired())
+      expect(validToken.isValid()).toBe(!validToken.isExpired())
     })
   })
 
