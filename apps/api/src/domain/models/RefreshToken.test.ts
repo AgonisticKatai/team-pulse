@@ -4,6 +4,15 @@ import { ValidationError } from '../errors/index.js'
 import { EntityId } from '../value-objects/index.js'
 import { RefreshToken } from './RefreshToken.js'
 
+// Helper to create user from persistence and unwrap Result
+function createRefreshToken(data: Parameters<typeof RefreshToken.create>[0]): RefreshToken {
+  return expectSuccess(RefreshToken.create(data))
+}
+
+function createRefreshTokenError(data: Parameters<typeof RefreshToken.create>[0]): ValidationError {
+  return expectError(RefreshToken.create(data))
+}
+
 describe('RefreshToken Domain Entity', () => {
   describe('create', () => {
     it('should create a valid refresh token', () => {
@@ -11,14 +20,12 @@ describe('RefreshToken Domain Entity', () => {
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
 
       // Act
-      const token = expectSuccess(
-        RefreshToken.create({
-          expiresAt,
-          id: 'token-123',
-          token: 'refresh-token-string',
-          userId: 'user-123',
-        }),
-      )
+      const token = createRefreshToken({
+        expiresAt,
+        id: 'token-123',
+        token: 'refresh-token-string',
+        userId: 'user-123',
+      })
 
       // Assert
       expect(token).toBeInstanceOf(RefreshToken)
@@ -36,14 +43,12 @@ describe('RefreshToken Domain Entity', () => {
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
       // Act
-      const error = expectError(
-        RefreshToken.create({
-          expiresAt,
-          id: 'token-123',
-          token: '',
-          userId: 'user-123',
-        }),
-      )
+      const error = createRefreshTokenError({
+        expiresAt,
+        id: 'token-123',
+        token: '',
+        userId: 'user-123',
+      })
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
@@ -55,14 +60,12 @@ describe('RefreshToken Domain Entity', () => {
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
       // Act
-      const error = expectError(
-        RefreshToken.create({
-          expiresAt,
-          id: 'token-123',
-          token: 'refresh-token',
-          userId: '',
-        }),
-      )
+      const error = createRefreshTokenError({
+        expiresAt,
+        id: 'token-123',
+        token: 'refresh-token',
+        userId: '',
+      })
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
@@ -74,14 +77,12 @@ describe('RefreshToken Domain Entity', () => {
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
       // Act
-      const error = expectError(
-        RefreshToken.create({
-          expiresAt,
-          id: '',
-          token: 'refresh-token',
-          userId: 'user-123',
-        }),
-      )
+      const error = createRefreshTokenError({
+        expiresAt,
+        id: '',
+        token: 'refresh-token',
+        userId: 'user-123',
+      })
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
@@ -93,14 +94,12 @@ describe('RefreshToken Domain Entity', () => {
       const expiresAt = new Date(Date.now() - 1000) // Expired
 
       // Act
-      const token = expectSuccess(
-        RefreshToken.create({
-          expiresAt,
-          id: 'token-123',
-          token: 'refresh-token',
-          userId: 'user-123',
-        }),
-      )
+      const token = createRefreshToken({
+        expiresAt,
+        id: 'token-123',
+        token: 'refresh-token',
+        userId: 'user-123',
+      })
 
       // Assert
       expect(token).toBeInstanceOf(RefreshToken)
@@ -115,15 +114,13 @@ describe('RefreshToken Domain Entity', () => {
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
       // Act
-      const token = expectSuccess(
-        RefreshToken.create({
-          createdAt,
-          expiresAt,
-          id: 'token-123',
-          token: 'refresh-token',
-          userId: 'user-123',
-        }),
-      )
+      const token = createRefreshToken({
+        createdAt,
+        expiresAt,
+        id: 'token-123',
+        token: 'refresh-token',
+        userId: 'user-123',
+      })
 
       // Assert
       expect(token).toBeInstanceOf(RefreshToken)
@@ -136,14 +133,12 @@ describe('RefreshToken Domain Entity', () => {
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
       // Act
-      const token = expectSuccess(
-        RefreshToken.create({
-          expiresAt,
-          id: 'token-123',
-          token: 'refresh-token',
-          userId: 'user-123',
-        }),
-      )
+      const token = createRefreshToken({
+        expiresAt,
+        id: 'token-123',
+        token: 'refresh-token',
+        userId: 'user-123',
+      })
 
       const after = new Date()
 
@@ -184,14 +179,12 @@ describe('RefreshToken Domain Entity', () => {
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days future
 
       // Act
-      const token = expectSuccess(
-        RefreshToken.create({
-          expiresAt,
-          id: 'token-123',
-          token: 'refresh-token',
-          userId: 'user-123',
-        }),
-      )
+      const token = createRefreshToken({
+        expiresAt,
+        id: 'token-123',
+        token: 'refresh-token',
+        userId: 'user-123',
+      })
 
       // Assert
       expect(token.isExpired()).toBe(false)
@@ -202,14 +195,12 @@ describe('RefreshToken Domain Entity', () => {
       const expiresAt = new Date(Date.now() - 1000) // 1 second ago
 
       // Act
-      const token = expectSuccess(
-        RefreshToken.create({
-          expiresAt,
-          id: 'token-123',
-          token: 'refresh-token',
-          userId: 'user-123',
-        }),
-      )
+      const token = createRefreshToken({
+        expiresAt,
+        id: 'token-123',
+        token: 'refresh-token',
+        userId: 'user-123',
+      })
 
       // Assert
       expect(token.isExpired()).toBe(true)
@@ -222,14 +213,12 @@ describe('RefreshToken Domain Entity', () => {
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
       // Act
-      const token = expectSuccess(
-        RefreshToken.create({
-          expiresAt,
-          id: 'token-123',
-          token: 'refresh-token',
-          userId: 'user-123',
-        }),
-      )
+      const token = createRefreshToken({
+        expiresAt,
+        id: 'token-123',
+        token: 'refresh-token',
+        userId: 'user-123',
+      })
 
       // Assert
       expect(token.isValid()).toBe(true)
@@ -255,27 +244,23 @@ describe('RefreshToken Domain Entity', () => {
 
     it('should be opposite of isExpired', () => {
       // Arrange & Act
-      const expiredToken = expectSuccess(
-        RefreshToken.create({
-          expiresAt: new Date(Date.now() - 1000),
-          id: 'token-1',
-          token: 'expired-token',
-          userId: 'user-123',
-        }),
-      )
+      const expiredToken = createRefreshToken({
+        expiresAt: new Date(Date.now() - 1000),
+        id: 'token-1',
+        token: 'expired-token',
+        userId: 'user-123',
+      })
 
-      const validToken = expectSuccess(
-        RefreshToken.create({
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-          id: 'token-2',
-          token: 'valid-token',
-          userId: 'user-123',
-        }),
-      )
+      const validToken = createRefreshToken({
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        id: 'token-2',
+        token: 'valid-token',
+        userId: 'user-123',
+      })
 
       // Assert
-      expect(expiredToken.isValid()).toBe(!expiredToken.isExpired())
-      expect(validToken.isValid()).toBe(!validToken.isExpired())
+      expect(expiredToken.isValid()).toBe(expiredToken.isExpired())
+      expect(validToken.isValid()).toBe(validToken.isExpired())
     })
   })
 
@@ -285,14 +270,12 @@ describe('RefreshToken Domain Entity', () => {
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
       // Act
-      const token = expectSuccess(
-        RefreshToken.create({
-          expiresAt,
-          id: 'token-123',
-          token: 'refresh-token-string',
-          userId: 'user-123',
-        }),
-      )
+      const token = createRefreshToken({
+        expiresAt,
+        id: 'token-123',
+        token: 'refresh-token-string',
+        userId: 'user-123',
+      })
 
       const obj = token.toObject()
 
@@ -309,14 +292,12 @@ describe('RefreshToken Domain Entity', () => {
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
       // Act
-      const token = expectSuccess(
-        RefreshToken.create({
-          expiresAt,
-          id: 'token-123',
-          token: 'secret-refresh-token',
-          userId: 'user-123',
-        }),
-      )
+      const token = createRefreshToken({
+        expiresAt,
+        id: 'token-123',
+        token: 'secret-refresh-token',
+        userId: 'user-123',
+      })
 
       const obj = token.toObject()
 

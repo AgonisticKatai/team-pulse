@@ -190,16 +190,14 @@ describe('CreateUserUseCase', () => {
     describe('error cases', () => {
       it('should throw ValidationError when email already exists', async () => {
         // Arrange
-        const existingUser = expectSuccess(
-          User.create({
-            createdAt: new Date(),
-            email: 'existing@example.com',
-            id: 'existing-123',
-            passwordHash: 'hashed',
-            role: 'USER',
-            updatedAt: new Date(),
-          }),
-        )
+        const existingUser = createUser({
+          createdAt: new Date(),
+          email: 'existing@example.com',
+          id: 'existing-123',
+          passwordHash: 'hashed',
+          role: 'USER',
+          updatedAt: new Date(),
+        })
 
         const dto: CreateUserDTO = {
           email: 'existing@example.com',
@@ -207,7 +205,7 @@ describe('CreateUserUseCase', () => {
           role: 'USER',
         }
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(existingUser!)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(existingUser)
 
         // Act
         let error: ValidationError | undefined
@@ -226,16 +224,14 @@ describe('CreateUserUseCase', () => {
 
       it('should not hash password when email already exists', async () => {
         // Arrange
-        const existingUser = expectSuccess(
-          User.create({
-            createdAt: new Date(),
-            email: 'existing@example.com',
-            id: 'existing-123',
-            passwordHash: 'hashed',
-            role: 'USER',
-            updatedAt: new Date(),
-          }),
-        )
+        const existingUser = createUser({
+          createdAt: new Date(),
+          email: 'existing@example.com',
+          id: 'existing-123',
+          passwordHash: 'hashed',
+          role: 'USER',
+          updatedAt: new Date(),
+        })
 
         const dto: CreateUserDTO = {
           email: 'existing@example.com',
@@ -243,7 +239,7 @@ describe('CreateUserUseCase', () => {
           role: 'USER',
         }
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(existingUser!)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(existingUser)
 
         const { hashPassword } = await import('../../infrastructure/auth/passwordUtils.js')
 
@@ -263,16 +259,14 @@ describe('CreateUserUseCase', () => {
     describe('edge cases', () => {
       it('should handle user with ADMIN role', async () => {
         // Arrange
-        const adminUser = expectSuccess(
-          User.create({
-            createdAt: new Date('2025-01-01T00:00:00Z'),
-            email: 'admin@example.com',
-            id: 'mock-uuid',
-            passwordHash: 'hashed-password',
-            role: 'ADMIN',
-            updatedAt: new Date('2025-01-01T00:00:00Z'),
-          }),
-        )
+        const adminUser = createUser({
+          createdAt: new Date('2025-01-01T00:00:00Z'),
+          email: 'admin@example.com',
+          id: 'mock-uuid',
+          passwordHash: 'hashed-password',
+          role: 'ADMIN',
+          updatedAt: new Date('2025-01-01T00:00:00Z'),
+        })
 
         const dto: CreateUserDTO = {
           email: 'admin@example.com',
@@ -281,7 +275,7 @@ describe('CreateUserUseCase', () => {
         }
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(adminUser!)
+        vi.mocked(userRepository.save).mockResolvedValue(adminUser)
 
         // Act
         const result = await createUserUseCase.execute(dto)
@@ -294,16 +288,14 @@ describe('CreateUserUseCase', () => {
 
       it('should handle user with SUPER_ADMIN role', async () => {
         // Arrange
-        const superAdminUser = expectSuccess(
-          User.create({
-            createdAt: new Date('2025-01-01T00:00:00Z'),
-            email: 'superadmin@example.com',
-            id: 'mock-uuid',
-            passwordHash: 'hashed-password',
-            role: 'SUPER_ADMIN',
-            updatedAt: new Date('2025-01-01T00:00:00Z'),
-          }),
-        )
+        const superAdminUser = createUser({
+          createdAt: new Date('2025-01-01T00:00:00Z'),
+          email: 'superadmin@example.com',
+          id: 'mock-uuid',
+          passwordHash: 'hashed-password',
+          role: 'SUPER_ADMIN',
+          updatedAt: new Date('2025-01-01T00:00:00Z'),
+        })
 
         const dto: CreateUserDTO = {
           email: 'superadmin@example.com',
@@ -312,7 +304,7 @@ describe('CreateUserUseCase', () => {
         }
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(superAdminUser!)
+        vi.mocked(userRepository.save).mockResolvedValue(superAdminUser)
 
         // Act
         const result = await createUserUseCase.execute(dto)

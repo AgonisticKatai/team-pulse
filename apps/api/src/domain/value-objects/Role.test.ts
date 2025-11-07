@@ -26,7 +26,7 @@ describe('Role Value Object', () => {
 
       // Assert
       expect(role).toBeDefined()
-      expect(role!.getValue()).toBe(UserRole.ADMIN)
+      expect(role.getValue()).toBe(UserRole.ADMIN)
     })
 
     it('should create SUPER_ADMIN role', () => {
@@ -38,7 +38,7 @@ describe('Role Value Object', () => {
 
       // Assert
       expect(role).toBeDefined()
-      expect(role!.getValue()).toBe(UserRole.SUPER_ADMIN)
+      expect(role.getValue()).toBe(UserRole.SUPER_ADMIN)
     })
 
     it('should normalize to uppercase', () => {
@@ -50,7 +50,7 @@ describe('Role Value Object', () => {
 
       // Assert
       expect(role).toBeDefined()
-      expect(role!.getValue()).toBe(UserRole.USER)
+      expect(role.getValue()).toBe(UserRole.USER)
     })
 
     it('should trim whitespace', () => {
@@ -62,7 +62,7 @@ describe('Role Value Object', () => {
 
       // Assert
       expect(role).toBeDefined()
-      expect(role!.getValue()).toBe(UserRole.ADMIN)
+      expect(role.getValue()).toBe(UserRole.ADMIN)
     })
 
     it('should fail with empty string', () => {
