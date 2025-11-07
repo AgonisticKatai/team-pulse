@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { RepositoryError, ValidationError } from '../../domain/errors/index.js'
 import { Team } from '../../domain/models/Team.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
-import { Err, isError, isOk, Ok } from '../../domain/types/index.js'
+import { Err, Ok } from '../../domain/types/index.js'
 import { CreateTeamUseCase } from './CreateTeamUseCase.js'
 
 // Mock external dependencies
@@ -59,19 +59,15 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam!))
 
         // Act
-        const result = await createTeamUseCase.execute(dto)
+        const [error, team] = await createTeamUseCase.execute(dto)
 
         // Assert
-        expect(isOk(result)).toBe(true)
-        expect(isError(result)).toBe(false)
-
-        if (isOk(result)) {
-          const team = result[1]
-          expect(team.id).toBe('mock-uuid')
-          expect(team.name).toBe('FC Barcelona')
-          expect(team.city).toBe('Barcelona')
-          expect(team.foundedYear).toBe(1899)
-        }
+        expect(error).toBeNull()
+        expect(team).toBeDefined()
+        expect(team!.id).toBe('mock-uuid')
+        expect(team!.name).toBe('FC Barcelona')
+        expect(team!.city).toBe('Barcelona')
+        expect(team!.foundedYear).toBe(1899)
       })
 
       it('should check if team name already exists', async () => {
@@ -129,18 +125,15 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam!))
 
         // Act
-        const result = await createTeamUseCase.execute(dto)
+        const [error, team] = await createTeamUseCase.execute(dto)
 
         // Assert
-        expect(isOk(result)).toBe(true)
-
-        if (isOk(result)) {
-          const team = result[1]
-          expect(typeof team.createdAt).toBe('string')
-          expect(typeof team.updatedAt).toBe('string')
-          expect(team.createdAt).toBe('2025-01-01T00:00:00.000Z')
-          expect(team.updatedAt).toBe('2025-01-01T00:00:00.000Z')
-        }
+        expect(error).toBeNull()
+        expect(team).toBeDefined()
+        expect(typeof team!.createdAt).toBe('string')
+        expect(typeof team!.updatedAt).toBe('string')
+        expect(team!.createdAt).toBe('2025-01-01T00:00:00.000Z')
+        expect(team!.updatedAt).toBe('2025-01-01T00:00:00.000Z')
       })
 
       it('should handle team without foundedYear', async () => {
@@ -163,15 +156,12 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(teamWithoutYear!))
 
         // Act
-        const result = await createTeamUseCase.execute(dto)
+        const [error, team] = await createTeamUseCase.execute(dto)
 
         // Assert
-        expect(isOk(result)).toBe(true)
-
-        if (isOk(result)) {
-          const team = result[1]
-          expect(team.foundedYear).toBeNull()
-        }
+        expect(error).toBeNull()
+        expect(team).toBeDefined()
+        expect(team!.foundedYear).toBeNull()
       })
     })
 
@@ -196,20 +186,12 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(existingTeam!))
 
         // Act
-        const result = await createTeamUseCase.execute(dto)
+        const [error, team] = await createTeamUseCase.execute(dto)
 
         // Assert
-        expect(isError(result)).toBe(true)
-        expect(isOk(result)).toBe(false)
-
-        if (isError(result)) {
-          const error = result[0]
-          expect(error).toBeInstanceOf(ValidationError)
-          expect(error.message).toBe('A team with name "FC Barcelona" already exists')
-          if (error instanceof ValidationError) {
-            expect(error.field).toBe('name')
-          }
-        }
+        expect(error).toBeInstanceOf(ValidationError)
+        expect(error!.message).toBe('A team with name "FC Barcelona" already exists')
+        expect(team).toBeNull()
       })
 
       it('should not save team when name already exists', async () => {
@@ -249,15 +231,11 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
 
         // Act
-        const result = await createTeamUseCase.execute(dto)
+        const [error, team] = await createTeamUseCase.execute(dto)
 
         // Assert
-        expect(isError(result)).toBe(true)
-
-        if (isError(result)) {
-          const error = result[0]
-          expect(error).toBeInstanceOf(ValidationError)
-        }
+        expect(error).toBeInstanceOf(ValidationError)
+        expect(team).toBeNull()
       })
 
       it('should return Err when repository save fails', async () => {
@@ -277,16 +255,12 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Err(repositoryError))
 
         // Act
-        const result = await createTeamUseCase.execute(dto)
+        const [error, team] = await createTeamUseCase.execute(dto)
 
         // Assert
-        expect(isError(result)).toBe(true)
-
-        if (isError(result)) {
-          const error = result[0]
-          expect(error).toBeInstanceOf(RepositoryError)
-          expect(error.message).toBe('Database connection lost')
-        }
+        expect(error).toBeInstanceOf(RepositoryError)
+        expect(error!.message).toBe('Database connection lost')
+        expect(team).toBeNull()
       })
 
       it('should return Err when repository findByName fails', async () => {
@@ -305,16 +279,12 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.findByName).mockResolvedValue(Err(repositoryError))
 
         // Act
-        const result = await createTeamUseCase.execute(dto)
+        const [error, team] = await createTeamUseCase.execute(dto)
 
         // Assert
-        expect(isError(result)).toBe(true)
-
-        if (isError(result)) {
-          const error = result[0]
-          expect(error).toBeInstanceOf(RepositoryError)
-          expect(error.message).toBe('Database query timeout')
-        }
+        expect(error).toBeInstanceOf(RepositoryError)
+        expect(error!.message).toBe('Database query timeout')
+        expect(team).toBeNull()
       })
     })
 
@@ -361,10 +331,10 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(teamWithoutYear!))
 
         // Act
-        const result = await createTeamUseCase.execute(dto)
+        const [error] = await createTeamUseCase.execute(dto)
 
         // Assert
-        expect(isOk(result)).toBe(true)
+        expect(error).toBeNull()
         const savedTeam = expectMockCallArg<Team>(vi.mocked(teamRepository.save))
         expect(savedTeam.foundedYear).toBeNull()
       })
