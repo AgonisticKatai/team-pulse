@@ -55,7 +55,6 @@ function App() {
           <Routes>
             {/* Public routes */}
             <Route path="/login" element={<LoginPage />} />
-
             {/* Protected routes */}
             <Route
               path="/"
@@ -65,7 +64,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             <Route
               path="/teams"
               element={
