@@ -68,3 +68,26 @@ export function expectDefined<T, E>(result: Result<T, E>): NonNullable<T> {
   expect(value).toBeDefined()
   return value as NonNullable<T>
 }
+
+/**
+ * Test helper to assert a Result contains a specific error type
+ *
+ * This helper allows type-safe extraction of specific error types from union types.
+ * It automatically narrows the error type using instanceof check.
+ * Works with both public and private constructors.
+ *
+ * @example
+ * const error = expectErrorType({ result, errorType: ValidationError })
+ * expect(error.field).toBe('name') // ← TypeScript knows error is ValidationError
+ */
+export function expectErrorType<E extends Error>({
+  result,
+  errorType,
+}: {
+  result: Result<any, any>
+  errorType: Function & { prototype: E }
+}): E {
+  const error = expectError(result)
+  expect(error).toBeInstanceOf(errorType)
+  return error as E
+}

@@ -1,0 +1,289 @@
+import type { UpdateTeamDTO } from '@team-pulse/shared'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { NotFoundError, RepositoryError, ValidationError } from '../../domain/errors/index.js'
+import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
+import { Err, Ok } from '../../domain/types/index.js'
+import {
+  buildExistingTeam,
+  buildTeam,
+  expectError,
+  expectErrorType,
+  expectSuccess,
+  TEST_CONSTANTS,
+} from '../../infrastructure/testing/index.js'
+import { UpdateTeamUseCase } from './UpdateTeamUseCase.js'
+
+describe('UpdateTeamUseCase', () => {
+  let updateTeamUseCase: UpdateTeamUseCase
+  let teamRepository: ITeamRepository
+
+  // Mock team data
+  const mockTeam = buildTeam()
+  const existingTeam = buildExistingTeam()
+
+  beforeEach(() => {
+    // Reset all mocks before each test
+    vi.clearAllMocks()
+
+    // Mock repository
+    teamRepository = {
+      delete: vi.fn(),
+      existsByName: vi.fn(),
+      findAll: vi.fn(),
+      findById: vi.fn(),
+      findByName: vi.fn(),
+      save: vi.fn(),
+    }
+
+    // Create use case instance
+    updateTeamUseCase = new UpdateTeamUseCase(teamRepository)
+  })
+
+  describe('execute', () => {
+    describe('successful team update', () => {
+      it('should return Ok with updated team data when update succeeds', async () => {
+        // Arrange
+        const dto: UpdateTeamDTO = {
+          city: 'New City',
+          foundedYear: 1950,
+          name: 'Updated Team',
+        }
+
+        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
+        vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
+
+        // Act
+        const team = expectSuccess(await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto))
+
+        // Assert
+        expect(team.id).toBe(TEST_CONSTANTS.MOCK_UUID)
+        expect(teamRepository.findById).toHaveBeenCalledWith(TEST_CONSTANTS.MOCK_UUID)
+        expect(teamRepository.save).toHaveBeenCalled()
+      })
+
+      it('should allow partial updates', async () => {
+        // Arrange
+        const dto: UpdateTeamDTO = {
+          city: 'New City',
+        }
+
+        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
+
+        // Act
+        const team = expectSuccess(await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto))
+
+        // Assert
+        expect(team).toBeDefined()
+        expect(teamRepository.save).toHaveBeenCalled()
+      })
+
+      it('should update team without checking name if name is not changed', async () => {
+        // Arrange
+        const dto: UpdateTeamDTO = {
+          city: 'New City',
+          foundedYear: 1950,
+        }
+
+        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
+
+        // Act
+        await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto)
+
+        // Assert
+        expect(teamRepository.findByName).not.toHaveBeenCalled()
+      })
+
+      it('should check name uniqueness if name is changed', async () => {
+        // Arrange
+        const dto: UpdateTeamDTO = {
+          name: 'New Team Name',
+        }
+
+        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
+        vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
+
+        // Act
+        await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto)
+
+        // Assert
+        expect(teamRepository.findByName).toHaveBeenCalledWith('New Team Name')
+      })
+
+      it('should allow same team to keep its own name', async () => {
+        // Arrange
+        const dto: UpdateTeamDTO = {
+          name: TEST_CONSTANTS.TEAMS.FC_BARCELONA.name,
+        }
+
+        // Return the same team when checking by name
+        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(mockTeam))
+        vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
+
+        // Act
+        const result = await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto)
+
+        // Assert
+        expect(result.ok).toBe(true)
+      })
+    })
+
+    describe('validation errors', () => {
+      it('should return NotFoundError when team does not exist', async () => {
+        // Arrange
+        const dto: UpdateTeamDTO = {
+          city: 'New City',
+        }
+
+        vi.mocked(teamRepository.findById).mockResolvedValue(null)
+
+        // Act
+        const error = expectError(await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto))
+
+        // Assert
+        expect(error).toBeInstanceOf(NotFoundError)
+        expect(error.message).toContain('Team')
+        expect(error.message).toContain(TEST_CONSTANTS.MOCK_UUID)
+        expect(teamRepository.save).not.toHaveBeenCalled()
+      })
+
+      it('should return ValidationError when new name already exists for different team', async () => {
+        // Arrange
+        const dto: UpdateTeamDTO = {
+          name: 'Existing Team Name',
+        }
+
+        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(existingTeam))
+
+        // Act
+        const error = expectErrorType({
+          errorType: ValidationError,
+          result: await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto),
+        })
+
+        // Assert
+        expect(error.message).toContain('already exists')
+        expect(error.message).toContain('Existing Team Name')
+        expect(error.field).toBe('name')
+        expect(teamRepository.save).not.toHaveBeenCalled()
+      })
+
+      it('should return ValidationError when team update validation fails', async () => {
+        // Arrange
+        const dto: UpdateTeamDTO = {
+          city: '', // Invalid: empty city
+        }
+
+        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+
+        // Act
+        const error = expectError(await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto))
+
+        // Assert
+        expect(error).toBeInstanceOf(ValidationError)
+        expect(teamRepository.save).not.toHaveBeenCalled()
+      })
+
+      it('should return ValidationError for invalid founded year', async () => {
+        // Arrange
+        const dto: UpdateTeamDTO = {
+          foundedYear: 3000, // Future year
+        }
+
+        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+
+        // Act
+        const error = expectError(await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto))
+
+        // Assert
+        expect(error).toBeInstanceOf(ValidationError)
+        expect(teamRepository.save).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('repository errors', () => {
+      it('should return RepositoryError when findByName fails', async () => {
+        // Arrange
+        const dto: UpdateTeamDTO = {
+          name: 'New Team Name',
+        }
+
+        const repositoryError = RepositoryError.forOperation({
+          message: TEST_CONSTANTS.ERRORS.DATABASE_CONNECTION_LOST,
+          operation: 'findByName',
+        })
+
+        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.findByName).mockResolvedValue(Err(repositoryError))
+
+        // Act
+        const error = expectError(await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto))
+
+        // Assert
+        expect(error).toBeInstanceOf(RepositoryError)
+        expect(error.message).toContain(TEST_CONSTANTS.ERRORS.DATABASE_CONNECTION_LOST)
+        expect(teamRepository.save).not.toHaveBeenCalled()
+      })
+
+      it('should return RepositoryError when save fails', async () => {
+        // Arrange
+        const dto: UpdateTeamDTO = {
+          city: 'New City',
+        }
+
+        const repositoryError = RepositoryError.forOperation({
+          message: TEST_CONSTANTS.ERRORS.DATABASE_CONNECTION_LOST,
+          operation: 'save',
+        })
+
+        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.save).mockResolvedValue(Err(repositoryError))
+
+        // Act
+        const error = expectError(await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto))
+
+        // Assert
+        expect(error).toBeInstanceOf(RepositoryError)
+        expect(error.message).toContain(TEST_CONSTANTS.ERRORS.DATABASE_CONNECTION_LOST)
+      })
+    })
+
+    describe('edge cases', () => {
+      it('should handle empty update DTO', async () => {
+        // Arrange
+        const dto: UpdateTeamDTO = {}
+
+        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
+
+        // Act
+        const team = expectSuccess(await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto))
+
+        // Assert
+        expect(team).toBeDefined()
+      })
+
+      it('should handle setting founded year to null', async () => {
+        // Arrange
+        const dto: UpdateTeamDTO = {
+          foundedYear: null,
+        }
+
+        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
+
+        // Act
+        const team = expectSuccess(await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto))
+
+        // Assert
+        expect(team).toBeDefined()
+      })
+    })
+  })
+})
