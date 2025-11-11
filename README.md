@@ -42,8 +42,8 @@ team-pulse/
 
 ### Prerequisites
 
-- Node.js >= 22.0.0
-- pnpm >= 10.0.0
+- Node.js >= 25.1.0
+- pnpm >= 11.6.2
 - Docker and Docker Compose (for local database)
 
 ### Database Setup
@@ -243,7 +243,7 @@ Root Directory: .
 Build Command: turbo build
 Output Directory: apps/web/dist
 Install Command: pnpm install
-Node.js Version: 22.x
+Node.js Version: 25.x
 ```
 
 ## 📝 Features
