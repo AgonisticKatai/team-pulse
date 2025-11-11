@@ -13,6 +13,7 @@ export const TEST_CONSTANTS = {
     FAILED_TO_DELETE_TEAM: 'Failed to delete team',
   },
   EXISTING_TEAM_ID: 'existing-123',
+  EXISTING_USER_ID: 'existing-user-123',
 
   // Invalid Data
   INVALID: {
@@ -41,6 +42,28 @@ export const TEST_CONSTANTS = {
       city: 'Valencia',
       foundedYear: undefined,
       name: 'Valencia CF',
+    },
+  },
+
+  // User Data
+  USERS: {
+    ADMIN_USER: {
+      email: 'admin@example.com',
+      password: 'AdminPass123',
+      passwordHash: 'hashed-admin-password',
+      role: 'ADMIN' as const,
+    },
+    JOHN_DOE: {
+      email: 'john.doe@example.com',
+      password: 'ValidPass123',
+      passwordHash: 'hashed-password',
+      role: 'USER' as const,
+    },
+    SUPER_ADMIN_USER: {
+      email: 'superadmin@example.com',
+      password: 'SuperPass123',
+      passwordHash: 'hashed-superadmin-password',
+      role: 'SUPER_ADMIN' as const,
     },
   },
 } as const
