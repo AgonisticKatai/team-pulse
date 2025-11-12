@@ -28,11 +28,35 @@ import type { Env } from '../../infrastructure/config/env.js'
  * It's PURE business logic.
  */
 export class RefreshTokenUseCase {
-  constructor(
-    private readonly userRepository: IUserRepository,
-    private readonly refreshTokenRepository: IRefreshTokenRepository,
-    private readonly env: Env,
-  ) {}
+  private readonly userRepository: IUserRepository
+  private readonly refreshTokenRepository: IRefreshTokenRepository
+  private readonly env: Env
+
+  private constructor({
+    userRepository,
+    refreshTokenRepository,
+    env,
+  }: {
+    userRepository: IUserRepository
+    refreshTokenRepository: IRefreshTokenRepository
+    env: Env
+  }) {
+    this.userRepository = userRepository
+    this.refreshTokenRepository = refreshTokenRepository
+    this.env = env
+  }
+
+  static create({
+    userRepository,
+    refreshTokenRepository,
+    env,
+  }: {
+    userRepository: IUserRepository
+    refreshTokenRepository: IRefreshTokenRepository
+    env: Env
+  }): RefreshTokenUseCase {
+    return new RefreshTokenUseCase({ env, refreshTokenRepository, userRepository })
+  }
 
   async execute(dto: RefreshTokenDTO): Promise<Result<RefreshTokenResponseDTO, ValidationError>> {
     // Verify JWT signature and decode payload

@@ -161,11 +161,11 @@ export class Container {
    */
   get loginUseCase(): LoginUseCase {
     if (!this._loginUseCase) {
-      this._loginUseCase = new LoginUseCase(
-        this.userRepository,
-        this.refreshTokenRepository,
-        this.env,
-      )
+      this._loginUseCase = LoginUseCase.create({
+        env: this.env,
+        refreshTokenRepository: this.refreshTokenRepository,
+        userRepository: this.userRepository,
+      })
     }
     return this._loginUseCase
   }
@@ -175,11 +175,11 @@ export class Container {
    */
   get refreshTokenUseCase(): RefreshTokenUseCase {
     if (!this._refreshTokenUseCase) {
-      this._refreshTokenUseCase = new RefreshTokenUseCase(
-        this.userRepository,
-        this.refreshTokenRepository,
-        this.env,
-      )
+      this._refreshTokenUseCase = RefreshTokenUseCase.create({
+        env: this.env,
+        refreshTokenRepository: this.refreshTokenRepository,
+        userRepository: this.userRepository,
+      })
     }
     return this._refreshTokenUseCase
   }
@@ -189,7 +189,9 @@ export class Container {
    */
   get logoutUseCase(): LogoutUseCase {
     if (!this._logoutUseCase) {
-      this._logoutUseCase = new LogoutUseCase(this.refreshTokenRepository)
+      this._logoutUseCase = LogoutUseCase.create({
+        refreshTokenRepository: this.refreshTokenRepository,
+      })
     }
     return this._logoutUseCase
   }
@@ -199,7 +201,7 @@ export class Container {
    */
   get createUserUseCase(): CreateUserUseCase {
     if (!this._createUserUseCase) {
-      this._createUserUseCase = new CreateUserUseCase(this.userRepository)
+      this._createUserUseCase = CreateUserUseCase.create({ userRepository: this.userRepository })
     }
     return this._createUserUseCase
   }
@@ -209,7 +211,7 @@ export class Container {
    */
   get listUsersUseCase(): ListUsersUseCase {
     if (!this._listUsersUseCase) {
-      this._listUsersUseCase = new ListUsersUseCase(this.userRepository)
+      this._listUsersUseCase = ListUsersUseCase.create({ userRepository: this.userRepository })
     }
     return this._listUsersUseCase
   }

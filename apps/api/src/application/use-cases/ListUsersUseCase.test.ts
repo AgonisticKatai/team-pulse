@@ -29,7 +29,7 @@ describe('ListUsersUseCase', () => {
     }
 
     // Create use case instance
-    listUsersUseCase = new ListUsersUseCase(userRepository)
+    listUsersUseCase = ListUsersUseCase.create({ userRepository })
   })
 
   describe('execute', () => {

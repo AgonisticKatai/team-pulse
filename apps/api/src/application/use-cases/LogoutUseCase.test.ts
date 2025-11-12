@@ -22,7 +22,7 @@ describe('LogoutUseCase', () => {
     }
 
     // Create use case instance
-    logoutUseCase = new LogoutUseCase(refreshTokenRepository)
+    logoutUseCase = LogoutUseCase.create({ refreshTokenRepository })
   })
 
   describe('execute', () => {

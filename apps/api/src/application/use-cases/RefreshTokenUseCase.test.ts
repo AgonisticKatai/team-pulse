@@ -68,7 +68,11 @@ describe('RefreshTokenUseCase', () => {
     }
 
     // Create use case instance
-    refreshTokenUseCase = new RefreshTokenUseCase(userRepository, refreshTokenRepository, env)
+    refreshTokenUseCase = RefreshTokenUseCase.create({
+      env,
+      refreshTokenRepository,
+      userRepository,
+    })
   })
 
   describe('execute', () => {

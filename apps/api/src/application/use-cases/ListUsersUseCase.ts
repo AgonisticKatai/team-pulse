@@ -18,7 +18,15 @@ import { Ok, type Result } from '../../domain/types/index.js'
  * Authorization is handled by middleware at the HTTP layer.
  */
 export class ListUsersUseCase {
-  constructor(private readonly userRepository: IUserRepository) {}
+  private readonly userRepository: IUserRepository
+
+  private constructor({ userRepository }: { userRepository: IUserRepository }) {
+    this.userRepository = userRepository
+  }
+
+  static create({ userRepository }: { userRepository: IUserRepository }): ListUsersUseCase {
+    return new ListUsersUseCase({ userRepository })
+  }
 
   async execute(): Promise<Result<UsersListResponseDTO, never>> {
     // Fetch all users

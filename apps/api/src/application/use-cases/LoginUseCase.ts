@@ -33,11 +33,35 @@ import type { Env } from '../../infrastructure/config/env.js'
  * It's PURE business logic.
  */
 export class LoginUseCase {
-  constructor(
-    private readonly userRepository: IUserRepository,
-    private readonly refreshTokenRepository: IRefreshTokenRepository,
-    private readonly env: Env,
-  ) {}
+  private readonly userRepository: IUserRepository
+  private readonly refreshTokenRepository: IRefreshTokenRepository
+  private readonly env: Env
+
+  private constructor({
+    userRepository,
+    refreshTokenRepository,
+    env,
+  }: {
+    userRepository: IUserRepository
+    refreshTokenRepository: IRefreshTokenRepository
+    env: Env
+  }) {
+    this.userRepository = userRepository
+    this.refreshTokenRepository = refreshTokenRepository
+    this.env = env
+  }
+
+  static create({
+    userRepository,
+    refreshTokenRepository,
+    env,
+  }: {
+    userRepository: IUserRepository
+    refreshTokenRepository: IRefreshTokenRepository
+    env: Env
+  }): LoginUseCase {
+    return new LoginUseCase({ env, refreshTokenRepository, userRepository })
+  }
 
   async execute(dto: LoginDTO): Promise<Result<LoginResponseDTO, ValidationError>> {
     // Find user by email

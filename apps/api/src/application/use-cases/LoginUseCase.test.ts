@@ -68,7 +68,7 @@ describe('LoginUseCase', () => {
     }
 
     // Create use case instance
-    loginUseCase = new LoginUseCase(userRepository, refreshTokenRepository, env)
+    loginUseCase = LoginUseCase.create({ env, refreshTokenRepository, userRepository })
   })
 
   describe('execute', () => {

@@ -26,7 +26,15 @@ import { hashPassword } from '../../infrastructure/auth/passwordUtils.js'
  * It's PURE business logic.
  */
 export class CreateUserUseCase {
-  constructor(private readonly userRepository: IUserRepository) {}
+  private readonly userRepository: IUserRepository
+
+  private constructor({ userRepository }: { userRepository: IUserRepository }) {
+    this.userRepository = userRepository
+  }
+
+  static create({ userRepository }: { userRepository: IUserRepository }): CreateUserUseCase {
+    return new CreateUserUseCase({ userRepository })
+  }
 
   async execute(dto: CreateUserDTO): Promise<Result<UserResponseDTO, ValidationError>> {
     // Business Rule: Email must be unique

@@ -47,7 +47,7 @@ describe('CreateUserUseCase', () => {
     }
 
     // Create use case instance
-    createUserUseCase = new CreateUserUseCase(userRepository)
+    createUserUseCase = CreateUserUseCase.create({ userRepository })
   })
 
   describe('execute', () => {

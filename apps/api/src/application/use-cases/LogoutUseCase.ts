@@ -22,7 +22,21 @@ import { Ok, type Result } from '../../domain/types/index.js'
  * wants to logout, they are logged out.
  */
 export class LogoutUseCase {
-  constructor(private readonly refreshTokenRepository: IRefreshTokenRepository) {}
+  private readonly refreshTokenRepository: IRefreshTokenRepository
+
+  private constructor({
+    refreshTokenRepository,
+  }: { refreshTokenRepository: IRefreshTokenRepository }) {
+    this.refreshTokenRepository = refreshTokenRepository
+  }
+
+  static create({
+    refreshTokenRepository,
+  }: {
+    refreshTokenRepository: IRefreshTokenRepository
+  }): LogoutUseCase {
+    return new LogoutUseCase({ refreshTokenRepository })
+  }
 
   async execute(refreshToken: string): Promise<Result<void, never>> {
     // Delete refresh token from database (revoke it)
