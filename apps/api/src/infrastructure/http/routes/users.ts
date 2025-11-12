@@ -49,11 +49,16 @@ export async function registerUserRoutes(
         const dto = CreateUserDTOSchema.parse(request.body)
 
         // Execute use case
-        const user = await createUserUseCase.execute(dto)
+        const result = await createUserUseCase.execute(dto)
+
+        // Handle Result type
+        if (!result.ok) {
+          return handleError(result.error, reply)
+        }
 
         // Return success response
         return reply.code(201).send({
-          data: user,
+          data: result.value,
           success: true,
         })
       } catch (error) {
@@ -75,8 +80,13 @@ export async function registerUserRoutes(
       try {
         const result = await listUsersUseCase.execute()
 
+        // Handle Result type
+        if (!result.ok) {
+          return handleError(result.error, reply)
+        }
+
         return reply.code(200).send({
-          data: result,
+          data: result.value,
           success: true,
         })
       } catch (error) {

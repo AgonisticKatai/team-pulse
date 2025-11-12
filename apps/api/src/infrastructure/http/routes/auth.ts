@@ -47,9 +47,14 @@ export async function registerAuthRoutes(
       // Execute use case
       const result = await loginUseCase.execute(dto)
 
+      // Handle Result type
+      if (!result.ok) {
+        return handleError(result.error, reply)
+      }
+
       // Return success response
       return reply.code(200).send({
-        data: result,
+        data: result.value,
         success: true,
       })
     } catch (error) {
@@ -69,9 +74,14 @@ export async function registerAuthRoutes(
       // Execute use case
       const result = await refreshTokenUseCase.execute(dto)
 
+      // Handle Result type
+      if (!result.ok) {
+        return handleError(result.error, reply)
+      }
+
       // Return success response
       return reply.code(200).send({
-        data: result,
+        data: result.value,
         success: true,
       })
     } catch (error) {
@@ -90,7 +100,7 @@ export async function registerAuthRoutes(
       // Validate request body using Zod
       const dto = RefreshTokenDTOSchema.parse(request.body)
 
-      // Execute use case
+      // Execute use case (Result<void, never> - always succeeds)
       await logoutUseCase.execute(dto.refreshToken)
 
       // Return success response
