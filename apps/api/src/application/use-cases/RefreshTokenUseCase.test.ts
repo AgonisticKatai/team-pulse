@@ -10,6 +10,8 @@ import {
   buildSuperAdminUser,
   buildUser,
   buildValidRefreshToken,
+  expectErrorType,
+  expectSuccess,
   TEST_CONSTANTS,
 } from '../../infrastructure/testing/index.js'
 import { RefreshTokenUseCase } from './RefreshTokenUseCase.js'
@@ -84,8 +86,9 @@ describe('RefreshTokenUseCase', () => {
         const result = await refreshTokenUseCase.execute(dto)
 
         // Assert
-        expect(result).toBeDefined()
-        expect(result.accessToken).toBe(TEST_CONSTANTS.AUTH.NEW_ACCESS_TOKEN)
+        const data = expectSuccess(result)
+        expect(data).toBeDefined()
+        expect(data.accessToken).toBe(TEST_CONSTANTS.AUTH.NEW_ACCESS_TOKEN)
       })
 
       it('should verify refresh token JWT signature', async () => {
@@ -98,9 +101,10 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(userRepository.findById).mockResolvedValue(mockUser)
 
         // Act
-        await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute(dto)
 
         // Assert
+        expectSuccess(result)
         expect(verifyRefreshToken).toHaveBeenCalledWith(
           TEST_CONSTANTS.AUTH.VALID_REFRESH_TOKEN,
           env,
@@ -118,9 +122,10 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(userRepository.findById).mockResolvedValue(mockUser)
 
         // Act
-        await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute(dto)
 
         // Assert
+        expectSuccess(result)
         expect(refreshTokenRepository.findByToken).toHaveBeenCalledWith(
           TEST_CONSTANTS.AUTH.VALID_REFRESH_TOKEN,
         )
@@ -137,9 +142,10 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(userRepository.findById).mockResolvedValue(mockUser)
 
         // Act
-        await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute(dto)
 
         // Assert
+        expectSuccess(result)
         expect(userRepository.findById).toHaveBeenCalledWith(TEST_CONSTANTS.USERS.JOHN_DOE.id)
         expect(userRepository.findById).toHaveBeenCalledTimes(1)
       })
@@ -156,9 +162,10 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(userRepository.findById).mockResolvedValue(mockUser)
 
         // Act
-        await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute(dto)
 
         // Assert
+        expectSuccess(result)
         expect(generateAccessToken).toHaveBeenCalledWith(
           {
             email: TEST_CONSTANTS.USERS.JOHN_DOE.email,
@@ -172,7 +179,7 @@ describe('RefreshTokenUseCase', () => {
     })
 
     describe('error cases', () => {
-      it('should throw ValidationError when JWT signature is invalid', async () => {
+      it('should return ValidationError when JWT signature is invalid', async () => {
         // Arrange
         const dto = buildRefreshTokenDTO()
 
@@ -181,15 +188,18 @@ describe('RefreshTokenUseCase', () => {
           throw new Error('Invalid token signature')
         })
 
-        // Act & Assert
-        await expect(refreshTokenUseCase.execute(dto)).rejects.toThrow(ValidationError)
-        await expect(refreshTokenUseCase.execute(dto)).rejects.toThrow('Invalid token signature')
+        // Act
+        const result = await refreshTokenUseCase.execute(dto)
+
+        // Assert
+        const error = expectErrorType({ errorType: ValidationError, result })
+        expect(error.message).toBe('Invalid token signature')
 
         // Should not proceed to database checks
         expect(refreshTokenRepository.findByToken).not.toHaveBeenCalled()
       })
 
-      it('should throw ValidationError when refresh token does not exist in database', async () => {
+      it('should return ValidationError when refresh token does not exist in database', async () => {
         // Arrange
         const dto = buildRefreshTokenDTO()
 
@@ -197,17 +207,18 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(verifyRefreshToken).mockReturnValue(mockPayload)
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(null)
 
-        // Act & Assert
-        await expect(refreshTokenUseCase.execute(dto)).rejects.toThrow(ValidationError)
-        await expect(refreshTokenUseCase.execute(dto)).rejects.toThrow(
-          'Refresh token has been revoked',
-        )
+        // Act
+        const result = await refreshTokenUseCase.execute(dto)
+
+        // Assert
+        const error = expectErrorType({ errorType: ValidationError, result })
+        expect(error.message).toBe('Refresh token has been revoked')
 
         // Should not proceed to user check
         expect(userRepository.findById).not.toHaveBeenCalled()
       })
 
-      it('should throw ValidationError and delete token when refresh token has expired', async () => {
+      it('should return ValidationError and delete token when refresh token has expired', async () => {
         // Arrange
         const dto = buildRefreshTokenDTO({
           refreshToken: TEST_CONSTANTS.AUTH.EXPIRED_REFRESH_TOKEN,
@@ -221,17 +232,11 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(expiredToken)
 
         // Act
-        let error: ValidationError | undefined
-        try {
-          await refreshTokenUseCase.execute(dto)
-        } catch (err) {
-          error = err as ValidationError
-        }
+        const result = await refreshTokenUseCase.execute(dto)
 
         // Assert
-        expect(error).toBeInstanceOf(ValidationError)
-        expect(error).toBeDefined()
-        expect(error?.message).toBe('Refresh token has expired')
+        const error = expectErrorType({ errorType: ValidationError, result })
+        expect(error.message).toBe('Refresh token has expired')
 
         // Should clean up expired token
         expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith(
@@ -240,7 +245,7 @@ describe('RefreshTokenUseCase', () => {
         expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledTimes(1)
       })
 
-      it('should throw ValidationError and delete token when user no longer exists', async () => {
+      it('should return ValidationError and delete token when user no longer exists', async () => {
         // Arrange
         const dto = buildRefreshTokenDTO({ refreshToken: TEST_CONSTANTS.AUTH.VALID_REFRESH_TOKEN })
 
@@ -250,17 +255,11 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(userRepository.findById).mockResolvedValue(null) // User deleted
 
         // Act
-        let error: ValidationError | undefined
-        try {
-          await refreshTokenUseCase.execute(dto)
-        } catch (err) {
-          error = err as ValidationError
-        }
+        const result = await refreshTokenUseCase.execute(dto)
 
         // Assert
-        expect(error).toBeInstanceOf(ValidationError)
-        expect(error).toBeDefined()
-        expect(error?.message).toBe('User no longer exists')
+        const error = expectErrorType({ errorType: ValidationError, result })
+        expect(error.message).toBe('User no longer exists')
 
         // Should clean up orphaned token
         expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith(
@@ -279,17 +278,11 @@ describe('RefreshTokenUseCase', () => {
         })
 
         // Act
-        let error: ValidationError | undefined
-        try {
-          await refreshTokenUseCase.execute(dto)
-        } catch (err) {
-          error = err as ValidationError
-        }
+        const result = await refreshTokenUseCase.execute(dto)
 
         // Assert
-        expect(error).toBeInstanceOf(ValidationError)
-        expect(error).toBeDefined()
-        expect(error?.field).toBe('refreshToken')
+        const error = expectErrorType({ errorType: ValidationError, result })
+        expect(error.field).toBe('refreshToken')
       })
     })
 
@@ -311,9 +304,10 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(userRepository.findById).mockResolvedValue(adminUser)
 
         // Act
-        await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute(dto)
 
         // Assert
+        expectSuccess(result)
         expect(generateAccessToken).toHaveBeenCalledWith(
           {
             email: TEST_CONSTANTS.USERS.ADMIN_USER.email,
@@ -341,9 +335,10 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(userRepository.findById).mockResolvedValue(superAdminUser)
 
         // Act
-        await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute(dto)
 
         // Assert
+        expectSuccess(result)
         expect(generateAccessToken).toHaveBeenCalledWith(
           {
             email: TEST_CONSTANTS.USERS.SUPER_ADMIN_USER.email,
@@ -364,13 +359,10 @@ describe('RefreshTokenUseCase', () => {
         })
 
         // Act
-        try {
-          await refreshTokenUseCase.execute(dto)
-        } catch {
-          // Expected error
-        }
+        const result = await refreshTokenUseCase.execute(dto)
 
-        // Assert - Should NOT delete token on JWT verification failure
+        // Assert - Should return error but NOT delete token on JWT verification failure
+        expectErrorType({ errorType: ValidationError, result })
         expect(refreshTokenRepository.deleteByToken).not.toHaveBeenCalled()
       })
     })

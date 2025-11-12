@@ -2,6 +2,7 @@ import type { RefreshTokenDTO, RefreshTokenResponseDTO } from '@team-pulse/share
 import { ValidationError } from '../../domain/errors/index.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
+import { Err, Ok, type Result } from '../../domain/types/index.js'
 import {
   generateAccessToken,
   type RefreshTokenPayload,
@@ -33,29 +34,41 @@ export class RefreshTokenUseCase {
     private readonly env: Env,
   ) {}
 
-  async execute(dto: RefreshTokenDTO): Promise<RefreshTokenResponseDTO> {
+  async execute(dto: RefreshTokenDTO): Promise<Result<RefreshTokenResponseDTO, ValidationError>> {
     // Verify JWT signature and decode payload
     let payload: RefreshTokenPayload
     try {
       payload = verifyRefreshToken(dto.refreshToken, this.env)
     } catch (error) {
-      throw new ValidationError(
-        error instanceof Error ? error.message : 'Invalid refresh token',
-        'refreshToken',
+      return Err(
+        ValidationError.forField({
+          field: 'refreshToken',
+          message: error instanceof Error ? error.message : 'Invalid refresh token',
+        }),
       )
     }
 
     // Check if refresh token exists in database (not revoked)
     const refreshToken = await this.refreshTokenRepository.findByToken(dto.refreshToken)
     if (!refreshToken) {
-      throw new ValidationError('Refresh token has been revoked', 'refreshToken')
+      return Err(
+        ValidationError.forField({
+          field: 'refreshToken',
+          message: 'Refresh token has been revoked',
+        }),
+      )
     }
 
     // Check if refresh token has expired
     if (refreshToken.isExpired()) {
       // Clean up expired token
       await this.refreshTokenRepository.deleteByToken(dto.refreshToken)
-      throw new ValidationError('Refresh token has expired', 'refreshToken')
+      return Err(
+        ValidationError.forField({
+          field: 'refreshToken',
+          message: 'Refresh token has expired',
+        }),
+      )
     }
 
     // Get user from database (ensure user still exists and is active)
@@ -63,7 +76,12 @@ export class RefreshTokenUseCase {
     if (!user) {
       // User was deleted, invalidate token
       await this.refreshTokenRepository.deleteByToken(dto.refreshToken)
-      throw new ValidationError('User no longer exists', 'refreshToken')
+      return Err(
+        ValidationError.forField({
+          field: 'refreshToken',
+          message: 'User no longer exists',
+        }),
+      )
     }
 
     // Generate new access token
@@ -76,8 +94,8 @@ export class RefreshTokenUseCase {
       this.env,
     )
 
-    return {
+    return Ok({
       accessToken,
-    }
+    })
   }
 }
