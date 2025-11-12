@@ -10,6 +10,8 @@ import {
   buildLoginDTO,
   buildSuperAdminUser,
   buildUser,
+  expectErrorType,
+  expectSuccess,
   TEST_CONSTANTS,
 } from '../../infrastructure/testing/index.js'
 import { LoginUseCase } from './LoginUseCase.js'
@@ -83,10 +85,11 @@ describe('LoginUseCase', () => {
         const result = await loginUseCase.execute(loginDTO)
 
         // Assert
-        expect(result).toBeDefined()
-        expect(result.accessToken).toBe(TEST_CONSTANTS.AUTH.MOCK_ACCESS_TOKEN)
-        expect(result.refreshToken).toBe(TEST_CONSTANTS.AUTH.MOCK_REFRESH_TOKEN)
-        expect(result.user).toEqual({
+        const data = expectSuccess(result)
+        expect(data).toBeDefined()
+        expect(data.accessToken).toBe(TEST_CONSTANTS.AUTH.MOCK_ACCESS_TOKEN)
+        expect(data.refreshToken).toBe(TEST_CONSTANTS.AUTH.MOCK_REFRESH_TOKEN)
+        expect(data.user).toEqual({
           createdAt: TEST_CONSTANTS.MOCK_DATE_ISO,
           email: TEST_CONSTANTS.USERS.JOHN_DOE.email,
           id: TEST_CONSTANTS.USERS.JOHN_DOE.id,
@@ -104,9 +107,10 @@ describe('LoginUseCase', () => {
         vi.mocked(verifyPassword).mockResolvedValue(true)
 
         // Act
-        await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute(loginDTO)
 
         // Assert
+        expectSuccess(result)
         expect(userRepository.findByEmail).toHaveBeenCalledWith(TEST_CONSTANTS.USERS.JOHN_DOE.email)
         expect(userRepository.findByEmail).toHaveBeenCalledTimes(1)
       })
@@ -120,9 +124,10 @@ describe('LoginUseCase', () => {
         vi.mocked(verifyPassword).mockResolvedValue(true)
 
         // Act
-        await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute(loginDTO)
 
         // Assert
+        expectSuccess(result)
         expect(verifyPassword).toHaveBeenCalledWith(
           TEST_CONSTANTS.USERS.JOHN_DOE.password,
           TEST_CONSTANTS.USERS.JOHN_DOE.passwordHash,
@@ -141,9 +146,10 @@ describe('LoginUseCase', () => {
         const { generateAccessToken } = await import('../../infrastructure/auth/jwtUtils.js')
 
         // Act
-        await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute(loginDTO)
 
         // Assert
+        expectSuccess(result)
         expect(generateAccessToken).toHaveBeenCalledWith(
           {
             email: TEST_CONSTANTS.USERS.JOHN_DOE.email,
@@ -166,9 +172,10 @@ describe('LoginUseCase', () => {
         const { generateRefreshToken } = await import('../../infrastructure/auth/jwtUtils.js')
 
         // Act
-        await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute(loginDTO)
 
         // Assert
+        expectSuccess(result)
         expect(generateRefreshToken).toHaveBeenCalledWith(
           {
             tokenId: TEST_CONSTANTS.MOCK_UUID,
@@ -188,9 +195,10 @@ describe('LoginUseCase', () => {
         vi.mocked(verifyPassword).mockResolvedValue(true)
 
         // Act
-        await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute(loginDTO)
 
         // Assert
+        expectSuccess(result)
         expect(refreshTokenRepository.save).toHaveBeenCalledTimes(1)
         const savedToken = expectMockCallArg<RefreshToken>(vi.mocked(refreshTokenRepository.save))
         expect(savedToken).toBeInstanceOf(RefreshToken)
@@ -212,8 +220,9 @@ describe('LoginUseCase', () => {
         const result = await loginUseCase.execute(loginDTO)
 
         // Assert
-        expect(result.user).not.toHaveProperty('passwordHash')
-        expect(result.user).toEqual({
+        const data = expectSuccess(result)
+        expect(data.user).not.toHaveProperty('passwordHash')
+        expect(data.user).toEqual({
           createdAt: TEST_CONSTANTS.MOCK_DATE_ISO,
           email: TEST_CONSTANTS.USERS.JOHN_DOE.email,
           id: TEST_CONSTANTS.USERS.JOHN_DOE.id,
@@ -224,15 +233,18 @@ describe('LoginUseCase', () => {
     })
 
     describe('error cases', () => {
-      it('should throw ValidationError when user does not exist', async () => {
+      it('should return ValidationError when user does not exist', async () => {
         // Arrange
         const loginDTO = buildLoginDTO({ email: 'nonexistent@example.com' })
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
 
-        // Act & Assert
-        await expect(loginUseCase.execute(loginDTO)).rejects.toThrow(ValidationError)
-        await expect(loginUseCase.execute(loginDTO)).rejects.toThrow('Invalid email or password')
+        // Act
+        const result = await loginUseCase.execute(loginDTO)
+
+        // Assert
+        const error = expectErrorType({ errorType: ValidationError, result })
+        expect(error.message).toBe('Invalid email or password')
       })
 
       it('should not verify password when user does not exist', async () => {
@@ -243,17 +255,14 @@ describe('LoginUseCase', () => {
         const { verifyPassword } = await import('../../infrastructure/auth/passwordUtils.js')
 
         // Act
-        try {
-          await loginUseCase.execute(loginDTO)
-        } catch {
-          // Expected error
-        }
+        const result = await loginUseCase.execute(loginDTO)
 
         // Assert
+        expectErrorType({ errorType: ValidationError, result })
         expect(verifyPassword).not.toHaveBeenCalled()
       })
 
-      it('should throw ValidationError when password is incorrect', async () => {
+      it('should return ValidationError when password is incorrect', async () => {
         // Arrange
         const loginDTO = buildLoginDTO({ password: TEST_CONSTANTS.INVALID.WRONG_PASSWORD })
 
@@ -261,9 +270,12 @@ describe('LoginUseCase', () => {
         const { verifyPassword } = await import('../../infrastructure/auth/passwordUtils.js')
         vi.mocked(verifyPassword).mockResolvedValue(false)
 
-        // Act & Assert
-        await expect(loginUseCase.execute(loginDTO)).rejects.toThrow(ValidationError)
-        await expect(loginUseCase.execute(loginDTO)).rejects.toThrow('Invalid email or password')
+        // Act
+        const result = await loginUseCase.execute(loginDTO)
+
+        // Assert
+        const error = expectErrorType({ errorType: ValidationError, result })
+        expect(error.message).toBe('Invalid email or password')
       })
 
       it('should not generate tokens when password is incorrect', async () => {
@@ -279,13 +291,10 @@ describe('LoginUseCase', () => {
         )
 
         // Act
-        try {
-          await loginUseCase.execute(loginDTO)
-        } catch {
-          // Expected error
-        }
+        const result = await loginUseCase.execute(loginDTO)
 
         // Assert
+        expectErrorType({ errorType: ValidationError, result })
         expect(generateAccessToken).not.toHaveBeenCalled()
         expect(generateRefreshToken).not.toHaveBeenCalled()
         expect(refreshTokenRepository.save).not.toHaveBeenCalled()
@@ -300,18 +309,12 @@ describe('LoginUseCase', () => {
         vi.mocked(verifyPassword).mockResolvedValue(false)
 
         // Act
-        let error: ValidationError | undefined
-        try {
-          await loginUseCase.execute(loginDTO)
-        } catch (err) {
-          error = err as ValidationError
-        }
+        const result = await loginUseCase.execute(loginDTO)
 
         // Assert - Error message should be the same for "user not found" and "wrong password"
-        expect(error).toBeInstanceOf(ValidationError)
-        expect(error).toBeDefined()
-        expect(error?.message).toBe('Invalid email or password')
-        expect(error?.field).toBe('credentials')
+        const error = expectErrorType({ errorType: ValidationError, result })
+        expect(error.message).toBe('Invalid email or password')
+        expect(error.field).toBe('credentials')
       })
     })
 
@@ -333,7 +336,8 @@ describe('LoginUseCase', () => {
         const result = await loginUseCase.execute(loginDTO)
 
         // Assert
-        expect(result.user.role).toBe(TEST_CONSTANTS.USERS.ADMIN_USER.role)
+        const data = expectSuccess(result)
+        expect(data.user.role).toBe(TEST_CONSTANTS.USERS.ADMIN_USER.role)
       })
 
       it('should handle user with SUPER_ADMIN role', async () => {
@@ -353,7 +357,8 @@ describe('LoginUseCase', () => {
         const result = await loginUseCase.execute(loginDTO)
 
         // Assert
-        expect(result.user.role).toBe(TEST_CONSTANTS.USERS.SUPER_ADMIN_USER.role)
+        const data = expectSuccess(result)
+        expect(data.user.role).toBe(TEST_CONSTANTS.USERS.SUPER_ADMIN_USER.role)
       })
 
       it('should convert dates to ISO strings in user DTO', async () => {
@@ -368,10 +373,11 @@ describe('LoginUseCase', () => {
         const result = await loginUseCase.execute(loginDTO)
 
         // Assert
-        expect(typeof result.user.createdAt).toBe('string')
-        expect(typeof result.user.updatedAt).toBe('string')
-        expect(result.user.createdAt).toBe(TEST_CONSTANTS.MOCK_DATE_ISO)
-        expect(result.user.updatedAt).toBe(TEST_CONSTANTS.MOCK_DATE_ISO)
+        const data = expectSuccess(result)
+        expect(typeof data.user.createdAt).toBe('string')
+        expect(typeof data.user.updatedAt).toBe('string')
+        expect(data.user.createdAt).toBe(TEST_CONSTANTS.MOCK_DATE_ISO)
+        expect(data.user.updatedAt).toBe(TEST_CONSTANTS.MOCK_DATE_ISO)
       })
     })
   })

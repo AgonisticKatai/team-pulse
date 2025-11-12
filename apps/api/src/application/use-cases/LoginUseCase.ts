@@ -5,6 +5,7 @@ import { RefreshToken } from '../../domain/models/RefreshToken.js'
 import type { User } from '../../domain/models/User.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
+import { Err, Ok, type Result } from '../../domain/types/index.js'
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -38,19 +39,29 @@ export class LoginUseCase {
     private readonly env: Env,
   ) {}
 
-  async execute(dto: LoginDTO): Promise<LoginResponseDTO> {
+  async execute(dto: LoginDTO): Promise<Result<LoginResponseDTO, ValidationError>> {
     // Find user by email
     const user = await this.userRepository.findByEmail(dto.email)
     if (!user) {
       // Use generic error message to avoid revealing if email exists
-      throw new ValidationError('Invalid email or password', 'credentials')
+      return Err(
+        ValidationError.forField({
+          field: 'credentials',
+          message: 'Invalid email or password',
+        }),
+      )
     }
 
     // Verify password
     const isPasswordValid = await verifyPassword(dto.password, user.getPasswordHash())
     if (!isPasswordValid) {
       // Use generic error message to avoid revealing if email exists
-      throw new ValidationError('Invalid email or password', 'credentials')
+      return Err(
+        ValidationError.forField({
+          field: 'credentials',
+          message: 'Invalid email or password',
+        }),
+      )
     }
 
     // Generate tokens
@@ -82,17 +93,17 @@ export class LoginUseCase {
     })
 
     if (!refreshTokenResult.ok) {
-      throw refreshTokenResult.error
+      return Err(refreshTokenResult.error)
     }
 
     await this.refreshTokenRepository.save(refreshTokenResult.value)
 
     // Return response
-    return {
+    return Ok({
       accessToken,
       refreshToken: refreshTokenString,
       user: this.mapToUserDTO(user),
-    }
+    })
   }
 
   /**
