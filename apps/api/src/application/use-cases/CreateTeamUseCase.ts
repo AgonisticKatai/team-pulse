@@ -2,7 +2,11 @@ import { randomUUID } from 'node:crypto'
 
 import type { CreateTeamDTO, TeamResponseDTO } from '@team-pulse/shared'
 
-import { type RepositoryError, ValidationError } from '../../domain/errors/index.js'
+import {
+  DuplicatedError,
+  type RepositoryError,
+  type ValidationError,
+} from '../../domain/errors/index.js'
 import { Team } from '../../domain/models/Team.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
 import { Err, Ok, type Result } from '../../domain/types/index.js'
@@ -45,7 +49,7 @@ export class CreateTeamUseCase {
 
   async execute(
     dto: CreateTeamDTO,
-  ): Promise<Result<TeamResponseDTO, ValidationError | RepositoryError>> {
+  ): Promise<Result<TeamResponseDTO, DuplicatedError | RepositoryError | ValidationError>> {
     // Business Rule: Team name must be unique
     const findResult = await this.teamRepository.findByName({ name: dto.name })
 
@@ -55,9 +59,9 @@ export class CreateTeamUseCase {
 
     if (findResult.value) {
       return Err(
-        ValidationError.forField({
-          field: 'name',
-          message: `A team with name "${dto.name}" already exists`,
+        DuplicatedError.create({
+          entityName: 'Team',
+          identifier: dto.name,
         }),
       )
     }

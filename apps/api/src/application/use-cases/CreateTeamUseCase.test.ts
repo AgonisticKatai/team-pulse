@@ -1,7 +1,7 @@
 import { expectMockCallArg } from '@team-pulse/shared/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { RepositoryError, ValidationError } from '../../domain/errors/index.js'
+import { DuplicatedError, RepositoryError, ValidationError } from '../../domain/errors/index.js'
 import { Team } from '../../domain/models/Team.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
 import { Err, Ok } from '../../domain/types/index.js'
@@ -155,10 +155,9 @@ describe('CreateTeamUseCase', () => {
         const error = expectError(await createTeamUseCase.execute(dto))
 
         // Assert
-        expect(error).toBeInstanceOf(ValidationError)
-        expect(error.message).toBe(
-          `A team with name "${TEST_CONSTANTS.teams.fcBarcelona.name}" already exists`,
-        )
+        expect(error).toBeInstanceOf(DuplicatedError)
+        expect(error.message).toContain('already exists')
+        expect(error.message).toContain(TEST_CONSTANTS.teams.fcBarcelona.name)
       })
 
       it('should not save team when name already exists', async () => {
