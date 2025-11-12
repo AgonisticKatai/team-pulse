@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
-import { TEST_CONSTANTS } from '../../infrastructure/testing/index.js'
+import { expectSuccess, TEST_CONSTANTS } from '../../infrastructure/testing/index.js'
 import { LogoutUseCase } from './LogoutUseCase.js'
 
 describe('LogoutUseCase', () => {
@@ -31,9 +31,10 @@ describe('LogoutUseCase', () => {
       const refreshToken = TEST_CONSTANTS.AUTH.VALID_REFRESH_TOKEN
 
       // Act
-      await logoutUseCase.execute(refreshToken)
+      const result = await logoutUseCase.execute(refreshToken)
 
       // Assert
+      expectSuccess(result)
       expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith(refreshToken)
       expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledTimes(1)
     })
@@ -43,8 +44,11 @@ describe('LogoutUseCase', () => {
       const refreshToken = 'non-existent-token'
       vi.mocked(refreshTokenRepository.deleteByToken).mockResolvedValue(false)
 
-      // Act & Assert - Should not throw
-      await expect(logoutUseCase.execute(refreshToken)).resolves.toBeUndefined()
+      // Act
+      const result = await logoutUseCase.execute(refreshToken)
+
+      // Assert
+      expectSuccess(result)
       expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith(refreshToken)
     })
 
@@ -56,7 +60,8 @@ describe('LogoutUseCase', () => {
       const result = await logoutUseCase.execute(refreshToken)
 
       // Assert
-      expect(result).toBeUndefined()
+      const value = expectSuccess(result)
+      expect(value).toBeUndefined()
     })
 
     it('should handle empty token string', async () => {
@@ -64,9 +69,10 @@ describe('LogoutUseCase', () => {
       const refreshToken = ''
 
       // Act
-      await logoutUseCase.execute(refreshToken)
+      const result = await logoutUseCase.execute(refreshToken)
 
       // Assert
+      expectSuccess(result)
       expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith('')
       expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledTimes(1)
     })
@@ -76,11 +82,14 @@ describe('LogoutUseCase', () => {
       const refreshToken = TEST_CONSTANTS.AUTH.MOCK_REFRESH_TOKEN
 
       // Act - Call multiple times
-      await logoutUseCase.execute(refreshToken)
-      await logoutUseCase.execute(refreshToken)
-      await logoutUseCase.execute(refreshToken)
+      const result1 = await logoutUseCase.execute(refreshToken)
+      const result2 = await logoutUseCase.execute(refreshToken)
+      const result3 = await logoutUseCase.execute(refreshToken)
 
       // Assert - Should be called 3 times (idempotent operation)
+      expectSuccess(result1)
+      expectSuccess(result2)
+      expectSuccess(result3)
       expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledTimes(3)
       expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith(refreshToken)
     })

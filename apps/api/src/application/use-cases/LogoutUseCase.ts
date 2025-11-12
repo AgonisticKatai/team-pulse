@@ -1,4 +1,5 @@
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
+import { Ok, type Result } from '../../domain/types/index.js'
 
 /**
  * Logout Use Case
@@ -15,13 +16,19 @@ import type { IRefreshTokenRepository } from '../../domain/repositories/IRefresh
  *
  * Note: This doesn't know about HTTP, Fastify, or any framework.
  * It's PURE business logic.
+ *
+ * Note: This operation is idempotent - logout always succeeds regardless
+ * of whether the token exists. From a business perspective, if the user
+ * wants to logout, they are logged out.
  */
 export class LogoutUseCase {
   constructor(private readonly refreshTokenRepository: IRefreshTokenRepository) {}
 
-  async execute(refreshToken: string): Promise<void> {
+  async execute(refreshToken: string): Promise<Result<void, never>> {
     // Delete refresh token from database (revoke it)
     // If token doesn't exist, that's fine (already logged out or invalid)
     await this.refreshTokenRepository.deleteByToken(refreshToken)
+
+    return Ok(undefined)
   }
 }
