@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.2/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.5/schema.json",
   "assist": { "actions": { "source": { "organizeImports": "on", "useSortedKeys": "on" } } },
   "files": {
     "includes": [
@@ -48,5 +48,10 @@
         "noExplicitAny": "warn"
       }
     }
+  },
+  "vcs": {
+    "clientKind": "git",
+    "enabled": true,
+    "useIgnoreFile": true
   }
 }
