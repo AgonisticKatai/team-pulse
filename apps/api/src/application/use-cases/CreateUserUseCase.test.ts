@@ -9,6 +9,8 @@ import {
   buildExistingUser,
   buildSuperAdminUser,
   buildUser,
+  expectErrorType,
+  expectSuccess,
   TEST_CONSTANTS,
 } from '../../infrastructure/testing/index.js'
 import { CreateUserUseCase } from './CreateUserUseCase.js'
@@ -61,10 +63,11 @@ describe('CreateUserUseCase', () => {
         const result = await createUserUseCase.execute(dto)
 
         // Assert
-        expect(result).toBeDefined()
-        expect(result.id).toBe(TEST_CONSTANTS.MOCK_UUID)
-        expect(result.email).toBe(TEST_CONSTANTS.USERS.JOHN_DOE.email)
-        expect(result.role).toBe(TEST_CONSTANTS.USERS.JOHN_DOE.role)
+        const data = expectSuccess(result)
+        expect(data).toBeDefined()
+        expect(data.id).toBe(TEST_CONSTANTS.MOCK_UUID)
+        expect(data.email).toBe(TEST_CONSTANTS.USERS.JOHN_DOE.email)
+        expect(data.role).toBe(TEST_CONSTANTS.USERS.JOHN_DOE.role)
       })
 
       it('should check if email already exists', async () => {
@@ -75,9 +78,10 @@ describe('CreateUserUseCase', () => {
         vi.mocked(userRepository.save).mockResolvedValue(mockUser)
 
         // Act
-        await createUserUseCase.execute(dto)
+        const result = await createUserUseCase.execute(dto)
 
         // Assert
+        expectSuccess(result)
         expect(userRepository.findByEmail).toHaveBeenCalledWith(TEST_CONSTANTS.USERS.JOHN_DOE.email)
         expect(userRepository.findByEmail).toHaveBeenCalledTimes(1)
       })
@@ -92,9 +96,10 @@ describe('CreateUserUseCase', () => {
         const { hashPassword } = await import('../../infrastructure/auth/passwordUtils.js')
 
         // Act
-        await createUserUseCase.execute(dto)
+        const result = await createUserUseCase.execute(dto)
 
         // Assert
+        expectSuccess(result)
         expect(hashPassword).toHaveBeenCalledWith(TEST_CONSTANTS.USERS.JOHN_DOE.password)
         expect(hashPassword).toHaveBeenCalledTimes(1)
       })
@@ -107,9 +112,10 @@ describe('CreateUserUseCase', () => {
         vi.mocked(userRepository.save).mockResolvedValue(mockUser)
 
         // Act
-        await createUserUseCase.execute(dto)
+        const result = await createUserUseCase.execute(dto)
 
         // Assert
+        expectSuccess(result)
         expect(userRepository.save).toHaveBeenCalledTimes(1)
         const savedUser = expectMockCallArg<User>(vi.mocked(userRepository.save))
         expect(savedUser).toBeInstanceOf(User)
@@ -129,8 +135,9 @@ describe('CreateUserUseCase', () => {
         const result = await createUserUseCase.execute(dto)
 
         // Assert
-        expect(result).not.toHaveProperty('passwordHash')
-        expect(result).toEqual({
+        const data = expectSuccess(result)
+        expect(data).not.toHaveProperty('passwordHash')
+        expect(data).toEqual({
           createdAt: TEST_CONSTANTS.MOCK_DATE_ISO,
           email: TEST_CONSTANTS.USERS.JOHN_DOE.email,
           id: TEST_CONSTANTS.MOCK_UUID,
@@ -150,15 +157,16 @@ describe('CreateUserUseCase', () => {
         const result = await createUserUseCase.execute(dto)
 
         // Assert
-        expect(typeof result.createdAt).toBe('string')
-        expect(typeof result.updatedAt).toBe('string')
-        expect(result.createdAt).toBe(TEST_CONSTANTS.MOCK_DATE_ISO)
-        expect(result.updatedAt).toBe(TEST_CONSTANTS.MOCK_DATE_ISO)
+        const data = expectSuccess(result)
+        expect(typeof data.createdAt).toBe('string')
+        expect(typeof data.updatedAt).toBe('string')
+        expect(data.createdAt).toBe(TEST_CONSTANTS.MOCK_DATE_ISO)
+        expect(data.updatedAt).toBe(TEST_CONSTANTS.MOCK_DATE_ISO)
       })
     })
 
     describe('error cases', () => {
-      it('should throw ValidationError when email already exists', async () => {
+      it('should return ValidationError when email already exists', async () => {
         // Arrange
         const existingUser = buildExistingUser({ email: 'existing@example.com' })
 
@@ -167,18 +175,12 @@ describe('CreateUserUseCase', () => {
         vi.mocked(userRepository.findByEmail).mockResolvedValue(existingUser)
 
         // Act
-        let error: ValidationError | undefined
-        try {
-          await createUserUseCase.execute(dto)
-        } catch (err) {
-          error = err as ValidationError
-        }
+        const result = await createUserUseCase.execute(dto)
 
         // Assert
-        expect(error).toBeInstanceOf(ValidationError)
-        expect(error).toBeDefined()
-        expect(error?.message).toBe('A user with email "existing@example.com" already exists')
-        expect(error?.field).toBe('email')
+        const error = expectErrorType({ errorType: ValidationError, result })
+        expect(error.message).toBe('A user with email "existing@example.com" already exists')
+        expect(error.field).toBe('email')
       })
 
       it('should not hash password when email already exists', async () => {
@@ -192,13 +194,10 @@ describe('CreateUserUseCase', () => {
         const { hashPassword } = await import('../../infrastructure/auth/passwordUtils.js')
 
         // Act
-        try {
-          await createUserUseCase.execute(dto)
-        } catch {
-          // Expected error
-        }
+        const result = await createUserUseCase.execute(dto)
 
         // Assert - Should fail before hashing password
+        expectErrorType({ errorType: ValidationError, result })
         expect(hashPassword).not.toHaveBeenCalled()
         expect(userRepository.save).not.toHaveBeenCalled()
       })
@@ -222,7 +221,8 @@ describe('CreateUserUseCase', () => {
         const result = await createUserUseCase.execute(dto)
 
         // Assert
-        expect(result.role).toBe(TEST_CONSTANTS.USERS.ADMIN_USER.role)
+        const data = expectSuccess(result)
+        expect(data.role).toBe(TEST_CONSTANTS.USERS.ADMIN_USER.role)
         const savedUser = expectMockCallArg<User>(vi.mocked(userRepository.save))
         expect(savedUser.role.getValue()).toBe(TEST_CONSTANTS.USERS.ADMIN_USER.role)
       })
@@ -244,7 +244,8 @@ describe('CreateUserUseCase', () => {
         const result = await createUserUseCase.execute(dto)
 
         // Assert
-        expect(result.role).toBe(TEST_CONSTANTS.USERS.SUPER_ADMIN_USER.role)
+        const data = expectSuccess(result)
+        expect(data.role).toBe(TEST_CONSTANTS.USERS.SUPER_ADMIN_USER.role)
         const savedUser = expectMockCallArg<User>(vi.mocked(userRepository.save))
         expect(savedUser.role.getValue()).toBe(TEST_CONSTANTS.USERS.SUPER_ADMIN_USER.role)
       })
@@ -259,9 +260,10 @@ describe('CreateUserUseCase', () => {
         const { randomUUID } = await import('node:crypto')
 
         // Act
-        await createUserUseCase.execute(dto)
+        const result = await createUserUseCase.execute(dto)
 
         // Assert
+        expectSuccess(result)
         expect(randomUUID).toHaveBeenCalled()
         const savedUser = expectMockCallArg<User>(vi.mocked(userRepository.save))
         expect(savedUser.id.getValue()).toBe(TEST_CONSTANTS.MOCK_UUID)

@@ -3,6 +3,7 @@ import type { CreateUserDTO, UserResponseDTO } from '@team-pulse/shared'
 import { ValidationError } from '../../domain/errors/index.js'
 import { User } from '../../domain/models/User.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
+import { Err, Ok, type Result } from '../../domain/types/index.js'
 import { hashPassword } from '../../infrastructure/auth/passwordUtils.js'
 
 /**
@@ -27,11 +28,16 @@ import { hashPassword } from '../../infrastructure/auth/passwordUtils.js'
 export class CreateUserUseCase {
   constructor(private readonly userRepository: IUserRepository) {}
 
-  async execute(dto: CreateUserDTO): Promise<UserResponseDTO> {
+  async execute(dto: CreateUserDTO): Promise<Result<UserResponseDTO, ValidationError>> {
     // Business Rule: Email must be unique
     const existingUser = await this.userRepository.findByEmail(dto.email)
     if (existingUser) {
-      throw new ValidationError(`A user with email "${dto.email}" already exists`, 'email')
+      return Err(
+        ValidationError.forField({
+          field: 'email',
+          message: `A user with email "${dto.email}" already exists`,
+        }),
+      )
     }
 
     // Hash the password before storing
@@ -47,14 +53,14 @@ export class CreateUserUseCase {
     })
 
     if (!userResult.ok) {
-      throw userResult.error
+      return Err(userResult.error)
     }
 
     // Persist
     const savedUser = await this.userRepository.save(userResult.value)
 
     // Map to response DTO (WITHOUT password hash)
-    return this.mapToResponseDTO(savedUser)
+    return Ok(this.mapToResponseDTO(savedUser))
   }
 
   /**
