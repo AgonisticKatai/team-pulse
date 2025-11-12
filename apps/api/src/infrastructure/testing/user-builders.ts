@@ -49,7 +49,7 @@ export function buildUser(
   const result = User.create({
     createdAt: TEST_CONSTANTS.MOCK_DATE,
     email: TEST_CONSTANTS.USERS.JOHN_DOE.email,
-    id: TEST_CONSTANTS.MOCK_UUID,
+    id: TEST_CONSTANTS.USERS.JOHN_DOE.id,
     passwordHash: TEST_CONSTANTS.USERS.JOHN_DOE.passwordHash,
     role: TEST_CONSTANTS.USERS.JOHN_DOE.role,
     updatedAt: TEST_CONSTANTS.MOCK_DATE,
@@ -96,6 +96,8 @@ export function buildAdminUser(
 ): User {
   return buildUser({
     email: TEST_CONSTANTS.USERS.ADMIN_USER.email,
+    id: TEST_CONSTANTS.USERS.ADMIN_USER.id,
+    passwordHash: TEST_CONSTANTS.USERS.ADMIN_USER.passwordHash,
     role: TEST_CONSTANTS.USERS.ADMIN_USER.role,
     ...overrides,
   })
@@ -115,6 +117,8 @@ export function buildSuperAdminUser(
 ): User {
   return buildUser({
     email: TEST_CONSTANTS.USERS.SUPER_ADMIN_USER.email,
+    id: TEST_CONSTANTS.USERS.SUPER_ADMIN_USER.id,
+    passwordHash: TEST_CONSTANTS.USERS.SUPER_ADMIN_USER.passwordHash,
     role: TEST_CONSTANTS.USERS.SUPER_ADMIN_USER.role,
     ...overrides,
   })

@@ -26,8 +26,8 @@ describe('CreateUserUseCase', () => {
   let createUserUseCase: CreateUserUseCase
   let userRepository: IUserRepository
 
-  // Mock user data
-  const mockUser = buildUser()
+  // Mock user data - represents a newly created user with generated UUID
+  const mockUser = buildUser({ id: TEST_CONSTANTS.MOCK_UUID })
 
   beforeEach(() => {
     // Reset all mocks before each test

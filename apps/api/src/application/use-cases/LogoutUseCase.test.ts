@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
+import { TEST_CONSTANTS } from '../../infrastructure/testing/index.js'
 import { LogoutUseCase } from './LogoutUseCase.js'
 
 describe('LogoutUseCase', () => {
@@ -27,7 +28,7 @@ describe('LogoutUseCase', () => {
   describe('execute', () => {
     it('should delete refresh token from database', async () => {
       // Arrange
-      const refreshToken = 'valid-refresh-token'
+      const refreshToken = TEST_CONSTANTS.AUTH.VALID_REFRESH_TOKEN
 
       // Act
       await logoutUseCase.execute(refreshToken)
@@ -49,7 +50,7 @@ describe('LogoutUseCase', () => {
 
     it('should return void (no return value)', async () => {
       // Arrange
-      const refreshToken = 'some-token'
+      const refreshToken = TEST_CONSTANTS.AUTH.MOCK_REFRESH_TOKEN
 
       // Act
       const result = await logoutUseCase.execute(refreshToken)
@@ -72,7 +73,7 @@ describe('LogoutUseCase', () => {
 
     it('should handle multiple logout attempts with same token', async () => {
       // Arrange
-      const refreshToken = 'same-token'
+      const refreshToken = TEST_CONSTANTS.AUTH.MOCK_REFRESH_TOKEN
 
       // Act - Call multiple times
       await logoutUseCase.execute(refreshToken)
