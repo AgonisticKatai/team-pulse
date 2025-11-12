@@ -18,7 +18,7 @@ import { CreateTeamUseCase } from './CreateTeamUseCase.js'
 
 // Mock external dependencies
 vi.mock('node:crypto', () => ({
-  randomUUID: vi.fn(() => TEST_CONSTANTS.MOCK_UUID),
+  randomUUID: vi.fn(() => TEST_CONSTANTS.mockUuid),
 }))
 
 describe('CreateTeamUseCase', () => {
@@ -59,10 +59,10 @@ describe('CreateTeamUseCase', () => {
         const team = expectSuccess(await createTeamUseCase.execute(dto))
 
         // Assert
-        expect(team.id).toBe(TEST_CONSTANTS.MOCK_UUID)
-        expect(team.name).toBe(TEST_CONSTANTS.TEAMS.FC_BARCELONA.name)
-        expect(team.city).toBe(TEST_CONSTANTS.TEAMS.FC_BARCELONA.city)
-        expect(team.foundedYear).toBe(TEST_CONSTANTS.TEAMS.FC_BARCELONA.foundedYear)
+        expect(team.id).toBe(TEST_CONSTANTS.mockUuid)
+        expect(team.name).toBe(TEST_CONSTANTS.teams.fcBarcelona.name)
+        expect(team.city).toBe(TEST_CONSTANTS.teams.fcBarcelona.city)
+        expect(team.foundedYear).toBe(TEST_CONSTANTS.teams.fcBarcelona.foundedYear)
       })
 
       it('should check if team name already exists', async () => {
@@ -77,7 +77,7 @@ describe('CreateTeamUseCase', () => {
 
         // Assert
         expect(teamRepository.findByName).toHaveBeenCalledWith(
-          TEST_CONSTANTS.TEAMS.FC_BARCELONA.name,
+          TEST_CONSTANTS.teams.fcBarcelona.name,
         )
         expect(teamRepository.findByName).toHaveBeenCalledTimes(1)
       })
@@ -96,12 +96,10 @@ describe('CreateTeamUseCase', () => {
         expect(teamRepository.save).toHaveBeenCalledTimes(1)
         const savedTeam = expectMockCallArg<Team>(vi.mocked(teamRepository.save))
         expect(savedTeam).toBeInstanceOf(Team)
-        expect(savedTeam.id.getValue()).toBe(TEST_CONSTANTS.MOCK_UUID)
-        expect(savedTeam.name.getValue()).toBe(TEST_CONSTANTS.TEAMS.FC_BARCELONA.name)
-        expect(savedTeam.city.getValue()).toBe(TEST_CONSTANTS.TEAMS.FC_BARCELONA.city)
-        expect(savedTeam.foundedYear?.getValue()).toBe(
-          TEST_CONSTANTS.TEAMS.FC_BARCELONA.foundedYear,
-        )
+        expect(savedTeam.id.getValue()).toBe(TEST_CONSTANTS.mockUuid)
+        expect(savedTeam.name.getValue()).toBe(TEST_CONSTANTS.teams.fcBarcelona.name)
+        expect(savedTeam.city.getValue()).toBe(TEST_CONSTANTS.teams.fcBarcelona.city)
+        expect(savedTeam.foundedYear?.getValue()).toBe(TEST_CONSTANTS.teams.fcBarcelona.foundedYear)
       })
 
       it('should return team DTO with ISO date strings', async () => {
@@ -117,21 +115,21 @@ describe('CreateTeamUseCase', () => {
         // Assert
         expect(typeof team.createdAt).toBe('string')
         expect(typeof team.updatedAt).toBe('string')
-        expect(team.createdAt).toBe(TEST_CONSTANTS.MOCK_DATE_ISO)
-        expect(team.updatedAt).toBe(TEST_CONSTANTS.MOCK_DATE_ISO)
+        expect(team.createdAt).toBe(TEST_CONSTANTS.mockDateIso)
+        expect(team.updatedAt).toBe(TEST_CONSTANTS.mockDateIso)
       })
 
       it('should handle team without foundedYear', async () => {
         // Arrange
         const teamWithoutYear = buildTeamWithoutFoundedYear({
-          city: TEST_CONSTANTS.TEAMS.VALENCIA_CF.city,
-          name: TEST_CONSTANTS.TEAMS.VALENCIA_CF.name,
+          city: TEST_CONSTANTS.teams.valenciaCf.city,
+          name: TEST_CONSTANTS.teams.valenciaCf.name,
         })
 
         const dto = buildCreateTeamDTO({
-          city: TEST_CONSTANTS.TEAMS.VALENCIA_CF.city,
+          city: TEST_CONSTANTS.teams.valenciaCf.city,
           foundedYear: undefined,
-          name: TEST_CONSTANTS.TEAMS.VALENCIA_CF.name,
+          name: TEST_CONSTANTS.teams.valenciaCf.name,
         })
 
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
@@ -159,7 +157,7 @@ describe('CreateTeamUseCase', () => {
         // Assert
         expect(error).toBeInstanceOf(ValidationError)
         expect(error.message).toBe(
-          `A team with name "${TEST_CONSTANTS.TEAMS.FC_BARCELONA.name}" already exists`,
+          `A team with name "${TEST_CONSTANTS.teams.fcBarcelona.name}" already exists`,
         )
       })
 
@@ -180,7 +178,7 @@ describe('CreateTeamUseCase', () => {
       it('should return Err when team data is invalid', async () => {
         // Arrange - Invalid foundedYear (too old)
         const dto = buildCreateTeamDTO({
-          foundedYear: TEST_CONSTANTS.INVALID.FOUNDED_YEAR_TOO_OLD,
+          foundedYear: TEST_CONSTANTS.invalid.foundedYearTooOld,
         })
 
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
@@ -197,7 +195,7 @@ describe('CreateTeamUseCase', () => {
         const dto = buildCreateTeamDTO()
 
         const repositoryError = RepositoryError.forOperation({
-          message: TEST_CONSTANTS.ERRORS.DATABASE_CONNECTION_LOST,
+          message: TEST_CONSTANTS.errors.databaseConnectionLost,
           operation: 'save',
         })
 
@@ -209,7 +207,7 @@ describe('CreateTeamUseCase', () => {
 
         // Assert
         expect(error).toBeInstanceOf(RepositoryError)
-        expect(error.message).toBe(TEST_CONSTANTS.ERRORS.DATABASE_CONNECTION_LOST)
+        expect(error.message).toBe(TEST_CONSTANTS.errors.databaseConnectionLost)
       })
 
       it('should return Err when repository findByName fails', async () => {
@@ -217,7 +215,7 @@ describe('CreateTeamUseCase', () => {
         const dto = buildCreateTeamDTO()
 
         const repositoryError = RepositoryError.forOperation({
-          message: TEST_CONSTANTS.ERRORS.DATABASE_QUERY_TIMEOUT,
+          message: TEST_CONSTANTS.errors.databaseQueryTimeout,
           operation: 'findByName',
         })
 
@@ -228,7 +226,7 @@ describe('CreateTeamUseCase', () => {
 
         // Assert
         expect(error).toBeInstanceOf(RepositoryError)
-        expect(error.message).toBe(TEST_CONSTANTS.ERRORS.DATABASE_QUERY_TIMEOUT)
+        expect(error.message).toBe(TEST_CONSTANTS.errors.databaseQueryTimeout)
       })
     })
 
@@ -248,20 +246,20 @@ describe('CreateTeamUseCase', () => {
         // Assert
         expect(randomUUID).toHaveBeenCalled()
         const savedTeam = expectMockCallArg<Team>(vi.mocked(teamRepository.save))
-        expect(savedTeam.id.getValue()).toBe(TEST_CONSTANTS.MOCK_UUID)
+        expect(savedTeam.id.getValue()).toBe(TEST_CONSTANTS.mockUuid)
       })
 
       it('should handle null foundedYear from DTO', async () => {
         // Arrange
         const teamWithoutYear = buildTeamWithoutFoundedYear({
-          city: TEST_CONSTANTS.TEAMS.SEVILLA_FC.city,
-          name: TEST_CONSTANTS.TEAMS.SEVILLA_FC.name,
+          city: TEST_CONSTANTS.teams.sevillaFc.city,
+          name: TEST_CONSTANTS.teams.sevillaFc.name,
         })
 
         const dto = buildCreateTeamDTO({
-          city: TEST_CONSTANTS.TEAMS.SEVILLA_FC.city,
+          city: TEST_CONSTANTS.teams.sevillaFc.city,
           foundedYear: null,
-          name: TEST_CONSTANTS.TEAMS.SEVILLA_FC.name,
+          name: TEST_CONSTANTS.teams.sevillaFc.name,
         })
 
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))

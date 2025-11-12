@@ -1,13 +1,13 @@
 import type { CreateTeamDTO, TeamResponseDTO, UpdateTeamDTO } from '@team-pulse/shared'
 import { useState } from 'react'
-import { useAuth } from '../../application/hooks/useAuth'
+import { useAuth } from '../../application/hooks/use-auth'
 import {
   useCreateTeam,
   useDeleteTeam,
   useTeams,
   useUpdateTeam,
-} from '../../application/hooks/useTeams'
-import type { TeamApiClient } from '../../infrastructure/api/teamApiClient'
+} from '../../application/hooks/use-teams'
+import type { TeamApiClient } from '../../infrastructure/api/team-api-client'
 import { DashboardLayout } from '../components/layout/DashboardLayout'
 import { TeamForm } from '../components/teams/TeamForm'
 import { TeamList } from '../components/teams/TeamList'
@@ -79,9 +79,8 @@ export function TeamsPage({ teamApiClient }: TeamsPageProps) {
       // Close form on success
       setShowForm(false)
       setEditingTeam(null)
-    } catch (error) {
-      // Error is handled by the mutation
-      console.error('Form submission error:', error)
+    } catch (_error) {
+      // Intentionally ignoring errors - form validation handles them
     }
   }
 
@@ -154,7 +153,7 @@ export function TeamsPage({ teamApiClient }: TeamsPageProps) {
         />
 
         {/* Stats Footer */}
-        {!isLoading && !error && (
+        {!(isLoading || error) && (
           <div
             style={{
               color: '#6b7280',

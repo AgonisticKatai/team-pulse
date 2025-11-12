@@ -7,7 +7,7 @@ import {
   generateAccessToken,
   type RefreshTokenPayload,
   verifyRefreshToken,
-} from '../../infrastructure/auth/jwtUtils.js'
+} from '../../infrastructure/auth/jwt-utils.js'
 import type { Env } from '../../infrastructure/config/env.js'
 
 /**

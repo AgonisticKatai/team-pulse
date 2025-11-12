@@ -26,12 +26,12 @@ describe('Team', () => {
       // Assert
       expect(error).toBeNull()
       expect(team).toBeDefined()
-      expect(team!.getId().getValue()).toBe(data.id)
-      expect(team!.getName().getValue()).toBe('FC Barcelona')
-      expect(team!.getCity().getValue()).toBe('Barcelona')
-      expect(team!.getFoundedYear()!.getValue()).toBe(1899)
-      expect(team!.getCreatedAt()).toBe(data.createdAt)
-      expect(team!.getUpdatedAt()).toBe(data.updatedAt)
+      expect(team?.getId().getValue()).toBe(data.id)
+      expect(team?.getName().getValue()).toBe('FC Barcelona')
+      expect(team?.getCity().getValue()).toBe('Barcelona')
+      expect(team?.getFoundedYear()?.getValue()).toBe(1899)
+      expect(team?.getCreatedAt()).toBe(data.createdAt)
+      expect(team?.getUpdatedAt()).toBe(data.updatedAt)
     })
 
     it('should create team without founded year', () => {
@@ -44,7 +44,7 @@ describe('Team', () => {
       // Assert
       expect(error).toBeNull()
       expect(team).toBeDefined()
-      expect(team!.getFoundedYear()).toBeNull()
+      expect(team?.getFoundedYear()).toBeNull()
     })
 
     it('should create team with null founded year', () => {
@@ -60,7 +60,7 @@ describe('Team', () => {
       // Assert
       expect(error).toBeNull()
       expect(team).toBeDefined()
-      expect(team!.getFoundedYear()).toBeNull()
+      expect(team?.getFoundedYear()).toBeNull()
     })
 
     it('should fail with invalid id', () => {
@@ -139,8 +139,8 @@ describe('Team', () => {
       const after = Date.now()
 
       // Assert
-      const createdAt = team!.getCreatedAt().getTime()
-      const updatedAt = team!.getUpdatedAt().getTime()
+      const createdAt = team?.getCreatedAt().getTime()
+      const updatedAt = team?.getUpdatedAt().getTime()
       expect(createdAt).toBeGreaterThanOrEqual(before)
       expect(createdAt).toBeLessThanOrEqual(after)
       expect(updatedAt).toBeGreaterThanOrEqual(before)
@@ -160,8 +160,8 @@ describe('Team', () => {
 
       // Assert
       expect(error).toBeNull()
-      expect(team!.getCreatedAt()).toBeInstanceOf(Date)
-      expect(team!.getUpdatedAt()).toBeInstanceOf(Date)
+      expect(team?.getCreatedAt()).toBeInstanceOf(Date)
+      expect(team?.getUpdatedAt()).toBeInstanceOf(Date)
     })
 
     it('should trim whitespace from name', () => {
@@ -175,7 +175,7 @@ describe('Team', () => {
       const [, team] = Team.create(data)
 
       // Assert
-      expect(team!.getName().getValue()).toBe('FC Barcelona')
+      expect(team?.getName().getValue()).toBe('FC Barcelona')
     })
   })
 
@@ -226,9 +226,9 @@ describe('Team', () => {
       // Assert
       expect(error).toBeNull()
       expect(team).toBeDefined()
-      expect(team!.getName().getValue()).toBe('FC Barcelona')
-      expect(team!.getCity().getValue()).toBe('Barcelona')
-      expect(team!.getFoundedYear()!.getValue()).toBe(1899)
+      expect(team?.getName().getValue()).toBe('FC Barcelona')
+      expect(team?.getCity().getValue()).toBe('Barcelona')
+      expect(team?.getFoundedYear()?.getValue()).toBe(1899)
     })
 
     it('should create team from DTO without founded year', () => {
@@ -247,7 +247,7 @@ describe('Team', () => {
 
       // Assert
       expect(error).toBeNull()
-      expect(team!.getFoundedYear()).toBeNull()
+      expect(team?.getFoundedYear()).toBeNull()
     })
 
     it('should fail with invalid DTO', () => {
@@ -298,8 +298,8 @@ describe('Team', () => {
       // Assert
       expect(error).toBeNull()
       expect(teams).toHaveLength(2)
-      expect(teams![0]!.getName().getValue()).toBe('FC Barcelona')
-      expect(teams![1]!.getName().getValue()).toBe('Real Madrid')
+      expect(teams?.[0]?.getName().getValue()).toBe('FC Barcelona')
+      expect(teams?.[1]?.getName().getValue()).toBe('Real Madrid')
     })
 
     it('should fail on first invalid DTO', () => {
@@ -366,9 +366,9 @@ describe('Team', () => {
 
       // Assert
       expect(error).toBeNull()
-      expect(updated!.getName().getValue()).toBe(newName)
-      expect(updated!.getCity()).toBe(team!.getCity())
-      expect(updated!.getFoundedYear()).toBe(team!.getFoundedYear())
+      expect(updated?.getName().getValue()).toBe(newName)
+      expect(updated?.getCity()).toBe(team?.getCity())
+      expect(updated?.getFoundedYear()).toBe(team?.getFoundedYear())
     })
 
     it('should update city only', () => {
@@ -381,9 +381,9 @@ describe('Team', () => {
 
       // Assert
       expect(error).toBeNull()
-      expect(updated!.getCity().getValue()).toBe(newCity)
-      expect(updated!.getName()).toBe(team!.getName())
-      expect(updated!.getFoundedYear()).toBe(team!.getFoundedYear())
+      expect(updated?.getCity().getValue()).toBe(newCity)
+      expect(updated?.getName()).toBe(team?.getName())
+      expect(updated?.getFoundedYear()).toBe(team?.getFoundedYear())
     })
 
     it('should update founded year only', () => {
@@ -396,9 +396,9 @@ describe('Team', () => {
 
       // Assert
       expect(error).toBeNull()
-      expect(updated!.getFoundedYear()!.getValue()).toBe(newYear)
-      expect(updated!.getName()).toBe(team!.getName())
-      expect(updated!.getCity()).toBe(team!.getCity())
+      expect(updated?.getFoundedYear()?.getValue()).toBe(newYear)
+      expect(updated?.getName()).toBe(team?.getName())
+      expect(updated?.getCity()).toBe(team?.getCity())
     })
 
     it('should update all fields', () => {
@@ -414,9 +414,9 @@ describe('Team', () => {
 
       // Assert
       expect(error).toBeNull()
-      expect(updated!.getName().getValue()).toBe('Real Madrid')
-      expect(updated!.getCity().getValue()).toBe('Madrid')
-      expect(updated!.getFoundedYear()!.getValue()).toBe(1902)
+      expect(updated?.getName().getValue()).toBe('Real Madrid')
+      expect(updated?.getCity().getValue()).toBe('Madrid')
+      expect(updated?.getFoundedYear()?.getValue()).toBe(1902)
     })
 
     it('should set founded year to null', () => {
@@ -428,35 +428,35 @@ describe('Team', () => {
 
       // Assert
       expect(error).toBeNull()
-      expect(updated!.getFoundedYear()).toBeNull()
+      expect(updated?.getFoundedYear()).toBeNull()
     })
 
     it('should preserve immutability (return new instance)', () => {
       // Arrange
       const [, team] = Team.create(createValidTeamData())
-      const originalName = team!.getName().getValue()
+      const originalName = team?.getName().getValue()
 
       // Act
       const [, updated] = team!.update({ name: 'New Name' })
 
       // Assert
       expect(updated).not.toBe(team)
-      expect(team!.getName().getValue()).toBe(originalName)
-      expect(updated!.getName().getValue()).toBe('New Name')
+      expect(team?.getName().getValue()).toBe(originalName)
+      expect(updated?.getName().getValue()).toBe('New Name')
     })
 
     it('should preserve id and createdAt', () => {
       // Arrange
       const [, team] = Team.create(createValidTeamData())
-      const originalId = team!.getId()
-      const originalCreatedAt = team!.getCreatedAt()
+      const originalId = team?.getId()
+      const originalCreatedAt = team?.getCreatedAt()
 
       // Act
       const [, updated] = team!.update({ name: 'New Name' })
 
       // Assert
-      expect(updated!.getId()).toBe(originalId)
-      expect(updated!.getCreatedAt()).toBe(originalCreatedAt)
+      expect(updated?.getId()).toBe(originalId)
+      expect(updated?.getCreatedAt()).toBe(originalCreatedAt)
     })
 
     it('should update updatedAt to current date', () => {
@@ -470,7 +470,7 @@ describe('Team', () => {
       const after = Date.now()
 
       // Assert
-      const updatedAt = updated!.getUpdatedAt().getTime()
+      const updatedAt = updated?.getUpdatedAt().getTime()
       expect(updatedAt).toBeGreaterThanOrEqual(before)
       expect(updatedAt).toBeLessThanOrEqual(after)
     })
@@ -524,7 +524,7 @@ describe('Team', () => {
         const expectedAge = currentYear - 2000
 
         // Act
-        const age = team!.getAge()
+        const age = team?.getAge()
 
         // Assert
         expect(age).toBe(expectedAge)
@@ -538,7 +538,7 @@ describe('Team', () => {
         })
 
         // Act
-        const age = team!.getAge()
+        const age = team?.getAge()
 
         // Assert
         expect(age).toBeNull()
@@ -554,8 +554,8 @@ describe('Team', () => {
         })
 
         // Act & Assert
-        expect(team!.wasFoundedBefore(1900)).toBe(true)
-        expect(team!.wasFoundedBefore(2000)).toBe(true)
+        expect(team?.wasFoundedBefore(1900)).toBe(true)
+        expect(team?.wasFoundedBefore(2000)).toBe(true)
       })
 
       it('should return false when founded after given year', () => {
@@ -566,8 +566,8 @@ describe('Team', () => {
         })
 
         // Act & Assert
-        expect(team!.wasFoundedBefore(1899)).toBe(false)
-        expect(team!.wasFoundedBefore(1800)).toBe(false)
+        expect(team?.wasFoundedBefore(1899)).toBe(false)
+        expect(team?.wasFoundedBefore(1800)).toBe(false)
       })
 
       it('should return false when founded year is not set', () => {
@@ -578,7 +578,7 @@ describe('Team', () => {
         })
 
         // Act & Assert
-        expect(team!.wasFoundedBefore(2000)).toBe(false)
+        expect(team?.wasFoundedBefore(2000)).toBe(false)
       })
     })
 
@@ -591,8 +591,8 @@ describe('Team', () => {
         })
 
         // Act & Assert
-        expect(team!.wasFoundedAfter(1800)).toBe(true)
-        expect(team!.wasFoundedAfter(1898)).toBe(true)
+        expect(team?.wasFoundedAfter(1800)).toBe(true)
+        expect(team?.wasFoundedAfter(1898)).toBe(true)
       })
 
       it('should return false when founded before given year', () => {
@@ -603,8 +603,8 @@ describe('Team', () => {
         })
 
         // Act & Assert
-        expect(team!.wasFoundedAfter(1899)).toBe(false)
-        expect(team!.wasFoundedAfter(1900)).toBe(false)
+        expect(team?.wasFoundedAfter(1899)).toBe(false)
+        expect(team?.wasFoundedAfter(1900)).toBe(false)
       })
 
       it('should return false when founded year is not set', () => {
@@ -615,7 +615,7 @@ describe('Team', () => {
         })
 
         // Act & Assert
-        expect(team!.wasFoundedAfter(1800)).toBe(false)
+        expect(team?.wasFoundedAfter(1800)).toBe(false)
       })
     })
 
@@ -628,7 +628,7 @@ describe('Team', () => {
         })
 
         // Act & Assert
-        expect(team!.hasFoundedYear()).toBe(true)
+        expect(team?.hasFoundedYear()).toBe(true)
       })
 
       it('should return false when founded year is not set', () => {
@@ -639,7 +639,7 @@ describe('Team', () => {
         })
 
         // Act & Assert
-        expect(team!.hasFoundedYear()).toBe(false)
+        expect(team?.hasFoundedYear()).toBe(false)
       })
     })
 
@@ -655,7 +655,7 @@ describe('Team', () => {
         })
 
         // Act & Assert
-        expect(team1!.equals(team2!)).toBe(true)
+        expect(team1?.equals(team2!)).toBe(true)
       })
 
       it('should return false for teams with different id', () => {
@@ -670,7 +670,7 @@ describe('Team', () => {
         })
 
         // Act & Assert
-        expect(team1!.equals(team2!)).toBe(false)
+        expect(team1?.equals(team2!)).toBe(false)
       })
     })
   })
@@ -681,7 +681,7 @@ describe('Team', () => {
       const [, team] = Team.create(createValidTeamData())
 
       // Act
-      const obj = team!.toObject()
+      const obj = team?.toObject()
 
       // Assert
       expect(obj).toEqual({
@@ -700,11 +700,11 @@ describe('Team', () => {
       const [, team] = Team.create(data)
 
       // Act
-      const obj = team!.toObject()
+      const obj = team?.toObject()
 
       // Assert
-      expect(obj.createdAt).toBe(data.createdAt.toISOString())
-      expect(obj.updatedAt).toBe(data.updatedAt.toISOString())
+      expect(obj!.createdAt).toBe(data.createdAt.toISOString())
+      expect(obj!.updatedAt).toBe(data.updatedAt.toISOString())
     })
 
     it('should handle null founded year', () => {
@@ -715,10 +715,10 @@ describe('Team', () => {
       })
 
       // Act
-      const obj = team!.toObject()
+      const obj = team?.toObject()
 
       // Assert
-      expect(obj.foundedYear).toBeNull()
+      expect(obj!.foundedYear).toBeNull()
     })
   })
 
@@ -728,7 +728,7 @@ describe('Team', () => {
       const [, team] = Team.create(createValidTeamData())
 
       // Act
-      const dto = team!.toDTO()
+      const dto = team?.toDTO()
 
       // Assert
       expect(dto).toEqual({
@@ -746,8 +746,8 @@ describe('Team', () => {
       const [, team] = Team.create(createValidTeamData())
 
       // Act
-      const obj = team!.toObject()
-      const dto = team!.toDTO()
+      const obj = team?.toObject()
+      const dto = team?.toDTO()
 
       // Assert
       expect(dto).toEqual(obj)
@@ -760,8 +760,8 @@ describe('Team', () => {
       const [, team] = Team.create(createValidTeamData())
 
       // Act
-      const json = team!.toJSON()
-      const obj = team!.toObject()
+      const json = team?.toJSON()
+      const obj = team?.toObject()
 
       // Assert
       expect(json).toEqual(obj)

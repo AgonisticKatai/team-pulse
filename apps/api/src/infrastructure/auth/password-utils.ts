@@ -22,7 +22,7 @@ const SALT_ROUNDS = 10
  * @returns A promise that resolves to the hashed password
  */
 export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, SALT_ROUNDS)
+  return await bcrypt.hash(password, SALT_ROUNDS)
 }
 
 /**
@@ -33,5 +33,5 @@ export async function hashPassword(password: string): Promise<string> {
  * @returns A promise that resolves to true if the password matches, false otherwise
  */
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  return bcrypt.compare(password, hash)
+  return await bcrypt.compare(password, hash)
 }

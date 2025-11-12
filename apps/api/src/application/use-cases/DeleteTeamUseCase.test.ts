@@ -44,7 +44,7 @@ describe('DeleteTeamUseCase', () => {
         vi.mocked(teamRepository.delete).mockResolvedValue(true)
 
         // Act
-        const result = expectSuccess(await deleteTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID))
+        const result = expectSuccess(await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid))
 
         // Assert
         expect(result).toBeUndefined()
@@ -56,10 +56,10 @@ describe('DeleteTeamUseCase', () => {
         vi.mocked(teamRepository.delete).mockResolvedValue(true)
 
         // Act
-        await deleteTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID)
+        await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid)
 
         // Assert
-        expect(teamRepository.findById).toHaveBeenCalledWith(TEST_CONSTANTS.MOCK_UUID)
+        expect(teamRepository.findById).toHaveBeenCalledWith(TEST_CONSTANTS.mockUuid)
         expect(teamRepository.findById).toHaveBeenCalledTimes(1)
       })
 
@@ -69,10 +69,10 @@ describe('DeleteTeamUseCase', () => {
         vi.mocked(teamRepository.delete).mockResolvedValue(true)
 
         // Act
-        await deleteTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID)
+        await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid)
 
         // Assert
-        expect(teamRepository.delete).toHaveBeenCalledWith(TEST_CONSTANTS.MOCK_UUID)
+        expect(teamRepository.delete).toHaveBeenCalledWith(TEST_CONSTANTS.mockUuid)
         expect(teamRepository.delete).toHaveBeenCalledTimes(1)
       })
 
@@ -82,7 +82,7 @@ describe('DeleteTeamUseCase', () => {
         vi.mocked(teamRepository.delete).mockResolvedValue(true)
 
         // Act
-        await deleteTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID)
+        await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid)
 
         // Assert
         // findById should be called before delete
@@ -98,12 +98,12 @@ describe('DeleteTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(null)
 
         // Act
-        const error = expectError(await deleteTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID))
+        const error = expectError(await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid))
 
         // Assert
         expect(error).toBeInstanceOf(NotFoundError)
         expect(error.message).toContain('Team')
-        expect(error.message).toContain(TEST_CONSTANTS.MOCK_UUID)
+        expect(error.message).toContain(TEST_CONSTANTS.mockUuid)
         expect(teamRepository.delete).not.toHaveBeenCalled()
       })
 
@@ -112,7 +112,7 @@ describe('DeleteTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(null)
 
         // Act
-        await deleteTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID)
+        await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid)
 
         // Assert
         expect(teamRepository.delete).not.toHaveBeenCalled()
@@ -139,7 +139,7 @@ describe('DeleteTeamUseCase', () => {
         vi.mocked(teamRepository.delete).mockResolvedValue(false)
 
         // Act
-        const error = expectError(await deleteTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID))
+        const error = expectError(await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid))
 
         // Assert
         expect(error).toBeInstanceOf(RepositoryError)
@@ -154,7 +154,7 @@ describe('DeleteTeamUseCase', () => {
         // Act
         const error = expectErrorType({
           errorType: RepositoryError,
-          result: await deleteTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID),
+          result: await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid),
         })
 
         // Assert
@@ -186,7 +186,7 @@ describe('DeleteTeamUseCase', () => {
         vi.mocked(teamRepository.delete).mockResolvedValue(true)
 
         // Act
-        const result = expectSuccess(await deleteTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID))
+        const result = expectSuccess(await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid))
 
         // Assert
         expect(result).toBeUndefined()

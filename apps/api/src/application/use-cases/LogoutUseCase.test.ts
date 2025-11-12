@@ -28,7 +28,7 @@ describe('LogoutUseCase', () => {
   describe('execute', () => {
     it('should delete refresh token from database', async () => {
       // Arrange
-      const refreshToken = TEST_CONSTANTS.AUTH.VALID_REFRESH_TOKEN
+      const refreshToken = TEST_CONSTANTS.auth.validRefreshToken
 
       // Act
       const result = await logoutUseCase.execute(refreshToken)
@@ -54,7 +54,7 @@ describe('LogoutUseCase', () => {
 
     it('should return void (no return value)', async () => {
       // Arrange
-      const refreshToken = TEST_CONSTANTS.AUTH.MOCK_REFRESH_TOKEN
+      const refreshToken = TEST_CONSTANTS.auth.mockRefreshToken
 
       // Act
       const result = await logoutUseCase.execute(refreshToken)
@@ -79,7 +79,7 @@ describe('LogoutUseCase', () => {
 
     it('should handle multiple logout attempts with same token', async () => {
       // Arrange
-      const refreshToken = TEST_CONSTANTS.AUTH.MOCK_REFRESH_TOKEN
+      const refreshToken = TEST_CONSTANTS.auth.mockRefreshToken
 
       // Act - Call multiple times
       const result1 = await logoutUseCase.execute(refreshToken)

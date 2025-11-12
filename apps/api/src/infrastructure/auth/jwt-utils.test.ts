@@ -8,7 +8,7 @@ import {
   type RefreshTokenPayload,
   verifyAccessToken,
   verifyRefreshToken,
-} from './jwtUtils.js'
+} from './jwt-utils.js'
 
 describe('JWT Utilities', () => {
   let testEnv: Env

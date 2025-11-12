@@ -97,8 +97,8 @@ describe('ListTeamsUseCase', () => {
 
         // Assert - dates are ISO strings
         expect(result.teams[0]).toMatchObject({
-          createdAt: TEST_CONSTANTS.MOCK_DATE_ISO,
-          updatedAt: TEST_CONSTANTS.MOCK_DATE_ISO,
+          createdAt: TEST_CONSTANTS.mockDateIso,
+          updatedAt: TEST_CONSTANTS.mockDateIso,
         })
       })
 
@@ -122,7 +122,7 @@ describe('ListTeamsUseCase', () => {
         const result = expectSuccess(await listTeamsUseCase.execute())
 
         // Assert
-        expect(result.teams[0]?.foundedYear).toBe(TEST_CONSTANTS.TEAMS.FC_BARCELONA.foundedYear)
+        expect(result.teams[0]?.foundedYear).toBe(TEST_CONSTANTS.teams.fcBarcelona.foundedYear)
         expect(result.teams[1]?.foundedYear).toBeNull()
       })
     })
@@ -163,7 +163,7 @@ describe('ListTeamsUseCase', () => {
         // Assert
         expect(result.teams).toHaveLength(1)
         expect(result.total).toBe(1)
-        expect(result.teams[0]?.id).toBe(TEST_CONSTANTS.MOCK_UUID)
+        expect(result.teams[0]?.id).toBe(TEST_CONSTANTS.mockUuid)
       })
     })
 
@@ -176,7 +176,7 @@ describe('ListTeamsUseCase', () => {
         const result = expectSuccess(await listTeamsUseCase.execute())
 
         // Assert
-        expect(result.teams[0]?.name).toBe(TEST_CONSTANTS.TEAMS.FC_BARCELONA.name)
+        expect(result.teams[0]?.name).toBe(TEST_CONSTANTS.teams.fcBarcelona.name)
         expect(result.teams[1]?.name).toBe('Real Madrid')
         expect(result.teams[2]?.name).toBe('Athletic Bilbao')
       })

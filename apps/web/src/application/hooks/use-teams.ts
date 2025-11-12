@@ -5,8 +5,8 @@ import type {
   TeamsListResponseDTO,
   UpdateTeamDTO,
 } from '@team-pulse/shared'
-import type { ApiError } from '../../infrastructure/api/apiClient'
-import type { TeamApiClient } from '../../infrastructure/api/teamApiClient'
+import type { ApiError } from '../../infrastructure/api/api-client'
+import type { TeamApiClient } from '../../infrastructure/api/team-api-client'
 
 /**
  * Teams Query Keys

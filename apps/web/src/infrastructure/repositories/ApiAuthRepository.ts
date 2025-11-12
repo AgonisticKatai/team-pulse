@@ -3,8 +3,8 @@ import { DomainError, NotFoundError, ValidationError } from '../../domain/errors
 import type { IAuthRepository, LoginCredentials, LoginResponse } from '../../domain/repositories'
 import type { Result } from '../../domain/types/Result'
 import { Err, Ok } from '../../domain/types/Result'
-import { ApiError } from '../api/apiClient'
-import type { AuthApiClient } from '../api/authApiClient'
+import { ApiError } from '../api/api-client'
+import type { AuthApiClient } from '../api/auth-api-client'
 
 /**
  * API Auth Repository Implementation

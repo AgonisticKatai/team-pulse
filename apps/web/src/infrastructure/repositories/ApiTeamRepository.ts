@@ -8,8 +8,8 @@ import type {
 } from '../../domain/repositories'
 import type { Result } from '../../domain/types/Result'
 import { Err, Ok } from '../../domain/types/Result'
-import { ApiError } from '../api/apiClient'
-import type { TeamApiClient } from '../api/teamApiClient'
+import { ApiError } from '../api/api-client'
+import type { TeamApiClient } from '../api/team-api-client'
 
 /**
  * API Team Repository Implementation

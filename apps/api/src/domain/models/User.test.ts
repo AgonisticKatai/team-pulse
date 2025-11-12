@@ -24,7 +24,7 @@ describe('User Domain Entity', () => {
       expect(user.email).toBeInstanceOf(Email)
       expect(user.email.getValue()).toBe('test@example.com')
       expect(user.role).toBeInstanceOf(Role)
-      expect(user.role.getValue()).toBe(UserRole.USER)
+      expect(user.role.getValue()).toBe(UserRole.User)
       expect(user.createdAt).toBeInstanceOf(Date)
       expect(user.updatedAt).toBeInstanceOf(Date)
     })
@@ -59,9 +59,9 @@ describe('User Domain Entity', () => {
       )
 
       // Assert
-      expect(user1.role.getValue()).toBe(UserRole.USER)
-      expect(user2.role.getValue()).toBe(UserRole.ADMIN)
-      expect(user3.role.getValue()).toBe(UserRole.SUPER_ADMIN)
+      expect(user1.role.getValue()).toBe(UserRole.User)
+      expect(user2.role.getValue()).toBe(UserRole.Admin)
+      expect(user3.role.getValue()).toBe(UserRole.SuperAdmin)
     })
 
     it('should return error for empty email', () => {
@@ -115,7 +115,7 @@ describe('User Domain Entity', () => {
     it('should return error for email too long', () => {
       // Arrange - create a string of 250 a's plus @example.com
       const longLocalPart = Array(250).fill('a').join('')
-      const longEmail = longLocalPart + '@example.com'
+      const longEmail = `${longLocalPart}@example.com`
 
       // Act
       const error = expectError(
@@ -293,7 +293,7 @@ describe('User Domain Entity', () => {
       const updated = expectSuccess(user.update({ role: 'ADMIN' }))
 
       // Assert
-      expect(updated.role.getValue()).toBe(UserRole.ADMIN)
+      expect(updated.role.getValue()).toBe(UserRole.Admin)
     })
 
     it('should update password hash', () => {
@@ -532,7 +532,7 @@ describe('User Domain Entity', () => {
       // Assert
       expect(obj.id).toBe('user-123')
       expect(obj.email).toBe('test@example.com')
-      expect(obj.role).toBe(UserRole.USER)
+      expect(obj.role).toBe(UserRole.User)
       expect(obj.createdAt).toBeInstanceOf(Date)
       expect(obj.updatedAt).toBeInstanceOf(Date)
     })
@@ -579,7 +579,7 @@ describe('User Domain Entity', () => {
       // Assert
       expect(dto.id).toBe('user-123')
       expect(dto.email).toBe('test@example.com')
-      expect(dto.role).toBe(UserRole.ADMIN)
+      expect(dto.role).toBe(UserRole.Admin)
       expect(dto.createdAt).toBe('2025-01-01T00:00:00.000Z')
       expect(dto.updatedAt).toBe('2025-01-02T00:00:00.000Z')
     })

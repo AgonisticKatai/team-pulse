@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import 'dotenv/config'
 import { User } from '../domain/models/User.js'
-import { hashPassword } from '../infrastructure/auth/passwordUtils.js'
+import { hashPassword } from '../infrastructure/auth/password-utils.js'
 import { validateEnv } from '../infrastructure/config/env.js'
 import { createDatabase } from '../infrastructure/database/connection.js'
 import { DrizzleUserRepository } from '../infrastructure/database/repositories/DrizzleUserRepository.js'

@@ -4,8 +4,8 @@ import { DomainError, NotFoundError, ValidationError } from '../../domain/errors
 import type { CreateUserData, IUserRepository } from '../../domain/repositories'
 import type { Result } from '../../domain/types/Result'
 import { Err, Ok } from '../../domain/types/Result'
-import type { ApiClient } from '../api/apiClient'
-import { ApiError } from '../api/apiClient'
+import type { ApiClient } from '../api/api-client'
+import { ApiError } from '../api/api-client'
 
 /**
  * API User Repository Implementation

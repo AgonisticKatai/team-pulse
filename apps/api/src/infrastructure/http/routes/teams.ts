@@ -43,10 +43,7 @@ interface TeamRouteDependencies {
   env: Env
 }
 
-export async function registerTeamRoutes(
-  fastify: FastifyInstance,
-  dependencies: TeamRouteDependencies,
-) {
+export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamRouteDependencies) {
   const {
     createTeamUseCase,
     getTeamUseCase,
@@ -249,9 +246,6 @@ function handleError(error: unknown, reply: FastifyReply) {
       success: false,
     })
   }
-
-  // Unknown errors (don't expose details)
-  console.error('Unexpected error:', error)
   return reply.code(500).send({
     error: {
       code: 'INTERNAL_SERVER_ERROR',

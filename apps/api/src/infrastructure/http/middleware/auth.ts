@@ -1,6 +1,6 @@
 import type { UserRole } from '@team-pulse/shared'
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { type AccessTokenPayload, verifyAccessToken } from '../../auth/jwtUtils.js'
+import { type AccessTokenPayload, verifyAccessToken } from '../../auth/jwt-utils.js'
 import type { Env } from '../../config/env.js'
 
 /**
@@ -74,7 +74,7 @@ function extractAndVerifyToken(request: FastifyRequest, env: Env): AccessTokenPa
  * ```
  */
 export function requireAuth(env: Env) {
-  return async (request: FastifyRequest, reply: FastifyReply) => {
+  return (request: FastifyRequest, reply: FastifyReply): void => {
     try {
       const payload = extractAndVerifyToken(request, env)
 
@@ -85,7 +85,7 @@ export function requireAuth(env: Env) {
         userId: payload.userId,
       }
     } catch (error) {
-      return reply.code(401).send({
+      reply.code(401).send({
         error: {
           code: 'UNAUTHORIZED',
           message: error instanceof Error ? error.message : 'Authentication required',
@@ -111,21 +111,22 @@ export function requireAuth(env: Env) {
  * ```
  */
 export function requireRole(allowedRoles: UserRole[]) {
-  return async (request: FastifyRequest, reply: FastifyReply) => {
+  return (request: FastifyRequest, reply: FastifyReply): void => {
     // Ensure user is authenticated (should be done by requireAuth)
     if (!request.user) {
-      return reply.code(401).send({
+      reply.code(401).send({
         error: {
           code: 'UNAUTHORIZED',
           message: 'Authentication required',
         },
         success: false,
       })
+      return
     }
 
     // Check if user has required role
     if (!allowedRoles.includes(request.user.role)) {
-      return reply.code(403).send({
+      reply.code(403).send({
         error: {
           code: 'FORBIDDEN',
           message: `Access denied. Required role: ${allowedRoles.join(' or ')}`,

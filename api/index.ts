@@ -17,7 +17,7 @@ async function getApp(): Promise<FastifyApp> {
 
   // Reuse ongoing initialization if available
   if (appPromise) {
-    return appPromise
+    return await appPromise
   }
 
   // Initialize app
@@ -32,7 +32,7 @@ async function getApp(): Promise<FastifyApp> {
       throw error
     })
 
-  return appPromise
+  return await appPromise
 }
 
 /**
@@ -71,7 +71,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Forward the request to Fastify
     app.server.emit('request', req, res)
   } catch (error) {
-    console.error('Serverless function error:', error)
     res.status(500).json({
       error: {
         code: 'INTERNAL_SERVER_ERROR',

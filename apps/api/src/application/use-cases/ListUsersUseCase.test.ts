@@ -73,11 +73,11 @@ describe('ListUsersUseCase', () => {
       const data = expectSuccess(result)
       expect(data.users[0]).not.toHaveProperty('passwordHash')
       expect(data.users[0]).toEqual({
-        createdAt: TEST_CONSTANTS.MOCK_DATE_ISO,
-        email: TEST_CONSTANTS.USERS.JOHN_DOE.email,
-        id: TEST_CONSTANTS.USERS.JOHN_DOE.id,
-        role: TEST_CONSTANTS.USERS.JOHN_DOE.role,
-        updatedAt: TEST_CONSTANTS.MOCK_DATE_ISO,
+        createdAt: TEST_CONSTANTS.mockDateIso,
+        email: TEST_CONSTANTS.users.johnDoe.email,
+        id: TEST_CONSTANTS.users.johnDoe.id,
+        role: TEST_CONSTANTS.users.johnDoe.role,
+        updatedAt: TEST_CONSTANTS.mockDateIso,
       })
     })
 
@@ -126,7 +126,7 @@ describe('ListUsersUseCase', () => {
       const data = expectSuccess(result)
       expect(data.users).toHaveLength(1)
       expect(data.total).toBe(1)
-      expect(data.users[0]?.email).toBe(TEST_CONSTANTS.USERS.SUPER_ADMIN_USER.email)
+      expect(data.users[0]?.email).toBe(TEST_CONSTANTS.users.superAdminUser.email)
     })
 
     it('should handle users with different roles', async () => {
@@ -141,9 +141,9 @@ describe('ListUsersUseCase', () => {
       // Assert
       const data = expectSuccess(result)
       expect(data.users).toHaveLength(3)
-      expect(data.users[0]?.role).toBe(TEST_CONSTANTS.USERS.JOHN_DOE.role)
-      expect(data.users[1]?.role).toBe(TEST_CONSTANTS.USERS.ADMIN_USER.role)
-      expect(data.users[2]?.role).toBe(TEST_CONSTANTS.USERS.SUPER_ADMIN_USER.role)
+      expect(data.users[0]?.role).toBe(TEST_CONSTANTS.users.johnDoe.role)
+      expect(data.users[1]?.role).toBe(TEST_CONSTANTS.users.adminUser.role)
+      expect(data.users[2]?.role).toBe(TEST_CONSTANTS.users.superAdminUser.role)
     })
 
     it('should return correct total count', async () => {

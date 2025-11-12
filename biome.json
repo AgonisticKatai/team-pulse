@@ -1,28 +1,30 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.5/schema.json",
-  "assist": { "actions": { "source": { "organizeImports": "on", "useSortedKeys": "on" } } },
+  "$schema": "node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
   "files": {
-    "includes": [
-      "**",
-      "!**/node_modules",
-      "!**/dist",
-      "!**/build",
-      "!**/.next",
-      "!**/coverage",
-      "!**/pnpm-lock.yaml"
-    ]
+    "ignoreUnknown": true
   },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
     "indentWidth": 2,
-    "lineWidth": 100
+    "lineWidth": 100,
+    "lineEnding": "lf"
   },
   "javascript": {
     "formatter": {
       "quoteStyle": "single",
+      "jsxQuoteStyle": "double",
+      "quoteProperties": "asNeeded",
+      "trailingCommas": "all",
       "semicolons": "asNeeded",
-      "trailingCommas": "all"
+      "arrowParentheses": "always",
+      "bracketSpacing": true,
+      "bracketSameLine": false
     }
   },
   "json": {
@@ -33,25 +35,200 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "complexity": {
-        "useLiteralKeys": "off"
-      },
+      "recommended": true,
       "correctness": {
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error",
+        "useExhaustiveDependencies": "warn",
+        "useHookAtTopLevel": "error",
         "noNodejsModules": "off"
       },
-      "recommended": true,
-      "style": {
-        "noNonNullAssertion": "off",
-        "useNamingConvention": "off"
-      },
       "suspicious": {
-        "noExplicitAny": "warn"
+        "noExplicitAny": "warn",
+        "noArrayIndexKey": "error",
+        "noConsole": "warn",
+        "noDoubleEquals": "error",
+        "noEmptyBlockStatements": "error",
+        "noExtraNonNullAssertion": "error",
+        "noMisleadingCharacterClass": "error",
+        "noThenProperty": "error",
+        "useAwait": "error"
+      },
+      "complexity": {
+        "noExcessiveCognitiveComplexity": {
+          "level": "warn",
+          "options": {
+            "maxAllowedComplexity": 15
+          }
+        },
+        "noForEach": "off",
+        "noUselessFragments": "error",
+        "useLiteralKeys": "off",
+        "useSimplifiedLogicExpression": "error"
+      },
+      "style": {
+        "noNonNullAssertion": "warn",
+        "noParameterAssign": "error",
+        "useConsistentArrayType": {
+          "level": "error",
+          "options": {
+            "syntax": "shorthand"
+          }
+        },
+        "useFilenamingConvention": {
+          "level": "error",
+          "options": {
+            "strictCase": false,
+            "requireAscii": true,
+            "filenameCases": ["kebab-case", "PascalCase"]
+          }
+        },
+        "useNamingConvention": {
+          "level": "error",
+          "options": {
+            "strictCase": false,
+            "conventions": [
+              {
+                "selector": {
+                  "kind": "function"
+                },
+                "formats": ["camelCase", "PascalCase"]
+              },
+              {
+                "selector": {
+                  "kind": "variable"
+                },
+                "formats": ["camelCase", "CONSTANT_CASE", "PascalCase"]
+              },
+              {
+                "selector": {
+                  "kind": "objectLiteralProperty"
+                },
+                "formats": ["camelCase", "PascalCase"]
+              },
+              {
+                "selector": {
+                  "kind": "typeMember"
+                },
+                "formats": ["camelCase", "PascalCase"]
+              },
+              {
+                "selector": {
+                  "kind": "class"
+                },
+                "formats": ["PascalCase"]
+              },
+              {
+                "selector": {
+                  "kind": "interface"
+                },
+                "formats": ["PascalCase"]
+              },
+              {
+                "selector": {
+                  "kind": "typeAlias"
+                },
+                "formats": ["PascalCase"]
+              }
+            ]
+          }
+        },
+        "useNodejsImportProtocol": "error",
+        "useNumberNamespace": "error",
+        "useSingleVarDeclarator": "error",
+        "useTemplate": "error"
+      },
+      "performance": {
+        "noAccumulatingSpread": "warn",
+        "noDelete": "error"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "error",
+        "noDangerouslySetInnerHtmlWithChildren": "error"
+      },
+      "a11y": {
+        "noAccessKey": "error",
+        "noAriaUnsupportedElements": "error",
+        "noAutofocus": "warn",
+        "noDistractingElements": "error",
+        "noHeaderScope": "error",
+        "noNoninteractiveElementToInteractiveRole": "error",
+        "noPositiveTabindex": "error",
+        "noRedundantAlt": "error",
+        "noRedundantRoles": "error",
+        "useAltText": "error",
+        "useAnchorContent": "error",
+        "useAriaPropsForRole": "error",
+        "useButtonType": "error",
+        "useHeadingContent": "error",
+        "useHtmlLang": "error",
+        "useIframeTitle": "error",
+        "useKeyWithClickEvents": "error",
+        "useKeyWithMouseEvents": "error",
+        "useMediaCaption": "warn",
+        "useValidAnchor": "error",
+        "useValidAriaProps": "error",
+        "useValidAriaRole": "error",
+        "useValidAriaValues": "error",
+        "useValidLang": "error"
+      },
+      "nursery": {
+        "useSortedClasses": "off"
       }
     }
   },
-  "vcs": {
-    "clientKind": "git",
-    "enabled": true,
-    "useIgnoreFile": true
-  }
+  "overrides": [
+    {
+      "includes": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off"
+          },
+          "complexity": {
+            "noExcessiveCognitiveComplexity": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/scripts/**", "**/seed*.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/api/**"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "recommended": false
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "**/env.ts",
+        "**/test-env.ts",
+        "**/config/env.ts",
+        "**/*env*.test.ts",
+        "**/jwt-utils.test.ts",
+        "**/vite-env.d.ts",
+        "apps/web/**"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "useNamingConvention": "off",
+            "noNonNullAssertion": "off"
+          }
+        }
+      }
+    }
+  ]
 }

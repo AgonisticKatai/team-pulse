@@ -76,7 +76,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
   })
 
   // 6. Health check endpoint
-  fastify.get('/api/health', async () => {
+  fastify.get('/api/health', () => {
     return {
       environment: env.NODE_ENV,
       message: 'TeamPulse API is running',
@@ -87,7 +87,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
   })
 
   // 7. API info endpoint
-  fastify.get('/api', async () => {
+  fastify.get('/api', () => {
     return {
       description: 'Football team statistics platform API',
       endpoints: {
@@ -102,7 +102,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
   })
 
   // 8. 404 handler
-  fastify.setNotFoundHandler(async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.setNotFoundHandler((request: FastifyRequest, reply: FastifyReply) => {
     return reply.code(404).send({
       error: {
         code: 'NOT_FOUND',
@@ -113,21 +113,19 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
   })
 
   // 9. Global error handler
-  fastify.setErrorHandler(
-    async (error: FastifyError, _request: FastifyRequest, reply: FastifyReply) => {
-      fastify.log.error(error)
+  fastify.setErrorHandler((error: FastifyError, _request: FastifyRequest, reply: FastifyReply) => {
+    fastify.log.error(error)
 
-      const statusCode = error.statusCode || 500
+    const statusCode = error.statusCode || 500
 
-      return reply.code(statusCode).send({
-        error: {
-          code: error.name || 'INTERNAL_SERVER_ERROR',
-          message: env.NODE_ENV === 'production' ? 'Something went wrong' : error.message,
-        },
-        success: false,
-      })
-    },
-  )
+    return reply.code(statusCode).send({
+      error: {
+        code: error.name || 'INTERNAL_SERVER_ERROR',
+        message: env.NODE_ENV === 'production' ? 'Something went wrong' : error.message,
+      },
+      success: false,
+    })
+  })
 
   await fastify.ready()
 

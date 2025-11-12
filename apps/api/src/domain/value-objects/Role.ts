@@ -7,18 +7,18 @@ import { Err, Ok } from '../types/Result.js'
  * Matches backend UserRole enum from @team-pulse/shared
  */
 export enum UserRole {
-  SUPER_ADMIN = 'SUPER_ADMIN',
-  ADMIN = 'ADMIN',
-  USER = 'USER',
+  SuperAdmin = 'SUPER_ADMIN',
+  Admin = 'ADMIN',
+  User = 'USER',
 }
 
 /**
  * Role hierarchy levels (higher = more permissions)
  */
 const ROLE_LEVELS: Record<UserRole, number> = {
-  [UserRole.SUPER_ADMIN]: 3,
-  [UserRole.ADMIN]: 2,
-  [UserRole.USER]: 1,
+  [UserRole.SuperAdmin]: 3,
+  [UserRole.Admin]: 2,
+  [UserRole.User]: 1,
 }
 
 /**
@@ -115,21 +115,21 @@ export class Role {
    * Check if this role is SUPER_ADMIN
    */
   isSuperAdmin(): boolean {
-    return this.value === UserRole.SUPER_ADMIN
+    return this.value === UserRole.SuperAdmin
   }
 
   /**
    * Check if this role is ADMIN or higher
    */
   isAdmin(): boolean {
-    return this.value === UserRole.ADMIN || this.isSuperAdmin()
+    return this.value === UserRole.Admin || this.isSuperAdmin()
   }
 
   /**
    * Check if this role is USER
    */
   isUser(): boolean {
-    return this.value === UserRole.USER
+    return this.value === UserRole.User
   }
 
   /**

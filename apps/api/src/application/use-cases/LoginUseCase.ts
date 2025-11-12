@@ -10,8 +10,8 @@ import {
   generateAccessToken,
   generateRefreshToken,
   getRefreshTokenExpirationDate,
-} from '../../infrastructure/auth/jwtUtils.js'
-import { verifyPassword } from '../../infrastructure/auth/passwordUtils.js'
+} from '../../infrastructure/auth/jwt-utils.js'
+import { verifyPassword } from '../../infrastructure/auth/password-utils.js'
 import type { Env } from '../../infrastructure/config/env.js'
 
 /**

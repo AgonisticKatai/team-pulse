@@ -14,7 +14,7 @@ describe('Role Value Object', () => {
 
       // Assert
       expect(role).toBeDefined()
-      expect(role.getValue()).toBe(UserRole.USER)
+      expect(role.getValue()).toBe(UserRole.User)
     })
 
     it('should create ADMIN role', () => {
@@ -26,7 +26,7 @@ describe('Role Value Object', () => {
 
       // Assert
       expect(role).toBeDefined()
-      expect(role.getValue()).toBe(UserRole.ADMIN)
+      expect(role.getValue()).toBe(UserRole.Admin)
     })
 
     it('should create SUPER_ADMIN role', () => {
@@ -38,7 +38,7 @@ describe('Role Value Object', () => {
 
       // Assert
       expect(role).toBeDefined()
-      expect(role.getValue()).toBe(UserRole.SUPER_ADMIN)
+      expect(role.getValue()).toBe(UserRole.SuperAdmin)
     })
 
     it('should normalize to uppercase', () => {
@@ -50,7 +50,7 @@ describe('Role Value Object', () => {
 
       // Assert
       expect(role).toBeDefined()
-      expect(role.getValue()).toBe(UserRole.USER)
+      expect(role.getValue()).toBe(UserRole.User)
     })
 
     it('should trim whitespace', () => {
@@ -62,7 +62,7 @@ describe('Role Value Object', () => {
 
       // Assert
       expect(role).toBeDefined()
-      expect(role.getValue()).toBe(UserRole.ADMIN)
+      expect(role.getValue()).toBe(UserRole.Admin)
     })
 
     it('should fail with empty string', () => {
@@ -105,11 +105,11 @@ describe('Role Value Object', () => {
   describe('fromEnum', () => {
     it('should create role from enum value', () => {
       // Act
-      const role = Role.fromEnum({ value: UserRole.ADMIN })
+      const role = Role.fromEnum({ value: UserRole.Admin })
 
       // Assert
       expect(role).toBeDefined()
-      expect(role.getValue()).toBe(UserRole.ADMIN)
+      expect(role.getValue()).toBe(UserRole.Admin)
     })
   })
 
@@ -125,7 +125,7 @@ describe('Role Value Object', () => {
       const value = role.getValue()
 
       // Assert
-      expect(value).toBe(UserRole.USER)
+      expect(value).toBe(UserRole.User)
     })
   })
 
@@ -232,7 +232,7 @@ describe('Role Value Object', () => {
       expect(role).toBeDefined()
 
       // Act
-      const isAdmin = role.is({ role: UserRole.ADMIN })
+      const isAdmin = role.is({ role: UserRole.Admin })
 
       // Assert
       expect(isAdmin).toBe(true)
@@ -246,7 +246,7 @@ describe('Role Value Object', () => {
       expect(role).toBeDefined()
 
       // Act
-      const isAdmin = role.is({ role: UserRole.ADMIN })
+      const isAdmin = role.is({ role: UserRole.Admin })
 
       // Assert
       expect(isAdmin).toBe(false)
@@ -511,8 +511,8 @@ describe('Role Value Object', () => {
       expect(role).toBeDefined()
 
       // Act & Assert
-      expect(role.getValue()).toBe(UserRole.ADMIN)
-      expect(role.getValue()).toBe(UserRole.ADMIN) // Still the same
+      expect(role.getValue()).toBe(UserRole.Admin)
+      expect(role.getValue()).toBe(UserRole.Admin) // Still the same
     })
   })
 })

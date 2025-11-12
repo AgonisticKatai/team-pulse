@@ -16,9 +16,9 @@ import { TEST_CONSTANTS } from './test-constants.js'
  */
 export function buildCreateTeamDTO(overrides: Partial<CreateTeamDTO> = {}): CreateTeamDTO {
   return {
-    city: TEST_CONSTANTS.TEAMS.FC_BARCELONA.city,
-    foundedYear: TEST_CONSTANTS.TEAMS.FC_BARCELONA.foundedYear,
-    name: TEST_CONSTANTS.TEAMS.FC_BARCELONA.name,
+    city: TEST_CONSTANTS.teams.fcBarcelona.city,
+    foundedYear: TEST_CONSTANTS.teams.fcBarcelona.foundedYear,
+    name: TEST_CONSTANTS.teams.fcBarcelona.name,
     ...overrides,
   }
 }
@@ -47,12 +47,12 @@ export function buildTeam(
   } = {},
 ): Team {
   const result = Team.create({
-    city: TEST_CONSTANTS.TEAMS.FC_BARCELONA.city,
-    createdAt: TEST_CONSTANTS.MOCK_DATE,
-    foundedYear: TEST_CONSTANTS.TEAMS.FC_BARCELONA.foundedYear,
-    id: TEST_CONSTANTS.MOCK_UUID,
-    name: TEST_CONSTANTS.TEAMS.FC_BARCELONA.name,
-    updatedAt: TEST_CONSTANTS.MOCK_DATE,
+    city: TEST_CONSTANTS.teams.fcBarcelona.city,
+    createdAt: TEST_CONSTANTS.mockDate,
+    foundedYear: TEST_CONSTANTS.teams.fcBarcelona.foundedYear,
+    id: TEST_CONSTANTS.mockUuid,
+    name: TEST_CONSTANTS.teams.fcBarcelona.name,
+    updatedAt: TEST_CONSTANTS.mockDate,
     ...overrides,
   })
 
@@ -89,7 +89,7 @@ export function buildExistingTeam(
   } = {},
 ): Team {
   return buildTeam({
-    id: TEST_CONSTANTS.EXISTING_TEAM_ID,
+    id: TEST_CONSTANTS.existingTeamId,
     ...overrides,
   })
 }

@@ -29,10 +29,7 @@ interface AuthRouteDependencies {
   env: Env
 }
 
-export async function registerAuthRoutes(
-  fastify: FastifyInstance,
-  dependencies: AuthRouteDependencies,
-) {
+export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthRouteDependencies) {
   const { loginUseCase, refreshTokenUseCase, logoutUseCase, env } = dependencies
 
   /**
@@ -116,7 +113,7 @@ export async function registerAuthRoutes(
    *
    * Requires authentication (access token in Authorization header)
    */
-  fastify.get('/api/auth/me', { preHandler: requireAuth(env) }, async (request, reply) => {
+  fastify.get('/api/auth/me', { preHandler: requireAuth(env) }, (request, reply) => {
     try {
       // User is available from requireAuth middleware
       const user = request.user
@@ -183,9 +180,6 @@ function handleError(error: unknown, reply: FastifyReply) {
       success: false,
     })
   }
-
-  // Unknown errors (don't expose details)
-  console.error('Unexpected error:', error)
   return reply.code(500).send({
     error: {
       code: 'INTERNAL_SERVER_ERROR',

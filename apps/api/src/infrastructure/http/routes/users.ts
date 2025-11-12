@@ -28,10 +28,7 @@ interface UserRouteDependencies {
   env: Env
 }
 
-export async function registerUserRoutes(
-  fastify: FastifyInstance,
-  dependencies: UserRouteDependencies,
-) {
+export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserRouteDependencies) {
   const { createUserUseCase, listUsersUseCase, env } = dependencies
 
   /**
@@ -137,9 +134,6 @@ function handleError(error: unknown, reply: FastifyReply) {
       success: false,
     })
   }
-
-  // Unknown errors (don't expose details)
-  console.error('Unexpected error:', error)
   return reply.code(500).send({
     error: {
       code: 'INTERNAL_SERVER_ERROR',

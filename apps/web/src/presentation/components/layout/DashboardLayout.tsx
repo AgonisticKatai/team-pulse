@@ -10,7 +10,7 @@
 
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { useAuth } from '../../../application/hooks/useAuth'
+import { useAuth } from '../../../application/hooks/use-auth'
 import './DashboardLayout.css'
 
 export interface DashboardLayoutProps {

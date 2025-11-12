@@ -190,7 +190,7 @@ export class User {
    * Check if user is SUPER_ADMIN
    */
   isSuperAdmin(): boolean {
-    return this.role.getValue() === UserRole.SUPER_ADMIN
+    return this.role.getValue() === UserRole.SuperAdmin
   }
 
   /**
@@ -198,7 +198,7 @@ export class User {
    */
   isAdmin(): boolean {
     const roleValue = this.role.getValue()
-    return roleValue === UserRole.ADMIN || roleValue === UserRole.SUPER_ADMIN
+    return roleValue === UserRole.Admin || roleValue === UserRole.SuperAdmin
   }
 
   /**

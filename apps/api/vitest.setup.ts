@@ -14,10 +14,6 @@ process.env.NODE_ENV = 'test'
 if (!process.env.DATABASE_URL) {
   // Default to Docker Compose test database for local development
   process.env.DATABASE_URL = 'postgresql://teampulse:teampulse@localhost:5432/teampulse'
-  console.log(
-    '⚠️  DATABASE_URL not set, using Docker Compose default: postgresql://teampulse:teampulse@localhost:5432/teampulse',
-  )
-  console.log('💡 Make sure PostgreSQL is running: docker compose up -d')
 }
 
 // Validate it's a PostgreSQL URL
@@ -27,5 +23,3 @@ if (!process.env.DATABASE_URL.startsWith('postgres')) {
 Current value: ${process.env.DATABASE_URL}`,
   )
 }
-
-console.log(`Using PostgreSQL: ${process.env.DATABASE_URL.substring(0, 30)}...`)

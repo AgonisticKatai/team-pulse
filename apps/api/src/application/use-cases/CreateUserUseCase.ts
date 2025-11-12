@@ -4,7 +4,7 @@ import { ValidationError } from '../../domain/errors/index.js'
 import { User } from '../../domain/models/User.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import { Err, Ok, type Result } from '../../domain/types/index.js'
-import { hashPassword } from '../../infrastructure/auth/passwordUtils.js'
+import { hashPassword } from '../../infrastructure/auth/password-utils.js'
 
 /**
  * Create User Use Case

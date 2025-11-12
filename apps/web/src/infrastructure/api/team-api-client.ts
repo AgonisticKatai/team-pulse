@@ -4,7 +4,7 @@ import type {
   TeamsListResponseDTO,
   UpdateTeamDTO,
 } from '@team-pulse/shared'
-import type { ApiClient } from './apiClient'
+import type { ApiClient } from './api-client'
 
 /**
  * Team API Client (Infrastructure Layer)
@@ -25,7 +25,7 @@ export class TeamApiClient {
    *
    * @returns List of all teams
    */
-  async getTeams(): Promise<TeamsListResponseDTO> {
+  getTeams(): Promise<TeamsListResponseDTO> {
     return this.apiClient.get<TeamsListResponseDTO>('/api/teams')
   }
 
@@ -35,7 +35,7 @@ export class TeamApiClient {
    * @param id - Team ID
    * @returns Team details
    */
-  async getTeam(id: string): Promise<TeamResponseDTO> {
+  getTeam(id: string): Promise<TeamResponseDTO> {
     return this.apiClient.get<TeamResponseDTO>(`/api/teams/${id}`)
   }
 
@@ -45,7 +45,7 @@ export class TeamApiClient {
    * @param data - Team creation data
    * @returns Created team
    */
-  async createTeam(data: CreateTeamDTO): Promise<TeamResponseDTO> {
+  createTeam(data: CreateTeamDTO): Promise<TeamResponseDTO> {
     return this.apiClient.post<TeamResponseDTO>('/api/teams', data)
   }
 
@@ -56,7 +56,7 @@ export class TeamApiClient {
    * @param data - Team update data
    * @returns Updated team
    */
-  async updateTeam(id: string, data: UpdateTeamDTO): Promise<TeamResponseDTO> {
+  updateTeam(id: string, data: UpdateTeamDTO): Promise<TeamResponseDTO> {
     return this.apiClient.patch<TeamResponseDTO>(`/api/teams/${id}`, data)
   }
 
@@ -65,7 +65,7 @@ export class TeamApiClient {
    *
    * @param id - Team ID
    */
-  async deleteTeam(id: string): Promise<void> {
+  deleteTeam(id: string): Promise<void> {
     return this.apiClient.delete<void>(`/api/teams/${id}`)
   }
 }

@@ -29,9 +29,9 @@ import type {
   ITeamRepository,
   IUserRepository,
 } from '../../domain/repositories'
-import { createApiClient } from '../api/apiClient'
-import { createAuthApiClient } from '../api/authApiClient'
-import { createTeamApiClient } from '../api/teamApiClient'
+import { createApiClient } from '../api/api-client'
+import { createAuthApiClient } from '../api/auth-api-client'
+import { createTeamApiClient } from '../api/team-api-client'
 import { ApiAuthRepository, ApiTeamRepository, ApiUserRepository } from '../repositories'
 import { LocalStorageService } from '../storage'
 

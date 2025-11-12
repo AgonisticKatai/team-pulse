@@ -91,28 +91,28 @@ export class ApiClient {
   /**
    * GET request
    */
-  async get<T>(path: string): Promise<T> {
+  get<T>(path: string): Promise<T> {
     return this.request<T>('GET', path)
   }
 
   /**
    * POST request
    */
-  async post<T>(path: string, data?: unknown): Promise<T> {
+  post<T>(path: string, data?: unknown): Promise<T> {
     return this.request<T>('POST', path, data)
   }
 
   /**
    * PATCH request
    */
-  async patch<T>(path: string, data?: unknown): Promise<T> {
+  patch<T>(path: string, data?: unknown): Promise<T> {
     return this.request<T>('PATCH', path, data)
   }
 
   /**
    * DELETE request
    */
-  async delete<T>(path: string): Promise<T> {
+  delete<T>(path: string): Promise<T> {
     return this.request<T>('DELETE', path)
   }
 
@@ -150,7 +150,7 @@ export class ApiClient {
       const responseData = (await response.json()) as ApiResponse<T>
 
       // Handle error responses
-      if (!response.ok || !responseData.success) {
+      if (!(response.ok && responseData.success)) {
         const errorData = responseData as ApiErrorResponse
         throw new ApiError(
           errorData.error.message,

@@ -25,9 +25,9 @@ describe('User', () => {
       // Assert
       expect(error).toBeNull()
       expect(user).toBeDefined()
-      expect(user!.getId().getValue()).toBe(data.id)
-      expect(user!.getEmail().getValue()).toBe(data.email)
-      expect(user!.getRole().getValue()).toBe(UserRole.USER)
+      expect(user?.getId().getValue()).toBe(data.id)
+      expect(user?.getEmail().getValue()).toBe(data.email)
+      expect(user?.getRole().getValue()).toBe(UserRole.User)
     })
 
     it('should create user with Date objects for timestamps', () => {
@@ -46,8 +46,8 @@ describe('User', () => {
       // Assert
       expect(error).toBeNull()
       expect(user).toBeDefined()
-      expect(user!.getCreatedAt()).toEqual(createdAt)
-      expect(user!.getUpdatedAt()).toEqual(updatedAt)
+      expect(user?.getCreatedAt()).toEqual(createdAt)
+      expect(user?.getUpdatedAt()).toEqual(updatedAt)
     })
 
     it('should create user with string dates', () => {
@@ -64,8 +64,8 @@ describe('User', () => {
       // Assert
       expect(error).toBeNull()
       expect(user).toBeDefined()
-      expect(user!.getCreatedAt()).toEqual(new Date('2024-01-15T10:00:00Z'))
-      expect(user!.getUpdatedAt()).toEqual(new Date('2024-01-15T11:00:00Z'))
+      expect(user?.getCreatedAt()).toEqual(new Date('2024-01-15T10:00:00Z'))
+      expect(user?.getUpdatedAt()).toEqual(new Date('2024-01-15T11:00:00Z'))
     })
 
     it('should create user with default dates when not provided', () => {
@@ -84,8 +84,8 @@ describe('User', () => {
       // Assert
       expect(error).toBeNull()
       expect(user).toBeDefined()
-      const createdAtTime = user!.getCreatedAt().getTime()
-      const updatedAtTime = user!.getUpdatedAt().getTime()
+      const createdAtTime = user?.getCreatedAt().getTime()
+      const updatedAtTime = user?.getUpdatedAt().getTime()
       expect(createdAtTime).toBeGreaterThanOrEqual(before)
       expect(createdAtTime).toBeLessThanOrEqual(after)
       expect(updatedAtTime).toBeGreaterThanOrEqual(before)
@@ -105,7 +105,7 @@ describe('User', () => {
       // Assert
       expect(error).toBeNull()
       expect(user).toBeDefined()
-      expect(user!.getRole().getValue()).toBe(UserRole.ADMIN)
+      expect(user?.getRole().getValue()).toBe(UserRole.Admin)
     })
 
     it('should create user with super admin role', () => {
@@ -121,7 +121,7 @@ describe('User', () => {
       // Assert
       expect(error).toBeNull()
       expect(user).toBeDefined()
-      expect(user!.getRole().getValue()).toBe(UserRole.SUPER_ADMIN)
+      expect(user?.getRole().getValue()).toBe(UserRole.SuperAdmin)
     })
 
     it('should fail with invalid id (empty string)', () => {
@@ -136,7 +136,7 @@ describe('User', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error!.message).toContain('ID')
+      expect(error?.message).toContain('ID')
       expect(user).toBeNull()
     })
 
@@ -152,7 +152,7 @@ describe('User', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error!.message).toContain('Email')
+      expect(error?.message).toContain('Email')
       expect(user).toBeNull()
     })
 
@@ -168,7 +168,7 @@ describe('User', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error!.message).toContain('Email')
+      expect(error?.message).toContain('Email')
       expect(user).toBeNull()
     })
 
@@ -184,7 +184,7 @@ describe('User', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error!.message).toContain('Invalid role')
+      expect(error?.message).toContain('Invalid role')
       expect(user).toBeNull()
     })
 
@@ -200,7 +200,7 @@ describe('User', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error!.message).toContain('Role')
+      expect(error?.message).toContain('Role')
       expect(user).toBeNull()
     })
   })
@@ -250,9 +250,9 @@ describe('User', () => {
       // Assert
       expect(error).toBeNull()
       expect(user).toBeDefined()
-      expect(user!.getId().getValue()).toBe(dto.id)
-      expect(user!.getEmail().getValue()).toBe(dto.email)
-      expect(user!.getRole().getValue()).toBe(UserRole.USER)
+      expect(user?.getId().getValue()).toBe(dto.id)
+      expect(user?.getEmail().getValue()).toBe(dto.email)
+      expect(user?.getRole().getValue()).toBe(UserRole.User)
     })
 
     it('should fail with invalid DTO (bad email)', () => {
@@ -270,7 +270,7 @@ describe('User', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error!.message).toContain('Email')
+      expect(error?.message).toContain('Email')
       expect(user).toBeNull()
     })
   })
@@ -308,7 +308,7 @@ describe('User', () => {
       expect(error).toBeNull()
       expect(users).toBeDefined()
       expect(users).toHaveLength(1)
-      expect(users![0]!.getEmail().getValue()).toBe('test1@example.com')
+      expect(users?.[0]?.getEmail().getValue()).toBe('test1@example.com')
     })
 
     it('should create users from multiple DTOs', () => {
@@ -337,9 +337,9 @@ describe('User', () => {
       expect(error).toBeNull()
       expect(users).toBeDefined()
       expect(users).toHaveLength(2)
-      expect(users![0]!.getEmail().getValue()).toBe('test1@example.com')
-      expect(users![1]!.getEmail().getValue()).toBe('test2@example.com')
-      expect(users![1]!.getRole().getValue()).toBe(UserRole.ADMIN)
+      expect(users?.[0]?.getEmail().getValue()).toBe('test1@example.com')
+      expect(users?.[1]?.getEmail().getValue()).toBe('test2@example.com')
+      expect(users?.[1]?.getRole().getValue()).toBe(UserRole.Admin)
     })
 
     it('should fail with first invalid DTO in list', () => {
@@ -366,7 +366,7 @@ describe('User', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error!.message).toContain('Email')
+      expect(error?.message).toContain('Email')
       expect(users).toBeNull()
     })
   })
@@ -415,7 +415,7 @@ describe('User', () => {
 
       // Assert
       expect(role).toBeInstanceOf(Role)
-      expect(role.getValue()).toBe(UserRole.USER)
+      expect(role.getValue()).toBe(UserRole.User)
     })
 
     it('should get createdAt', () => {
@@ -446,7 +446,7 @@ describe('User', () => {
         expect(error).toBeNull()
 
         // Act & Assert
-        expect(user!.hasRole(UserRole.USER)).toBe(true)
+        expect(user?.hasRole(UserRole.User)).toBe(true)
       })
 
       it('should return false when user does not have the specified role', () => {
@@ -456,8 +456,8 @@ describe('User', () => {
         expect(error).toBeNull()
 
         // Act & Assert
-        expect(user!.hasRole(UserRole.ADMIN)).toBe(false)
-        expect(user!.hasRole(UserRole.SUPER_ADMIN)).toBe(false)
+        expect(user?.hasRole(UserRole.Admin)).toBe(false)
+        expect(user?.hasRole(UserRole.SuperAdmin)).toBe(false)
       })
 
       it('should return true for admin role', () => {
@@ -470,8 +470,8 @@ describe('User', () => {
         expect(error).toBeNull()
 
         // Act & Assert
-        expect(user!.hasRole(UserRole.ADMIN)).toBe(true)
-        expect(user!.hasRole(UserRole.USER)).toBe(false)
+        expect(user?.hasRole(UserRole.Admin)).toBe(true)
+        expect(user?.hasRole(UserRole.User)).toBe(false)
       })
     })
 
@@ -485,7 +485,7 @@ describe('User', () => {
         const [, userRole] = Role.create('USER')
 
         // Act & Assert
-        expect(user!.hasRoleLevel(userRole!)).toBe(true)
+        expect(user?.hasRoleLevel(userRole!)).toBe(true)
       })
 
       it('should return true when user has higher role level', () => {
@@ -500,7 +500,7 @@ describe('User', () => {
         const [, userRole] = Role.create('USER')
 
         // Act & Assert
-        expect(user!.hasRoleLevel(userRole!)).toBe(true)
+        expect(user?.hasRoleLevel(userRole!)).toBe(true)
       })
 
       it('should return false when user has lower role level', () => {
@@ -512,7 +512,7 @@ describe('User', () => {
         const [, adminRole] = Role.create('ADMIN')
 
         // Act & Assert
-        expect(user!.hasRoleLevel(adminRole!)).toBe(false)
+        expect(user?.hasRoleLevel(adminRole!)).toBe(false)
       })
     })
 
@@ -527,7 +527,7 @@ describe('User', () => {
         expect(error).toBeNull()
 
         // Act & Assert
-        expect(user!.isSuperAdmin()).toBe(true)
+        expect(user?.isSuperAdmin()).toBe(true)
       })
 
       it('should return false for admin', () => {
@@ -540,7 +540,7 @@ describe('User', () => {
         expect(error).toBeNull()
 
         // Act & Assert
-        expect(user!.isSuperAdmin()).toBe(false)
+        expect(user?.isSuperAdmin()).toBe(false)
       })
 
       it('should return false for user', () => {
@@ -550,7 +550,7 @@ describe('User', () => {
         expect(error).toBeNull()
 
         // Act & Assert
-        expect(user!.isSuperAdmin()).toBe(false)
+        expect(user?.isSuperAdmin()).toBe(false)
       })
     })
 
@@ -565,7 +565,7 @@ describe('User', () => {
         expect(error).toBeNull()
 
         // Act & Assert
-        expect(user!.isAdmin()).toBe(true)
+        expect(user?.isAdmin()).toBe(true)
       })
 
       it('should return true for admin', () => {
@@ -578,7 +578,7 @@ describe('User', () => {
         expect(error).toBeNull()
 
         // Act & Assert
-        expect(user!.isAdmin()).toBe(true)
+        expect(user?.isAdmin()).toBe(true)
       })
 
       it('should return false for user', () => {
@@ -588,7 +588,7 @@ describe('User', () => {
         expect(error).toBeNull()
 
         // Act & Assert
-        expect(user!.isAdmin()).toBe(false)
+        expect(user?.isAdmin()).toBe(false)
       })
     })
 
@@ -605,7 +605,7 @@ describe('User', () => {
         const [, userRole] = Role.create('USER')
 
         // Act & Assert
-        expect(user!.canPerform(userRole!)).toBe(true)
+        expect(user?.canPerform(userRole!)).toBe(true)
       })
 
       it('should return false when user cannot perform action', () => {
@@ -617,7 +617,7 @@ describe('User', () => {
         const [, adminRole] = Role.create('ADMIN')
 
         // Act & Assert
-        expect(user!.canPerform(adminRole!)).toBe(false)
+        expect(user?.canPerform(adminRole!)).toBe(false)
       })
     })
 
@@ -631,7 +631,7 @@ describe('User', () => {
         expect(error2).toBeNull()
 
         // Act & Assert
-        expect(user1!.equals(user2!)).toBe(true)
+        expect(user1?.equals(user2!)).toBe(true)
       })
 
       it('should return false for different users', () => {
@@ -647,7 +647,7 @@ describe('User', () => {
         expect(error2).toBeNull()
 
         // Act & Assert
-        expect(user1!.equals(user2!)).toBe(false)
+        expect(user1?.equals(user2!)).toBe(false)
       })
     })
   })
@@ -710,8 +710,8 @@ describe('User', () => {
 
         // Assert
         expect(error).toBeNull()
-        expect(recreatedUser!.equals(user)).toBe(true)
-        expect(recreatedUser!.toDTO()).toEqual(dto)
+        expect(recreatedUser?.equals(user)).toBe(true)
+        expect(recreatedUser?.toDTO()).toEqual(dto)
       })
     })
 

@@ -55,11 +55,11 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        const team = expectSuccess(await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto))
+        const team = expectSuccess(await updateTeamUseCase.execute(TEST_CONSTANTS.mockUuid, dto))
 
         // Assert
-        expect(team.id).toBe(TEST_CONSTANTS.MOCK_UUID)
-        expect(teamRepository.findById).toHaveBeenCalledWith(TEST_CONSTANTS.MOCK_UUID)
+        expect(team.id).toBe(TEST_CONSTANTS.mockUuid)
+        expect(teamRepository.findById).toHaveBeenCalledWith(TEST_CONSTANTS.mockUuid)
         expect(teamRepository.save).toHaveBeenCalled()
       })
 
@@ -73,7 +73,7 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        const team = expectSuccess(await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto))
+        const team = expectSuccess(await updateTeamUseCase.execute(TEST_CONSTANTS.mockUuid, dto))
 
         // Assert
         expect(team).toBeDefined()
@@ -91,7 +91,7 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto)
+        await updateTeamUseCase.execute(TEST_CONSTANTS.mockUuid, dto)
 
         // Assert
         expect(teamRepository.findByName).not.toHaveBeenCalled()
@@ -108,7 +108,7 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto)
+        await updateTeamUseCase.execute(TEST_CONSTANTS.mockUuid, dto)
 
         // Assert
         expect(teamRepository.findByName).toHaveBeenCalledWith('New Team Name')
@@ -117,7 +117,7 @@ describe('UpdateTeamUseCase', () => {
       it('should allow same team to keep its own name', async () => {
         // Arrange
         const dto: UpdateTeamDTO = {
-          name: TEST_CONSTANTS.TEAMS.FC_BARCELONA.name,
+          name: TEST_CONSTANTS.teams.fcBarcelona.name,
         }
 
         // Return the same team when checking by name
@@ -126,7 +126,7 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        const result = await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto)
+        const result = await updateTeamUseCase.execute(TEST_CONSTANTS.mockUuid, dto)
 
         // Assert
         expect(result.ok).toBe(true)
@@ -143,12 +143,12 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(null)
 
         // Act
-        const error = expectError(await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto))
+        const error = expectError(await updateTeamUseCase.execute(TEST_CONSTANTS.mockUuid, dto))
 
         // Assert
         expect(error).toBeInstanceOf(NotFoundError)
         expect(error.message).toContain('Team')
-        expect(error.message).toContain(TEST_CONSTANTS.MOCK_UUID)
+        expect(error.message).toContain(TEST_CONSTANTS.mockUuid)
         expect(teamRepository.save).not.toHaveBeenCalled()
       })
 
@@ -164,7 +164,7 @@ describe('UpdateTeamUseCase', () => {
         // Act
         const error = expectErrorType({
           errorType: ValidationError,
-          result: await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto),
+          result: await updateTeamUseCase.execute(TEST_CONSTANTS.mockUuid, dto),
         })
 
         // Assert
@@ -183,7 +183,7 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
 
         // Act
-        const error = expectError(await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto))
+        const error = expectError(await updateTeamUseCase.execute(TEST_CONSTANTS.mockUuid, dto))
 
         // Assert
         expect(error).toBeInstanceOf(ValidationError)
@@ -199,7 +199,7 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
 
         // Act
-        const error = expectError(await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto))
+        const error = expectError(await updateTeamUseCase.execute(TEST_CONSTANTS.mockUuid, dto))
 
         // Assert
         expect(error).toBeInstanceOf(ValidationError)
@@ -215,7 +215,7 @@ describe('UpdateTeamUseCase', () => {
         }
 
         const repositoryError = RepositoryError.forOperation({
-          message: TEST_CONSTANTS.ERRORS.DATABASE_CONNECTION_LOST,
+          message: TEST_CONSTANTS.errors.databaseConnectionLost,
           operation: 'findByName',
         })
 
@@ -223,11 +223,11 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.findByName).mockResolvedValue(Err(repositoryError))
 
         // Act
-        const error = expectError(await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto))
+        const error = expectError(await updateTeamUseCase.execute(TEST_CONSTANTS.mockUuid, dto))
 
         // Assert
         expect(error).toBeInstanceOf(RepositoryError)
-        expect(error.message).toContain(TEST_CONSTANTS.ERRORS.DATABASE_CONNECTION_LOST)
+        expect(error.message).toContain(TEST_CONSTANTS.errors.databaseConnectionLost)
         expect(teamRepository.save).not.toHaveBeenCalled()
       })
 
@@ -238,7 +238,7 @@ describe('UpdateTeamUseCase', () => {
         }
 
         const repositoryError = RepositoryError.forOperation({
-          message: TEST_CONSTANTS.ERRORS.DATABASE_CONNECTION_LOST,
+          message: TEST_CONSTANTS.errors.databaseConnectionLost,
           operation: 'save',
         })
 
@@ -246,11 +246,11 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Err(repositoryError))
 
         // Act
-        const error = expectError(await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto))
+        const error = expectError(await updateTeamUseCase.execute(TEST_CONSTANTS.mockUuid, dto))
 
         // Assert
         expect(error).toBeInstanceOf(RepositoryError)
-        expect(error.message).toContain(TEST_CONSTANTS.ERRORS.DATABASE_CONNECTION_LOST)
+        expect(error.message).toContain(TEST_CONSTANTS.errors.databaseConnectionLost)
       })
     })
 
@@ -263,7 +263,7 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        const team = expectSuccess(await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto))
+        const team = expectSuccess(await updateTeamUseCase.execute(TEST_CONSTANTS.mockUuid, dto))
 
         // Assert
         expect(team).toBeDefined()
@@ -279,7 +279,7 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        const team = expectSuccess(await updateTeamUseCase.execute(TEST_CONSTANTS.MOCK_UUID, dto))
+        const team = expectSuccess(await updateTeamUseCase.execute(TEST_CONSTANTS.mockUuid, dto))
 
         // Assert
         expect(team).toBeDefined()

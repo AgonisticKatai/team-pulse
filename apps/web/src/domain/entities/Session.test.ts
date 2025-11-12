@@ -36,10 +36,10 @@ describe('Session', () => {
       // Assert
       expect(error).toBeNull()
       expect(session).toBeDefined()
-      expect(session!.getAccessToken()).toBe('valid.jwt.token')
-      expect(session!.getRefreshToken()).toBe('valid.refresh.token')
-      expect(session!.getUser()).toBe(data.user)
-      expect(session!.getCreatedAt()).toBe(data.createdAt)
+      expect(session?.getAccessToken()).toBe('valid.jwt.token')
+      expect(session?.getRefreshToken()).toBe('valid.refresh.token')
+      expect(session?.getUser()).toBe(data.user)
+      expect(session?.getCreatedAt()).toBe(data.createdAt)
     })
 
     it('should fail when accessToken is empty', () => {
@@ -54,7 +54,7 @@ describe('Session', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error!.message).toContain('Token is required')
+      expect(error?.message).toContain('Token is required')
       expect(session).toBeNull()
     })
 
@@ -70,7 +70,7 @@ describe('Session', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error!.message).toContain('Token is required')
+      expect(error?.message).toContain('Token is required')
       expect(session).toBeNull()
     })
 
@@ -86,7 +86,7 @@ describe('Session', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error!.message).toContain('Invalid date')
+      expect(error?.message).toContain('Invalid date')
       expect(session).toBeNull()
     })
 
@@ -103,8 +103,8 @@ describe('Session', () => {
 
       // Assert
       expect(error).toBeNull()
-      expect(session!.getAccessToken()).toBe('valid.jwt.token')
-      expect(session!.getRefreshToken()).toBe('valid.refresh.token')
+      expect(session?.getAccessToken()).toBe('valid.jwt.token')
+      expect(session?.getRefreshToken()).toBe('valid.refresh.token')
     })
   })
 
@@ -127,10 +127,10 @@ describe('Session', () => {
       // Assert
       expect(error).toBeNull()
       expect(session).toBeDefined()
-      expect(session!.getAccessToken()).toBe('valid.jwt.token')
-      expect(session!.getRefreshToken()).toBe('valid.refresh.token')
-      expect(session!.getUser()).toBe(user)
-      expect(session!.getCreatedAt()).toBeInstanceOf(Date)
+      expect(session?.getAccessToken()).toBe('valid.jwt.token')
+      expect(session?.getRefreshToken()).toBe('valid.refresh.token')
+      expect(session?.getUser()).toBe(user)
+      expect(session?.getCreatedAt()).toBeInstanceOf(Date)
     })
 
     it('should set createdAt to current date', () => {
@@ -150,7 +150,7 @@ describe('Session', () => {
       const after = Date.now()
 
       // Assert
-      const createdAt = session!.getCreatedAt().getTime()
+      const createdAt = session?.getCreatedAt().getTime()
       expect(createdAt).toBeGreaterThanOrEqual(before)
       expect(createdAt).toBeLessThanOrEqual(after)
     })
@@ -177,9 +177,9 @@ describe('Session', () => {
       // Assert
       expect(error).toBeNull()
       expect(session).toBeDefined()
-      expect(session!.getAccessToken()).toBe('valid.jwt.token')
-      expect(session!.getRefreshToken()).toBe('valid.refresh.token')
-      expect(session!.getUser().getEmail().getValue()).toBe('user@example.com')
+      expect(session?.getAccessToken()).toBe('valid.jwt.token')
+      expect(session?.getRefreshToken()).toBe('valid.refresh.token')
+      expect(session?.getUser().getEmail().getValue()).toBe('user@example.com')
     })
 
     it('should fail when user DTO is invalid', () => {
@@ -201,7 +201,7 @@ describe('Session', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error!.message).toContain('Failed to create Session from DTO')
+      expect(error?.message).toContain('Failed to create Session from DTO')
       expect(session).toBeNull()
     })
 
@@ -224,7 +224,7 @@ describe('Session', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error!.message).toContain('Failed to create Session from DTO')
+      expect(error?.message).toContain('Failed to create Session from DTO')
       expect(session).toBeNull()
     })
   })
@@ -253,15 +253,15 @@ describe('Session', () => {
       // Assert
       expect(error).toBeNull()
       expect(updatedSession).toBeDefined()
-      expect(updatedSession!.getAccessToken()).toBe(newToken)
-      expect(updatedSession!.getRefreshToken()).toBe(originalSession!.getRefreshToken())
-      expect(updatedSession!.getUser()).toBe(originalSession!.getUser())
+      expect(updatedSession?.getAccessToken()).toBe(newToken)
+      expect(updatedSession?.getRefreshToken()).toBe(originalSession?.getRefreshToken())
+      expect(updatedSession?.getUser()).toBe(originalSession?.getUser())
     })
 
     it('should preserve immutability (return new instance)', () => {
       // Arrange
       const [, originalSession] = Session.create(createValidSessionData())
-      const originalAccessToken = originalSession!.getAccessToken()
+      const originalAccessToken = originalSession?.getAccessToken()
 
       // Act
       const [, updatedSession] = originalSession!.updateAccessToken({
@@ -270,8 +270,8 @@ describe('Session', () => {
 
       // Assert
       expect(updatedSession).not.toBe(originalSession)
-      expect(originalSession!.getAccessToken()).toBe(originalAccessToken)
-      expect(updatedSession!.getAccessToken()).toBe('new.jwt.token')
+      expect(originalSession?.getAccessToken()).toBe(originalAccessToken)
+      expect(updatedSession?.getAccessToken()).toBe('new.jwt.token')
     })
 
     it('should fail with invalid access token', () => {
@@ -291,7 +291,7 @@ describe('Session', () => {
     it('should preserve createdAt date', () => {
       // Arrange
       const [, originalSession] = Session.create(createValidSessionData())
-      const originalCreatedAt = originalSession!.getCreatedAt()
+      const originalCreatedAt = originalSession?.getCreatedAt()
 
       // Act
       const [, updatedSession] = originalSession!.updateAccessToken({
@@ -299,7 +299,7 @@ describe('Session', () => {
       })
 
       // Assert
-      expect(updatedSession!.getCreatedAt()).toBe(originalCreatedAt)
+      expect(updatedSession?.getCreatedAt()).toBe(originalCreatedAt)
     })
   })
 
@@ -319,16 +319,16 @@ describe('Session', () => {
       // Assert
       expect(error).toBeNull()
       expect(updatedSession).toBeDefined()
-      expect(updatedSession!.getAccessToken()).toBe(newAccessToken)
-      expect(updatedSession!.getRefreshToken()).toBe(newRefreshToken)
-      expect(updatedSession!.getUser()).toBe(originalSession!.getUser())
+      expect(updatedSession?.getAccessToken()).toBe(newAccessToken)
+      expect(updatedSession?.getRefreshToken()).toBe(newRefreshToken)
+      expect(updatedSession?.getUser()).toBe(originalSession?.getUser())
     })
 
     it('should preserve immutability (return new instance)', () => {
       // Arrange
       const [, originalSession] = Session.create(createValidSessionData())
-      const originalAccessToken = originalSession!.getAccessToken()
-      const originalRefreshToken = originalSession!.getRefreshToken()
+      const originalAccessToken = originalSession?.getAccessToken()
+      const originalRefreshToken = originalSession?.getRefreshToken()
 
       // Act
       const [, updatedSession] = originalSession!.updateTokens({
@@ -338,10 +338,10 @@ describe('Session', () => {
 
       // Assert
       expect(updatedSession).not.toBe(originalSession)
-      expect(originalSession!.getAccessToken()).toBe(originalAccessToken)
-      expect(originalSession!.getRefreshToken()).toBe(originalRefreshToken)
-      expect(updatedSession!.getAccessToken()).toBe('new.jwt.token')
-      expect(updatedSession!.getRefreshToken()).toBe('new.refresh.token')
+      expect(originalSession?.getAccessToken()).toBe(originalAccessToken)
+      expect(originalSession?.getRefreshToken()).toBe(originalRefreshToken)
+      expect(updatedSession?.getAccessToken()).toBe('new.jwt.token')
+      expect(updatedSession?.getRefreshToken()).toBe('new.refresh.token')
     })
 
     it('should fail with invalid access token', () => {
@@ -382,7 +382,7 @@ describe('Session', () => {
       const [, session] = Session.create(data)
 
       // Act & Assert
-      expect(session!.getUser()).toBe(data.user)
+      expect(session?.getUser()).toBe(data.user)
     })
 
     it('should return access token as string', () => {
@@ -390,7 +390,7 @@ describe('Session', () => {
       const [, session] = Session.create(createValidSessionData())
 
       // Act & Assert
-      expect(session!.getAccessToken()).toBe('valid.jwt.token')
+      expect(session?.getAccessToken()).toBe('valid.jwt.token')
     })
 
     it('should return refresh token as string', () => {
@@ -398,7 +398,7 @@ describe('Session', () => {
       const [, session] = Session.create(createValidSessionData())
 
       // Act & Assert
-      expect(session!.getRefreshToken()).toBe('valid.refresh.token')
+      expect(session?.getRefreshToken()).toBe('valid.refresh.token')
     })
 
     it('should return createdAt date', () => {
@@ -407,7 +407,7 @@ describe('Session', () => {
       const [, session] = Session.create(data)
 
       // Act & Assert
-      expect(session!.getCreatedAt()).toBe(data.createdAt)
+      expect(session?.getCreatedAt()).toBe(data.createdAt)
     })
   })
 
@@ -417,7 +417,7 @@ describe('Session', () => {
       const [, session] = Session.create(createValidSessionData())
 
       // Act & Assert
-      expect(session!.isAuthenticated()).toBe(true)
+      expect(session?.isAuthenticated()).toBe(true)
     })
   })
 
@@ -427,7 +427,7 @@ describe('Session', () => {
       const [, session] = Session.create(createValidSessionData())
 
       // Act & Assert
-      expect(session!.hasRole('USER')).toBe(true)
+      expect(session?.hasRole('USER')).toBe(true)
     })
 
     it('should return false when user does not have the role', () => {
@@ -435,7 +435,7 @@ describe('Session', () => {
       const [, session] = Session.create(createValidSessionData())
 
       // Act & Assert
-      expect(session!.hasRole('ADMIN')).toBe(false)
+      expect(session?.hasRole('ADMIN')).toBe(false)
     })
   })
 
@@ -445,7 +445,7 @@ describe('Session', () => {
       const [, session] = Session.create(createValidSessionData())
 
       // Act & Assert
-      expect(session!.isSuperAdmin()).toBe(false)
+      expect(session?.isSuperAdmin()).toBe(false)
     })
 
     it('should return true for super admin user', () => {
@@ -466,7 +466,7 @@ describe('Session', () => {
       })
 
       // Act & Assert
-      expect(session!.isSuperAdmin()).toBe(true)
+      expect(session?.isSuperAdmin()).toBe(true)
     })
   })
 
@@ -476,7 +476,7 @@ describe('Session', () => {
       const [, session] = Session.create(createValidSessionData())
 
       // Act & Assert
-      expect(session!.isAdmin()).toBe(false)
+      expect(session?.isAdmin()).toBe(false)
     })
 
     it('should return true for admin user', () => {
@@ -497,7 +497,7 @@ describe('Session', () => {
       })
 
       // Act & Assert
-      expect(session!.isAdmin()).toBe(true)
+      expect(session?.isAdmin()).toBe(true)
     })
 
     it('should return true for super admin user', () => {
@@ -518,7 +518,7 @@ describe('Session', () => {
       })
 
       // Act & Assert
-      expect(session!.isAdmin()).toBe(true)
+      expect(session?.isAdmin()).toBe(true)
     })
   })
 
@@ -532,7 +532,7 @@ describe('Session', () => {
       })
 
       // Act
-      const ageMs = session!.getAgeInMs()
+      const ageMs = session?.getAgeInMs()
 
       // Assert
       expect(ageMs).toBeGreaterThanOrEqual(5000)
@@ -547,7 +547,7 @@ describe('Session', () => {
       })
 
       // Act
-      const ageMs = session!.getAgeInMs()
+      const ageMs = session?.getAgeInMs()
 
       // Assert
       expect(ageMs).toBeLessThan(100) // Should be very small
@@ -564,7 +564,7 @@ describe('Session', () => {
       })
 
       // Act
-      const ageMinutes = session!.getAgeInMinutes()
+      const ageMinutes = session?.getAgeInMinutes()
 
       // Assert
       expect(ageMinutes).toBe(5)
@@ -578,7 +578,7 @@ describe('Session', () => {
       })
 
       // Act
-      const ageMinutes = session!.getAgeInMinutes()
+      const ageMinutes = session?.getAgeInMinutes()
 
       // Assert
       expect(ageMinutes).toBe(0)
@@ -593,7 +593,7 @@ describe('Session', () => {
       })
 
       // Act
-      const ageMinutes = session!.getAgeInMinutes()
+      const ageMinutes = session?.getAgeInMinutes()
 
       // Assert
       expect(ageMinutes).toBe(5) // Should be floored, not 6
@@ -607,7 +607,7 @@ describe('Session', () => {
       const [, session] = Session.create(data)
 
       // Act
-      const obj = session!.toObject()
+      const obj = session?.toObject()
 
       // Assert
       expect(obj).toEqual({
@@ -624,13 +624,13 @@ describe('Session', () => {
       const [, session] = Session.create(data)
 
       // Act
-      const obj = session!.toObject()
-      const [, recreated] = Session.create(obj)
+      const obj = session?.toObject()
+      const [, recreated] = Session.create(obj!)
 
       // Assert
-      expect(recreated!.getAccessToken()).toBe(session!.getAccessToken())
-      expect(recreated!.getRefreshToken()).toBe(session!.getRefreshToken())
-      expect(recreated!.getUser()).toBe(session!.getUser())
+      expect(recreated?.getAccessToken()).toBe(session?.getAccessToken())
+      expect(recreated?.getRefreshToken()).toBe(session?.getRefreshToken())
+      expect(recreated?.getUser()).toBe(session?.getUser())
     })
   })
 
@@ -640,15 +640,15 @@ describe('Session', () => {
       const [, session] = Session.create(createValidSessionData())
 
       // Act
-      const dto = session!.toDTO()
+      const dto = session?.toDTO()
 
       // Assert
       expect(dto).toHaveProperty('accessToken', 'valid.jwt.token')
       expect(dto).toHaveProperty('refreshToken', 'valid.refresh.token')
       expect(dto).toHaveProperty('user')
-      expect(dto.user).toHaveProperty('id')
-      expect(dto.user).toHaveProperty('email')
-      expect(dto.user).toHaveProperty('role')
+      expect(dto!.user).toHaveProperty('id')
+      expect(dto!.user).toHaveProperty('email')
+      expect(dto!.user).toHaveProperty('role')
     })
 
     it('should serialize user to DTO format', () => {
@@ -656,11 +656,11 @@ describe('Session', () => {
       const [, session] = Session.create(createValidSessionData())
 
       // Act
-      const dto = session!.toDTO()
+      const dto = session?.toDTO()
 
       // Assert
-      expect(dto.user.email).toBe('user@example.com')
-      expect(dto.user.role).toBe('USER')
+      expect(dto!.user.email).toBe('user@example.com')
+      expect(dto!.user.role).toBe('USER')
     })
   })
 
@@ -670,8 +670,8 @@ describe('Session', () => {
       const [, session] = Session.create(createValidSessionData())
 
       // Act
-      const json = session!.toJSON()
-      const obj = session!.toObject()
+      const json = session?.toJSON()
+      const obj = session?.toObject()
 
       // Assert
       expect(json).toEqual(obj)

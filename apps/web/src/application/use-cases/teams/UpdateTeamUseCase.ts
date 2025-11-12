@@ -23,6 +23,48 @@ export class UpdateTeamUseCase {
   constructor(private readonly teamRepository: ITeamRepository) {}
 
   /**
+   * Validate input fields
+   */
+  private validateInput(input: UpdateTeamUseCaseInput): DomainError | null {
+    if (input.name !== undefined) {
+      const [nameError] = TeamName.create(input.name)
+      if (nameError) return nameError
+    }
+
+    if (input.city !== undefined) {
+      const [cityError] = City.create(input.city)
+      if (cityError) return cityError
+    }
+
+    if (input.foundedYear !== undefined) {
+      const [yearError] = FoundedYear.create(input.foundedYear)
+      if (yearError) return yearError
+    }
+
+    return null
+  }
+
+  /**
+   * Check if name is being changed and doesn't conflict
+   */
+  private async checkNameUniqueness(
+    newName: string | undefined,
+    existingTeam: Team,
+  ): Promise<DomainError | null> {
+    if (!newName || newName === existingTeam.getName().getValue()) {
+      return null
+    }
+
+    const [existsError, exists] = await this.teamRepository.existsByName(newName)
+    if (existsError) return existsError
+    if (exists) {
+      return ValidationError.forField('name', `Team with name '${newName}' already exists`)
+    }
+
+    return null
+  }
+
+  /**
    * Execute update team
    * Returns [error, null] or [null, team]
    */
@@ -31,66 +73,21 @@ export class UpdateTeamUseCase {
     input: UpdateTeamUseCaseInput,
     currentUser: User | null,
   ): Promise<Result<Team, DomainError>> {
-    // Check permissions
     const [permissionError] = canUpdateTeam(currentUser)
-    if (permissionError) {
-      return Err(permissionError)
-    }
+    if (permissionError) return Err(permissionError)
 
-    // Validate name if provided
-    if (input.name !== undefined) {
-      const [nameError] = TeamName.create(input.name)
-      if (nameError) {
-        return Err(nameError)
-      }
-    }
+    const validationError = this.validateInput(input)
+    if (validationError) return Err(validationError)
 
-    // Validate city if provided
-    if (input.city !== undefined) {
-      const [cityError] = City.create(input.city)
-      if (cityError) {
-        return Err(cityError)
-      }
-    }
-
-    // Validate founded year if provided
-    if (input.foundedYear !== undefined) {
-      const [yearError] = FoundedYear.create(input.foundedYear)
-      if (yearError) {
-        return Err(yearError)
-      }
-    }
-
-    // Check if team exists
     const [findError, existingTeam] = await this.teamRepository.findById(teamId)
-    if (findError) {
-      return Err(findError)
-    }
+    if (findError) return Err(findError)
+    if (!existingTeam) return Err(NotFoundError.entity('Team', teamId))
 
-    if (!existingTeam) {
-      return Err(NotFoundError.entity('Team', teamId))
-    }
+    const nameError = await this.checkNameUniqueness(input.name, existingTeam)
+    if (nameError) return Err(nameError)
 
-    // Check if new name already exists (if name is being changed)
-    if (input.name && input.name !== existingTeam.getName().getValue()) {
-      const [existsError, exists] = await this.teamRepository.existsByName(input.name)
-      if (existsError) {
-        return Err(existsError)
-      }
-
-      if (exists) {
-        return Err(
-          ValidationError.forField('name', `Team with name '${input.name}' already exists`),
-        )
-      }
-    }
-
-    // Update team via repository
     const [updateError, team] = await this.teamRepository.update(teamId, input)
-
-    if (updateError) {
-      return Err(updateError)
-    }
+    if (updateError) return Err(updateError)
 
     return [null, team]
   }

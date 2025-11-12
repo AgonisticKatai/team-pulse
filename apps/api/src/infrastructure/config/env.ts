@@ -40,8 +40,6 @@ export function validateEnv() {
   const result = envSchema.safeParse(process.env)
 
   if (!result.success) {
-    console.error('❌ Invalid environment variables:')
-    console.error(result.error.format())
     throw new Error('Invalid environment configuration')
   }
 

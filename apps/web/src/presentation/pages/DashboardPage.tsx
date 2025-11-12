@@ -7,7 +7,7 @@
  * - USER: Read-only team information
  */
 
-import { useAuth } from '../../application/hooks/useAuth'
+import { useAuth } from '../../application/hooks/use-auth'
 import { DashboardLayout } from '../components/layout/DashboardLayout'
 import './DashboardPage.css'
 
@@ -33,7 +33,6 @@ export function DashboardPage() {
     </DashboardLayout>
   )
 }
-
 /**
  * Super Admin Dashboard
  * Full system access and controls

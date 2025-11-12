@@ -20,8 +20,8 @@
 import type { UserResponseDTO } from '@team-pulse/shared'
 import type { ReactNode } from 'react'
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
-import type { ApiClient } from '../../infrastructure/api/apiClient'
-import type { AuthApiClient } from '../../infrastructure/api/authApiClient'
+import type { ApiClient } from '../../infrastructure/api/api-client'
+import type { AuthApiClient } from '../../infrastructure/api/auth-api-client'
 
 /**
  * Authentication state
@@ -107,7 +107,7 @@ export function AuthProvider({ children, authApiClient, apiClient }: AuthProvide
     try {
       const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
       const userJson = localStorage.getItem(STORAGE_KEYS.USER)
-      if (!refreshToken || !userJson) {
+      if (!(refreshToken && userJson)) {
         return false
       }
 
@@ -180,7 +180,7 @@ export function AuthProvider({ children, authApiClient, apiClient }: AuthProvide
         const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
         const userJson = localStorage.getItem(STORAGE_KEYS.USER)
 
-        if (!accessToken || !refreshToken || !userJson) {
+        if (!(accessToken && refreshToken && userJson)) {
           setIsLoading(false)
           return
         }

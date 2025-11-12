@@ -16,9 +16,9 @@ import { TEST_CONSTANTS } from './test-constants.js'
  */
 export function buildCreateUserDTO(overrides: Partial<CreateUserDTO> = {}): CreateUserDTO {
   return {
-    email: TEST_CONSTANTS.USERS.JOHN_DOE.email,
-    password: TEST_CONSTANTS.USERS.JOHN_DOE.password,
-    role: TEST_CONSTANTS.USERS.JOHN_DOE.role,
+    email: TEST_CONSTANTS.users.johnDoe.email,
+    password: TEST_CONSTANTS.users.johnDoe.password,
+    role: TEST_CONSTANTS.users.johnDoe.role,
     ...overrides,
   }
 }
@@ -47,12 +47,12 @@ export function buildUser(
   } = {},
 ): User {
   const result = User.create({
-    createdAt: TEST_CONSTANTS.MOCK_DATE,
-    email: TEST_CONSTANTS.USERS.JOHN_DOE.email,
-    id: TEST_CONSTANTS.USERS.JOHN_DOE.id,
-    passwordHash: TEST_CONSTANTS.USERS.JOHN_DOE.passwordHash,
-    role: TEST_CONSTANTS.USERS.JOHN_DOE.role,
-    updatedAt: TEST_CONSTANTS.MOCK_DATE,
+    createdAt: TEST_CONSTANTS.mockDate,
+    email: TEST_CONSTANTS.users.johnDoe.email,
+    id: TEST_CONSTANTS.users.johnDoe.id,
+    passwordHash: TEST_CONSTANTS.users.johnDoe.passwordHash,
+    role: TEST_CONSTANTS.users.johnDoe.role,
+    updatedAt: TEST_CONSTANTS.mockDate,
     ...overrides,
   })
 
@@ -77,7 +77,7 @@ export function buildExistingUser(
   } = {},
 ): User {
   return buildUser({
-    id: TEST_CONSTANTS.EXISTING_USER_ID,
+    id: TEST_CONSTANTS.existingUserId,
     ...overrides,
   })
 }
@@ -95,10 +95,10 @@ export function buildAdminUser(
   } = {},
 ): User {
   return buildUser({
-    email: TEST_CONSTANTS.USERS.ADMIN_USER.email,
-    id: TEST_CONSTANTS.USERS.ADMIN_USER.id,
-    passwordHash: TEST_CONSTANTS.USERS.ADMIN_USER.passwordHash,
-    role: TEST_CONSTANTS.USERS.ADMIN_USER.role,
+    email: TEST_CONSTANTS.users.adminUser.email,
+    id: TEST_CONSTANTS.users.adminUser.id,
+    passwordHash: TEST_CONSTANTS.users.adminUser.passwordHash,
+    role: TEST_CONSTANTS.users.adminUser.role,
     ...overrides,
   })
 }
@@ -116,10 +116,10 @@ export function buildSuperAdminUser(
   } = {},
 ): User {
   return buildUser({
-    email: TEST_CONSTANTS.USERS.SUPER_ADMIN_USER.email,
-    id: TEST_CONSTANTS.USERS.SUPER_ADMIN_USER.id,
-    passwordHash: TEST_CONSTANTS.USERS.SUPER_ADMIN_USER.passwordHash,
-    role: TEST_CONSTANTS.USERS.SUPER_ADMIN_USER.role,
+    email: TEST_CONSTANTS.users.superAdminUser.email,
+    id: TEST_CONSTANTS.users.superAdminUser.id,
+    passwordHash: TEST_CONSTANTS.users.superAdminUser.passwordHash,
+    role: TEST_CONSTANTS.users.superAdminUser.role,
     ...overrides,
   })
 }

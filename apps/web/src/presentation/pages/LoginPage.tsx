@@ -11,7 +11,7 @@
 
 import { type FormEvent, useState } from 'react'
 import { Navigate } from 'react-router-dom'
-import { useAuth } from '../../application/hooks/useAuth'
+import { useAuth } from '../../application/hooks/use-auth'
 import './LoginPage.css'
 
 export function LoginPage() {
