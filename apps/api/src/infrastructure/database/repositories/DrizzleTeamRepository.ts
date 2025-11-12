@@ -27,32 +27,51 @@ import { teams } from '../schema.js'
 export class DrizzleTeamRepository implements ITeamRepository {
   constructor(private readonly db: Database) {}
 
-  async findById(id: string): Promise<Team | null> {
-    const rows = await this.db.select().from(teams).where(eq(teams.id, id)).limit(1)
-
-    const row = rows[0]
-    if (!row) {
-      return null
-    }
-
-    return this.mapToDomain(row)
-  }
-
-  async findAll(): Promise<Team[]> {
-    const rows = await this.db.select().from(teams)
-
-    return rows.map((row: typeof teams.$inferSelect) => this.mapToDomain(row))
-  }
-
-  async findByName(name: string): Promise<Result<Team | null, RepositoryError>> {
+  async findById({ id }: { id: string }): Promise<Result<Team | null, RepositoryError>> {
     try {
-      const [row] = await this.db.select().from(teams).where(eq(teams.name, name)).limit(1)
+      const [team] = await this.db.select().from(teams).where(eq(teams.id, id)).limit(1)
 
-      if (!row) {
+      if (!team) {
         return Ok(null)
       }
 
-      return Ok(this.mapToDomain(row))
+      return Ok(this.mapToDomain(team))
+    } catch (error) {
+      return Err(
+        RepositoryError.forOperation({
+          cause: error instanceof Error ? error : new Error(String(error)),
+          message: 'Failed to find team by id',
+          operation: 'findById',
+        }),
+      )
+    }
+  }
+
+  async findAll(): Promise<Result<Team[], RepositoryError>> {
+    try {
+      const rows = await this.db.select().from(teams)
+
+      return Ok(rows.map((row: typeof teams.$inferSelect) => this.mapToDomain(row)))
+    } catch (error) {
+      return Err(
+        RepositoryError.forOperation({
+          cause: error instanceof Error ? error : new Error(String(error)),
+          message: 'Failed to find all teams',
+          operation: 'findAll',
+        }),
+      )
+    }
+  }
+
+  async findByName({ name }: { name: string }): Promise<Result<Team | null, RepositoryError>> {
+    try {
+      const [team] = await this.db.select().from(teams).where(eq(teams.name, name)).limit(1)
+
+      if (!team) {
+        return Ok(null)
+      }
+
+      return Ok(this.mapToDomain(team))
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -105,19 +124,39 @@ export class DrizzleTeamRepository implements ITeamRepository {
     }
   }
 
-  async delete(id: string): Promise<boolean> {
-    const result = await this.db.delete(teams).where(eq(teams.id, id))
-    return result.count > 0
+  async delete({ id }: { id: string }): Promise<Result<void, RepositoryError>> {
+    try {
+      await this.db.delete(teams).where(eq(teams.id, id))
+      return Ok(undefined)
+    } catch (error) {
+      return Err(
+        RepositoryError.forOperation({
+          cause: error instanceof Error ? error : new Error(String(error)),
+          message: 'Failed to delete team',
+          operation: 'delete',
+        }),
+      )
+    }
   }
 
-  async existsByName(name: string): Promise<boolean> {
-    const rows = await this.db
-      .select({ id: teams.id })
-      .from(teams)
-      .where(eq(teams.name, name))
-      .limit(1)
+  async existsByName(name: string): Promise<Result<boolean, RepositoryError>> {
+    try {
+      const rows = await this.db
+        .select({ id: teams.id })
+        .from(teams)
+        .where(eq(teams.name, name))
+        .limit(1)
 
-    return rows.length > 0
+      return Ok(rows.length > 0)
+    } catch (error) {
+      return Err(
+        RepositoryError.forOperation({
+          cause: error instanceof Error ? error : new Error(String(error)),
+          message: 'Failed to check if team exists by name',
+          operation: 'existsByName',
+        }),
+      )
+    }
   }
 
   /**

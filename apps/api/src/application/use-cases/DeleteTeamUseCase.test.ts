@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { NotFoundError, RepositoryError } from '../../domain/errors/index.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
+import { Err, Ok } from '../../domain/types/Result.js'
 import {
   buildTeam,
   expectError,
@@ -40,8 +41,8 @@ describe('DeleteTeamUseCase', () => {
     describe('successful deletion', () => {
       it('should return Ok when team is deleted successfully', async () => {
         // Arrange
-        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
-        vi.mocked(teamRepository.delete).mockResolvedValue(true)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
+        vi.mocked(teamRepository.delete).mockResolvedValue(Ok(undefined))
 
         // Act
         const result = expectSuccess(await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid))
@@ -52,34 +53,34 @@ describe('DeleteTeamUseCase', () => {
 
       it('should call teamRepository.findById with correct id', async () => {
         // Arrange
-        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
-        vi.mocked(teamRepository.delete).mockResolvedValue(true)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
+        vi.mocked(teamRepository.delete).mockResolvedValue(Ok(undefined))
 
         // Act
         await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid)
 
         // Assert
-        expect(teamRepository.findById).toHaveBeenCalledWith(TEST_CONSTANTS.mockUuid)
+        expect(teamRepository.findById).toHaveBeenCalledWith({ id: TEST_CONSTANTS.mockUuid })
         expect(teamRepository.findById).toHaveBeenCalledTimes(1)
       })
 
       it('should call teamRepository.delete with correct id', async () => {
         // Arrange
-        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
-        vi.mocked(teamRepository.delete).mockResolvedValue(true)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
+        vi.mocked(teamRepository.delete).mockResolvedValue(Ok(undefined))
 
         // Act
         await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid)
 
         // Assert
-        expect(teamRepository.delete).toHaveBeenCalledWith(TEST_CONSTANTS.mockUuid)
+        expect(teamRepository.delete).toHaveBeenCalledWith({ id: TEST_CONSTANTS.mockUuid })
         expect(teamRepository.delete).toHaveBeenCalledTimes(1)
       })
 
       it('should verify team exists before attempting deletion', async () => {
         // Arrange
-        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
-        vi.mocked(teamRepository.delete).mockResolvedValue(true)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
+        vi.mocked(teamRepository.delete).mockResolvedValue(Ok(undefined))
 
         // Act
         await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid)
@@ -95,7 +96,7 @@ describe('DeleteTeamUseCase', () => {
     describe('not found errors', () => {
       it('should return NotFoundError when team does not exist', async () => {
         // Arrange
-        vi.mocked(teamRepository.findById).mockResolvedValue(null)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(null))
 
         // Act
         const error = expectError(await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid))
@@ -109,7 +110,7 @@ describe('DeleteTeamUseCase', () => {
 
       it('should not attempt deletion if team does not exist', async () => {
         // Arrange
-        vi.mocked(teamRepository.findById).mockResolvedValue(null)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(null))
 
         // Act
         await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid)
@@ -121,7 +122,7 @@ describe('DeleteTeamUseCase', () => {
       it('should return NotFoundError for non-existent id', async () => {
         // Arrange
         const nonExistentId = 'non-existent-id'
-        vi.mocked(teamRepository.findById).mockResolvedValue(null)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(null))
 
         // Act
         const error = expectError(await deleteTeamUseCase.execute(nonExistentId))
@@ -135,8 +136,10 @@ describe('DeleteTeamUseCase', () => {
     describe('repository errors', () => {
       it('should return RepositoryError when deletion fails', async () => {
         // Arrange
-        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
-        vi.mocked(teamRepository.delete).mockResolvedValue(false)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
+        vi.mocked(teamRepository.delete).mockResolvedValue(
+          Err(RepositoryError.create({ message: 'Failed to delete team' })),
+        )
 
         // Act
         const error = expectError(await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid))
@@ -148,8 +151,10 @@ describe('DeleteTeamUseCase', () => {
 
       it('should return RepositoryError if delete returns false', async () => {
         // Arrange - this is defensive programming, should never happen
-        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
-        vi.mocked(teamRepository.delete).mockResolvedValue(false)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
+        vi.mocked(teamRepository.delete).mockResolvedValue(
+          Err(RepositoryError.create({ message: 'Failed to delete team', operation: 'delete' })),
+        )
 
         // Act
         const error = expectErrorType({
@@ -167,23 +172,23 @@ describe('DeleteTeamUseCase', () => {
         // Arrange
         const differentId = 'different-team-id'
         const differentTeam = buildTeam({ id: differentId })
-        vi.mocked(teamRepository.findById).mockResolvedValue(differentTeam)
-        vi.mocked(teamRepository.delete).mockResolvedValue(true)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(differentTeam))
+        vi.mocked(teamRepository.delete).mockResolvedValue(Ok(undefined))
 
         // Act
         const result = expectSuccess(await deleteTeamUseCase.execute(differentId))
 
         // Assert
         expect(result).toBeUndefined()
-        expect(teamRepository.findById).toHaveBeenCalledWith(differentId)
-        expect(teamRepository.delete).toHaveBeenCalledWith(differentId)
+        expect(teamRepository.findById).toHaveBeenCalledWith({ id: differentId })
+        expect(teamRepository.delete).toHaveBeenCalledWith({ id: differentId })
       })
 
       it('should handle deletion of team without founded year', async () => {
         // Arrange
         const teamWithoutYear = buildTeam({ foundedYear: null })
-        vi.mocked(teamRepository.findById).mockResolvedValue(teamWithoutYear)
-        vi.mocked(teamRepository.delete).mockResolvedValue(true)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(teamWithoutYear))
+        vi.mocked(teamRepository.delete).mockResolvedValue(Ok(undefined))
 
         // Act
         const result = expectSuccess(await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid))

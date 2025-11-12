@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { NotFoundError } from '../../domain/errors/index.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
+import { Ok } from '../../domain/types/Result.js'
 import {
   buildTeam,
   expectError,
@@ -39,7 +40,7 @@ describe('GetTeamUseCase', () => {
     describe('successful retrieval', () => {
       it('should return Ok with team data when team exists', async () => {
         // Arrange
-        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
 
         // Act
         const team = expectSuccess(await getTeamUseCase.execute(TEST_CONSTANTS.mockUuid))
@@ -53,19 +54,19 @@ describe('GetTeamUseCase', () => {
 
       it('should call teamRepository.findById with correct id', async () => {
         // Arrange
-        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
 
         // Act
         await getTeamUseCase.execute(TEST_CONSTANTS.mockUuid)
 
         // Assert
-        expect(teamRepository.findById).toHaveBeenCalledWith(TEST_CONSTANTS.mockUuid)
+        expect(teamRepository.findById).toHaveBeenCalledWith({ id: TEST_CONSTANTS.mockUuid })
         expect(teamRepository.findById).toHaveBeenCalledTimes(1)
       })
 
       it('should return team with all properties in DTO format', async () => {
         // Arrange
-        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
 
         // Act
         const team = expectSuccess(await getTeamUseCase.execute(TEST_CONSTANTS.mockUuid))
@@ -81,7 +82,7 @@ describe('GetTeamUseCase', () => {
 
       it('should return dates as ISO strings in DTO', async () => {
         // Arrange
-        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
 
         // Act
         const team = expectSuccess(await getTeamUseCase.execute(TEST_CONSTANTS.mockUuid))
@@ -97,7 +98,7 @@ describe('GetTeamUseCase', () => {
     describe('not found errors', () => {
       it('should return NotFoundError when team does not exist', async () => {
         // Arrange
-        vi.mocked(teamRepository.findById).mockResolvedValue(null)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(null))
 
         // Act
         const error = expectError(await getTeamUseCase.execute(TEST_CONSTANTS.mockUuid))
@@ -111,7 +112,7 @@ describe('GetTeamUseCase', () => {
       it('should return NotFoundError for non-existent id', async () => {
         // Arrange
         const nonExistentId = 'non-existent-id'
-        vi.mocked(teamRepository.findById).mockResolvedValue(null)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(null))
 
         // Act
         const error = expectError(await getTeamUseCase.execute(nonExistentId))
@@ -126,7 +127,7 @@ describe('GetTeamUseCase', () => {
       it('should handle team without founded year', async () => {
         // Arrange
         const teamWithoutYear = buildTeam({ foundedYear: null })
-        vi.mocked(teamRepository.findById).mockResolvedValue(teamWithoutYear)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(teamWithoutYear))
 
         // Act
         const team = expectSuccess(await getTeamUseCase.execute(TEST_CONSTANTS.mockUuid))
@@ -139,14 +140,14 @@ describe('GetTeamUseCase', () => {
         // Arrange
         const differentId = 'different-id'
         const differentTeam = buildTeam({ id: differentId })
-        vi.mocked(teamRepository.findById).mockResolvedValue(differentTeam)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(differentTeam))
 
         // Act
         const team = expectSuccess(await getTeamUseCase.execute(differentId))
 
         // Assert
         expect(team.id).toBe(differentId)
-        expect(teamRepository.findById).toHaveBeenCalledWith(differentId)
+        expect(teamRepository.findById).toHaveBeenCalledWith({ id: differentId })
       })
     })
   })

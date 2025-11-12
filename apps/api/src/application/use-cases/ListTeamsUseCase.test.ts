@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
+import { Ok } from '../../domain/types/Result.js'
 import {
   buildExistingTeam,
   buildTeam,
@@ -49,7 +50,7 @@ describe('ListTeamsUseCase', () => {
     describe('successful listing', () => {
       it('should return Ok with all teams when teams exist', async () => {
         // Arrange
-        vi.mocked(teamRepository.findAll).mockResolvedValue([mockTeam1, mockTeam2, mockTeam3])
+        vi.mocked(teamRepository.findAll).mockResolvedValue(Ok([mockTeam1, mockTeam2, mockTeam3]))
 
         // Act
         const result = expectSuccess(await listTeamsUseCase.execute())
@@ -61,7 +62,7 @@ describe('ListTeamsUseCase', () => {
 
       it('should call teamRepository.findAll', async () => {
         // Arrange
-        vi.mocked(teamRepository.findAll).mockResolvedValue([mockTeam1, mockTeam2])
+        vi.mocked(teamRepository.findAll).mockResolvedValue(Ok([mockTeam1, mockTeam2]))
 
         // Act
         await listTeamsUseCase.execute()
@@ -72,7 +73,7 @@ describe('ListTeamsUseCase', () => {
 
       it('should return teams with all properties in DTO format', async () => {
         // Arrange
-        vi.mocked(teamRepository.findAll).mockResolvedValue([mockTeam1])
+        vi.mocked(teamRepository.findAll).mockResolvedValue(Ok([mockTeam1]))
 
         // Act
         const result = expectSuccess(await listTeamsUseCase.execute())
@@ -90,7 +91,7 @@ describe('ListTeamsUseCase', () => {
 
       it('should return dates as ISO strings in DTOs', async () => {
         // Arrange
-        vi.mocked(teamRepository.findAll).mockResolvedValue([mockTeam1])
+        vi.mocked(teamRepository.findAll).mockResolvedValue(Ok([mockTeam1]))
 
         // Act
         const result = expectSuccess(await listTeamsUseCase.execute())
@@ -104,7 +105,7 @@ describe('ListTeamsUseCase', () => {
 
       it('should return correct total count', async () => {
         // Arrange
-        vi.mocked(teamRepository.findAll).mockResolvedValue([mockTeam1, mockTeam2])
+        vi.mocked(teamRepository.findAll).mockResolvedValue(Ok([mockTeam1, mockTeam2]))
 
         // Act
         const result = expectSuccess(await listTeamsUseCase.execute())
@@ -116,7 +117,7 @@ describe('ListTeamsUseCase', () => {
 
       it('should handle teams with and without founded year', async () => {
         // Arrange
-        vi.mocked(teamRepository.findAll).mockResolvedValue([mockTeam1, mockTeam3])
+        vi.mocked(teamRepository.findAll).mockResolvedValue(Ok([mockTeam1, mockTeam3]))
 
         // Act
         const result = expectSuccess(await listTeamsUseCase.execute())
@@ -130,7 +131,7 @@ describe('ListTeamsUseCase', () => {
     describe('empty results', () => {
       it('should return empty array when no teams exist', async () => {
         // Arrange
-        vi.mocked(teamRepository.findAll).mockResolvedValue([])
+        vi.mocked(teamRepository.findAll).mockResolvedValue(Ok([]))
 
         // Act
         const result = expectSuccess(await listTeamsUseCase.execute())
@@ -142,7 +143,7 @@ describe('ListTeamsUseCase', () => {
 
       it('should return total 0 when no teams exist', async () => {
         // Arrange
-        vi.mocked(teamRepository.findAll).mockResolvedValue([])
+        vi.mocked(teamRepository.findAll).mockResolvedValue(Ok([]))
 
         // Act
         const result = expectSuccess(await listTeamsUseCase.execute())
@@ -155,7 +156,7 @@ describe('ListTeamsUseCase', () => {
     describe('single team', () => {
       it('should handle single team correctly', async () => {
         // Arrange
-        vi.mocked(teamRepository.findAll).mockResolvedValue([mockTeam1])
+        vi.mocked(teamRepository.findAll).mockResolvedValue(Ok([mockTeam1]))
 
         // Act
         const result = expectSuccess(await listTeamsUseCase.execute())
@@ -170,7 +171,7 @@ describe('ListTeamsUseCase', () => {
     describe('multiple teams', () => {
       it('should maintain team order from repository', async () => {
         // Arrange
-        vi.mocked(teamRepository.findAll).mockResolvedValue([mockTeam1, mockTeam2, mockTeam3])
+        vi.mocked(teamRepository.findAll).mockResolvedValue(Ok([mockTeam1, mockTeam2, mockTeam3]))
 
         // Act
         const result = expectSuccess(await listTeamsUseCase.execute())
@@ -190,7 +191,7 @@ describe('ListTeamsUseCase', () => {
             name: `Team ${i}`,
           }),
         )
-        vi.mocked(teamRepository.findAll).mockResolvedValue(manyTeams)
+        vi.mocked(teamRepository.findAll).mockResolvedValue(Ok(manyTeams))
 
         // Act
         const result = expectSuccess(await listTeamsUseCase.execute())
@@ -204,7 +205,7 @@ describe('ListTeamsUseCase', () => {
     describe('edge cases', () => {
       it('should convert all teams to DTO format', async () => {
         // Arrange
-        vi.mocked(teamRepository.findAll).mockResolvedValue([mockTeam1, mockTeam2])
+        vi.mocked(teamRepository.findAll).mockResolvedValue(Ok([mockTeam1, mockTeam2]))
 
         // Act
         const result = expectSuccess(await listTeamsUseCase.execute())
@@ -222,7 +223,7 @@ describe('ListTeamsUseCase', () => {
       it('should handle teams with null founded year', async () => {
         // Arrange
         const teamsWithNullYear = [buildTeamWithoutFoundedYear(), buildTeamWithoutFoundedYear()]
-        vi.mocked(teamRepository.findAll).mockResolvedValue(teamsWithNullYear)
+        vi.mocked(teamRepository.findAll).mockResolvedValue(Ok(teamsWithNullYear))
 
         // Act
         const result = expectSuccess(await listTeamsUseCase.execute())

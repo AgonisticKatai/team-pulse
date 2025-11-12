@@ -47,7 +47,7 @@ export class CreateTeamUseCase {
     dto: CreateTeamDTO,
   ): Promise<Result<TeamResponseDTO, ValidationError | RepositoryError>> {
     // Business Rule: Team name must be unique
-    const findResult = await this.teamRepository.findByName(dto.name)
+    const findResult = await this.teamRepository.findByName({ name: dto.name })
 
     if (!findResult.ok) {
       return Err(findResult.error)

@@ -1,5 +1,5 @@
 import type { TeamResponseDTO } from '@team-pulse/shared'
-import { NotFoundError } from '../../domain/errors/index.js'
+import { NotFoundError, type RepositoryError } from '../../domain/errors/index.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
 import { Err, Ok, type Result } from '../../domain/types/index.js'
 
@@ -17,20 +17,26 @@ export class GetTeamUseCase {
 
   /**
    * Factory method to create the use case
-   *
-   * Use named parameters for consistency with domain entities
    */
   static create({ teamRepository }: { teamRepository: ITeamRepository }): GetTeamUseCase {
     return new GetTeamUseCase({ teamRepository })
   }
 
-  async execute(id: string): Promise<Result<TeamResponseDTO, NotFoundError>> {
-    const team = await this.teamRepository.findById(id)
+  async execute(id: string): Promise<Result<TeamResponseDTO, NotFoundError | RepositoryError>> {
+    // Verify team exists
+    const findResult = await this.teamRepository.findById({ id })
 
-    if (!team) {
-      return Err(new NotFoundError('Team', id))
+    // Handle repository errors
+    if (!findResult.ok) {
+      return Err(findResult.error)
     }
 
-    return Ok(team.toDTO())
+    // Handle not found
+    if (!findResult.value) {
+      return Err(NotFoundError.create({ entityName: 'Team', identifier: id }))
+    }
+
+    // Map to DTO and return
+    return Ok(findResult.value.toDTO())
   }
 }

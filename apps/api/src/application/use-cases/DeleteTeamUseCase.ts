@@ -1,4 +1,4 @@
-import { NotFoundError, RepositoryError } from '../../domain/errors/index.js'
+import { NotFoundError, type RepositoryError } from '../../domain/errors/index.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
 import { Err, Ok, type Result } from '../../domain/types/index.js'
 
@@ -25,22 +25,24 @@ export class DeleteTeamUseCase {
 
   async execute(id: string): Promise<Result<void, NotFoundError | RepositoryError>> {
     // Verify team exists before deleting
-    const team = await this.teamRepository.findById(id)
-    if (!team) {
-      return Err(new NotFoundError('Team', id))
+    const findResult = await this.teamRepository.findById({ id })
+
+    // Handle repository errors
+    if (!findResult.ok) {
+      return Err(findResult.error)
+    }
+
+    // Handle not found error
+    if (!findResult.value) {
+      return Err(NotFoundError.create({ entityName: 'Team', identifier: id }))
     }
 
     // Delete
-    const deleted = await this.teamRepository.delete(id)
+    const deleteResult = await this.teamRepository.delete({ id })
 
     // This should never happen if findById succeeded, but defensive programming
-    if (!deleted) {
-      return Err(
-        RepositoryError.forOperation({
-          message: 'Failed to delete team',
-          operation: 'delete',
-        }),
-      )
+    if (!deleteResult.ok) {
+      return Err(deleteResult.error)
     }
 
     return Ok(undefined)

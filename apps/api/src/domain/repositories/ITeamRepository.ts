@@ -26,16 +26,16 @@ export interface ITeamRepository {
    * Find a team by its unique identifier
    *
    * @param id - The team's unique identifier
-   * @returns The team if found, null otherwise
+   * @returns Result with the team if found (null if not found), or RepositoryError if operation fails
    */
-  findById(id: string): Promise<Team | null>
+  findById({ id }: { id: string }): Promise<Result<Team | null, RepositoryError>>
 
   /**
    * Find all teams
    *
-   * @returns Array of all teams (empty array if none exist)
+   * @returns Result with array of all teams (empty array if none exist), or RepositoryError if operation fails
    */
-  findAll(): Promise<Team[]>
+  findAll(): Promise<Result<Team[], RepositoryError>>
 
   /**
    * Find a team by name
@@ -43,7 +43,7 @@ export interface ITeamRepository {
    * @param name - The team's name (case-insensitive search)
    * @returns Result with the team if found (null if not found), or RepositoryError if operation fails
    */
-  findByName(name: string): Promise<Result<Team | null, RepositoryError>>
+  findByName({ name }: { name: string }): Promise<Result<Team | null, RepositoryError>>
 
   /**
    * Save a team (create or update)
@@ -60,15 +60,15 @@ export interface ITeamRepository {
    * Delete a team by its identifier
    *
    * @param id - The team's unique identifier
-   * @returns true if deleted, false if team didn't exist
+   * @returns Result with void if deleted successfully, or RepositoryError if operation fails
    */
-  delete(id: string): Promise<boolean>
+  delete({ id }: { id: string }): Promise<Result<void, RepositoryError>>
 
   /**
    * Check if a team exists by name
    *
    * @param name - The team's name
-   * @returns true if a team with this name exists
+   * @returns Result with boolean indicating if team exists, or RepositoryError if operation fails
    */
-  existsByName(name: string): Promise<boolean>
+  existsByName(name: string): Promise<Result<boolean, RepositoryError>>
 }

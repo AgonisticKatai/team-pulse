@@ -39,6 +39,7 @@ export class CreateUserUseCase {
   async execute(dto: CreateUserDTO): Promise<Result<UserResponseDTO, ValidationError>> {
     // Business Rule: Email must be unique
     const existingUser = await this.userRepository.findByEmail(dto.email)
+
     if (existingUser) {
       return Err(
         ValidationError.forField({

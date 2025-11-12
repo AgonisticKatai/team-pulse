@@ -76,9 +76,9 @@ describe('CreateTeamUseCase', () => {
         await createTeamUseCase.execute(dto)
 
         // Assert
-        expect(teamRepository.findByName).toHaveBeenCalledWith(
-          TEST_CONSTANTS.teams.fcBarcelona.name,
-        )
+        expect(teamRepository.findByName).toHaveBeenCalledWith({
+          name: TEST_CONSTANTS.teams.fcBarcelona.name,
+        })
         expect(teamRepository.findByName).toHaveBeenCalledTimes(1)
       })
 

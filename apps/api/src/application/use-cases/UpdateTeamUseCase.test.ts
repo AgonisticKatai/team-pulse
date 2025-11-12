@@ -1,7 +1,12 @@
 import type { UpdateTeamDTO } from '@team-pulse/shared'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { NotFoundError, RepositoryError, ValidationError } from '../../domain/errors/index.js'
+import {
+  DuplicatedError,
+  NotFoundError,
+  RepositoryError,
+  ValidationError,
+} from '../../domain/errors/index.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
 import { Err, Ok } from '../../domain/types/index.js'
 import {
@@ -50,7 +55,7 @@ describe('UpdateTeamUseCase', () => {
           name: 'Updated Team',
         }
 
-        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
@@ -59,7 +64,7 @@ describe('UpdateTeamUseCase', () => {
 
         // Assert
         expect(team.id).toBe(TEST_CONSTANTS.mockUuid)
-        expect(teamRepository.findById).toHaveBeenCalledWith(TEST_CONSTANTS.mockUuid)
+        expect(teamRepository.findById).toHaveBeenCalledWith({ id: TEST_CONSTANTS.mockUuid })
         expect(teamRepository.save).toHaveBeenCalled()
       })
 
@@ -69,7 +74,7 @@ describe('UpdateTeamUseCase', () => {
           city: 'New City',
         }
 
-        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
         // Act
@@ -87,7 +92,7 @@ describe('UpdateTeamUseCase', () => {
           foundedYear: 1950,
         }
 
-        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
         // Act
@@ -103,7 +108,7 @@ describe('UpdateTeamUseCase', () => {
           name: 'New Team Name',
         }
 
-        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
@@ -111,7 +116,7 @@ describe('UpdateTeamUseCase', () => {
         await updateTeamUseCase.execute(TEST_CONSTANTS.mockUuid, dto)
 
         // Assert
-        expect(teamRepository.findByName).toHaveBeenCalledWith('New Team Name')
+        expect(teamRepository.findByName).toHaveBeenCalledWith({ name: 'New Team Name' })
       })
 
       it('should allow same team to keep its own name', async () => {
@@ -121,7 +126,7 @@ describe('UpdateTeamUseCase', () => {
         }
 
         // Return the same team when checking by name
-        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(mockTeam))
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
@@ -140,7 +145,7 @@ describe('UpdateTeamUseCase', () => {
           city: 'New City',
         }
 
-        vi.mocked(teamRepository.findById).mockResolvedValue(null)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(null))
 
         // Act
         const error = expectError(await updateTeamUseCase.execute(TEST_CONSTANTS.mockUuid, dto))
@@ -152,25 +157,24 @@ describe('UpdateTeamUseCase', () => {
         expect(teamRepository.save).not.toHaveBeenCalled()
       })
 
-      it('should return ValidationError when new name already exists for different team', async () => {
+      it('should return DuplicatedError when new name already exists for different team', async () => {
         // Arrange
         const dto: UpdateTeamDTO = {
           name: 'Existing Team Name',
         }
 
-        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(existingTeam))
 
         // Act
         const error = expectErrorType({
-          errorType: ValidationError,
+          errorType: DuplicatedError,
           result: await updateTeamUseCase.execute(TEST_CONSTANTS.mockUuid, dto),
         })
 
         // Assert
         expect(error.message).toContain('already exists')
         expect(error.message).toContain('Existing Team Name')
-        expect(error.field).toBe('name')
         expect(teamRepository.save).not.toHaveBeenCalled()
       })
 
@@ -180,7 +184,7 @@ describe('UpdateTeamUseCase', () => {
           city: '', // Invalid: empty city
         }
 
-        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
 
         // Act
         const error = expectError(await updateTeamUseCase.execute(TEST_CONSTANTS.mockUuid, dto))
@@ -196,7 +200,7 @@ describe('UpdateTeamUseCase', () => {
           foundedYear: 3000, // Future year
         }
 
-        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
 
         // Act
         const error = expectError(await updateTeamUseCase.execute(TEST_CONSTANTS.mockUuid, dto))
@@ -219,7 +223,7 @@ describe('UpdateTeamUseCase', () => {
           operation: 'findByName',
         })
 
-        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
         vi.mocked(teamRepository.findByName).mockResolvedValue(Err(repositoryError))
 
         // Act
@@ -242,7 +246,7 @@ describe('UpdateTeamUseCase', () => {
           operation: 'save',
         })
 
-        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
         vi.mocked(teamRepository.save).mockResolvedValue(Err(repositoryError))
 
         // Act
@@ -259,7 +263,7 @@ describe('UpdateTeamUseCase', () => {
         // Arrange
         const dto: UpdateTeamDTO = {}
 
-        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
         // Act
@@ -275,7 +279,7 @@ describe('UpdateTeamUseCase', () => {
           foundedYear: null,
         }
 
-        vi.mocked(teamRepository.findById).mockResolvedValue(mockTeam)
+        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
         // Act
