@@ -121,7 +121,7 @@ export class Container {
    */
   get getTeamUseCase(): GetTeamUseCase {
     if (!this._getTeamUseCase) {
-      this._getTeamUseCase = new GetTeamUseCase(this.teamRepository)
+      this._getTeamUseCase = GetTeamUseCase.create({ teamRepository: this.teamRepository })
     }
     return this._getTeamUseCase
   }
@@ -131,7 +131,7 @@ export class Container {
    */
   get listTeamsUseCase(): ListTeamsUseCase {
     if (!this._listTeamsUseCase) {
-      this._listTeamsUseCase = new ListTeamsUseCase(this.teamRepository)
+      this._listTeamsUseCase = ListTeamsUseCase.create({ teamRepository: this.teamRepository })
     }
     return this._listTeamsUseCase
   }
@@ -141,7 +141,7 @@ export class Container {
    */
   get updateTeamUseCase(): UpdateTeamUseCase {
     if (!this._updateTeamUseCase) {
-      this._updateTeamUseCase = new UpdateTeamUseCase(this.teamRepository)
+      this._updateTeamUseCase = UpdateTeamUseCase.create({ teamRepository: this.teamRepository })
     }
     return this._updateTeamUseCase
   }
@@ -151,7 +151,7 @@ export class Container {
    */
   get deleteTeamUseCase(): DeleteTeamUseCase {
     if (!this._deleteTeamUseCase) {
-      this._deleteTeamUseCase = new DeleteTeamUseCase(this.teamRepository)
+      this._deleteTeamUseCase = DeleteTeamUseCase.create({ teamRepository: this.teamRepository })
     }
     return this._deleteTeamUseCase
   }

@@ -9,7 +9,20 @@ import { Err, Ok, type Result } from '../../domain/types/index.js'
  * Updates an existing team
  */
 export class UpdateTeamUseCase {
-  constructor(private readonly teamRepository: ITeamRepository) {}
+  private readonly teamRepository: ITeamRepository
+
+  private constructor({ teamRepository }: { teamRepository: ITeamRepository }) {
+    this.teamRepository = teamRepository
+  }
+
+  /**
+   * Factory method to create the use case
+   *
+   * Use named parameters for consistency with domain entities
+   */
+  static create({ teamRepository }: { teamRepository: ITeamRepository }): UpdateTeamUseCase {
+    return new UpdateTeamUseCase({ teamRepository })
+  }
 
   async execute(
     id: string,

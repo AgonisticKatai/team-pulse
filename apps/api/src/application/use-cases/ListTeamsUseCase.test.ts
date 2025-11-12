@@ -42,7 +42,7 @@ describe('ListTeamsUseCase', () => {
     }
 
     // Create use case instance
-    listTeamsUseCase = new ListTeamsUseCase(teamRepository)
+    listTeamsUseCase = ListTeamsUseCase.create({ teamRepository })
   })
 
   describe('execute', () => {

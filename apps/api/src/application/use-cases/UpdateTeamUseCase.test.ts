@@ -37,7 +37,7 @@ describe('UpdateTeamUseCase', () => {
     }
 
     // Create use case instance
-    updateTeamUseCase = new UpdateTeamUseCase(teamRepository)
+    updateTeamUseCase = UpdateTeamUseCase.create({ teamRepository })
   })
 
   describe('execute', () => {

@@ -9,7 +9,20 @@ import { Ok, type Result } from '../../domain/types/index.js'
  * Future: Add pagination, filtering, sorting
  */
 export class ListTeamsUseCase {
-  constructor(private readonly teamRepository: ITeamRepository) {}
+  private readonly teamRepository: ITeamRepository
+
+  private constructor({ teamRepository }: { teamRepository: ITeamRepository }) {
+    this.teamRepository = teamRepository
+  }
+
+  /**
+   * Factory method to create the use case
+   *
+   * Use named parameters for consistency with domain entities
+   */
+  static create({ teamRepository }: { teamRepository: ITeamRepository }): ListTeamsUseCase {
+    return new ListTeamsUseCase({ teamRepository })
+  }
 
   async execute(): Promise<Result<TeamsListResponseDTO, never>> {
     const teams = await this.teamRepository.findAll()

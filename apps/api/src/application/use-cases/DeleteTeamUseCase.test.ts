@@ -33,7 +33,7 @@ describe('DeleteTeamUseCase', () => {
     }
 
     // Create use case instance
-    deleteTeamUseCase = new DeleteTeamUseCase(teamRepository)
+    deleteTeamUseCase = DeleteTeamUseCase.create({ teamRepository })
   })
 
   describe('execute', () => {

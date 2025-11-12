@@ -9,7 +9,20 @@ import { Err, Ok, type Result } from '../../domain/types/index.js'
  * Retrieves a single team by ID
  */
 export class GetTeamUseCase {
-  constructor(private readonly teamRepository: ITeamRepository) {}
+  private readonly teamRepository: ITeamRepository
+
+  private constructor({ teamRepository }: { teamRepository: ITeamRepository }) {
+    this.teamRepository = teamRepository
+  }
+
+  /**
+   * Factory method to create the use case
+   *
+   * Use named parameters for consistency with domain entities
+   */
+  static create({ teamRepository }: { teamRepository: ITeamRepository }): GetTeamUseCase {
+    return new GetTeamUseCase({ teamRepository })
+  }
 
   async execute(id: string): Promise<Result<TeamResponseDTO, NotFoundError>> {
     const team = await this.teamRepository.findById(id)

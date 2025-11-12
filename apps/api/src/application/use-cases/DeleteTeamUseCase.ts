@@ -8,7 +8,20 @@ import { Err, Ok, type Result } from '../../domain/types/index.js'
  * Deletes a team by ID
  */
 export class DeleteTeamUseCase {
-  constructor(private readonly teamRepository: ITeamRepository) {}
+  private readonly teamRepository: ITeamRepository
+
+  private constructor({ teamRepository }: { teamRepository: ITeamRepository }) {
+    this.teamRepository = teamRepository
+  }
+
+  /**
+   * Factory method to create the use case
+   *
+   * Use named parameters for consistency with domain entities
+   */
+  static create({ teamRepository }: { teamRepository: ITeamRepository }): DeleteTeamUseCase {
+    return new DeleteTeamUseCase({ teamRepository })
+  }
 
   async execute(id: string): Promise<Result<void, NotFoundError | RepositoryError>> {
     // Verify team exists before deleting

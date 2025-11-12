@@ -32,7 +32,7 @@ describe('GetTeamUseCase', () => {
     }
 
     // Create use case instance
-    getTeamUseCase = new GetTeamUseCase(teamRepository)
+    getTeamUseCase = GetTeamUseCase.create({ teamRepository })
   })
 
   describe('execute', () => {
