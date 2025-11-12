@@ -4,6 +4,7 @@ import {
   buildAdminUser,
   buildSuperAdminUser,
   buildUser,
+  expectSuccess,
   TEST_CONSTANTS,
 } from '../../infrastructure/testing/index.js'
 import { ListUsersUseCase } from './ListUsersUseCase.js'
@@ -42,9 +43,10 @@ describe('ListUsersUseCase', () => {
       const result = await listUsersUseCase.execute()
 
       // Assert
-      expect(result).toBeDefined()
-      expect(result.users).toHaveLength(2)
-      expect(result.total).toBe(2)
+      const data = expectSuccess(result)
+      expect(data).toBeDefined()
+      expect(data.users).toHaveLength(2)
+      expect(data.total).toBe(2)
     })
 
     it('should call userRepository.findAll', async () => {
@@ -68,8 +70,9 @@ describe('ListUsersUseCase', () => {
       const result = await listUsersUseCase.execute()
 
       // Assert
-      expect(result.users[0]).not.toHaveProperty('passwordHash')
-      expect(result.users[0]).toEqual({
+      const data = expectSuccess(result)
+      expect(data.users[0]).not.toHaveProperty('passwordHash')
+      expect(data.users[0]).toEqual({
         createdAt: TEST_CONSTANTS.MOCK_DATE_ISO,
         email: TEST_CONSTANTS.USERS.JOHN_DOE.email,
         id: TEST_CONSTANTS.USERS.JOHN_DOE.id,
@@ -88,12 +91,13 @@ describe('ListUsersUseCase', () => {
       const result = await listUsersUseCase.execute()
 
       // Assert
-      expect(result.users[0]).toMatchObject({
+      const data = expectSuccess(result)
+      expect(data.users[0]).toMatchObject({
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
       })
-      expect(typeof result.users[0]?.createdAt).toBe('string')
-      expect(typeof result.users[0]?.updatedAt).toBe('string')
+      expect(typeof data.users[0]?.createdAt).toBe('string')
+      expect(typeof data.users[0]?.updatedAt).toBe('string')
     })
 
     it('should handle empty user list', async () => {
@@ -104,8 +108,9 @@ describe('ListUsersUseCase', () => {
       const result = await listUsersUseCase.execute()
 
       // Assert
-      expect(result.users).toHaveLength(0)
-      expect(result.total).toBe(0)
+      const data = expectSuccess(result)
+      expect(data.users).toHaveLength(0)
+      expect(data.total).toBe(0)
     })
 
     it('should handle single user', async () => {
@@ -118,9 +123,10 @@ describe('ListUsersUseCase', () => {
       const result = await listUsersUseCase.execute()
 
       // Assert
-      expect(result.users).toHaveLength(1)
-      expect(result.total).toBe(1)
-      expect(result.users[0]?.email).toBe(TEST_CONSTANTS.USERS.SUPER_ADMIN_USER.email)
+      const data = expectSuccess(result)
+      expect(data.users).toHaveLength(1)
+      expect(data.total).toBe(1)
+      expect(data.users[0]?.email).toBe(TEST_CONSTANTS.USERS.SUPER_ADMIN_USER.email)
     })
 
     it('should handle users with different roles', async () => {
@@ -133,10 +139,11 @@ describe('ListUsersUseCase', () => {
       const result = await listUsersUseCase.execute()
 
       // Assert
-      expect(result.users).toHaveLength(3)
-      expect(result.users[0]?.role).toBe(TEST_CONSTANTS.USERS.JOHN_DOE.role)
-      expect(result.users[1]?.role).toBe(TEST_CONSTANTS.USERS.ADMIN_USER.role)
-      expect(result.users[2]?.role).toBe(TEST_CONSTANTS.USERS.SUPER_ADMIN_USER.role)
+      const data = expectSuccess(result)
+      expect(data.users).toHaveLength(3)
+      expect(data.users[0]?.role).toBe(TEST_CONSTANTS.USERS.JOHN_DOE.role)
+      expect(data.users[1]?.role).toBe(TEST_CONSTANTS.USERS.ADMIN_USER.role)
+      expect(data.users[2]?.role).toBe(TEST_CONSTANTS.USERS.SUPER_ADMIN_USER.role)
     })
 
     it('should return correct total count', async () => {
@@ -153,8 +160,9 @@ describe('ListUsersUseCase', () => {
       const result = await listUsersUseCase.execute()
 
       // Assert
-      expect(result.total).toBe(10)
-      expect(result.users).toHaveLength(10)
+      const data = expectSuccess(result)
+      expect(data.total).toBe(10)
+      expect(data.users).toHaveLength(10)
     })
 
     it('should maintain user order from repository', async () => {
@@ -171,9 +179,10 @@ describe('ListUsersUseCase', () => {
       const result = await listUsersUseCase.execute()
 
       // Assert
-      expect(result.users[0]?.email).toBe('third@example.com')
-      expect(result.users[1]?.email).toBe('first@example.com')
-      expect(result.users[2]?.email).toBe('second@example.com')
+      const data = expectSuccess(result)
+      expect(data.users[0]?.email).toBe('third@example.com')
+      expect(data.users[1]?.email).toBe('first@example.com')
+      expect(data.users[2]?.email).toBe('second@example.com')
     })
   })
 })

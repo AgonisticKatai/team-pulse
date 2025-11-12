@@ -1,5 +1,6 @@
 import type { UsersListResponseDTO } from '@team-pulse/shared'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
+import { Ok, type Result } from '../../domain/types/index.js'
 
 /**
  * List Users Use Case
@@ -19,16 +20,16 @@ import type { IUserRepository } from '../../domain/repositories/IUserRepository.
 export class ListUsersUseCase {
   constructor(private readonly userRepository: IUserRepository) {}
 
-  async execute(): Promise<UsersListResponseDTO> {
+  async execute(): Promise<Result<UsersListResponseDTO, never>> {
     // Fetch all users
     const users = await this.userRepository.findAll()
 
     // Map to response DTOs
     const userDTOs = users.map((user) => user.toDTO())
 
-    return {
+    return Ok({
       total: userDTOs.length,
       users: userDTOs,
-    }
+    })
   }
 }
