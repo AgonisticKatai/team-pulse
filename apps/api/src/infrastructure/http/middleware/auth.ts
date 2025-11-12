@@ -42,7 +42,10 @@ declare module 'fastify' {
  * @returns Decoded token payload
  * @throws Error if token is missing or invalid
  */
-function extractAndVerifyToken(request: FastifyRequest, env: Env): AccessTokenPayload {
+async function extractAndVerifyToken(
+  request: FastifyRequest,
+  env: Env,
+): Promise<AccessTokenPayload> {
   // Get Authorization header
   const authHeader = request.headers.authorization
 
@@ -58,8 +61,8 @@ function extractAndVerifyToken(request: FastifyRequest, env: Env): AccessTokenPa
 
   const token = parts[1]
 
-  // Verify token
-  return verifyAccessToken(token, env)
+  // Verify token (wrapped in Promise for async middleware pattern)
+  return await Promise.resolve(verifyAccessToken(token, env))
 }
 
 /**
@@ -74,9 +77,9 @@ function extractAndVerifyToken(request: FastifyRequest, env: Env): AccessTokenPa
  * ```
  */
 export function requireAuth(env: Env) {
-  return (request: FastifyRequest, reply: FastifyReply): void => {
+  return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     try {
-      const payload = extractAndVerifyToken(request, env)
+      const payload = await extractAndVerifyToken(request, env)
 
       // Attach user to request for use in route handlers
       request.user = {
@@ -92,8 +95,27 @@ export function requireAuth(env: Env) {
         },
         success: false,
       })
+      return
     }
   }
+}
+
+/**
+ * Check if user has one of the allowed roles
+ *
+ * @param user - Authenticated user
+ * @param allowedRoles - Array of allowed roles
+ * @returns true if user has required role
+ */
+async function checkUserRole(
+  user: AuthenticatedUser | undefined,
+  allowedRoles: UserRole[],
+): Promise<boolean> {
+  if (!user) {
+    return false
+  }
+  // Wrapped in Promise for async middleware pattern
+  return await Promise.resolve(allowedRoles.includes(user.role))
 }
 
 /**
@@ -111,7 +133,7 @@ export function requireAuth(env: Env) {
  * ```
  */
 export function requireRole(allowedRoles: UserRole[]) {
-  return (request: FastifyRequest, reply: FastifyReply): void => {
+  return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     // Ensure user is authenticated (should be done by requireAuth)
     if (!request.user) {
       reply.code(401).send({
@@ -125,7 +147,8 @@ export function requireRole(allowedRoles: UserRole[]) {
     }
 
     // Check if user has required role
-    if (!allowedRoles.includes(request.user.role)) {
+    const hasRole = await checkUserRole(request.user, allowedRoles)
+    if (!hasRole) {
       reply.code(403).send({
         error: {
           code: 'FORBIDDEN',
@@ -133,6 +156,7 @@ export function requireRole(allowedRoles: UserRole[]) {
         },
         success: false,
       })
+      return
     }
   }
 }
