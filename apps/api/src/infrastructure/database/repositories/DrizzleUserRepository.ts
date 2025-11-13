@@ -5,7 +5,7 @@ import { User } from '../../../domain/models/User.js'
 import type { IUserRepository } from '../../../domain/repositories/IUserRepository.js'
 import { Err, Ok, type Result } from '../../../domain/types/Result.js'
 import type { Database } from '../connection.js'
-import { users } from '../schema.js'
+import { users as usersSchema } from '../schema.js'
 
 /**
  * Drizzle User Repository (ADAPTER)
@@ -29,37 +29,45 @@ export class DrizzleUserRepository implements IUserRepository {
   constructor(private readonly db: Database) {}
 
   async findById(id: string): Promise<User | null> {
-    const rows = await this.db.select().from(users).where(eq(users.id, id)).limit(1)
+    const [user] = await this.db.select().from(usersSchema).where(eq(usersSchema.id, id)).limit(1)
 
-    const row = rows[0]
-    if (!row) {
+    if (!user) {
       return null
     }
 
-    return this.mapToDomain(row)
+    return this.mapToDomain(user)
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    // Case-insensitive email search using SQL LOWER
-    const rows = await this.db
-      .select()
-      .from(users)
-      .where(sql`LOWER(${users.email}) = LOWER(${email})`)
-      .limit(1)
+  async findByEmail({ email }: { email: string }): Promise<Result<User | null, RepositoryError>> {
+    try {
+      // Case-insensitive email search using SQL LOWER
+      const [user] = await this.db
+        .select()
+        .from(usersSchema)
+        .where(sql`LOWER(${usersSchema.email}) = LOWER(${email})`)
+        .limit(1)
 
-    const row = rows[0]
-    if (!row) {
-      return null
+      if (!user) {
+        return Ok(null)
+      }
+
+      return Ok(this.mapToDomain(user))
+    } catch (error) {
+      return Err(
+        RepositoryError.forOperation({
+          cause: error instanceof Error ? error : new Error(String(error)),
+          message: 'Failed to find user by email',
+          operation: 'findByEmail',
+        }),
+      )
     }
-
-    return this.mapToDomain(row)
   }
 
   async findAll(): Promise<Result<User[], RepositoryError>> {
     try {
-      const rows = await this.db.select().from(users)
+      const rows = await this.db.select().from(usersSchema)
 
-      return Ok(rows.map((row: typeof users.$inferSelect) => this.mapToDomain(row)))
+      return Ok(rows.map((row: typeof usersSchema.$inferSelect) => this.mapToDomain(row)))
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -71,53 +79,63 @@ export class DrizzleUserRepository implements IUserRepository {
     }
   }
 
-  async save(user: User): Promise<User> {
-    const obj = user.toObject()
+  async save({ user }: { user: User }): Promise<Result<User, RepositoryError>> {
+    try {
+      const obj = user.toObject()
 
-    // Convert to database format
-    const row = {
-      createdAt: obj.createdAt,
-      email: obj.email,
-      id: obj.id,
-      passwordHash: user.getPasswordHash(), // Access private field via getter
-      role: obj.role,
-      updatedAt: obj.updatedAt,
+      // Convert to database format
+      const row = {
+        createdAt: obj.createdAt,
+        email: obj.email,
+        id: obj.id,
+        passwordHash: user.getPasswordHash(), // Access private field via getter
+        role: obj.role,
+        updatedAt: obj.updatedAt,
+      }
+
+      // Upsert: insert or update if exists
+      await this.db
+        .insert(usersSchema)
+        .values(row)
+        .onConflictDoUpdate({
+          set: {
+            email: row.email,
+            passwordHash: row.passwordHash,
+            role: row.role,
+            updatedAt: row.updatedAt,
+          },
+          target: usersSchema.id,
+        })
+
+      return Ok(user)
+    } catch (error) {
+      return Err(
+        RepositoryError.forOperation({
+          cause: error instanceof Error ? error : new Error(String(error)),
+          message: 'Failed to save user',
+          operation: 'save',
+        }),
+      )
     }
-
-    // Upsert: insert or update if exists
-    await this.db
-      .insert(users)
-      .values(row)
-      .onConflictDoUpdate({
-        set: {
-          email: row.email,
-          passwordHash: row.passwordHash,
-          role: row.role,
-          updatedAt: row.updatedAt,
-        },
-        target: users.id,
-      })
-
-    return user
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await this.db.delete(users).where(eq(users.id, id))
+    const result = await this.db.delete(usersSchema).where(eq(usersSchema.id, id))
     return result.count > 0
   }
 
   async existsByEmail(email: string): Promise<boolean> {
     const rows = await this.db
-      .select({ id: users.id })
-      .from(users)
-      .where(sql`LOWER(${users.email}) = LOWER(${email})`)
+      .select({ id: usersSchema.id })
+      .from(usersSchema)
+      .where(sql`LOWER(${usersSchema.email}) = LOWER(${email})`)
       .limit(1)
 
     return rows.length > 0
   }
 
   async count(): Promise<number> {
-    const result = await this.db.select({ count: sql<number>`count(*)` }).from(users)
+    const result = await this.db.select({ count: sql<number>`count(*)` }).from(usersSchema)
     return result[0]?.count ?? 0
   }
 
@@ -130,7 +148,7 @@ export class DrizzleUserRepository implements IUserRepository {
    * TODO (Tech Debt): This throws when validation fails. After error handling migration,
    * this should return Result and propagate to use cases.
    */
-  private mapToDomain(row: typeof users.$inferSelect): User {
+  private mapToDomain(row: typeof usersSchema.$inferSelect): User {
     const result = User.create({
       createdAt: new Date(row.createdAt),
       email: row.email,

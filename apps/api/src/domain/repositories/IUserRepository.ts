@@ -31,9 +31,9 @@ export interface IUserRepository {
    * Find a user by their email address
    *
    * @param email - The user's email (case-insensitive search)
-   * @returns The user if found, null otherwise
+   * @returns Result with the user if found (null if not found), or RepositoryError if operation fails
    */
-  findByEmail(email: string): Promise<User | null>
+  findByEmail({ email }: { email: string }): Promise<Result<User | null, RepositoryError>>
 
   /**
    * Find all users
@@ -49,9 +49,9 @@ export interface IUserRepository {
    * If it exists, it will be updated.
    *
    * @param user - The user entity to save
-   * @returns The saved user
+   * @returns Result with the saved user, or RepositoryError if operation fails
    */
-  save(user: User): Promise<User>
+  save({ user }: { user: User }): Promise<Result<User, RepositoryError>>
 
   /**
    * Delete a user by their identifier

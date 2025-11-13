@@ -1,6 +1,10 @@
 import { randomUUID } from 'node:crypto'
 import type { CreateUserDTO, UserResponseDTO } from '@team-pulse/shared'
-import { DuplicatedError, type ValidationError } from '../../domain/errors/index.js'
+import {
+  DuplicatedError,
+  type RepositoryError,
+  type ValidationError,
+} from '../../domain/errors/index.js'
 import { User } from '../../domain/models/User.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import { Err, Ok, type Result } from '../../domain/types/index.js'
@@ -38,9 +42,15 @@ export class CreateUserUseCase {
 
   async execute(
     dto: CreateUserDTO,
-  ): Promise<Result<UserResponseDTO, DuplicatedError | ValidationError>> {
+  ): Promise<Result<UserResponseDTO, DuplicatedError | RepositoryError | ValidationError>> {
     // Business Rule: Email must be unique
-    const existingUser = await this.userRepository.findByEmail(dto.email)
+    const findResult = await this.userRepository.findByEmail({ email: dto.email })
+
+    if (!findResult.ok) {
+      return Err(findResult.error)
+    }
+
+    const existingUser = findResult.value
 
     if (existingUser) {
       return Err(
@@ -67,11 +77,17 @@ export class CreateUserUseCase {
       return Err(userResult.error)
     }
 
+    const user = userResult.value
+
     // Persist
-    const savedUser = await this.userRepository.save(userResult.value)
+    const savedUser = await this.userRepository.save({ user })
+
+    if (!savedUser.ok) {
+      return Err(savedUser.error)
+    }
 
     // Map to response DTO (WITHOUT password hash)
-    return Ok(this.mapToResponseDTO(savedUser))
+    return Ok(this.mapToResponseDTO({ user: savedUser.value }))
   }
 
   /**
@@ -79,7 +95,7 @@ export class CreateUserUseCase {
    *
    * IMPORTANT: Does NOT include password hash for security
    */
-  private mapToResponseDTO(user: User): UserResponseDTO {
+  private mapToResponseDTO({ user }: { user: User }): UserResponseDTO {
     return user.toDTO()
   }
 }

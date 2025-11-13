@@ -1,6 +1,10 @@
 import { randomUUID } from 'node:crypto'
 import type { LoginDTO, LoginResponseDTO, UserResponseDTO } from '@team-pulse/shared'
-import { ValidationError } from '../../domain/errors/index.js'
+import {
+  type NotFoundError,
+  type RepositoryError,
+  ValidationError,
+} from '../../domain/errors/index.js'
 import { RefreshToken } from '../../domain/models/RefreshToken.js'
 import type { User } from '../../domain/models/User.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
@@ -63,9 +67,18 @@ export class LoginUseCase {
     return new LoginUseCase({ env, refreshTokenRepository, userRepository })
   }
 
-  async execute(dto: LoginDTO): Promise<Result<LoginResponseDTO, ValidationError>> {
+  async execute(
+    dto: LoginDTO,
+  ): Promise<Result<LoginResponseDTO, NotFoundError | RepositoryError | ValidationError>> {
     // Find user by email
-    const user = await this.userRepository.findByEmail(dto.email)
+    const findResult = await this.userRepository.findByEmail({ email: dto.email })
+
+    if (!findResult.ok) {
+      return Err(findResult.error)
+    }
+
+    const user = findResult.value
+
     if (!user) {
       // Use generic error message to avoid revealing if email exists
       return Err(
@@ -76,8 +89,8 @@ export class LoginUseCase {
       )
     }
 
-    // Verify password
     const isPasswordValid = await verifyPassword(dto.password, user.getPasswordHash())
+
     if (!isPasswordValid) {
       // Use generic error message to avoid revealing if email exists
       return Err(
@@ -126,14 +139,14 @@ export class LoginUseCase {
     return Ok({
       accessToken,
       refreshToken: refreshTokenString,
-      user: this.mapToUserDTO(user),
+      user: this.mapToUserDTO({ user }),
     })
   }
 
   /**
    * Map domain entity to user response DTO
    */
-  private mapToUserDTO(user: User): UserResponseDTO {
+  private mapToUserDTO({ user }: { user: User }): UserResponseDTO {
     return user.toDTO()
   }
 }

@@ -38,11 +38,6 @@ export class CreateTeamUseCase {
     this.teamRepository = teamRepository
   }
 
-  /**
-   * Factory method to create the use case
-   *
-   * Use named parameters for consistency with domain entities
-   */
   static create({ teamRepository }: { teamRepository: ITeamRepository }): CreateTeamUseCase {
     return new CreateTeamUseCase({ teamRepository })
   }
@@ -57,7 +52,9 @@ export class CreateTeamUseCase {
       return Err(findResult.error)
     }
 
-    if (findResult.value) {
+    const existingTeam = findResult.value
+
+    if (existingTeam) {
       return Err(
         DuplicatedError.create({
           entityName: 'Team',

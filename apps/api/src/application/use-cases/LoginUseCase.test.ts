@@ -4,6 +4,7 @@ import { ValidationError } from '../../domain/errors/index.js'
 import { RefreshToken } from '../../domain/models/RefreshToken.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
+import { Ok } from '../../domain/types/Result.js'
 import type { Env } from '../../infrastructure/config/env.js'
 import {
   buildAdminUser,
@@ -78,7 +79,7 @@ describe('LoginUseCase', () => {
         // Arrange
         const loginDTO = buildLoginDTO()
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(true)
 
@@ -103,7 +104,7 @@ describe('LoginUseCase', () => {
         // Arrange
         const loginDTO = buildLoginDTO()
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(true)
 
@@ -112,7 +113,9 @@ describe('LoginUseCase', () => {
 
         // Assert
         expectSuccess(result)
-        expect(userRepository.findByEmail).toHaveBeenCalledWith(TEST_CONSTANTS.users.johnDoe.email)
+        expect(userRepository.findByEmail).toHaveBeenCalledWith({
+          email: TEST_CONSTANTS.users.johnDoe.email,
+        })
         expect(userRepository.findByEmail).toHaveBeenCalledTimes(1)
       })
 
@@ -120,7 +123,7 @@ describe('LoginUseCase', () => {
         // Arrange
         const loginDTO = buildLoginDTO()
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(true)
 
@@ -140,7 +143,7 @@ describe('LoginUseCase', () => {
         // Arrange
         const loginDTO = buildLoginDTO()
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(true)
 
@@ -166,7 +169,7 @@ describe('LoginUseCase', () => {
         // Arrange
         const loginDTO = buildLoginDTO()
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(true)
 
@@ -191,7 +194,7 @@ describe('LoginUseCase', () => {
         // Arrange
         const loginDTO = buildLoginDTO()
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(true)
 
@@ -213,7 +216,7 @@ describe('LoginUseCase', () => {
         // Arrange
         const loginDTO = buildLoginDTO()
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(true)
 
@@ -238,7 +241,7 @@ describe('LoginUseCase', () => {
         // Arrange
         const loginDTO = buildLoginDTO({ email: 'nonexistent@example.com' })
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(null))
 
         // Act
         const result = await loginUseCase.execute(loginDTO)
@@ -252,7 +255,7 @@ describe('LoginUseCase', () => {
         // Arrange
         const loginDTO = buildLoginDTO({ email: 'nonexistent@example.com' })
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(null))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
 
         // Act
@@ -267,7 +270,7 @@ describe('LoginUseCase', () => {
         // Arrange
         const loginDTO = buildLoginDTO({ password: TEST_CONSTANTS.invalid.wrongPassword })
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(false)
 
@@ -283,7 +286,7 @@ describe('LoginUseCase', () => {
         // Arrange
         const loginDTO = buildLoginDTO({ password: TEST_CONSTANTS.invalid.wrongPassword })
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(false)
 
@@ -305,7 +308,7 @@ describe('LoginUseCase', () => {
         // Arrange
         const loginDTO = buildLoginDTO({ password: TEST_CONSTANTS.invalid.wrongPassword })
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(false)
 
@@ -329,7 +332,7 @@ describe('LoginUseCase', () => {
           password: TEST_CONSTANTS.users.adminUser.password,
         })
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(adminUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(adminUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(true)
 
@@ -350,7 +353,7 @@ describe('LoginUseCase', () => {
           password: TEST_CONSTANTS.users.superAdminUser.password,
         })
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(superAdminUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(superAdminUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(true)
 
@@ -366,7 +369,7 @@ describe('LoginUseCase', () => {
         // Arrange
         const loginDTO = buildLoginDTO()
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(true)
 

@@ -68,7 +68,7 @@ async function seedSuperAdmin() {
     }
 
     // 7. Save to database
-    await userRepository.save(userResult.value)
+    await userRepository.save({ user: userResult.value })
 
     console.log('✅ SUPER_ADMIN user created successfully!')
     console.log('')

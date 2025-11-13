@@ -1,14 +1,16 @@
 import { expectMockCallArg } from '@team-pulse/shared/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { DuplicatedError } from '../../domain/errors/index.js'
+import { DuplicatedError, RepositoryError } from '../../domain/errors/index.js'
 import { User } from '../../domain/models/User.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
+import { Err, Ok } from '../../domain/types/Result.js'
 import {
   buildAdminUser,
   buildCreateUserDTO,
   buildExistingUser,
   buildSuperAdminUser,
   buildUser,
+  expectError,
   expectErrorType,
   expectSuccess,
   TEST_CONSTANTS,
@@ -56,8 +58,8 @@ describe('CreateUserUseCase', () => {
         // Arrange
         const dto = buildCreateUserDTO()
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(null))
+        vi.mocked(userRepository.save).mockResolvedValue(Ok(mockUser))
 
         // Act
         const result = await createUserUseCase.execute(dto)
@@ -74,15 +76,17 @@ describe('CreateUserUseCase', () => {
         // Arrange
         const dto = buildCreateUserDTO()
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(null))
+        vi.mocked(userRepository.save).mockResolvedValue(Ok(mockUser))
 
         // Act
         const result = await createUserUseCase.execute(dto)
 
         // Assert
         expectSuccess(result)
-        expect(userRepository.findByEmail).toHaveBeenCalledWith(TEST_CONSTANTS.users.johnDoe.email)
+        expect(userRepository.findByEmail).toHaveBeenCalledWith({
+          email: TEST_CONSTANTS.users.johnDoe.email,
+        })
         expect(userRepository.findByEmail).toHaveBeenCalledTimes(1)
       })
 
@@ -90,8 +94,8 @@ describe('CreateUserUseCase', () => {
         // Arrange
         const dto = buildCreateUserDTO()
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(null))
+        vi.mocked(userRepository.save).mockResolvedValue(Ok(mockUser))
 
         const { hashPassword } = await import('../../infrastructure/auth/password-utils.js')
 
@@ -108,8 +112,8 @@ describe('CreateUserUseCase', () => {
         // Arrange
         const dto = buildCreateUserDTO()
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(null))
+        vi.mocked(userRepository.save).mockResolvedValue(Ok(mockUser))
 
         // Act
         const result = await createUserUseCase.execute(dto)
@@ -117,7 +121,12 @@ describe('CreateUserUseCase', () => {
         // Assert
         expectSuccess(result)
         expect(userRepository.save).toHaveBeenCalledTimes(1)
-        const savedUser = expectMockCallArg<User>(vi.mocked(userRepository.save))
+
+        // Get the saved user from the mock call
+        const { user: savedUser } = expectMockCallArg<{ user: User }>(
+          vi.mocked(userRepository.save),
+        )
+
         expect(savedUser).toBeInstanceOf(User)
         expect(savedUser.email.getValue()).toBe(TEST_CONSTANTS.users.johnDoe.email)
         expect(savedUser.getPasswordHash()).toBe(TEST_CONSTANTS.users.johnDoe.passwordHash)
@@ -128,8 +137,8 @@ describe('CreateUserUseCase', () => {
         // Arrange
         const dto = buildCreateUserDTO()
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(null))
+        vi.mocked(userRepository.save).mockResolvedValue(Ok(mockUser))
 
         // Act
         const result = await createUserUseCase.execute(dto)
@@ -150,8 +159,8 @@ describe('CreateUserUseCase', () => {
         // Arrange
         const dto = buildCreateUserDTO()
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(null))
+        vi.mocked(userRepository.save).mockResolvedValue(Ok(mockUser))
 
         // Act
         const result = await createUserUseCase.execute(dto)
@@ -172,7 +181,7 @@ describe('CreateUserUseCase', () => {
 
         const dto = buildCreateUserDTO({ email: 'existing@example.com' })
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(existingUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(existingUser))
 
         // Act
         const result = await createUserUseCase.execute(dto)
@@ -190,7 +199,7 @@ describe('CreateUserUseCase', () => {
 
         const dto = buildCreateUserDTO({ email: 'existing@example.com' })
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(existingUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(existingUser))
 
         const { hashPassword } = await import('../../infrastructure/auth/password-utils.js')
 
@@ -201,6 +210,45 @@ describe('CreateUserUseCase', () => {
         expectErrorType({ errorType: DuplicatedError, result })
         expect(hashPassword).not.toHaveBeenCalled()
         expect(userRepository.save).not.toHaveBeenCalled()
+      })
+
+      it('should return RepositoryError when findByEmail fails', async () => {
+        // Arrange
+        const dto = buildCreateUserDTO()
+
+        const repositoryError = RepositoryError.forOperation({
+          message: TEST_CONSTANTS.errors.databaseConnectionLost,
+          operation: 'findByEmail',
+        })
+
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Err(repositoryError))
+
+        // Act
+        const error = expectError(await createUserUseCase.execute(dto))
+
+        // Assert
+        expect(error).toBeInstanceOf(RepositoryError)
+        expect(error.message).toBe(TEST_CONSTANTS.errors.databaseConnectionLost)
+      })
+
+      it('should return RepositoryError when save fails', async () => {
+        // Arrange
+        const dto = buildCreateUserDTO()
+
+        const repositoryError = RepositoryError.forOperation({
+          message: TEST_CONSTANTS.errors.databaseConnectionLost,
+          operation: 'save',
+        })
+
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(null))
+        vi.mocked(userRepository.save).mockResolvedValue(Err(repositoryError))
+
+        // Act
+        const error = expectError(await createUserUseCase.execute(dto))
+
+        // Assert
+        expect(error).toBeInstanceOf(RepositoryError)
+        expect(error.message).toBe(TEST_CONSTANTS.errors.databaseConnectionLost)
       })
     })
 
@@ -215,8 +263,8 @@ describe('CreateUserUseCase', () => {
           role: TEST_CONSTANTS.users.adminUser.role,
         })
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(adminUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(null))
+        vi.mocked(userRepository.save).mockResolvedValue(Ok(adminUser))
 
         // Act
         const result = await createUserUseCase.execute(dto)
@@ -224,7 +272,11 @@ describe('CreateUserUseCase', () => {
         // Assert
         const data = expectSuccess(result)
         expect(data.role).toBe(TEST_CONSTANTS.users.adminUser.role)
-        const savedUser = expectMockCallArg<User>(vi.mocked(userRepository.save))
+
+        // Get the saved user from the mock call
+        const { user: savedUser } = expectMockCallArg<{ user: User }>(
+          vi.mocked(userRepository.save),
+        )
         expect(savedUser.role.getValue()).toBe(TEST_CONSTANTS.users.adminUser.role)
       })
 
@@ -238,8 +290,8 @@ describe('CreateUserUseCase', () => {
           role: TEST_CONSTANTS.users.superAdminUser.role,
         })
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(superAdminUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(null))
+        vi.mocked(userRepository.save).mockResolvedValue(Ok(superAdminUser))
 
         // Act
         const result = await createUserUseCase.execute(dto)
@@ -247,7 +299,11 @@ describe('CreateUserUseCase', () => {
         // Assert
         const data = expectSuccess(result)
         expect(data.role).toBe(TEST_CONSTANTS.users.superAdminUser.role)
-        const savedUser = expectMockCallArg<User>(vi.mocked(userRepository.save))
+
+        // Get the saved user from the mock call
+        const { user: savedUser } = expectMockCallArg<{ user: User }>(
+          vi.mocked(userRepository.save),
+        )
         expect(savedUser.role.getValue()).toBe(TEST_CONSTANTS.users.superAdminUser.role)
       })
 
@@ -255,8 +311,8 @@ describe('CreateUserUseCase', () => {
         // Arrange
         const dto = buildCreateUserDTO()
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(null)
-        vi.mocked(userRepository.save).mockResolvedValue(mockUser)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(null))
+        vi.mocked(userRepository.save).mockResolvedValue(Ok(mockUser))
 
         const { randomUUID } = await import('node:crypto')
 
@@ -266,7 +322,11 @@ describe('CreateUserUseCase', () => {
         // Assert
         expectSuccess(result)
         expect(randomUUID).toHaveBeenCalled()
-        const savedUser = expectMockCallArg<User>(vi.mocked(userRepository.save))
+
+        // Get the saved user from the mock call
+        const { user: savedUser } = expectMockCallArg<{ user: User }>(
+          vi.mocked(userRepository.save),
+        )
         expect(savedUser.id.getValue()).toBe(TEST_CONSTANTS.mockUuid)
       })
     })
