@@ -16,11 +16,6 @@ export class ListTeamsUseCase {
     this.teamRepository = teamRepository
   }
 
-  /**
-   * Factory method to create the use case
-   *
-   * Use named parameters for consistency with domain entities
-   */
   static create({ teamRepository }: { teamRepository: ITeamRepository }): ListTeamsUseCase {
     return new ListTeamsUseCase({ teamRepository })
   }

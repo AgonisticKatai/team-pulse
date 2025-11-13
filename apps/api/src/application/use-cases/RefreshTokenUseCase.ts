@@ -3,11 +3,7 @@ import { ValidationError } from '../../domain/errors/index.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import { Err, Ok, type Result } from '../../domain/types/index.js'
-import {
-  generateAccessToken,
-  type RefreshTokenPayload,
-  verifyRefreshToken,
-} from '../../infrastructure/auth/jwt-utils.js'
+import { generateAccessToken, verifyRefreshToken } from '../../infrastructure/auth/jwt-utils.js'
 import type { Env } from '../../infrastructure/config/env.js'
 
 /**
@@ -28,49 +24,47 @@ import type { Env } from '../../infrastructure/config/env.js'
  * It's PURE business logic.
  */
 export class RefreshTokenUseCase {
-  private readonly userRepository: IUserRepository
-  private readonly refreshTokenRepository: IRefreshTokenRepository
   private readonly env: Env
+  private readonly refreshTokenRepository: IRefreshTokenRepository
+  private readonly userRepository: IUserRepository
 
   private constructor({
-    userRepository,
-    refreshTokenRepository,
     env,
+    refreshTokenRepository,
+    userRepository,
   }: {
-    userRepository: IUserRepository
-    refreshTokenRepository: IRefreshTokenRepository
     env: Env
+    refreshTokenRepository: IRefreshTokenRepository
+    userRepository: IUserRepository
   }) {
-    this.userRepository = userRepository
-    this.refreshTokenRepository = refreshTokenRepository
     this.env = env
+    this.refreshTokenRepository = refreshTokenRepository
+    this.userRepository = userRepository
   }
 
   static create({
-    userRepository,
-    refreshTokenRepository,
     env,
+    refreshTokenRepository,
+    userRepository,
   }: {
-    userRepository: IUserRepository
-    refreshTokenRepository: IRefreshTokenRepository
     env: Env
+    refreshTokenRepository: IRefreshTokenRepository
+    userRepository: IUserRepository
   }): RefreshTokenUseCase {
     return new RefreshTokenUseCase({ env, refreshTokenRepository, userRepository })
   }
 
   async execute(dto: RefreshTokenDTO): Promise<Result<RefreshTokenResponseDTO, ValidationError>> {
-    // Verify JWT signature and decode payload
-    let payload: RefreshTokenPayload
-    try {
-      payload = verifyRefreshToken(dto.refreshToken, this.env)
-    } catch (error) {
-      return Err(
-        ValidationError.forField({
-          field: 'refreshToken',
-          message: error instanceof Error ? error.message : 'Invalid refresh token',
-        }),
-      )
+    const refreshTokenPayloadResult = verifyRefreshToken({
+      env: this.env,
+      token: dto.refreshToken,
+    })
+
+    if (!refreshTokenPayloadResult.ok) {
+      return Err(refreshTokenPayloadResult.error)
     }
+
+    const payload = refreshTokenPayloadResult.value
 
     // Check if refresh token exists in database (not revoked)
     const refreshToken = await this.refreshTokenRepository.findByToken(dto.refreshToken)

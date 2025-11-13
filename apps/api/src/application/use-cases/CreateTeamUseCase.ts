@@ -45,7 +45,6 @@ export class CreateTeamUseCase {
   async execute(
     dto: CreateTeamDTO,
   ): Promise<Result<TeamResponseDTO, DuplicatedError | RepositoryError | ValidationError>> {
-    // Business Rule: Team name must be unique
     const findResult = await this.teamRepository.findByName({ name: dto.name })
 
     if (!findResult.ok) {
@@ -63,8 +62,6 @@ export class CreateTeamUseCase {
       )
     }
 
-    // Create domain entity
-    // The Team entity validates its own invariants
     const createResult = Team.create({
       city: dto.city,
       foundedYear: dto.foundedYear ?? undefined,
@@ -76,14 +73,12 @@ export class CreateTeamUseCase {
       return Err(createResult.error)
     }
 
-    // Persist - TypeScript knows createResult.value is Team (no ! needed)
     const saveResult = await this.teamRepository.save(createResult.value)
 
     if (!saveResult.ok) {
       return Err(saveResult.error)
     }
 
-    // Map to response DTO - TypeScript knows saveResult.value is Team (no ! needed)
     return Ok(saveResult.value.toDTO())
   }
 }

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ValidationError } from '../../domain/errors/index.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
+import { Err, Ok } from '../../domain/types/Result.js'
 import type { Env } from '../../infrastructure/config/env.js'
 import {
   buildAdminUser,
@@ -83,7 +84,7 @@ describe('RefreshTokenUseCase', () => {
         const dto = buildRefreshTokenDTO({ refreshToken: TEST_CONSTANTS.auth.validRefreshToken })
 
         const { verifyRefreshToken } = await import('../../infrastructure/auth/jwt-utils.js')
-        vi.mocked(verifyRefreshToken).mockReturnValue(mockPayload)
+        vi.mocked(verifyRefreshToken).mockReturnValue(Ok(mockPayload))
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(mockRefreshToken)
         vi.mocked(userRepository.findById).mockResolvedValue(mockUser)
 
@@ -101,7 +102,7 @@ describe('RefreshTokenUseCase', () => {
         const dto = buildRefreshTokenDTO({ refreshToken: TEST_CONSTANTS.auth.validRefreshToken })
 
         const { verifyRefreshToken } = await import('../../infrastructure/auth/jwt-utils.js')
-        vi.mocked(verifyRefreshToken).mockReturnValue(mockPayload)
+        vi.mocked(verifyRefreshToken).mockReturnValue(Ok(mockPayload))
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(mockRefreshToken)
         vi.mocked(userRepository.findById).mockResolvedValue(mockUser)
 
@@ -110,7 +111,10 @@ describe('RefreshTokenUseCase', () => {
 
         // Assert
         expectSuccess(result)
-        expect(verifyRefreshToken).toHaveBeenCalledWith(TEST_CONSTANTS.auth.validRefreshToken, env)
+        expect(verifyRefreshToken).toHaveBeenCalledWith({
+          token: TEST_CONSTANTS.auth.validRefreshToken,
+          env,
+        })
         expect(verifyRefreshToken).toHaveBeenCalledTimes(1)
       })
 
@@ -119,7 +123,7 @@ describe('RefreshTokenUseCase', () => {
         const dto = buildRefreshTokenDTO({ refreshToken: TEST_CONSTANTS.auth.validRefreshToken })
 
         const { verifyRefreshToken } = await import('../../infrastructure/auth/jwt-utils.js')
-        vi.mocked(verifyRefreshToken).mockReturnValue(mockPayload)
+        vi.mocked(verifyRefreshToken).mockReturnValue(Ok(mockPayload))
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(mockRefreshToken)
         vi.mocked(userRepository.findById).mockResolvedValue(mockUser)
 
@@ -139,7 +143,7 @@ describe('RefreshTokenUseCase', () => {
         const dto = buildRefreshTokenDTO({ refreshToken: TEST_CONSTANTS.auth.validRefreshToken })
 
         const { verifyRefreshToken } = await import('../../infrastructure/auth/jwt-utils.js')
-        vi.mocked(verifyRefreshToken).mockReturnValue(mockPayload)
+        vi.mocked(verifyRefreshToken).mockReturnValue(Ok(mockPayload))
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(mockRefreshToken)
         vi.mocked(userRepository.findById).mockResolvedValue(mockUser)
 
@@ -159,7 +163,7 @@ describe('RefreshTokenUseCase', () => {
         const { verifyRefreshToken, generateAccessToken } = await import(
           '../../infrastructure/auth/jwt-utils.js'
         )
-        vi.mocked(verifyRefreshToken).mockReturnValue(mockPayload)
+        vi.mocked(verifyRefreshToken).mockReturnValue(Ok(mockPayload))
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(mockRefreshToken)
         vi.mocked(userRepository.findById).mockResolvedValue(mockUser)
 
@@ -186,9 +190,14 @@ describe('RefreshTokenUseCase', () => {
         const dto = buildRefreshTokenDTO()
 
         const { verifyRefreshToken } = await import('../../infrastructure/auth/jwt-utils.js')
-        vi.mocked(verifyRefreshToken).mockImplementation(() => {
-          throw new Error('Invalid token signature')
-        })
+        vi.mocked(verifyRefreshToken).mockReturnValue(
+          Err(
+            ValidationError.forField({
+              field: 'refreshToken',
+              message: 'Invalid token signature',
+            }),
+          ),
+        )
 
         // Act
         const result = await refreshTokenUseCase.execute(dto)
@@ -206,7 +215,7 @@ describe('RefreshTokenUseCase', () => {
         const dto = buildRefreshTokenDTO()
 
         const { verifyRefreshToken } = await import('../../infrastructure/auth/jwt-utils.js')
-        vi.mocked(verifyRefreshToken).mockReturnValue(mockPayload)
+        vi.mocked(verifyRefreshToken).mockReturnValue(Ok(mockPayload))
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(null)
 
         // Act
@@ -230,7 +239,7 @@ describe('RefreshTokenUseCase', () => {
         const expiredToken = buildExpiredRefreshToken()
 
         const { verifyRefreshToken } = await import('../../infrastructure/auth/jwt-utils.js')
-        vi.mocked(verifyRefreshToken).mockReturnValue(mockPayload)
+        vi.mocked(verifyRefreshToken).mockReturnValue(Ok(mockPayload))
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(expiredToken)
 
         // Act
@@ -252,7 +261,7 @@ describe('RefreshTokenUseCase', () => {
         const dto = buildRefreshTokenDTO({ refreshToken: TEST_CONSTANTS.auth.validRefreshToken })
 
         const { verifyRefreshToken } = await import('../../infrastructure/auth/jwt-utils.js')
-        vi.mocked(verifyRefreshToken).mockReturnValue(mockPayload)
+        vi.mocked(verifyRefreshToken).mockReturnValue(Ok(mockPayload))
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(mockRefreshToken)
         vi.mocked(userRepository.findById).mockResolvedValue(null) // User deleted
 
@@ -275,9 +284,15 @@ describe('RefreshTokenUseCase', () => {
         const dto = buildRefreshTokenDTO()
 
         const { verifyRefreshToken } = await import('../../infrastructure/auth/jwt-utils.js')
-        vi.mocked(verifyRefreshToken).mockImplementation(() => {
-          throw new Error('Token expired')
-        })
+
+        vi.mocked(verifyRefreshToken).mockReturnValue(
+          Err(
+            ValidationError.forField({
+              field: 'refreshToken',
+              message: 'Invalid token format',
+            }),
+          ),
+        )
 
         // Act
         const result = await refreshTokenUseCase.execute(dto)
@@ -298,10 +313,12 @@ describe('RefreshTokenUseCase', () => {
         const { verifyRefreshToken, generateAccessToken } = await import(
           '../../infrastructure/auth/jwt-utils.js'
         )
-        vi.mocked(verifyRefreshToken).mockReturnValue({
-          tokenId: TEST_CONSTANTS.mockTokenId,
-          userId: TEST_CONSTANTS.users.adminUser.id,
-        })
+        vi.mocked(verifyRefreshToken).mockReturnValue(
+          Ok({
+            tokenId: TEST_CONSTANTS.mockTokenId,
+            userId: TEST_CONSTANTS.users.adminUser.id,
+          }),
+        )
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(mockRefreshToken)
         vi.mocked(userRepository.findById).mockResolvedValue(adminUser)
 
@@ -329,10 +346,12 @@ describe('RefreshTokenUseCase', () => {
         const { verifyRefreshToken, generateAccessToken } = await import(
           '../../infrastructure/auth/jwt-utils.js'
         )
-        vi.mocked(verifyRefreshToken).mockReturnValue({
-          tokenId: TEST_CONSTANTS.mockTokenId,
-          userId: TEST_CONSTANTS.users.superAdminUser.id,
-        })
+        vi.mocked(verifyRefreshToken).mockReturnValue(
+          Ok({
+            tokenId: TEST_CONSTANTS.mockTokenId,
+            userId: TEST_CONSTANTS.users.superAdminUser.id,
+          }),
+        )
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(mockRefreshToken)
         vi.mocked(userRepository.findById).mockResolvedValue(superAdminUser)
 
@@ -356,9 +375,14 @@ describe('RefreshTokenUseCase', () => {
         const dto = buildRefreshTokenDTO()
 
         const { verifyRefreshToken } = await import('../../infrastructure/auth/jwt-utils.js')
-        vi.mocked(verifyRefreshToken).mockImplementation(() => {
-          throw new Error('Malformed JWT')
-        })
+        vi.mocked(verifyRefreshToken).mockReturnValue(
+          Err(
+            ValidationError.forField({
+              field: 'refreshToken',
+              message: 'Invalid access token',
+            }),
+          ),
+        )
 
         // Act
         const result = await refreshTokenUseCase.execute(dto)

@@ -1,12 +1,11 @@
 import { randomUUID } from 'node:crypto'
-import type { LoginDTO, LoginResponseDTO, UserResponseDTO } from '@team-pulse/shared'
+import type { LoginDTO, LoginResponseDTO } from '@team-pulse/shared'
 import {
   type NotFoundError,
   type RepositoryError,
   ValidationError,
 } from '../../domain/errors/index.js'
 import { RefreshToken } from '../../domain/models/RefreshToken.js'
-import type { User } from '../../domain/models/User.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import { Err, Ok, type Result } from '../../domain/types/index.js'
@@ -70,7 +69,6 @@ export class LoginUseCase {
   async execute(
     dto: LoginDTO,
   ): Promise<Result<LoginResponseDTO, NotFoundError | RepositoryError | ValidationError>> {
-    // Find user by email
     const findResult = await this.userRepository.findByEmail({ email: dto.email })
 
     if (!findResult.ok) {
@@ -80,7 +78,6 @@ export class LoginUseCase {
     const user = findResult.value
 
     if (!user) {
-      // Use generic error message to avoid revealing if email exists
       return Err(
         ValidationError.forField({
           field: 'credentials',
@@ -92,7 +89,6 @@ export class LoginUseCase {
     const isPasswordValid = await verifyPassword(dto.password, user.getPasswordHash())
 
     if (!isPasswordValid) {
-      // Use generic error message to avoid revealing if email exists
       return Err(
         ValidationError.forField({
           field: 'credentials',
@@ -101,7 +97,6 @@ export class LoginUseCase {
       )
     }
 
-    // Generate tokens
     const refreshTokenId = randomUUID()
 
     const accessToken = generateAccessToken(
@@ -121,7 +116,6 @@ export class LoginUseCase {
       this.env,
     )
 
-    // Store refresh token in database
     const refreshTokenResult = RefreshToken.create({
       expiresAt: getRefreshTokenExpirationDate(),
       id: refreshTokenId,
@@ -135,18 +129,10 @@ export class LoginUseCase {
 
     await this.refreshTokenRepository.save(refreshTokenResult.value)
 
-    // Return response
     return Ok({
       accessToken,
       refreshToken: refreshTokenString,
-      user: this.mapToUserDTO({ user }),
+      user: user.toDTO(),
     })
-  }
-
-  /**
-   * Map domain entity to user response DTO
-   */
-  private mapToUserDTO({ user }: { user: User }): UserResponseDTO {
-    return user.toDTO()
   }
 }

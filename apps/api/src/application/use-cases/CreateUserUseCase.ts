@@ -43,7 +43,6 @@ export class CreateUserUseCase {
   async execute(
     dto: CreateUserDTO,
   ): Promise<Result<UserResponseDTO, DuplicatedError | RepositoryError | ValidationError>> {
-    // Business Rule: Email must be unique
     const findResult = await this.userRepository.findByEmail({ email: dto.email })
 
     if (!findResult.ok) {
@@ -61,11 +60,8 @@ export class CreateUserUseCase {
       )
     }
 
-    // Hash the password before storing
     const passwordHash = await hashPassword(dto.password)
 
-    // Create domain entity
-    // The User entity validates its own invariants
     const userResult = User.create({
       email: dto.email,
       id: randomUUID(),
@@ -79,23 +75,12 @@ export class CreateUserUseCase {
 
     const user = userResult.value
 
-    // Persist
     const savedUser = await this.userRepository.save({ user })
 
     if (!savedUser.ok) {
       return Err(savedUser.error)
     }
 
-    // Map to response DTO (WITHOUT password hash)
-    return Ok(this.mapToResponseDTO({ user: savedUser.value }))
-  }
-
-  /**
-   * Map domain entity to response DTO
-   *
-   * IMPORTANT: Does NOT include password hash for security
-   */
-  private mapToResponseDTO({ user }: { user: User }): UserResponseDTO {
-    return user.toDTO()
+    return Ok(savedUser.value.toDTO())
   }
 }

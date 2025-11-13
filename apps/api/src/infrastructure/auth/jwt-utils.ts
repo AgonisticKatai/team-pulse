@@ -1,5 +1,7 @@
 import type { UserRole } from '@team-pulse/shared'
 import jwt from 'jsonwebtoken'
+import { ValidationError } from '../../domain/errors/ValidationError.js'
+import { Err, Ok, type Result } from '../../domain/types/Result.js'
 import type { Env } from '../config/env.js'
 
 /**
@@ -39,6 +41,12 @@ const ACCESS_TOKEN_EXPIRATION = '15m'
  * 7 days for user convenience
  */
 const REFRESH_TOKEN_EXPIRATION = '7d'
+
+/** Mapping of JWT error types to messages */
+const JWT_ERROR_TYPES: Record<string, string> = {
+  TokenExpiredError: 'Token has expired',
+  JsonWebTokenError: 'Invalid token',
+}
 
 /**
  * Generate an access token
@@ -105,22 +113,30 @@ export function verifyAccessToken(token: string, env: Env): AccessTokenPayload {
  * @returns The decoded payload
  * @throws Error if the token is invalid or expired
  */
-export function verifyRefreshToken(token: string, env: Env): RefreshTokenPayload {
+export function verifyRefreshToken({
+  env,
+  token,
+}: {
+  env: Env
+  token: string
+}): Result<RefreshTokenPayload, ValidationError> {
   try {
     const payload = jwt.verify(token, env.JWT_REFRESH_SECRET, {
       audience: 'team-pulse-app',
       issuer: 'team-pulse-api',
     }) as RefreshTokenPayload
 
-    return payload
+    return Ok(payload)
   } catch (error) {
-    if (error instanceof jwt.TokenExpiredError) {
-      throw new Error('Refresh token has expired')
-    }
-    if (error instanceof jwt.JsonWebTokenError) {
-      throw new Error('Invalid refresh token')
-    }
-    throw error
+    const errorName = error instanceof Error ? error.name : 'UnknownError'
+    const errorMessage = JWT_ERROR_TYPES[errorName]
+
+    return Err(
+      ValidationError.forField({
+        field: 'refreshToken',
+        message: errorMessage || 'Invalid refresh token',
+      }),
+    )
   }
 }
 

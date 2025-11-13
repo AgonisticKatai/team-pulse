@@ -1,4 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest'
+import { ValidationError } from '../../domain/errors/ValidationError.js'
 import type { Env } from '../config/env.js'
 import {
   type AccessTokenPayload,
@@ -79,10 +80,16 @@ describe('JWT Utilities', () => {
       }
 
       const token = generateRefreshToken(payload, testEnv)
-      const decoded = verifyRefreshToken(token, testEnv)
+      const verifyResult = verifyRefreshToken({ token, env: testEnv })
 
-      expect(decoded.userId).toBe(payload.userId)
-      expect(decoded.tokenId).toBe(payload.tokenId)
+      expect(verifyResult).toBeDefined()
+      expect(verifyResult.ok).toBe(true)
+
+      if (verifyResult.ok) {
+        const decoded = verifyResult.value
+        expect(decoded.userId).toBe(payload.userId)
+        expect(decoded.tokenId).toBe(payload.tokenId)
+      }
     })
   })
 
@@ -137,17 +144,30 @@ describe('JWT Utilities', () => {
       }
 
       const token = generateRefreshToken(payload, testEnv)
-      const decoded = verifyRefreshToken(token, testEnv)
+      const verifyResult = verifyRefreshToken({ token, env: testEnv })
 
-      expect(decoded).toBeDefined()
-      expect(decoded.userId).toBe(payload.userId)
-      expect(decoded.tokenId).toBe(payload.tokenId)
+      expect(verifyResult).toBeDefined()
+      expect(verifyResult.ok).toBe(true)
+
+      if (verifyResult.ok) {
+        const decoded = verifyResult.value
+        expect(decoded.userId).toBe(payload.userId)
+        expect(decoded.tokenId).toBe(payload.tokenId)
+      }
     })
 
-    it('should throw error for invalid refresh token', () => {
+    it('should handle invalid refresh token', () => {
       const invalidToken = 'invalid.refresh.token'
 
-      expect(() => verifyRefreshToken(invalidToken, testEnv)).toThrow('Invalid refresh token')
+      const verifyResult = verifyRefreshToken({ token: invalidToken, env: testEnv })
+
+      expect(verifyResult.ok).toBe(false)
+
+      if (!verifyResult.ok) {
+        expect(verifyResult.error).toBeInstanceOf(ValidationError)
+        expect(verifyResult.error.field).toBe('refreshToken')
+        expect(verifyResult.error.message).toBe('Invalid token')
+      }
     })
 
     it('should throw error for access token used as refresh token', () => {
@@ -159,8 +179,16 @@ describe('JWT Utilities', () => {
 
       const accessToken = generateAccessToken(accessPayload, testEnv)
 
+      const verifyResult = verifyRefreshToken({ token: accessToken, env: testEnv })
+
       // This should fail because it was signed with JWT_SECRET, not JWT_REFRESH_SECRET
-      expect(() => verifyRefreshToken(accessToken, testEnv)).toThrow()
+      expect(verifyResult.ok).toBe(false)
+
+      if (!verifyResult.ok) {
+        expect(verifyResult.error).toBeInstanceOf(ValidationError)
+        expect(verifyResult.error.field).toBe('refreshToken')
+        expect(verifyResult.error.message).toBe('Invalid token')
+      }
     })
   })
 

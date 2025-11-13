@@ -38,11 +38,9 @@ export class ListUsersUseCase {
 
     const users = findResult.value
 
-    const userDTOs = users.map((user) => user.toDTO())
-
     return Ok({
-      total: userDTOs.length,
-      users: userDTOs,
+      total: users.length,
+      users: users.map((user) => user.toDTO()),
     })
   }
 }

@@ -39,8 +39,6 @@ export class LogoutUseCase {
   }
 
   async execute(refreshToken: string): Promise<Result<void, never>> {
-    // Delete refresh token from database (revoke it)
-    // If token doesn't exist, that's fine (already logged out or invalid)
     await this.refreshTokenRepository.deleteByToken(refreshToken)
 
     return Ok(undefined)
