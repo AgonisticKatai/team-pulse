@@ -62,7 +62,7 @@ async function extractAndVerifyToken(
   const token = parts[1]
 
   // Verify token (wrapped in Promise for async middleware pattern)
-  return await Promise.resolve(verifyAccessToken(token, env))
+  return await Promise.resolve(verifyAccessToken({ token, env }))
 }
 
 /**

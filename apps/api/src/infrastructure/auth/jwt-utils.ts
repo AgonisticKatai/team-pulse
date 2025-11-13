@@ -17,17 +17,17 @@ import type { Env } from '../config/env.js'
  * Payload structure for access tokens
  */
 export interface AccessTokenPayload {
-  userId: string
   email: string
   role: UserRole
+  userId: string
 }
 
 /**
  * Payload structure for refresh tokens
  */
 export interface RefreshTokenPayload {
-  userId: string
   tokenId: string // Unique ID for this refresh token (for revocation)
+  userId: string
 }
 
 /**
@@ -44,18 +44,24 @@ const REFRESH_TOKEN_EXPIRATION = '7d'
 
 /** Mapping of JWT error types to messages */
 const JWT_ERROR_TYPES: Record<string, string> = {
-  TokenExpiredError: 'Token has expired',
   JsonWebTokenError: 'Invalid token',
+  TokenExpiredError: 'Token has expired',
 }
 
 /**
  * Generate an access token
  *
- * @param payload - The token payload
  * @param env - Environment configuration containing JWT_SECRET
+ * @param payload - The token payload
  * @returns The signed JWT token
  */
-export function generateAccessToken(payload: AccessTokenPayload, env: Env): string {
+export function generateAccessToken({
+  env,
+  payload,
+}: {
+  env: Env
+  payload: AccessTokenPayload
+}): string {
   return jwt.sign(payload, env.JWT_SECRET, {
     audience: 'team-pulse-app',
     expiresIn: ACCESS_TOKEN_EXPIRATION,
@@ -66,11 +72,17 @@ export function generateAccessToken(payload: AccessTokenPayload, env: Env): stri
 /**
  * Generate a refresh token
  *
- * @param payload - The token payload
  * @param env - Environment configuration containing JWT_REFRESH_SECRET
+ * @param payload - The token payload
  * @returns The signed JWT token
  */
-export function generateRefreshToken(payload: RefreshTokenPayload, env: Env): string {
+export function generateRefreshToken({
+  env,
+  payload,
+}: {
+  env: Env
+  payload: RefreshTokenPayload
+}): string {
   return jwt.sign(payload, env.JWT_REFRESH_SECRET, {
     audience: 'team-pulse-app',
     expiresIn: REFRESH_TOKEN_EXPIRATION,
@@ -81,12 +93,12 @@ export function generateRefreshToken(payload: RefreshTokenPayload, env: Env): st
 /**
  * Verify and decode an access token
  *
- * @param token - The JWT token to verify
  * @param env - Environment configuration containing JWT_SECRET
+ * @param token - The JWT token to verify
  * @returns The decoded payload
  * @throws Error if the token is invalid or expired
  */
-export function verifyAccessToken(token: string, env: Env): AccessTokenPayload {
+export function verifyAccessToken({ env, token }: { env: Env; token: string }): AccessTokenPayload {
   try {
     const payload = jwt.verify(token, env.JWT_SECRET, {
       audience: 'team-pulse-app',

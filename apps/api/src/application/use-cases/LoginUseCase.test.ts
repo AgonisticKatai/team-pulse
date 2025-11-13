@@ -154,14 +154,14 @@ describe('LoginUseCase', () => {
 
         // Assert
         expectSuccess(result)
-        expect(generateAccessToken).toHaveBeenCalledWith(
-          {
+        expect(generateAccessToken).toHaveBeenCalledWith({
+          payload: {
             email: TEST_CONSTANTS.users.johnDoe.email,
             role: TEST_CONSTANTS.users.johnDoe.role,
             userId: TEST_CONSTANTS.users.johnDoe.id,
           },
           env,
-        )
+        })
         expect(generateAccessToken).toHaveBeenCalledTimes(1)
       })
 
@@ -180,13 +180,13 @@ describe('LoginUseCase', () => {
 
         // Assert
         expectSuccess(result)
-        expect(generateRefreshToken).toHaveBeenCalledWith(
-          {
+        expect(generateRefreshToken).toHaveBeenCalledWith({
+          payload: {
             tokenId: TEST_CONSTANTS.mockUuid,
             userId: TEST_CONSTANTS.users.johnDoe.id,
           },
           env,
-        )
+        })
         expect(generateRefreshToken).toHaveBeenCalledTimes(1)
       })
 

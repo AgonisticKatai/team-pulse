@@ -36,32 +36,32 @@ import type { Env } from '../../infrastructure/config/env.js'
  * It's PURE business logic.
  */
 export class LoginUseCase {
-  private readonly userRepository: IUserRepository
-  private readonly refreshTokenRepository: IRefreshTokenRepository
   private readonly env: Env
+  private readonly refreshTokenRepository: IRefreshTokenRepository
+  private readonly userRepository: IUserRepository
 
   private constructor({
-    userRepository,
-    refreshTokenRepository,
     env,
+    refreshTokenRepository,
+    userRepository,
   }: {
-    userRepository: IUserRepository
-    refreshTokenRepository: IRefreshTokenRepository
     env: Env
+    refreshTokenRepository: IRefreshTokenRepository
+    userRepository: IUserRepository
   }) {
-    this.userRepository = userRepository
-    this.refreshTokenRepository = refreshTokenRepository
     this.env = env
+    this.refreshTokenRepository = refreshTokenRepository
+    this.userRepository = userRepository
   }
 
   static create({
-    userRepository,
-    refreshTokenRepository,
     env,
+    refreshTokenRepository,
+    userRepository,
   }: {
-    userRepository: IUserRepository
-    refreshTokenRepository: IRefreshTokenRepository
     env: Env
+    refreshTokenRepository: IRefreshTokenRepository
+    userRepository: IUserRepository
   }): LoginUseCase {
     return new LoginUseCase({ env, refreshTokenRepository, userRepository })
   }
@@ -99,22 +99,22 @@ export class LoginUseCase {
 
     const refreshTokenId = randomUUID()
 
-    const accessToken = generateAccessToken(
-      {
+    const accessToken = generateAccessToken({
+      payload: {
         email: user.email.getValue(),
         role: user.role.getValue(),
         userId: user.id.getValue(),
       },
-      this.env,
-    )
+      env: this.env,
+    })
 
-    const refreshTokenString = generateRefreshToken(
-      {
+    const refreshTokenString = generateRefreshToken({
+      payload: {
         tokenId: refreshTokenId,
         userId: user.id.getValue(),
       },
-      this.env,
-    )
+      env: this.env,
+    })
 
     const refreshTokenResult = RefreshToken.create({
       expiresAt: getRefreshTokenExpirationDate(),

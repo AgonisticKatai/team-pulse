@@ -112,8 +112,8 @@ describe('RefreshTokenUseCase', () => {
         // Assert
         expectSuccess(result)
         expect(verifyRefreshToken).toHaveBeenCalledWith({
-          token: TEST_CONSTANTS.auth.validRefreshToken,
           env,
+          token: TEST_CONSTANTS.auth.validRefreshToken,
         })
         expect(verifyRefreshToken).toHaveBeenCalledTimes(1)
       })
@@ -172,14 +172,14 @@ describe('RefreshTokenUseCase', () => {
 
         // Assert
         expectSuccess(result)
-        expect(generateAccessToken).toHaveBeenCalledWith(
-          {
+        expect(generateAccessToken).toHaveBeenCalledWith({
+          payload: {
             email: TEST_CONSTANTS.users.johnDoe.email,
             role: TEST_CONSTANTS.users.johnDoe.role,
             userId: TEST_CONSTANTS.users.johnDoe.id,
           },
           env,
-        )
+        })
         expect(generateAccessToken).toHaveBeenCalledTimes(1)
       })
     })
@@ -327,14 +327,14 @@ describe('RefreshTokenUseCase', () => {
 
         // Assert
         expectSuccess(result)
-        expect(generateAccessToken).toHaveBeenCalledWith(
-          {
+        expect(generateAccessToken).toHaveBeenCalledWith({
+          payload: {
             email: TEST_CONSTANTS.users.adminUser.email,
             role: TEST_CONSTANTS.users.adminUser.role,
             userId: TEST_CONSTANTS.users.adminUser.id,
           },
           env,
-        )
+        })
       })
 
       it('should handle user with SUPER_ADMIN role', async () => {
@@ -360,14 +360,14 @@ describe('RefreshTokenUseCase', () => {
 
         // Assert
         expectSuccess(result)
-        expect(generateAccessToken).toHaveBeenCalledWith(
-          {
+        expect(generateAccessToken).toHaveBeenCalledWith({
+          payload: {
             email: TEST_CONSTANTS.users.superAdminUser.email,
             role: TEST_CONSTANTS.users.superAdminUser.role,
             userId: TEST_CONSTANTS.users.superAdminUser.id,
           },
           env,
-        )
+        })
       })
 
       it('should not delete token when JWT verification fails', async () => {

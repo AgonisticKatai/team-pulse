@@ -36,7 +36,7 @@ describe('JWT Utilities', () => {
         userId: 'user-123',
       }
 
-      const token = generateAccessToken(payload, testEnv)
+      const token = generateAccessToken({ payload, env: testEnv })
 
       expect(token).toBeDefined()
       expect(typeof token).toBe('string')
@@ -50,8 +50,8 @@ describe('JWT Utilities', () => {
         userId: 'user-123',
       }
 
-      const token = generateAccessToken(payload, testEnv)
-      const decoded = verifyAccessToken(token, testEnv)
+      const token = generateAccessToken({ payload, env: testEnv })
+      const decoded = verifyAccessToken({ token, env: testEnv })
 
       expect(decoded.userId).toBe(payload.userId)
       expect(decoded.email).toBe(payload.email)
@@ -66,7 +66,7 @@ describe('JWT Utilities', () => {
         userId: 'user-123',
       }
 
-      const token = generateRefreshToken(payload, testEnv)
+      const token = generateRefreshToken({ payload, env: testEnv })
 
       expect(token).toBeDefined()
       expect(typeof token).toBe('string')
@@ -79,7 +79,7 @@ describe('JWT Utilities', () => {
         userId: 'user-123',
       }
 
-      const token = generateRefreshToken(payload, testEnv)
+      const token = generateRefreshToken({ payload, env: testEnv })
       const verifyResult = verifyRefreshToken({ token, env: testEnv })
 
       expect(verifyResult).toBeDefined()
@@ -101,8 +101,8 @@ describe('JWT Utilities', () => {
         userId: 'user-123',
       }
 
-      const token = generateAccessToken(payload, testEnv)
-      const decoded = verifyAccessToken(token, testEnv)
+      const token = generateAccessToken({ payload, env: testEnv })
+      const decoded = verifyAccessToken({ token, env: testEnv })
 
       expect(decoded).toBeDefined()
       expect(decoded.userId).toBe(payload.userId)
@@ -111,7 +111,9 @@ describe('JWT Utilities', () => {
     it('should throw error for invalid token', () => {
       const invalidToken = 'invalid.token.here'
 
-      expect(() => verifyAccessToken(invalidToken, testEnv)).toThrow('Invalid access token')
+      expect(() => verifyAccessToken({ token: invalidToken, env: testEnv })).toThrow(
+        'Invalid access token',
+      )
     })
 
     it('should throw error for token with wrong secret', () => {
@@ -121,18 +123,18 @@ describe('JWT Utilities', () => {
         userId: 'user-123',
       }
 
-      const token = generateAccessToken(payload, testEnv)
+      const token = generateAccessToken({ payload, env: testEnv })
 
       const wrongEnv = {
         ...testEnv,
         JWT_SECRET: 'wrong-secret-key-completely-different',
       }
 
-      expect(() => verifyAccessToken(token, wrongEnv)).toThrow('Invalid access token')
+      expect(() => verifyAccessToken({ token, env: wrongEnv })).toThrow('Invalid access token')
     })
 
     it('should throw error for malformed token', () => {
-      expect(() => verifyAccessToken('not-a-jwt', testEnv)).toThrow()
+      expect(() => verifyAccessToken({ token: 'not-a-jwt', env: testEnv })).toThrow()
     })
   })
 
@@ -143,7 +145,7 @@ describe('JWT Utilities', () => {
         userId: 'user-123',
       }
 
-      const token = generateRefreshToken(payload, testEnv)
+      const token = generateRefreshToken({ payload, env: testEnv })
       const verifyResult = verifyRefreshToken({ token, env: testEnv })
 
       expect(verifyResult).toBeDefined()
@@ -177,7 +179,7 @@ describe('JWT Utilities', () => {
         userId: 'user-123',
       }
 
-      const accessToken = generateAccessToken(accessPayload, testEnv)
+      const accessToken = generateAccessToken({ payload: accessPayload, env: testEnv })
 
       const verifyResult = verifyRefreshToken({ token: accessToken, env: testEnv })
 
@@ -227,8 +229,8 @@ describe('JWT Utilities', () => {
         userId: 'user-123',
       }
 
-      const token = generateAccessToken(payload, testEnv)
-      const decoded = verifyAccessToken(token, testEnv)
+      const token = generateAccessToken({ payload, env: testEnv })
+      const decoded = verifyAccessToken({ token, env: testEnv })
 
       expect(decoded).toHaveProperty('exp')
       expect(decoded).toHaveProperty('iat')
@@ -241,8 +243,8 @@ describe('JWT Utilities', () => {
         userId: 'user-123',
       }
 
-      const token = generateAccessToken(payload, testEnv)
-      const decoded = verifyAccessToken(token, testEnv)
+      const token = generateAccessToken({ payload, env: testEnv })
+      const decoded = verifyAccessToken({ token, env: testEnv })
 
       expect(decoded).toHaveProperty('iss', 'team-pulse-api')
       expect(decoded).toHaveProperty('aud', 'team-pulse-app')

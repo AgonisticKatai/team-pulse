@@ -103,14 +103,14 @@ export class RefreshTokenUseCase {
     }
 
     // Generate new access token
-    const accessToken = generateAccessToken(
-      {
+    const accessToken = generateAccessToken({
+      payload: {
         email: user.email.getValue(),
         role: user.role.getValue(),
         userId: user.id.getValue(),
       },
-      this.env,
-    )
+      env: this.env,
+    })
 
     return Ok({
       accessToken,
