@@ -1,6 +1,6 @@
 import { expectMockCallArg } from '@team-pulse/shared/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { ValidationError } from '../../domain/errors/index.js'
+import { DuplicatedError } from '../../domain/errors/index.js'
 import { User } from '../../domain/models/User.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import {
@@ -166,7 +166,7 @@ describe('CreateUserUseCase', () => {
     })
 
     describe('error cases', () => {
-      it('should return ValidationError when email already exists', async () => {
+      it('should return DuplicatedError when email already exists', async () => {
         // Arrange
         const existingUser = buildExistingUser({ email: 'existing@example.com' })
 
@@ -178,9 +178,10 @@ describe('CreateUserUseCase', () => {
         const result = await createUserUseCase.execute(dto)
 
         // Assert
-        const error = expectErrorType({ errorType: ValidationError, result })
-        expect(error.message).toBe('A user with email "existing@example.com" already exists')
-        expect(error.field).toBe('email')
+        const error = expectErrorType({ errorType: DuplicatedError, result })
+        expect(error).toBeInstanceOf(DuplicatedError)
+        expect(error.message).toContain('already exists')
+        expect(error.message).toContain('existing@example.com')
       })
 
       it('should not hash password when email already exists', async () => {
@@ -197,7 +198,7 @@ describe('CreateUserUseCase', () => {
         const result = await createUserUseCase.execute(dto)
 
         // Assert - Should fail before hashing password
-        expectErrorType({ errorType: ValidationError, result })
+        expectErrorType({ errorType: DuplicatedError, result })
         expect(hashPassword).not.toHaveBeenCalled()
         expect(userRepository.save).not.toHaveBeenCalled()
       })
