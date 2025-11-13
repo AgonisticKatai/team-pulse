@@ -1,7 +1,9 @@
 import type { UserRole } from '@team-pulse/shared'
 import { eq, sql } from 'drizzle-orm'
+import { RepositoryError } from '../../../domain/errors/RepositoryError.js'
 import { User } from '../../../domain/models/User.js'
 import type { IUserRepository } from '../../../domain/repositories/IUserRepository.js'
+import { Err, Ok, type Result } from '../../../domain/types/Result.js'
 import type { Database } from '../connection.js'
 import { users } from '../schema.js'
 
@@ -53,10 +55,20 @@ export class DrizzleUserRepository implements IUserRepository {
     return this.mapToDomain(row)
   }
 
-  async findAll(): Promise<User[]> {
-    const rows = await this.db.select().from(users)
+  async findAll(): Promise<Result<User[], RepositoryError>> {
+    try {
+      const rows = await this.db.select().from(users)
 
-    return rows.map((row: typeof users.$inferSelect) => this.mapToDomain(row))
+      return Ok(rows.map((row: typeof users.$inferSelect) => this.mapToDomain(row)))
+    } catch (error) {
+      return Err(
+        RepositoryError.forOperation({
+          cause: error instanceof Error ? error : new Error(String(error)),
+          message: 'Failed to find all users',
+          operation: 'findAll',
+        }),
+      )
+    }
   }
 
   async save(user: User): Promise<User> {

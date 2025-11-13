@@ -1,4 +1,6 @@
+import type { RepositoryError } from '../errors/RepositoryError.js'
 import type { User } from '../models/User.js'
+import type { Result } from '../types/Result.js'
 
 /**
  * User Repository Interface (PORT)
@@ -36,9 +38,9 @@ export interface IUserRepository {
   /**
    * Find all users
    *
-   * @returns Array of all users (empty array if none exist)
+   * @returns Result with array of all users (empty array if none exist), or RepositoryError if operation fails
    */
-  findAll(): Promise<User[]>
+  findAll(): Promise<Result<User[], RepositoryError>>
 
   /**
    * Save a user (create or update)
