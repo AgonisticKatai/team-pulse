@@ -20,7 +20,7 @@ import { RefreshTokenUseCase } from './RefreshTokenUseCase.js'
 
 // Mock external dependencies
 vi.mock('../../infrastructure/auth/jwt-utils.js', () => ({
-  generateAccessToken: vi.fn(() => TEST_CONSTANTS.auth.newAccessToken),
+  generateAccessToken: vi.fn(() => Ok(TEST_CONSTANTS.auth.newAccessToken)),
   verifyRefreshToken: vi.fn(),
 }))
 

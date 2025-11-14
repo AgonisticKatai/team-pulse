@@ -67,12 +67,17 @@ const handleJwtError = ({ error, field }: { error: unknown; field: string }): Va
  * @param payload - The token payload
  * @returns The signed JWT token
  */
-export function generateAccessToken({ env, payload }: { env: Env; payload: AccessTokenPayload }): string {
-  return jwt.sign(payload, env.JWT_SECRET, {
-    audience: 'team-pulse-app',
-    expiresIn: ACCESS_TOKEN_EXPIRATION,
-    issuer: 'team-pulse-api',
-  })
+export function generateAccessToken({ env, payload }: { env: Env; payload: AccessTokenPayload }): Result<string, ValidationError> {
+  try {
+    const token = jwt.sign(payload, env.JWT_SECRET, {
+      audience: 'team-pulse-app',
+      expiresIn: ACCESS_TOKEN_EXPIRATION,
+      issuer: 'team-pulse-api',
+    })
+    return Ok(token)
+  } catch (error) {
+    return Err(handleJwtError({ error, field: 'accessToken' }))
+  }
 }
 
 /**

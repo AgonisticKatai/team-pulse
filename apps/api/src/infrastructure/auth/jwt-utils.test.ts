@@ -36,11 +36,15 @@ describe('JWT Utilities', () => {
         userId: 'user-123',
       }
 
-      const token = generateAccessToken({ payload, env: testEnv })
+      const tokenResult = generateAccessToken({ payload, env: testEnv })
 
-      expect(token).toBeDefined()
-      expect(typeof token).toBe('string')
-      expect(token.split('.')).toHaveLength(3) // JWT has 3 parts
+      expect(tokenResult).toBeDefined()
+      expect(tokenResult.ok).toBe(true)
+
+      if (tokenResult.ok) {
+        expect(typeof tokenResult.value).toBe('string')
+        expect(tokenResult.value.split('.')).toHaveLength(3) // JWT has 3 parts
+      }
     })
 
     it('should include payload data in token', () => {
@@ -50,8 +54,12 @@ describe('JWT Utilities', () => {
         userId: 'user-123',
       }
 
-      const token = generateAccessToken({ payload, env: testEnv })
-      const verifyResult = verifyAccessToken({ token, env: testEnv })
+      const tokenResult = generateAccessToken({ payload, env: testEnv })
+      expect(tokenResult.ok).toBe(true)
+
+      if (!tokenResult.ok) return
+
+      const verifyResult = verifyAccessToken({ token: tokenResult.value, env: testEnv })
 
       expect(verifyResult).toBeDefined()
       expect(verifyResult.ok).toBe(true)
@@ -108,8 +116,12 @@ describe('JWT Utilities', () => {
         userId: 'user-123',
       }
 
-      const token = generateAccessToken({ payload, env: testEnv })
-      const verifyResult = verifyAccessToken({ token, env: testEnv })
+      const tokenResult = generateAccessToken({ payload, env: testEnv })
+      expect(tokenResult.ok).toBe(true)
+
+      if (!tokenResult.ok) return
+
+      const verifyResult = verifyAccessToken({ token: tokenResult.value, env: testEnv })
 
       expect(verifyResult).toBeDefined()
       expect(verifyResult.ok).toBe(true)
@@ -143,14 +155,17 @@ describe('JWT Utilities', () => {
         userId: 'user-123',
       }
 
-      const token = generateAccessToken({ payload, env: testEnv })
+      const tokenResult = generateAccessToken({ payload, env: testEnv })
+      expect(tokenResult.ok).toBe(true)
+
+      if (!tokenResult.ok) return
 
       const wrongEnv = {
         ...testEnv,
         JWT_SECRET: 'wrong-secret-key-completely-different',
       }
 
-      const verifyResult = verifyAccessToken({ token, env: wrongEnv })
+      const verifyResult = verifyAccessToken({ token: tokenResult.value, env: wrongEnv })
 
       expect(verifyResult.ok).toBe(false)
 
@@ -214,9 +229,12 @@ describe('JWT Utilities', () => {
         userId: 'user-123',
       }
 
-      const accessToken = generateAccessToken({ payload: accessPayload, env: testEnv })
+      const accessTokenResult = generateAccessToken({ payload: accessPayload, env: testEnv })
+      expect(accessTokenResult.ok).toBe(true)
 
-      const verifyResult = verifyRefreshToken({ token: accessToken, env: testEnv })
+      if (!accessTokenResult.ok) return
+
+      const verifyResult = verifyRefreshToken({ token: accessTokenResult.value, env: testEnv })
 
       // This should fail because it was signed with JWT_SECRET, not JWT_REFRESH_SECRET
       expect(verifyResult.ok).toBe(false)
@@ -262,8 +280,12 @@ describe('JWT Utilities', () => {
         userId: 'user-123',
       }
 
-      const token = generateAccessToken({ payload, env: testEnv })
-      const verifyResult = verifyAccessToken({ token, env: testEnv })
+      const tokenResult = generateAccessToken({ payload, env: testEnv })
+      expect(tokenResult.ok).toBe(true)
+
+      if (!tokenResult.ok) return
+
+      const verifyResult = verifyAccessToken({ token: tokenResult.value, env: testEnv })
 
       expect(verifyResult.ok).toBe(true)
 
@@ -280,8 +302,12 @@ describe('JWT Utilities', () => {
         userId: 'user-123',
       }
 
-      const token = generateAccessToken({ payload, env: testEnv })
-      const verifyResult = verifyAccessToken({ token, env: testEnv })
+      const tokenResult = generateAccessToken({ payload, env: testEnv })
+      expect(tokenResult.ok).toBe(true)
+
+      if (!tokenResult.ok) return
+
+      const verifyResult = verifyAccessToken({ token: tokenResult.value, env: testEnv })
 
       expect(verifyResult.ok).toBe(true)
 

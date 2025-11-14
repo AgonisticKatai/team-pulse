@@ -103,7 +103,7 @@ export class RefreshTokenUseCase {
     }
 
     // Generate new access token
-    const accessToken = generateAccessToken({
+    const accessTokenResult = generateAccessToken({
       payload: {
         email: user.email.getValue(),
         role: user.role.getValue(),
@@ -112,8 +112,12 @@ export class RefreshTokenUseCase {
       env: this.env,
     })
 
+    if (!accessTokenResult.ok) {
+      return Err(accessTokenResult.error)
+    }
+
     return Ok({
-      accessToken,
+      accessToken: accessTokenResult.value,
     })
   }
 }

@@ -20,7 +20,7 @@ import { LoginUseCase } from './LoginUseCase.js'
 
 // Mock external dependencies
 vi.mock('../../infrastructure/auth/jwt-utils.js', () => ({
-  generateAccessToken: vi.fn(() => TEST_CONSTANTS.auth.mockAccessToken),
+  generateAccessToken: vi.fn(() => Ok(TEST_CONSTANTS.auth.mockAccessToken)),
   generateRefreshToken: vi.fn(() => TEST_CONSTANTS.auth.mockRefreshToken),
   getRefreshTokenExpirationDate: vi.fn(() => TEST_CONSTANTS.futureDate),
 }))

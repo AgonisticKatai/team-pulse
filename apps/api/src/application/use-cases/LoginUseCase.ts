@@ -116,7 +116,7 @@ export class LoginUseCase {
       return Err(saveResult.error)
     }
 
-    const accessToken = generateAccessToken({
+    const accessTokenResult = generateAccessToken({
       env: this.env,
       payload: {
         email: user.email.getValue(),
@@ -125,8 +125,12 @@ export class LoginUseCase {
       },
     })
 
+    if (!accessTokenResult.ok) {
+      return Err(accessTokenResult.error)
+    }
+
     return Ok({
-      accessToken,
+      accessToken: accessTokenResult.value,
       refreshToken: refreshTokenString,
       user: user.toDTO(),
     })
