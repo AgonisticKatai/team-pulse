@@ -104,3 +104,25 @@ export const flatMap = <T, U, E extends Error>(result: Result<T, E>, fn: (value:
   }
   return fn(result.value)
 }
+
+/**
+ * Collect an array of Results into a Result of array
+ * If any Result is an error, returns the first error found
+ * Otherwise returns Ok with array of all values
+ *
+ * This is known as "sequence" in functional programming
+ *
+ * @example
+ * const results = users.map(u => User.create(u))
+ * const collected = collect(results) // Result<User[], ValidationError>
+ */
+export const collect = <T, E extends Error>(results: Result<T, E>[]): Result<T[], E> => {
+  const values: T[] = []
+  for (const result of results) {
+    if (!result.ok) {
+      return result
+    }
+    values.push(result.value)
+  }
+  return Ok(values)
+}

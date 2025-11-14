@@ -1,9 +1,10 @@
 import type { UserRole } from '@team-pulse/shared'
 import { eq, sql } from 'drizzle-orm'
 import { RepositoryError } from '../../../domain/errors/RepositoryError.js'
+import type { ValidationError } from '../../../domain/errors/ValidationError.js'
 import { User } from '../../../domain/models/User.js'
 import type { IUserRepository } from '../../../domain/repositories/IUserRepository.js'
-import { Err, Ok, type Result } from '../../../domain/types/Result.js'
+import { collect, Err, Ok, type Result } from '../../../domain/types/Result.js'
 import type { Database } from '../connection.js'
 import { users as usersSchema } from '../schema.js'
 
@@ -44,7 +45,19 @@ export class DrizzleUserRepository implements IUserRepository {
         return Ok(null)
       }
 
-      return Ok(this.mapToDomain({ user }))
+      const domainResult = this.mapToDomain({ user })
+
+      if (!domainResult.ok) {
+        return Err(
+          RepositoryError.forOperation({
+            cause: domainResult.error,
+            message: 'Failed to map user to domain',
+            operation: 'findById',
+          }),
+        )
+      }
+
+      return Ok(domainResult.value)
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -65,7 +78,19 @@ export class DrizzleUserRepository implements IUserRepository {
         return Ok(null)
       }
 
-      return Ok(this.mapToDomain({ user }))
+      const domainResult = this.mapToDomain({ user })
+
+      if (!domainResult.ok) {
+        return Err(
+          RepositoryError.forOperation({
+            cause: domainResult.error,
+            message: 'Failed to map user to domain',
+            operation: 'findByEmail',
+          }),
+        )
+      }
+
+      return Ok(domainResult.value)
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -81,7 +106,21 @@ export class DrizzleUserRepository implements IUserRepository {
     try {
       const rows = await this.db.select().from(usersSchema)
 
-      return Ok(rows.map((user: typeof usersSchema.$inferSelect) => this.mapToDomain({ user })))
+      const mappedResults = rows.map((user: typeof usersSchema.$inferSelect) => this.mapToDomain({ user }))
+
+      const collectedResult = collect(mappedResults)
+
+      if (!collectedResult.ok) {
+        return Err(
+          RepositoryError.forOperation({
+            cause: collectedResult.error,
+            message: 'Failed to map user to domain',
+            operation: 'findAll',
+          }),
+        )
+      }
+
+      return Ok(collectedResult.value)
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -185,11 +224,12 @@ export class DrizzleUserRepository implements IUserRepository {
    * This is where we convert infrastructure data structures
    * to domain entities. The domain entity validates itself.
    *
-   * TODO (Tech Debt): This throws when validation fails. After error handling migration,
-   * this should return Result and propagate to use cases.
+   * Returns Result to maintain consistency with the Result pattern.
+   * If mapping fails (should never happen with valid DB data),
+   * the error is propagated through Result.
    */
-  private mapToDomain({ user }: { user: typeof usersSchema.$inferSelect }): User {
-    const result = User.create({
+  private mapToDomain({ user }: { user: typeof usersSchema.$inferSelect }): Result<User, ValidationError> {
+    return User.create({
       createdAt: new Date(user.createdAt),
       email: user.email,
       id: user.id,
@@ -197,13 +237,5 @@ export class DrizzleUserRepository implements IUserRepository {
       role: user.role as UserRole, // Type assertion safe because DB enforces valid values
       updatedAt: new Date(user.updatedAt),
     })
-
-    if (!result.ok) {
-      // This should never happen with data from the database
-      // since it was validated on creation
-      throw result.error
-    }
-
-    return result.value
   }
 }

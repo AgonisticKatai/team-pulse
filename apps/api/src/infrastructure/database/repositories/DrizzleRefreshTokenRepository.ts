@@ -1,8 +1,9 @@
 import { eq, lt } from 'drizzle-orm'
 import { RepositoryError } from '../../../domain/errors/RepositoryError.js'
+import type { ValidationError } from '../../../domain/errors/ValidationError.js'
 import { RefreshToken } from '../../../domain/models/RefreshToken.js'
 import type { IRefreshTokenRepository } from '../../../domain/repositories/IRefreshTokenRepository.js'
-import { Err, Ok, type Result } from '../../../domain/types/Result.js'
+import { collect, Err, Ok, type Result } from '../../../domain/types/Result.js'
 import type { Database } from '../connection.js'
 import { refreshTokens as refreshTokensSchema } from '../schema.js'
 
@@ -43,7 +44,19 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
         return Ok(null)
       }
 
-      return Ok(this.mapToDomain({ refreshToken }))
+      const domainResult = this.mapToDomain({ refreshToken })
+
+      if (!domainResult.ok) {
+        return Err(
+          RepositoryError.forOperation({
+            cause: domainResult.error,
+            message: 'Failed to map refresh token to domain',
+            operation: 'findByToken',
+          }),
+        )
+      }
+
+      return Ok(domainResult.value)
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -58,7 +71,22 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
   async findByUserId({ userId }: { userId: string }): Promise<Result<RefreshToken[], RepositoryError>> {
     try {
       const refreshTokens = await this.db.select().from(refreshTokensSchema).where(eq(refreshTokensSchema.userId, userId))
-      return Ok(refreshTokens.map((row: typeof refreshTokensSchema.$inferSelect) => this.mapToDomain({ refreshToken: row })))
+
+      const mappedResults = refreshTokens.map((row: typeof refreshTokensSchema.$inferSelect) => this.mapToDomain({ refreshToken: row }))
+
+      const collectedResult = collect(mappedResults)
+
+      if (!collectedResult.ok) {
+        return Err(
+          RepositoryError.forOperation({
+            cause: collectedResult.error,
+            message: 'Failed to map refresh token to domain',
+            operation: 'findByUserId',
+          }),
+        )
+      }
+
+      return Ok(collectedResult.value)
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -159,22 +187,18 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
    *
    * This is where we convert infrastructure data structures
    * to domain entities. The domain entity validates itself.
+   *
+   * Returns Result to maintain consistency with the Result pattern.
+   * If mapping fails (should never happen with valid DB data),
+   * the error is propagated through Result.
    */
-  private mapToDomain({ refreshToken }: { refreshToken: typeof refreshTokensSchema.$inferSelect }): RefreshToken {
-    const result = RefreshToken.create({
+  private mapToDomain({ refreshToken }: { refreshToken: typeof refreshTokensSchema.$inferSelect }): Result<RefreshToken, ValidationError> {
+    return RefreshToken.create({
       createdAt: new Date(refreshToken.createdAt),
       expiresAt: new Date(refreshToken.expiresAt),
       id: refreshToken.id,
       token: refreshToken.token,
       userId: refreshToken.userId,
     })
-
-    if (!result.ok) {
-      // This should never happen with data from the database
-      // since it was validated on creation
-      throw result.error
-    }
-
-    return result.value
   }
 }

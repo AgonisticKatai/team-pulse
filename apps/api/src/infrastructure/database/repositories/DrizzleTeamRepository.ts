@@ -1,8 +1,9 @@
 import { eq } from 'drizzle-orm'
 import { RepositoryError } from '../../../domain/errors/index.js'
+import type { ValidationError } from '../../../domain/errors/ValidationError.js'
 import { Team } from '../../../domain/models/Team.js'
 import type { ITeamRepository } from '../../../domain/repositories/ITeamRepository.js'
-import { Err, Ok, type Result } from '../../../domain/types/index.js'
+import { collect, Err, Ok, type Result } from '../../../domain/types/index.js'
 import type { Database } from '../connection.js'
 import { teams as teamsSchema } from '../schema.js'
 
@@ -43,7 +44,19 @@ export class DrizzleTeamRepository implements ITeamRepository {
         return Ok(null)
       }
 
-      return Ok(this.mapToDomain({ team }))
+      const domainResult = this.mapToDomain({ team })
+
+      if (!domainResult.ok) {
+        return Err(
+          RepositoryError.forOperation({
+            cause: domainResult.error,
+            message: 'Failed to map team to domain',
+            operation: 'findById',
+          }),
+        )
+      }
+
+      return Ok(domainResult.value)
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -59,7 +72,21 @@ export class DrizzleTeamRepository implements ITeamRepository {
     try {
       const teams = await this.db.select().from(teamsSchema)
 
-      return Ok(teams.map((team: typeof teamsSchema.$inferSelect) => this.mapToDomain({ team })))
+      const mappedResults = teams.map((team: typeof teamsSchema.$inferSelect) => this.mapToDomain({ team }))
+
+      const collectedResult = collect(mappedResults)
+
+      if (!collectedResult.ok) {
+        return Err(
+          RepositoryError.forOperation({
+            cause: collectedResult.error,
+            message: 'Failed to map team to domain',
+            operation: 'findAll',
+          }),
+        )
+      }
+
+      return Ok(collectedResult.value)
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -79,7 +106,19 @@ export class DrizzleTeamRepository implements ITeamRepository {
         return Ok(null)
       }
 
-      return Ok(this.mapToDomain({ team }))
+      const domainResult = this.mapToDomain({ team })
+
+      if (!domainResult.ok) {
+        return Err(
+          RepositoryError.forOperation({
+            cause: domainResult.error,
+            message: 'Failed to map team to domain',
+            operation: 'findByName',
+          }),
+        )
+      }
+
+      return Ok(domainResult.value)
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -168,9 +207,13 @@ export class DrizzleTeamRepository implements ITeamRepository {
    *
    * This is where we convert infrastructure data structures
    * to domain entities. The domain entity validates itself.
+   *
+   * Returns Result to maintain consistency with the Result pattern.
+   * If mapping fails (should never happen with valid DB data),
+   * the error is propagated through Result.
    */
-  private mapToDomain({ team }: { team: typeof teamsSchema.$inferSelect }): Team {
-    const result = Team.create({
+  private mapToDomain({ team }: { team: typeof teamsSchema.$inferSelect }): Result<Team, ValidationError> {
+    return Team.create({
       city: team.city,
       createdAt: new Date(team.createdAt), // Convert from timestamp
       foundedYear: team.foundedYear,
@@ -178,13 +221,5 @@ export class DrizzleTeamRepository implements ITeamRepository {
       name: team.name,
       updatedAt: new Date(team.updatedAt), // Convert from timestamp
     })
-
-    if (!result.ok) {
-      // This should never happen with data from the database
-      // since it was validated on creation
-      throw result.error
-    }
-
-    return result.value
   }
 }
