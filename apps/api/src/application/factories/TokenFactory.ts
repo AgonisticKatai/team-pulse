@@ -83,87 +83,6 @@ export class TokenFactory {
   }
 
   /**
-   * Generate an access token JWT
-   *
-   * Low-level method to create an access token from payload.
-   * Use instance method createAccessToken() for high-level coordination.
-   *
-   * @param env - Environment configuration containing JWT_SECRET
-   * @param payload - The token payload
-   * @returns Result with JWT string or ValidationError
-   */
-  static generateAccessToken({ env, payload }: { env: Env; payload: AccessTokenPayload }): Result<string, ValidationError> {
-    try {
-      const token = jwt.sign(payload, env.JWT_SECRET, {
-        audience: 'team-pulse-app',
-        expiresIn: ACCESS_TOKEN_EXPIRATION,
-        issuer: 'team-pulse-api',
-      })
-      return Ok(token)
-    } catch (error) {
-      return Err(TokenFactory.handleJwtError({ error, field: 'accessToken' }))
-    }
-  }
-
-  /**
-   * Generate a refresh token JWT
-   *
-   * Low-level method to create a refresh token from payload.
-   * Use instance method createRefreshToken() for high-level coordination.
-   *
-   * @param env - Environment configuration containing JWT_REFRESH_SECRET
-   * @param payload - The token payload
-   * @returns JWT string
-   */
-  static generateRefreshToken({ env, payload }: { env: Env; payload: RefreshTokenPayload }): string {
-    return jwt.sign(payload, env.JWT_REFRESH_SECRET, {
-      audience: 'team-pulse-app',
-      expiresIn: REFRESH_TOKEN_EXPIRATION,
-      issuer: 'team-pulse-api',
-    })
-  }
-
-  /**
-   * Verify and decode an access token
-   *
-   * @param env - Environment configuration containing JWT_SECRET
-   * @param token - The JWT token to verify
-   * @returns Result with decoded payload or ValidationError
-   */
-  static verifyAccessToken({ env, token }: { env: Env; token: string }): Result<AccessTokenPayload, ValidationError> {
-    try {
-      const payload = jwt.verify(token, env.JWT_SECRET, {
-        audience: 'team-pulse-app',
-        issuer: 'team-pulse-api',
-      }) as AccessTokenPayload
-
-      return Ok(payload)
-    } catch (error) {
-      return Err(TokenFactory.handleJwtError({ error, field: 'accessToken' }))
-    }
-  }
-
-  /**
-   * Verify and decode a refresh token
-   *
-   * @param env - Environment configuration containing JWT_REFRESH_SECRET
-   * @param token - The JWT token to verify
-   * @returns Result with decoded payload or ValidationError
-   */
-  static verifyRefreshToken({ env, token }: { env: Env; token: string }): Result<RefreshTokenPayload, ValidationError> {
-    try {
-      const payload = jwt.verify(token, env.JWT_REFRESH_SECRET, {
-        audience: 'team-pulse-app',
-        issuer: 'team-pulse-api',
-      }) as RefreshTokenPayload
-
-      return Ok(payload)
-    } catch (error) {
-      return Err(TokenFactory.handleJwtError({ error, field: 'refreshToken' }))
-    }
-  }
-
-  /**
    * Get the expiration date for a refresh token
    *
    * @returns Date object representing when the refresh token will expire (7 days from now)
@@ -175,8 +94,8 @@ export class TokenFactory {
   }
 
   // ============================================
-  // INSTANCE METHODS (High-level coordination)
-  // Require an instance with env injected
+  // INSTANCE METHODS
+  // All token operations require an instance with env injected
   // ============================================
 
   private constructor(private readonly env: Env) {}
@@ -208,9 +127,10 @@ export class TokenFactory {
     const expiresAt = TokenFactory.getRefreshTokenExpirationDate()
 
     // Generate JWT string (infrastructure concern)
-    const jwtString = TokenFactory.generateRefreshToken({
-      env: this.env,
-      payload: { tokenId, userId },
+    const jwtString = jwt.sign({ tokenId, userId }, this.env.JWT_REFRESH_SECRET, {
+      audience: 'team-pulse-app',
+      expiresIn: REFRESH_TOKEN_EXPIRATION,
+      issuer: 'team-pulse-api',
     })
 
     // Create domain entity (domain concern)
@@ -234,33 +154,53 @@ export class TokenFactory {
    * @returns Result with JWT string or ValidationError
    */
   createAccessToken({ email, role, userId }: { email: string; role: UserRole; userId: string }): Result<string, ValidationError> {
-    return TokenFactory.generateAccessToken({
-      env: this.env,
-      payload: { email, role, userId },
-    })
+    try {
+      const token = jwt.sign({ email, role, userId }, this.env.JWT_SECRET, {
+        audience: 'team-pulse-app',
+        expiresIn: ACCESS_TOKEN_EXPIRATION,
+        issuer: 'team-pulse-api',
+      })
+      return Ok(token)
+    } catch (error) {
+      return Err(TokenFactory.handleJwtError({ error, field: 'accessToken' }))
+    }
   }
 
   /**
    * Verify an access token
    *
-   * Convenience instance method that uses the injected env.
-   *
    * @param token - The JWT token to verify
    * @returns Result with decoded payload or ValidationError
    */
   verifyAccessToken({ token }: { token: string }): Result<AccessTokenPayload, ValidationError> {
-    return TokenFactory.verifyAccessToken({ env: this.env, token })
+    try {
+      const payload = jwt.verify(token, this.env.JWT_SECRET, {
+        audience: 'team-pulse-app',
+        issuer: 'team-pulse-api',
+      }) as AccessTokenPayload
+
+      return Ok(payload)
+    } catch (error) {
+      return Err(TokenFactory.handleJwtError({ error, field: 'accessToken' }))
+    }
   }
 
   /**
    * Verify a refresh token
    *
-   * Convenience instance method that uses the injected env.
-   *
    * @param token - The JWT token to verify
    * @returns Result with decoded payload or ValidationError
    */
   verifyRefreshToken({ token }: { token: string }): Result<RefreshTokenPayload, ValidationError> {
-    return TokenFactory.verifyRefreshToken({ env: this.env, token })
+    try {
+      const payload = jwt.verify(token, this.env.JWT_REFRESH_SECRET, {
+        audience: 'team-pulse-app',
+        issuer: 'team-pulse-api',
+      }) as RefreshTokenPayload
+
+      return Ok(payload)
+    } catch (error) {
+      return Err(TokenFactory.handleJwtError({ error, field: 'refreshToken' }))
+    }
   }
 }
