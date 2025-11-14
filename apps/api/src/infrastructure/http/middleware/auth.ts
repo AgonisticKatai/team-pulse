@@ -1,7 +1,6 @@
 import type { UserRole } from '@team-pulse/shared'
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { type AccessTokenPayload, verifyAccessToken } from '../../auth/jwt-utils.js'
-import type { Env } from '../../config/env.js'
+import type { AccessTokenPayload, TokenFactory } from '../../../application/factories/TokenFactory.js'
 
 /**
  * Authentication middleware for Fastify
@@ -13,7 +12,7 @@ import type { Env } from '../../config/env.js'
  * These are ADAPTERS in Hexagonal Architecture:
  * - Framework-specific (Fastify)
  * - Handle HTTP concerns (headers, status codes)
- * - Delegate to infrastructure services (JWT verification)
+ * - Delegate to application services (TokenFactory)
  */
 
 /**
@@ -38,11 +37,11 @@ declare module 'fastify' {
  * Extract and verify JWT token from Authorization header
  *
  * @param request - Fastify request
- * @param env - Environment configuration
+ * @param tokenFactory - Token factory for verification
  * @returns Decoded token payload
  * @throws Error if token is missing or invalid
  */
-function extractAndVerifyToken(request: FastifyRequest, env: Env): AccessTokenPayload {
+function extractAndVerifyToken(request: FastifyRequest, tokenFactory: TokenFactory): AccessTokenPayload {
   // Get Authorization header
   const authHeader = request.headers.authorization
 
@@ -59,7 +58,7 @@ function extractAndVerifyToken(request: FastifyRequest, env: Env): AccessTokenPa
   const token = parts[1]
 
   // Verify token
-  const result = verifyAccessToken({ token, env })
+  const result = tokenFactory.verifyAccessToken({ token })
 
   if (!result.ok) {
     throw new Error(result.error.message)
@@ -73,16 +72,16 @@ function extractAndVerifyToken(request: FastifyRequest, env: Env): AccessTokenPa
  *
  * Usage in routes:
  * ```typescript
- * fastify.get('/protected', { preHandler: requireAuth(env) }, async (request, reply) => {
+ * fastify.get('/protected', { preHandler: requireAuth({ tokenFactory }) }, async (request, reply) => {
  *   const user = request.user // Available after authentication
  *   // ...
  * })
  * ```
  */
-export function requireAuth(env: Env) {
+export function requireAuth({ tokenFactory }: { tokenFactory: TokenFactory }) {
   return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     try {
-      const payload = extractAndVerifyToken(request, env)
+      const payload = extractAndVerifyToken(request, tokenFactory)
 
       // Attach user to request for use in route handlers
       request.user = {
@@ -124,7 +123,7 @@ function checkUserRole(user: AuthenticatedUser | undefined, allowedRoles: UserRo
  * Usage in routes:
  * ```typescript
  * fastify.post('/admin', {
- *   preHandler: [requireAuth(env), requireRole(['ADMIN', 'SUPER_ADMIN'])]
+ *   preHandler: [requireAuth({ tokenFactory }), requireRole(['ADMIN', 'SUPER_ADMIN'])]
  * }, async (request, reply) => {
  *   // Only ADMIN or SUPER_ADMIN can access this
  * })

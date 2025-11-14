@@ -47,26 +47,26 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
 
   // Authentication routes
   await registerAuthRoutes(fastify, {
-    env,
     loginUseCase: container.loginUseCase,
     logoutUseCase: container.logoutUseCase,
     refreshTokenUseCase: container.refreshTokenUseCase,
+    tokenFactory: container.tokenFactory,
   })
 
   // User management routes
   await registerUserRoutes(fastify, {
     createUserUseCase: container.createUserUseCase,
-    env,
     listUsersUseCase: container.listUsersUseCase,
+    tokenFactory: container.tokenFactory,
   })
 
   // Team routes
   await registerTeamRoutes(fastify, {
     createTeamUseCase: container.createTeamUseCase,
     deleteTeamUseCase: container.deleteTeamUseCase,
-    env,
     getTeamUseCase: container.getTeamUseCase,
     listTeamsUseCase: container.listTeamsUseCase,
+    tokenFactory: container.tokenFactory,
     updateTeamUseCase: container.updateTeamUseCase,
   })
 

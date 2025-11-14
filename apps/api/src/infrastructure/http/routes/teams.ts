@@ -1,12 +1,12 @@
 import { CreateTeamDTOSchema, UpdateTeamDTOSchema } from '@team-pulse/shared'
 import type { FastifyInstance, FastifyReply } from 'fastify'
+import type { TokenFactory } from '../../../application/factories/TokenFactory.js'
 import type { CreateTeamUseCase } from '../../../application/use-cases/CreateTeamUseCase.js'
 import type { DeleteTeamUseCase } from '../../../application/use-cases/DeleteTeamUseCase.js'
 import type { GetTeamUseCase } from '../../../application/use-cases/GetTeamUseCase.js'
 import type { ListTeamsUseCase } from '../../../application/use-cases/ListTeamsUseCase.js'
 import type { UpdateTeamUseCase } from '../../../application/use-cases/UpdateTeamUseCase.js'
 import { DomainError, NotFoundError, ValidationError } from '../../../domain/errors/index.js'
-import type { Env } from '../../config/env.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 
 /**
@@ -40,11 +40,11 @@ interface TeamRouteDependencies {
   listTeamsUseCase: ListTeamsUseCase
   updateTeamUseCase: UpdateTeamUseCase
   deleteTeamUseCase: DeleteTeamUseCase
-  env: Env
+  tokenFactory: TokenFactory
 }
 
 export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamRouteDependencies) {
-  const { createTeamUseCase, getTeamUseCase, listTeamsUseCase, updateTeamUseCase, deleteTeamUseCase, env } = dependencies
+  const { createTeamUseCase, getTeamUseCase, listTeamsUseCase, updateTeamUseCase, deleteTeamUseCase, tokenFactory } = dependencies
 
   /**
    * POST /api/teams
@@ -52,7 +52,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
    *
    * Requires: ADMIN or SUPER_ADMIN role
    */
-  fastify.post('/api/teams', { preHandler: [requireAuth(env), requireRole(['ADMIN', 'SUPER_ADMIN'])] }, async (request, reply) => {
+  fastify.post('/api/teams', { preHandler: [requireAuth({ tokenFactory }), requireRole(['ADMIN', 'SUPER_ADMIN'])] }, async (request, reply) => {
     try {
       // Validate request body using Zod
       const dto = CreateTeamDTOSchema.parse(request.body)
@@ -82,7 +82,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
    *
    * Requires: Authentication (any role)
    */
-  fastify.get('/api/teams', { preHandler: requireAuth(env) }, async (_request, reply) => {
+  fastify.get('/api/teams', { preHandler: requireAuth({ tokenFactory }) }, async (_request, reply) => {
     try {
       const result = await listTeamsUseCase.execute()
 
@@ -105,7 +105,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
    *
    * Requires: Authentication (any role)
    */
-  fastify.get<{ Params: { id: string } }>('/api/teams/:id', { preHandler: requireAuth(env) }, async (request, reply) => {
+  fastify.get<{ Params: { id: string } }>('/api/teams/:id', { preHandler: requireAuth({ tokenFactory }) }, async (request, reply) => {
     try {
       const { id } = request.params
 
@@ -128,7 +128,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
    */
   fastify.patch<{ Params: { id: string } }>(
     '/api/teams/:id',
-    { preHandler: [requireAuth(env), requireRole(['ADMIN', 'SUPER_ADMIN'])] },
+    { preHandler: [requireAuth({ tokenFactory }), requireRole(['ADMIN', 'SUPER_ADMIN'])] },
     async (request, reply) => {
       try {
         const { id } = request.params
@@ -163,7 +163,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
    */
   fastify.delete<{ Params: { id: string } }>(
     '/api/teams/:id',
-    { preHandler: [requireAuth(env), requireRole(['ADMIN', 'SUPER_ADMIN'])] },
+    { preHandler: [requireAuth({ tokenFactory }), requireRole(['ADMIN', 'SUPER_ADMIN'])] },
     async (request, reply) => {
       try {
         const { id } = request.params

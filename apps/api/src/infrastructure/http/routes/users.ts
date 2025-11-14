@@ -1,9 +1,9 @@
 import { CreateUserDTOSchema } from '@team-pulse/shared'
 import type { FastifyInstance, FastifyReply } from 'fastify'
+import type { TokenFactory } from '../../../application/factories/TokenFactory.js'
 import type { CreateUserUseCase } from '../../../application/use-cases/CreateUserUseCase.js'
 import type { ListUsersUseCase } from '../../../application/use-cases/ListUsersUseCase.js'
 import { DomainError, ValidationError } from '../../../domain/errors/index.js'
-import type { Env } from '../../config/env.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 
 /**
@@ -25,11 +25,11 @@ import { requireAuth, requireRole } from '../middleware/auth.js'
 interface UserRouteDependencies {
   createUserUseCase: CreateUserUseCase
   listUsersUseCase: ListUsersUseCase
-  env: Env
+  tokenFactory: TokenFactory
 }
 
 export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserRouteDependencies) {
-  const { createUserUseCase, listUsersUseCase, env } = dependencies
+  const { createUserUseCase, listUsersUseCase, tokenFactory } = dependencies
 
   /**
    * POST /api/users
@@ -37,7 +37,7 @@ export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserR
    *
    * Requires: SUPER_ADMIN or ADMIN role
    */
-  fastify.post('/api/users', { preHandler: [requireAuth(env), requireRole(['SUPER_ADMIN', 'ADMIN'])] }, async (request, reply) => {
+  fastify.post('/api/users', { preHandler: [requireAuth({ tokenFactory }), requireRole(['SUPER_ADMIN', 'ADMIN'])] }, async (request, reply) => {
     try {
       // Validate request body using Zod
       const dto = CreateUserDTOSchema.parse(request.body)
@@ -66,7 +66,7 @@ export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserR
    *
    * Requires: SUPER_ADMIN or ADMIN role
    */
-  fastify.get('/api/users', { preHandler: [requireAuth(env), requireRole(['SUPER_ADMIN', 'ADMIN'])] }, async (_request, reply) => {
+  fastify.get('/api/users', { preHandler: [requireAuth({ tokenFactory }), requireRole(['SUPER_ADMIN', 'ADMIN'])] }, async (_request, reply) => {
     try {
       const result = await listUsersUseCase.execute()
 

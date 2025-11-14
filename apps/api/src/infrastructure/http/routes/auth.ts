@@ -1,10 +1,10 @@
 import { LoginDTOSchema, RefreshTokenDTOSchema } from '@team-pulse/shared'
 import type { FastifyInstance, FastifyReply } from 'fastify'
+import type { TokenFactory } from '../../../application/factories/TokenFactory.js'
 import type { LoginUseCase } from '../../../application/use-cases/LoginUseCase.js'
 import type { LogoutUseCase } from '../../../application/use-cases/LogoutUseCase.js'
 import type { RefreshTokenUseCase } from '../../../application/use-cases/RefreshTokenUseCase.js'
 import { DomainError, ValidationError } from '../../../domain/errors/index.js'
-import type { Env } from '../../config/env.js'
 import { requireAuth } from '../middleware/auth.js'
 
 /**
@@ -26,11 +26,11 @@ interface AuthRouteDependencies {
   loginUseCase: LoginUseCase
   refreshTokenUseCase: RefreshTokenUseCase
   logoutUseCase: LogoutUseCase
-  env: Env
+  tokenFactory: TokenFactory
 }
 
 export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthRouteDependencies) {
-  const { loginUseCase, refreshTokenUseCase, logoutUseCase, env } = dependencies
+  const { loginUseCase, refreshTokenUseCase, logoutUseCase, tokenFactory } = dependencies
 
   /**
    * POST /api/auth/login
@@ -92,7 +92,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
    *
    * Requires authentication (access token in Authorization header)
    */
-  fastify.post('/api/auth/logout', { preHandler: requireAuth(env) }, async (request, reply) => {
+  fastify.post('/api/auth/logout', { preHandler: requireAuth({ tokenFactory }) }, async (request, reply) => {
     try {
       // Validate request body using Zod
       const dto = RefreshTokenDTOSchema.parse(request.body)
@@ -113,7 +113,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
    *
    * Requires authentication (access token in Authorization header)
    */
-  fastify.get('/api/auth/me', { preHandler: requireAuth(env) }, (request, reply) => {
+  fastify.get('/api/auth/me', { preHandler: requireAuth({ tokenFactory }) }, (request, reply) => {
     try {
       // User is available from requireAuth middleware
       const user = request.user
