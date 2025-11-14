@@ -1,4 +1,6 @@
+import type { RepositoryError } from '../errors/RepositoryError.js'
 import type { RefreshToken } from '../models/RefreshToken.js'
+import type { Result } from '../types/Result.js'
 
 /**
  * RefreshToken Repository Interface (PORT)
@@ -40,9 +42,13 @@ export interface IRefreshTokenRepository {
    * If it exists, it will be updated.
    *
    * @param refreshToken - The refresh token entity to save
-   * @returns The saved refresh token
+   * @returns The saved refresh token, or RepositoryError if operation fails
    */
-  save(refreshToken: RefreshToken): Promise<RefreshToken>
+  save({
+    refreshToken,
+  }: {
+    refreshToken: RefreshToken
+  }): Promise<Result<RefreshToken, RepositoryError>>
 
   /**
    * Delete a refresh token by the token string

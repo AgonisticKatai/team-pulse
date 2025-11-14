@@ -99,21 +99,12 @@ export class LoginUseCase {
 
     const refreshTokenId = randomUUID()
 
-    const accessToken = generateAccessToken({
-      payload: {
-        email: user.email.getValue(),
-        role: user.role.getValue(),
-        userId: user.id.getValue(),
-      },
-      env: this.env,
-    })
-
     const refreshTokenString = generateRefreshToken({
+      env: this.env,
       payload: {
         tokenId: refreshTokenId,
         userId: user.id.getValue(),
       },
-      env: this.env,
     })
 
     const refreshTokenResult = RefreshToken.create({
@@ -127,7 +118,22 @@ export class LoginUseCase {
       return Err(refreshTokenResult.error)
     }
 
-    await this.refreshTokenRepository.save(refreshTokenResult.value)
+    const saveResult = await this.refreshTokenRepository.save({
+      refreshToken: refreshTokenResult.value,
+    })
+
+    if (!saveResult.ok) {
+      return Err(saveResult.error)
+    }
+
+    const accessToken = generateAccessToken({
+      env: this.env,
+      payload: {
+        email: user.email.getValue(),
+        role: user.role.getValue(),
+        userId: user.id.getValue(),
+      },
+    })
 
     return Ok({
       accessToken,

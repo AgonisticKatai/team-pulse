@@ -1,6 +1,8 @@
 import { eq, lt } from 'drizzle-orm'
+import { RepositoryError } from '../../../domain/errors/RepositoryError.js'
 import { RefreshToken } from '../../../domain/models/RefreshToken.js'
 import type { IRefreshTokenRepository } from '../../../domain/repositories/IRefreshTokenRepository.js'
+import { Err, Ok, type Result } from '../../../domain/types/Result.js'
 import type { Database } from '../connection.js'
 import { refreshTokens } from '../schema.js'
 
@@ -46,32 +48,46 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
     return rows.map((row: typeof refreshTokens.$inferSelect) => this.mapToDomain(row))
   }
 
-  async save(refreshToken: RefreshToken): Promise<RefreshToken> {
-    const obj = refreshToken.toObject()
+  async save({
+    refreshToken,
+  }: {
+    refreshToken: RefreshToken
+  }): Promise<Result<RefreshToken, RepositoryError>> {
+    try {
+      const obj = refreshToken.toObject()
 
-    // Convert to database format
-    const row = {
-      createdAt: obj.createdAt,
-      expiresAt: obj.expiresAt,
-      id: obj.id,
-      token: obj.token,
-      userId: obj.userId,
+      // Convert to database format
+      const row = {
+        createdAt: obj.createdAt,
+        expiresAt: obj.expiresAt,
+        id: obj.id,
+        token: obj.token,
+        userId: obj.userId,
+      }
+
+      // Upsert: insert or update if exists
+      await this.db
+        .insert(refreshTokens)
+        .values(row)
+        .onConflictDoUpdate({
+          set: {
+            expiresAt: row.expiresAt,
+            token: row.token,
+            userId: row.userId,
+          },
+          target: refreshTokens.id,
+        })
+
+      return Ok(refreshToken)
+    } catch (error) {
+      return Err(
+        RepositoryError.forOperation({
+          cause: error instanceof Error ? error : new Error(String(error)),
+          message: 'Failed to save refresh token',
+          operation: 'save',
+        }),
+      )
     }
-
-    // Upsert: insert or update if exists
-    await this.db
-      .insert(refreshTokens)
-      .values(row)
-      .onConflictDoUpdate({
-        set: {
-          expiresAt: row.expiresAt,
-          token: row.token,
-          userId: row.userId,
-        },
-        target: refreshTokens.id,
-      })
-
-    return refreshToken
   }
 
   async deleteByToken(token: string): Promise<boolean> {
