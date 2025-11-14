@@ -1,8 +1,4 @@
-import { config } from 'dotenv'
 import { buildApp } from './app.js'
-
-// Load environment variables from .env file
-config()
 
 // Build and start the app
 const { app, container } = await buildApp()
