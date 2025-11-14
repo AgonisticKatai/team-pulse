@@ -1,13 +1,13 @@
 import { CreateTeamDTOSchema, UpdateTeamDTOSchema } from '@team-pulse/shared'
-import type { FastifyInstance, FastifyReply } from 'fastify'
+import type { FastifyInstance } from 'fastify'
 import type { TokenFactory } from '../../../application/factories/TokenFactory.js'
 import type { CreateTeamUseCase } from '../../../application/use-cases/CreateTeamUseCase.js'
 import type { DeleteTeamUseCase } from '../../../application/use-cases/DeleteTeamUseCase.js'
 import type { GetTeamUseCase } from '../../../application/use-cases/GetTeamUseCase.js'
 import type { ListTeamsUseCase } from '../../../application/use-cases/ListTeamsUseCase.js'
 import type { UpdateTeamUseCase } from '../../../application/use-cases/UpdateTeamUseCase.js'
-import { DomainError, NotFoundError, ValidationError } from '../../../domain/errors/index.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
+import { handleError } from '../utils/error-handler.js'
 
 /**
  * Team Routes (HTTP ADAPTER)
@@ -62,7 +62,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
 
       // Handle use case error
       if (!result.ok) {
-        return handleError(result.error, reply)
+        return handleError({ error: result.error, reply })
       }
 
       // Return success response
@@ -72,7 +72,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
       })
     } catch (error) {
       // Handle unexpected errors (Zod validation, etc.)
-      return handleError(error, reply)
+      return handleError({ error, reply })
     }
   })
 
@@ -87,7 +87,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
       const result = await listTeamsUseCase.execute()
 
       if (!result.ok) {
-        return handleError(result.error, reply)
+        return handleError({ error: result.error, reply })
       }
 
       return reply.code(200).send({
@@ -95,7 +95,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
         success: true,
       })
     } catch (error) {
-      return handleError(error, reply)
+      return handleError({ error, reply })
     }
   })
 
@@ -112,7 +112,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
       const result = await getTeamUseCase.execute(id)
 
       if (!result.ok) {
-        return handleError(result.error, reply)
+        return handleError({ error: result.error, reply })
       }
 
       return reply.code(200).send({
@@ -120,7 +120,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
         success: true,
       })
     } catch (error) {
-      return handleError(error, reply)
+      return handleError({ error, reply })
     }
   })
 
@@ -145,7 +145,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
 
         // Handle use case error
         if (!result.ok) {
-          return handleError(result.error, reply)
+          return handleError({ error: result.error, reply })
         }
 
         return reply.code(200).send({
@@ -154,7 +154,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
         })
       } catch (error) {
         // Handle unexpected errors (Zod validation, etc.)
-        return handleError(error, reply)
+        return handleError({ error, reply })
       }
     },
   )
@@ -176,70 +176,8 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
 
         return reply.code(204).send()
       } catch (error) {
-        return handleError(error, reply)
+        return handleError({ error, reply })
       }
     },
   )
-}
-
-/**
- * Error handler
- *
- * Maps domain errors to appropriate HTTP responses
- * This is the ONLY place that knows about HTTP status codes for errors
- */
-function handleError(error: unknown, reply: FastifyReply) {
-  // Zod validation errors
-  if (error instanceof Error && error.name === 'ZodError') {
-    return reply.code(400).send({
-      error: {
-        code: 'VALIDATION_ERROR',
-        details: error,
-        message: 'Invalid request data',
-      },
-      success: false,
-    })
-  }
-
-  // Domain validation errors
-  if (error instanceof ValidationError) {
-    return reply.code(400).send({
-      error: {
-        code: error.code,
-        details: error.details,
-        field: error.field,
-        message: error.message,
-      },
-      success: false,
-    })
-  }
-
-  // Not found errors
-  if (error instanceof NotFoundError) {
-    return reply.code(404).send({
-      error: {
-        code: error.code,
-        message: error.message,
-      },
-      success: false,
-    })
-  }
-
-  // Other domain errors
-  if (error instanceof DomainError) {
-    return reply.code(400).send({
-      error: {
-        code: error.code,
-        message: error.message,
-      },
-      success: false,
-    })
-  }
-  return reply.code(500).send({
-    error: {
-      code: 'INTERNAL_SERVER_ERROR',
-      message: 'An unexpected error occurred',
-    },
-    success: false,
-  })
 }

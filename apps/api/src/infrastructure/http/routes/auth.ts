@@ -1,11 +1,11 @@
 import { LoginDTOSchema, RefreshTokenDTOSchema } from '@team-pulse/shared'
-import type { FastifyInstance, FastifyReply } from 'fastify'
+import type { FastifyInstance } from 'fastify'
 import type { TokenFactory } from '../../../application/factories/TokenFactory.js'
 import type { LoginUseCase } from '../../../application/use-cases/LoginUseCase.js'
 import type { LogoutUseCase } from '../../../application/use-cases/LogoutUseCase.js'
 import type { RefreshTokenUseCase } from '../../../application/use-cases/RefreshTokenUseCase.js'
-import { DomainError, NotFoundError, ValidationError } from '../../../domain/errors/index.js'
 import { requireAuth } from '../middleware/auth.js'
+import { handleError } from '../utils/error-handler.js'
 
 /**
  * Authentication Routes (HTTP ADAPTER)
@@ -58,7 +58,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
 
         // Handle Result type
         if (!result.ok) {
-          return handleError(result.error, reply)
+          return handleError({ error: result.error, reply })
         }
 
         // Return success response
@@ -67,7 +67,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
           success: true,
         })
       } catch (error) {
-        return handleError(error, reply)
+        return handleError({ error, reply })
       }
     },
   )
@@ -86,7 +86,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
 
       // Handle Result type
       if (!result.ok) {
-        return handleError(result.error, reply)
+        return handleError({ error: result.error, reply })
       }
 
       // Return success response
@@ -95,7 +95,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
         success: true,
       })
     } catch (error) {
-      return handleError(error, reply)
+      return handleError({ error, reply })
     }
   })
 
@@ -116,7 +116,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
       // Return success response
       return reply.code(204).send()
     } catch (error) {
-      return handleError(error, reply)
+      return handleError({ error, reply })
     }
   })
 
@@ -136,90 +136,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
         success: true,
       })
     } catch (error) {
-      return handleError(error, reply)
+      return handleError({ error, reply })
     }
-  })
-}
-
-/**
- * Error handler
- *
- * Maps domain errors to appropriate HTTP responses
- */
-function handleError(error: unknown, reply: FastifyReply) {
-  // Zod validation errors
-  if (error instanceof Error && error.name === 'ZodError') {
-    return reply.code(400).send({
-      error: {
-        code: 'VALIDATION_ERROR',
-        details: error,
-        message: 'Invalid request data',
-      },
-      success: false,
-    })
-  }
-
-  // Domain validation errors
-  if (error instanceof ValidationError) {
-    // Special handling for authentication errors
-    if (error.field === 'credentials' || error.field === 'refreshToken') {
-      return reply.code(401).send({
-        error: {
-          code: 'AUTHENTICATION_ERROR',
-          message: error.message,
-        },
-        success: false,
-      })
-    }
-
-    return reply.code(400).send({
-      error: {
-        code: error.code,
-        details: error.details,
-        field: error.field,
-        message: error.message,
-      },
-      success: false,
-    })
-  }
-
-  // NotFound errors related to authentication (refresh tokens, users during refresh)
-  if (error instanceof NotFoundError) {
-    // Refresh token or user not found during token refresh should return 401
-    if (error.message.includes('RefreshToken') || error.message.includes('User')) {
-      return reply.code(401).send({
-        error: {
-          code: 'AUTHENTICATION_ERROR',
-          message: 'Invalid or expired refresh token',
-        },
-        success: false,
-      })
-    }
-
-    return reply.code(404).send({
-      error: {
-        code: error.code,
-        message: error.message,
-      },
-      success: false,
-    })
-  }
-
-  // Other domain errors
-  if (error instanceof DomainError) {
-    return reply.code(400).send({
-      error: {
-        code: error.code,
-        message: error.message,
-      },
-      success: false,
-    })
-  }
-  return reply.code(500).send({
-    error: {
-      code: 'INTERNAL_SERVER_ERROR',
-      message: 'An unexpected error occurred',
-    },
-    success: false,
   })
 }
