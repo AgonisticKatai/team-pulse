@@ -30,17 +30,15 @@ export class ListUsersUseCase {
   }
 
   async execute(): Promise<Result<UsersListResponseDTO, RepositoryError>> {
-    const findResult = await this.userRepository.findAll()
+    const findUserResult = await this.userRepository.findAll()
 
-    if (!findResult.ok) {
-      return Err(findResult.error)
+    if (!findUserResult.ok) {
+      return Err(findUserResult.error)
     }
 
-    const users = findResult.value
-
     return Ok({
-      total: users.length,
-      users: users.map((user) => user.toDTO()),
+      total: findUserResult.value.length,
+      users: findUserResult.value.map((user) => user.toDTO()),
     })
   }
 }

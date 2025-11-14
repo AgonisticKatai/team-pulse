@@ -4,7 +4,7 @@ import { Team } from '../../../domain/models/Team.js'
 import type { ITeamRepository } from '../../../domain/repositories/ITeamRepository.js'
 import { Err, Ok, type Result } from '../../../domain/types/index.js'
 import type { Database } from '../connection.js'
-import { teams } from '../schema.js'
+import { teams as teamsSchema } from '../schema.js'
 
 /**
  * Drizzle Team Repository (ADAPTER)
@@ -29,13 +29,13 @@ export class DrizzleTeamRepository implements ITeamRepository {
 
   async findById({ id }: { id: string }): Promise<Result<Team | null, RepositoryError>> {
     try {
-      const [team] = await this.db.select().from(teams).where(eq(teams.id, id)).limit(1)
+      const [team] = await this.db.select().from(teamsSchema).where(eq(teamsSchema.id, id)).limit(1)
 
       if (!team) {
         return Ok(null)
       }
 
-      return Ok(this.mapToDomain(team))
+      return Ok(this.mapToDomain({ team }))
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -49,9 +49,9 @@ export class DrizzleTeamRepository implements ITeamRepository {
 
   async findAll(): Promise<Result<Team[], RepositoryError>> {
     try {
-      const rows = await this.db.select().from(teams)
+      const teams = await this.db.select().from(teamsSchema)
 
-      return Ok(rows.map((row: typeof teams.$inferSelect) => this.mapToDomain(row)))
+      return Ok(teams.map((team: typeof teamsSchema.$inferSelect) => this.mapToDomain({ team })))
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -65,13 +65,13 @@ export class DrizzleTeamRepository implements ITeamRepository {
 
   async findByName({ name }: { name: string }): Promise<Result<Team | null, RepositoryError>> {
     try {
-      const [team] = await this.db.select().from(teams).where(eq(teams.name, name)).limit(1)
+      const [team] = await this.db.select().from(teamsSchema).where(eq(teamsSchema.name, name)).limit(1)
 
       if (!team) {
         return Ok(null)
       }
 
-      return Ok(this.mapToDomain(team))
+      return Ok(this.mapToDomain({ team }))
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -83,7 +83,7 @@ export class DrizzleTeamRepository implements ITeamRepository {
     }
   }
 
-  async save(team: Team): Promise<Result<Team, RepositoryError>> {
+  async save({ team }: { team: Team }): Promise<Result<Team, RepositoryError>> {
     try {
       const obj = team.toObject()
 
@@ -100,7 +100,7 @@ export class DrizzleTeamRepository implements ITeamRepository {
 
       // Upsert: insert or update if exists
       await this.db
-        .insert(teams)
+        .insert(teamsSchema)
         .values(row)
         .onConflictDoUpdate({
           set: {
@@ -109,7 +109,7 @@ export class DrizzleTeamRepository implements ITeamRepository {
             name: row.name,
             updatedAt: row.updatedAt,
           },
-          target: teams.id,
+          target: teamsSchema.id,
         })
 
       return Ok(team)
@@ -126,7 +126,7 @@ export class DrizzleTeamRepository implements ITeamRepository {
 
   async delete({ id }: { id: string }): Promise<Result<void, RepositoryError>> {
     try {
-      await this.db.delete(teams).where(eq(teams.id, id))
+      await this.db.delete(teamsSchema).where(eq(teamsSchema.id, id))
       return Ok(undefined)
     } catch (error) {
       return Err(
@@ -139,11 +139,11 @@ export class DrizzleTeamRepository implements ITeamRepository {
     }
   }
 
-  async existsByName(name: string): Promise<Result<boolean, RepositoryError>> {
+  async existsByName({ name }: { name: string }): Promise<Result<boolean, RepositoryError>> {
     try {
-      const rows = await this.db.select({ id: teams.id }).from(teams).where(eq(teams.name, name)).limit(1)
+      const teams = await this.db.select({ id: teamsSchema.id }).from(teamsSchema).where(eq(teamsSchema.name, name)).limit(1)
 
-      return Ok(rows.length > 0)
+      return Ok(teams.length > 0)
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -161,14 +161,14 @@ export class DrizzleTeamRepository implements ITeamRepository {
    * This is where we convert infrastructure data structures
    * to domain entities. The domain entity validates itself.
    */
-  private mapToDomain(row: typeof teams.$inferSelect): Team {
+  private mapToDomain({ team }: { team: typeof teamsSchema.$inferSelect }): Team {
     const result = Team.create({
-      city: row.city,
-      createdAt: new Date(row.createdAt), // Convert from timestamp
-      foundedYear: row.foundedYear,
-      id: row.id,
-      name: row.name,
-      updatedAt: new Date(row.updatedAt), // Convert from timestamp
+      city: team.city,
+      createdAt: new Date(team.createdAt), // Convert from timestamp
+      foundedYear: team.foundedYear,
+      id: team.id,
+      name: team.name,
+      updatedAt: new Date(team.updatedAt), // Convert from timestamp
     })
 
     if (!result.ok) {

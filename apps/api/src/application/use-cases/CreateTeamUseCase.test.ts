@@ -94,7 +94,10 @@ describe('CreateTeamUseCase', () => {
 
         // Assert
         expect(teamRepository.save).toHaveBeenCalledTimes(1)
-        const savedTeam = expectMockCallArg<Team>(vi.mocked(teamRepository.save))
+
+        // Verify the saved team entity
+        const { team: savedTeam } = expectMockCallArg<{ team: Team }>(vi.mocked(teamRepository.save))
+
         expect(savedTeam).toBeInstanceOf(Team)
         expect(savedTeam.id.getValue()).toBe(TEST_CONSTANTS.mockUuid)
         expect(savedTeam.name.getValue()).toBe(TEST_CONSTANTS.teams.fcBarcelona.name)
@@ -244,7 +247,10 @@ describe('CreateTeamUseCase', () => {
 
         // Assert
         expect(randomUUID).toHaveBeenCalled()
-        const savedTeam = expectMockCallArg<Team>(vi.mocked(teamRepository.save))
+
+        // Verify the saved team entity
+        const { team: savedTeam } = expectMockCallArg<{ team: Team }>(vi.mocked(teamRepository.save))
+
         expect(savedTeam.id.getValue()).toBe(TEST_CONSTANTS.mockUuid)
       })
 
@@ -268,7 +274,9 @@ describe('CreateTeamUseCase', () => {
         expectSuccess(await createTeamUseCase.execute(dto))
 
         // Assert
-        const savedTeam = expectMockCallArg<Team>(vi.mocked(teamRepository.save))
+        // Verify the saved team entity
+        const { team: savedTeam } = expectMockCallArg<{ team: Team }>(vi.mocked(teamRepository.save))
+
         expect(savedTeam.foundedYear).toBeNull()
       })
     })

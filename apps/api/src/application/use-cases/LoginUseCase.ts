@@ -33,11 +33,7 @@ export class LoginUseCase {
     tokenFactory,
     refreshTokenRepository,
     userRepository,
-  }: {
-    tokenFactory: TokenFactory
-    refreshTokenRepository: IRefreshTokenRepository
-    userRepository: IUserRepository
-  }) {
+  }: { tokenFactory: TokenFactory; refreshTokenRepository: IRefreshTokenRepository; userRepository: IUserRepository }) {
     this.tokenFactory = tokenFactory
     this.refreshTokenRepository = refreshTokenRepository
     this.userRepository = userRepository
@@ -56,38 +52,23 @@ export class LoginUseCase {
   }
 
   async execute(dto: LoginDTO): Promise<Result<LoginResponseDTO, NotFoundError | RepositoryError | ValidationError>> {
-    const findResult = await this.userRepository.findByEmail({ email: dto.email })
+    const findUserResult = await this.userRepository.findByEmail({ email: dto.email })
 
-    if (!findResult.ok) {
-      return Err(findResult.error)
+    if (!findUserResult.ok) {
+      return Err(findUserResult.error)
     }
 
-    const user = findResult.value
-
-    if (!user) {
-      return Err(
-        ValidationError.forField({
-          field: 'credentials',
-          message: 'Invalid email or password',
-        }),
-      )
+    if (!findUserResult.value) {
+      return Err(ValidationError.forField({ field: 'credentials', message: 'Invalid email or password' }))
     }
 
-    const isPasswordValid = await verifyPassword(dto.password, user.getPasswordHash())
+    const isPasswordValid = await verifyPassword(dto.password, findUserResult.value.getPasswordHash())
 
     if (!isPasswordValid) {
-      return Err(
-        ValidationError.forField({
-          field: 'credentials',
-          message: 'Invalid email or password',
-        }),
-      )
+      return Err(ValidationError.forField({ field: 'credentials', message: 'Invalid email or password' }))
     }
 
-    // Create refresh token (coordinates JWT generation + domain entity creation)
-    const refreshTokenResult = this.tokenFactory.createRefreshToken({
-      userId: user.id.getValue(),
-    })
+    const refreshTokenResult = this.tokenFactory.createRefreshToken({ userId: findUserResult.value.id.getValue() })
 
     if (!refreshTokenResult.ok) {
       return Err(refreshTokenResult.error)
@@ -95,19 +76,16 @@ export class LoginUseCase {
 
     const refreshToken = refreshTokenResult.value
 
-    const saveResult = await this.refreshTokenRepository.save({
-      refreshToken,
-    })
+    const saveResult = await this.refreshTokenRepository.save({ refreshToken })
 
     if (!saveResult.ok) {
       return Err(saveResult.error)
     }
 
-    // Create access token
     const accessTokenResult = this.tokenFactory.createAccessToken({
-      email: user.email.getValue(),
-      role: user.role.getValue(),
-      userId: user.id.getValue(),
+      email: findUserResult.value.email.getValue(),
+      role: findUserResult.value.role.getValue(),
+      userId: findUserResult.value.id.getValue(),
     })
 
     if (!accessTokenResult.ok) {
@@ -117,7 +95,7 @@ export class LoginUseCase {
     return Ok({
       accessToken: accessTokenResult.value,
       refreshToken: refreshToken.token,
-      user: user.toDTO(),
+      user: findUserResult.value.toDTO(),
     })
   }
 }

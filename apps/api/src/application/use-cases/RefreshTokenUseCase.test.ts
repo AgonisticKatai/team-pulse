@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { ValidationError } from '../../domain/errors/index.js'
+import { NotFoundError, ValidationError } from '../../domain/errors/index.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import { Err, Ok } from '../../domain/types/Result.js'
@@ -81,8 +81,8 @@ describe('RefreshTokenUseCase', () => {
         // Arrange
         const dto = buildRefreshTokenDTO({ refreshToken: TEST_CONSTANTS.auth.validRefreshToken })
 
-        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(mockRefreshToken)
-        vi.mocked(userRepository.findById).mockResolvedValue(mockUser)
+        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshToken))
+        vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
 
         // Act
         const result = await refreshTokenUseCase.execute(dto)
@@ -97,8 +97,8 @@ describe('RefreshTokenUseCase', () => {
         // Arrange
         const dto = buildRefreshTokenDTO({ refreshToken: TEST_CONSTANTS.auth.validRefreshToken })
 
-        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(mockRefreshToken)
-        vi.mocked(userRepository.findById).mockResolvedValue(mockUser)
+        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshToken))
+        vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
 
         // Act
         const result = await refreshTokenUseCase.execute(dto)
@@ -115,15 +115,15 @@ describe('RefreshTokenUseCase', () => {
         // Arrange
         const dto = buildRefreshTokenDTO({ refreshToken: TEST_CONSTANTS.auth.validRefreshToken })
 
-        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(mockRefreshToken)
-        vi.mocked(userRepository.findById).mockResolvedValue(mockUser)
+        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshToken))
+        vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
 
         // Act
         const result = await refreshTokenUseCase.execute(dto)
 
         // Assert
         expectSuccess(result)
-        expect(refreshTokenRepository.findByToken).toHaveBeenCalledWith(TEST_CONSTANTS.auth.validRefreshToken)
+        expect(refreshTokenRepository.findByToken).toHaveBeenCalledWith({ token: TEST_CONSTANTS.auth.validRefreshToken })
         expect(refreshTokenRepository.findByToken).toHaveBeenCalledTimes(1)
       })
 
@@ -131,15 +131,15 @@ describe('RefreshTokenUseCase', () => {
         // Arrange
         const dto = buildRefreshTokenDTO({ refreshToken: TEST_CONSTANTS.auth.validRefreshToken })
 
-        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(mockRefreshToken)
-        vi.mocked(userRepository.findById).mockResolvedValue(mockUser)
+        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshToken))
+        vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
 
         // Act
         const result = await refreshTokenUseCase.execute(dto)
 
         // Assert
         expectSuccess(result)
-        expect(userRepository.findById).toHaveBeenCalledWith(TEST_CONSTANTS.users.johnDoe.id)
+        expect(userRepository.findById).toHaveBeenCalledWith({ id: TEST_CONSTANTS.users.johnDoe.id })
         expect(userRepository.findById).toHaveBeenCalledTimes(1)
       })
 
@@ -147,8 +147,8 @@ describe('RefreshTokenUseCase', () => {
         // Arrange
         const dto = buildRefreshTokenDTO({ refreshToken: TEST_CONSTANTS.auth.validRefreshToken })
 
-        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(mockRefreshToken)
-        vi.mocked(userRepository.findById).mockResolvedValue(mockUser)
+        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshToken))
+        vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
 
         // Act
         const result = await refreshTokenUseCase.execute(dto)
@@ -189,19 +189,19 @@ describe('RefreshTokenUseCase', () => {
         expect(refreshTokenRepository.findByToken).not.toHaveBeenCalled()
       })
 
-      it('should return ValidationError when refresh token does not exist in database', async () => {
+      it('should return NotFoundError when refresh token does not exist in database', async () => {
         // Arrange
         const dto = buildRefreshTokenDTO()
 
         vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(Ok(mockPayload))
-        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(null)
+        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(null))
 
         // Act
         const result = await refreshTokenUseCase.execute(dto)
 
         // Assert
-        const error = expectErrorType({ errorType: ValidationError, result })
-        expect(error.message).toBe('Refresh token has been revoked')
+        const error = expectErrorType({ errorType: NotFoundError, result })
+        expect(error.message).toContain('RefreshToken')
 
         // Should not proceed to user check
         expect(userRepository.findById).not.toHaveBeenCalled()
@@ -217,7 +217,8 @@ describe('RefreshTokenUseCase', () => {
         const expiredToken = buildExpiredRefreshToken()
 
         vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(Ok(mockPayload))
-        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(expiredToken)
+        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(expiredToken))
+        vi.mocked(refreshTokenRepository.deleteByToken).mockResolvedValue(Ok(true))
 
         // Act
         const result = await refreshTokenUseCase.execute(dto)
@@ -227,27 +228,28 @@ describe('RefreshTokenUseCase', () => {
         expect(error.message).toBe('Refresh token has expired')
 
         // Should clean up expired token
-        expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith(TEST_CONSTANTS.auth.expiredRefreshToken)
+        expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith({ token: TEST_CONSTANTS.auth.expiredRefreshToken })
         expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledTimes(1)
       })
 
-      it('should return ValidationError and delete token when user no longer exists', async () => {
+      it('should return NotFoundError and delete token when user no longer exists', async () => {
         // Arrange
         const dto = buildRefreshTokenDTO({ refreshToken: TEST_CONSTANTS.auth.validRefreshToken })
 
         vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(Ok(mockPayload))
-        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(mockRefreshToken)
-        vi.mocked(userRepository.findById).mockResolvedValue(null) // User deleted
+        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshToken))
+        vi.mocked(userRepository.findById).mockResolvedValue(Ok(null)) // User deleted
+        vi.mocked(refreshTokenRepository.deleteByToken).mockResolvedValue(Ok(true))
 
         // Act
         const result = await refreshTokenUseCase.execute(dto)
 
         // Assert
-        const error = expectErrorType({ errorType: ValidationError, result })
-        expect(error.message).toBe('User no longer exists')
+        const error = expectErrorType({ errorType: NotFoundError, result })
+        expect(error.message).toContain('User')
 
         // Should clean up orphaned token
-        expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith(TEST_CONSTANTS.auth.validRefreshToken)
+        expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith({ token: TEST_CONSTANTS.auth.validRefreshToken })
         expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledTimes(1)
       })
 
@@ -286,8 +288,8 @@ describe('RefreshTokenUseCase', () => {
             userId: TEST_CONSTANTS.users.adminUser.id,
           }),
         )
-        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(mockRefreshToken)
-        vi.mocked(userRepository.findById).mockResolvedValue(adminUser)
+        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshToken))
+        vi.mocked(userRepository.findById).mockResolvedValue(Ok(adminUser))
 
         // Act
         const result = await refreshTokenUseCase.execute(dto)
@@ -313,8 +315,8 @@ describe('RefreshTokenUseCase', () => {
             userId: TEST_CONSTANTS.users.superAdminUser.id,
           }),
         )
-        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(mockRefreshToken)
-        vi.mocked(userRepository.findById).mockResolvedValue(superAdminUser)
+        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshToken))
+        vi.mocked(userRepository.findById).mockResolvedValue(Ok(superAdminUser))
 
         // Act
         const result = await refreshTokenUseCase.execute(dto)

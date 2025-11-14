@@ -23,17 +23,17 @@ export interface IRefreshTokenRepository {
    * Find a refresh token by the token string
    *
    * @param token - The refresh token string
-   * @returns The refresh token if found, null otherwise
+   * @returns The refresh token if found, null otherwise, or RepositoryError if operation fails
    */
-  findByToken(token: string): Promise<RefreshToken | null>
+  findByToken({ token }: { token: string }): Promise<Result<RefreshToken | null, RepositoryError>>
 
   /**
    * Find all refresh tokens for a specific user
    *
    * @param userId - The user's unique identifier
-   * @returns Array of refresh tokens for the user (empty array if none exist)
+   * @returns Array of refresh tokens for the user (empty array if none exist), or RepositoryError if operation fails
    */
-  findByUserId(userId: string): Promise<RefreshToken[]>
+  findByUserId({ userId }: { userId: string }): Promise<Result<RefreshToken[], RepositoryError>>
 
   /**
    * Save a refresh token (create or update)
@@ -50,9 +50,9 @@ export interface IRefreshTokenRepository {
    * Delete a refresh token by the token string
    *
    * @param token - The refresh token string
-   * @returns true if deleted, false if token didn't exist
+   * @returns true if deleted, false if token didn't exist, or RepositoryError if operation fails
    */
-  deleteByToken(token: string): Promise<boolean>
+  deleteByToken({ token }: { token: string }): Promise<Result<boolean, RepositoryError>>
 
   /**
    * Delete all refresh tokens for a specific user
@@ -60,16 +60,16 @@ export interface IRefreshTokenRepository {
    * Useful for logout-all-devices functionality
    *
    * @param userId - The user's unique identifier
-   * @returns Number of tokens deleted
+   * @returns Number of tokens deleted, or RepositoryError if operation fails
    */
-  deleteByUserId(userId: string): Promise<number>
+  deleteByUserId({ userId }: { userId: string }): Promise<Result<number, RepositoryError>>
 
   /**
    * Delete all expired refresh tokens
    *
    * Useful for cleanup jobs
    *
-   * @returns Number of tokens deleted
+   * @returns Number of tokens deleted, or RepositoryError if operation fails
    */
-  deleteExpired(): Promise<number>
+  deleteExpired(): Promise<Result<number, RepositoryError>>
 }

@@ -19,13 +19,13 @@ export class DeleteTeamUseCase {
   }
 
   async execute(id: string): Promise<Result<void, NotFoundError | RepositoryError>> {
-    const findResult = await this.teamRepository.findById({ id })
+    const findTeamResult = await this.teamRepository.findById({ id })
 
-    if (!findResult.ok) {
-      return Err(findResult.error)
+    if (!findTeamResult.ok) {
+      return Err(findTeamResult.error)
     }
 
-    if (!findResult.value) {
+    if (!findTeamResult.value) {
       return Err(NotFoundError.create({ entityName: 'Team', identifier: id }))
     }
 

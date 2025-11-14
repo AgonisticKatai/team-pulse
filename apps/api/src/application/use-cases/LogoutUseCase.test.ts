@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
+import { Ok } from '../../domain/types/Result.js'
 import { expectSuccess, TEST_CONSTANTS } from '../../infrastructure/testing/index.js'
 import { LogoutUseCase } from './LogoutUseCase.js'
 
@@ -35,21 +36,21 @@ describe('LogoutUseCase', () => {
 
       // Assert
       expectSuccess(result)
-      expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith(refreshToken)
+      expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith({ token: refreshToken })
       expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledTimes(1)
     })
 
     it('should complete successfully even if token does not exist', async () => {
       // Arrange
       const refreshToken = 'non-existent-token'
-      vi.mocked(refreshTokenRepository.deleteByToken).mockResolvedValue(false)
+      vi.mocked(refreshTokenRepository.deleteByToken).mockResolvedValue(Ok(false))
 
       // Act
       const result = await logoutUseCase.execute(refreshToken)
 
       // Assert
       expectSuccess(result)
-      expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith(refreshToken)
+      expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith({ token: refreshToken })
     })
 
     it('should return void (no return value)', async () => {
@@ -73,7 +74,7 @@ describe('LogoutUseCase', () => {
 
       // Assert
       expectSuccess(result)
-      expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith('')
+      expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith({ token: refreshToken })
       expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledTimes(1)
     })
 
@@ -91,7 +92,7 @@ describe('LogoutUseCase', () => {
       expectSuccess(result2)
       expectSuccess(result3)
       expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledTimes(3)
-      expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith(refreshToken)
+      expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith({ token: refreshToken })
     })
   })
 })

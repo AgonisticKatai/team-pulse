@@ -15,11 +15,6 @@ export class UpdateTeamUseCase {
     this.teamRepository = teamRepository
   }
 
-  /**
-   * Factory method to create the use case
-   *
-   * Use named parameters for consistency with domain entities
-   */
   static create({ teamRepository }: { teamRepository: ITeamRepository }): UpdateTeamUseCase {
     return new UpdateTeamUseCase({ teamRepository })
   }
@@ -28,51 +23,35 @@ export class UpdateTeamUseCase {
     id: string,
     dto: UpdateTeamDTO,
   ): Promise<Result<TeamResponseDTO, DuplicatedError | NotFoundError | ValidationError | RepositoryError>> {
-    // Find existing team by ID
-    const existingTeam = await this.teamRepository.findById({ id })
+    const findTeamResult = await this.teamRepository.findById({ id })
 
-    // Handle repository errors
-    if (!existingTeam.ok) {
-      return Err(existingTeam.error)
+    if (!findTeamResult.ok) {
+      return Err(findTeamResult.error)
     }
 
-    // Handle not found
-    if (!existingTeam.value) {
+    if (!findTeamResult.value) {
       return Err(NotFoundError.create({ entityName: 'Team', identifier: id }))
     }
 
-    const team = existingTeam.value
+    if (dto.name && dto.name !== findTeamResult.value.name.getValue()) {
+      const findTeamResult = await this.teamRepository.findByName({ name: dto.name })
 
-    // Business Rule: If updating name, check uniqueness
-    if (dto.name && dto.name !== team.name.getValue()) {
-      // Check if another team with the same name exists
-      const findResult = await this.teamRepository.findByName({ name: dto.name })
-
-      // Handle repository errors
-      if (!findResult.ok) {
-        return Err(findResult.error)
+      if (!findTeamResult.ok) {
+        return Err(findTeamResult.error)
       }
 
-      const existingTeamWithSameName = findResult.value
-
-      if (existingTeamWithSameName && existingTeamWithSameName.id.getValue() !== id) {
+      if (findTeamResult.value && findTeamResult.value.id.getValue() !== id) {
         return Err(DuplicatedError.create({ entityName: 'Team', identifier: dto.name }))
       }
     }
 
-    // Update domain entity (immutable update)
-    const updateResult = team.update({
-      city: dto.city,
-      foundedYear: dto.foundedYear,
-      name: dto.name,
-    })
+    const updateResult = findTeamResult.value.update({ city: dto.city, foundedYear: dto.foundedYear, name: dto.name })
 
     if (!updateResult.ok) {
       return Err(updateResult.error)
     }
 
-    // Persist - TypeScript knows updateResult.value is Team (no ! needed)
-    const saveResult = await this.teamRepository.save(updateResult.value)
+    const saveResult = await this.teamRepository.save({ team: updateResult.value })
 
     if (!saveResult.ok) {
       return Err(saveResult.error)

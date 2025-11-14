@@ -54,7 +54,7 @@ export interface ITeamRepository {
    * @param team - The team entity to save
    * @returns Result with the saved team, or RepositoryError if operation fails
    */
-  save(team: Team): Promise<Result<Team, RepositoryError>>
+  save({ team }: { team: Team }): Promise<Result<Team, RepositoryError>>
 
   /**
    * Delete a team by its identifier
@@ -70,5 +70,5 @@ export interface ITeamRepository {
    * @param name - The team's name
    * @returns Result with boolean indicating if team exists, or RepositoryError if operation fails
    */
-  existsByName(name: string): Promise<Result<boolean, RepositoryError>>
+  existsByName({ name }: { name: string }): Promise<Result<boolean, RepositoryError>>
 }

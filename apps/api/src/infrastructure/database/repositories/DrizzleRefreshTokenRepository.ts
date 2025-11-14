@@ -4,7 +4,7 @@ import { RefreshToken } from '../../../domain/models/RefreshToken.js'
 import type { IRefreshTokenRepository } from '../../../domain/repositories/IRefreshTokenRepository.js'
 import { Err, Ok, type Result } from '../../../domain/types/Result.js'
 import type { Database } from '../connection.js'
-import { refreshTokens } from '../schema.js'
+import { refreshTokens as refreshTokensSchema } from '../schema.js'
 
 /**
  * Drizzle RefreshToken Repository (ADAPTER)
@@ -27,21 +27,39 @@ import { refreshTokens } from '../schema.js'
 export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
   constructor(private readonly db: Database) {}
 
-  async findByToken(token: string): Promise<RefreshToken | null> {
-    const rows = await this.db.select().from(refreshTokens).where(eq(refreshTokens.token, token)).limit(1)
+  async findByToken({ token }: { token: string }): Promise<Result<RefreshToken | null, RepositoryError>> {
+    try {
+      const [refreshToken] = await this.db.select().from(refreshTokensSchema).where(eq(refreshTokensSchema.token, token)).limit(1)
 
-    const row = rows[0]
-    if (!row) {
-      return null
+      if (!refreshToken) {
+        return Ok(null)
+      }
+
+      return Ok(this.mapToDomain({ refreshToken }))
+    } catch (error) {
+      return Err(
+        RepositoryError.forOperation({
+          cause: error instanceof Error ? error : new Error(String(error)),
+          message: 'Failed to find refresh token by token',
+          operation: 'findByToken',
+        }),
+      )
     }
-
-    return this.mapToDomain(row)
   }
 
-  async findByUserId(userId: string): Promise<RefreshToken[]> {
-    const rows = await this.db.select().from(refreshTokens).where(eq(refreshTokens.userId, userId))
-
-    return rows.map((row: typeof refreshTokens.$inferSelect) => this.mapToDomain(row))
+  async findByUserId({ userId }: { userId: string }): Promise<Result<RefreshToken[], RepositoryError>> {
+    try {
+      const refreshTokens = await this.db.select().from(refreshTokensSchema).where(eq(refreshTokensSchema.userId, userId))
+      return Ok(refreshTokens.map((row: typeof refreshTokensSchema.$inferSelect) => this.mapToDomain({ refreshToken: row })))
+    } catch (error) {
+      return Err(
+        RepositoryError.forOperation({
+          cause: error instanceof Error ? error : new Error(String(error)),
+          message: 'Failed to find refresh tokens by user id',
+          operation: 'findByUserId',
+        }),
+      )
+    }
   }
 
   async save({ refreshToken }: { refreshToken: RefreshToken }): Promise<Result<RefreshToken, RepositoryError>> {
@@ -59,7 +77,7 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
 
       // Upsert: insert or update if exists
       await this.db
-        .insert(refreshTokens)
+        .insert(refreshTokensSchema)
         .values(row)
         .onConflictDoUpdate({
           set: {
@@ -67,7 +85,7 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
             token: row.token,
             userId: row.userId,
           },
-          target: refreshTokens.id,
+          target: refreshTokensSchema.id,
         })
 
       return Ok(refreshToken)
@@ -82,20 +100,50 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
     }
   }
 
-  async deleteByToken(token: string): Promise<boolean> {
-    const result = await this.db.delete(refreshTokens).where(eq(refreshTokens.token, token))
-    return result.count > 0
+  async deleteByToken({ token }: { token: string }): Promise<Result<boolean, RepositoryError>> {
+    try {
+      const result = await this.db.delete(refreshTokensSchema).where(eq(refreshTokensSchema.token, token))
+      return Ok(result.count > 0)
+    } catch (error) {
+      return Err(
+        RepositoryError.forOperation({
+          cause: error instanceof Error ? error : new Error(String(error)),
+          message: 'Failed to delete refresh token by token',
+          operation: 'deleteByToken',
+        }),
+      )
+    }
   }
 
-  async deleteByUserId(userId: string): Promise<number> {
-    const result = await this.db.delete(refreshTokens).where(eq(refreshTokens.userId, userId))
-    return result.count
+  async deleteByUserId({ userId }: { userId: string }): Promise<Result<number, RepositoryError>> {
+    try {
+      const result = await this.db.delete(refreshTokensSchema).where(eq(refreshTokensSchema.userId, userId))
+      return Ok(result.count)
+    } catch (error) {
+      return Err(
+        RepositoryError.forOperation({
+          cause: error instanceof Error ? error : new Error(String(error)),
+          message: 'Failed to delete refresh tokens by user id',
+          operation: 'deleteByUserId',
+        }),
+      )
+    }
   }
 
-  async deleteExpired(): Promise<number> {
+  async deleteExpired(): Promise<Result<number, RepositoryError>> {
     const now = new Date()
-    const result = await this.db.delete(refreshTokens).where(lt(refreshTokens.expiresAt, now))
-    return result.count
+    try {
+      const result = await this.db.delete(refreshTokensSchema).where(lt(refreshTokensSchema.expiresAt, now))
+      return Ok(result.count)
+    } catch (error) {
+      return Err(
+        RepositoryError.forOperation({
+          cause: error instanceof Error ? error : new Error(String(error)),
+          message: 'Failed to delete expired refresh tokens',
+          operation: 'deleteExpired',
+        }),
+      )
+    }
   }
 
   /**
@@ -104,13 +152,13 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
    * This is where we convert infrastructure data structures
    * to domain entities. The domain entity validates itself.
    */
-  private mapToDomain(row: typeof refreshTokens.$inferSelect): RefreshToken {
+  private mapToDomain({ refreshToken }: { refreshToken: typeof refreshTokensSchema.$inferSelect }): RefreshToken {
     const result = RefreshToken.create({
-      createdAt: new Date(row.createdAt),
-      expiresAt: new Date(row.expiresAt),
-      id: row.id,
-      token: row.token,
-      userId: row.userId,
+      createdAt: new Date(refreshToken.createdAt),
+      expiresAt: new Date(refreshToken.expiresAt),
+      id: refreshToken.id,
+      token: refreshToken.token,
+      userId: refreshToken.userId,
     })
 
     if (!result.ok) {

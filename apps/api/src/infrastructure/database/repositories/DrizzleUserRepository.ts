@@ -28,14 +28,24 @@ import { users as usersSchema } from '../schema.js'
 export class DrizzleUserRepository implements IUserRepository {
   constructor(private readonly db: Database) {}
 
-  async findById(id: string): Promise<User | null> {
-    const [user] = await this.db.select().from(usersSchema).where(eq(usersSchema.id, id)).limit(1)
+  async findById({ id }: { id: string }): Promise<Result<User | null, RepositoryError>> {
+    try {
+      const [user] = await this.db.select().from(usersSchema).where(eq(usersSchema.id, id)).limit(1)
 
-    if (!user) {
-      return null
+      if (!user) {
+        return Ok(null)
+      }
+
+      return Ok(this.mapToDomain({ user }))
+    } catch (error) {
+      return Err(
+        RepositoryError.forOperation({
+          cause: error instanceof Error ? error : new Error(String(error)),
+          message: 'Failed to find user by id',
+          operation: 'findById',
+        }),
+      )
     }
-
-    return this.mapToDomain(user)
   }
 
   async findByEmail({ email }: { email: string }): Promise<Result<User | null, RepositoryError>> {
@@ -47,7 +57,7 @@ export class DrizzleUserRepository implements IUserRepository {
         return Ok(null)
       }
 
-      return Ok(this.mapToDomain(user))
+      return Ok(this.mapToDomain({ user }))
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -63,7 +73,7 @@ export class DrizzleUserRepository implements IUserRepository {
     try {
       const rows = await this.db.select().from(usersSchema)
 
-      return Ok(rows.map((row: typeof usersSchema.$inferSelect) => this.mapToDomain(row)))
+      return Ok(rows.map((user: typeof usersSchema.$inferSelect) => this.mapToDomain({ user })))
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -115,20 +125,50 @@ export class DrizzleUserRepository implements IUserRepository {
     }
   }
 
-  async delete(id: string): Promise<boolean> {
-    const result = await this.db.delete(usersSchema).where(eq(usersSchema.id, id))
-    return result.count > 0
+  async delete({ id }: { id: string }): Promise<Result<boolean, RepositoryError>> {
+    try {
+      const result = await this.db.delete(usersSchema).where(eq(usersSchema.id, id))
+      return Ok(result.count > 0)
+    } catch (error) {
+      return Err(
+        RepositoryError.forOperation({
+          cause: error instanceof Error ? error : new Error(String(error)),
+          message: 'Failed to delete user',
+          operation: 'delete',
+        }),
+      )
+    }
   }
 
-  async existsByEmail(email: string): Promise<boolean> {
-    const rows = await this.db.select({ id: usersSchema.id }).from(usersSchema).where(sql`LOWER(${usersSchema.email}) = LOWER(${email})`).limit(1)
+  async existsByEmail({ email }: { email: string }): Promise<Result<boolean, RepositoryError>> {
+    try {
+      const rows = await this.db.select({ id: usersSchema.id }).from(usersSchema).where(sql`LOWER(${usersSchema.email}) = LOWER(${email})`).limit(1)
 
-    return rows.length > 0
+      return Ok(rows.length > 0)
+    } catch (error) {
+      return Err(
+        RepositoryError.forOperation({
+          cause: error instanceof Error ? error : new Error(String(error)),
+          message: 'Failed to check if user exists by email',
+          operation: 'existsByEmail',
+        }),
+      )
+    }
   }
 
-  async count(): Promise<number> {
-    const result = await this.db.select({ count: sql<number>`count(*)` }).from(usersSchema)
-    return result[0]?.count ?? 0
+  async count(): Promise<Result<number, RepositoryError>> {
+    try {
+      const result = await this.db.select({ count: sql<number>`count(*)` }).from(usersSchema)
+      return Ok(result[0]?.count ?? 0)
+    } catch (error) {
+      return Err(
+        RepositoryError.forOperation({
+          cause: error instanceof Error ? error : new Error(String(error)),
+          message: 'Failed to count users',
+          operation: 'count',
+        }),
+      )
+    }
   }
 
   /**
@@ -140,19 +180,20 @@ export class DrizzleUserRepository implements IUserRepository {
    * TODO (Tech Debt): This throws when validation fails. After error handling migration,
    * this should return Result and propagate to use cases.
    */
-  private mapToDomain(row: typeof usersSchema.$inferSelect): User {
+  private mapToDomain({ user }: { user: typeof usersSchema.$inferSelect }): User {
     const result = User.create({
-      createdAt: new Date(row.createdAt),
-      email: row.email,
-      id: row.id,
-      passwordHash: row.passwordHash,
-      role: row.role as UserRole, // Type assertion safe because DB enforces valid values
-      updatedAt: new Date(row.updatedAt),
+      createdAt: new Date(user.createdAt),
+      email: user.email,
+      id: user.id,
+      passwordHash: user.passwordHash,
+      role: user.role as UserRole, // Type assertion safe because DB enforces valid values
+      updatedAt: new Date(user.updatedAt),
     })
 
     if (!result.ok) {
-      // Data corruption - should never happen in production
-      throw new Error(`Failed to map database row to User entity: ${result.error.message}. User ID: ${row.id}`)
+      // This should never happen with data from the database
+      // since it was validated on creation
+      throw result.error
     }
 
     return result.value

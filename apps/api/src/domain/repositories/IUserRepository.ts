@@ -23,9 +23,9 @@ export interface IUserRepository {
    * Find a user by their unique identifier
    *
    * @param id - The user's unique identifier
-   * @returns The user if found, null otherwise
+   * @returns The user if found, null otherwise, or RepositoryError if operation fails
    */
-  findById(id: string): Promise<User | null>
+  findById({ id }: { id: string }): Promise<Result<User | null, RepositoryError>>
 
   /**
    * Find a user by their email address
@@ -57,22 +57,22 @@ export interface IUserRepository {
    * Delete a user by their identifier
    *
    * @param id - The user's unique identifier
-   * @returns true if deleted, false if user didn't exist
+   * @returns true if deleted, false if user didn't exist, or RepositoryError if operation fails
    */
-  delete(id: string): Promise<boolean>
+  delete({ id }: { id: string }): Promise<Result<boolean, RepositoryError>>
 
   /**
    * Check if a user exists by email
    *
    * @param email - The user's email
-   * @returns true if a user with this email exists
+   * @returns true if a user with this email exists, or RepositoryError if operation fails
    */
-  existsByEmail(email: string): Promise<boolean>
+  existsByEmail({ email }: { email: string }): Promise<Result<boolean, RepositoryError>>
 
   /**
    * Count total number of users
    *
-   * @returns Total count of users
+   * @returns Total count of users, or RepositoryError if operation fails
    */
-  count(): Promise<number>
+  count(): Promise<Result<number, RepositoryError>>
 }

@@ -1,5 +1,5 @@
 import type { RefreshTokenDTO, RefreshTokenResponseDTO } from '@team-pulse/shared'
-import { ValidationError } from '../../domain/errors/index.js'
+import { NotFoundError, type RepositoryError, ValidationError } from '../../domain/errors/index.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import { Err, Ok, type Result } from '../../domain/types/index.js'
@@ -31,11 +31,7 @@ export class RefreshTokenUseCase {
     tokenFactory,
     refreshTokenRepository,
     userRepository,
-  }: {
-    tokenFactory: TokenFactory
-    refreshTokenRepository: IRefreshTokenRepository
-    userRepository: IUserRepository
-  }) {
+  }: { tokenFactory: TokenFactory; refreshTokenRepository: IRefreshTokenRepository; userRepository: IUserRepository }) {
     this.tokenFactory = tokenFactory
     this.refreshTokenRepository = refreshTokenRepository
     this.userRepository = userRepository
@@ -53,67 +49,57 @@ export class RefreshTokenUseCase {
     return new RefreshTokenUseCase({ tokenFactory, refreshTokenRepository, userRepository })
   }
 
-  async execute(dto: RefreshTokenDTO): Promise<Result<RefreshTokenResponseDTO, ValidationError>> {
-    // Verify refresh token JWT signature
-    const refreshTokenPayloadResult = this.tokenFactory.verifyRefreshToken({
-      token: dto.refreshToken,
+  async execute(dto: RefreshTokenDTO): Promise<Result<RefreshTokenResponseDTO, NotFoundError | RepositoryError | ValidationError>> {
+    const verifyRefreshTokenResult = this.tokenFactory.verifyRefreshToken({ token: dto.refreshToken })
+
+    if (!verifyRefreshTokenResult.ok) {
+      return Err(verifyRefreshTokenResult.error)
+    }
+
+    const findRefreshTokenResult = await this.refreshTokenRepository.findByToken({ token: dto.refreshToken })
+
+    if (!findRefreshTokenResult.ok) {
+      return Err(findRefreshTokenResult.error)
+    }
+
+    if (!findRefreshTokenResult.value) {
+      return Err(NotFoundError.create({ entityName: 'RefreshToken', identifier: dto.refreshToken }))
+    }
+
+    if (findRefreshTokenResult.value.isExpired()) {
+      const deleteRefreshTokenResult = await this.refreshTokenRepository.deleteByToken({ token: dto.refreshToken })
+
+      if (!deleteRefreshTokenResult.ok) {
+        return Err(deleteRefreshTokenResult.error)
+      }
+
+      return Err(ValidationError.forField({ field: 'refreshToken', message: 'Refresh token has expired' }))
+    }
+
+    const userResult = await this.userRepository.findById({ id: verifyRefreshTokenResult.value.userId })
+
+    if (!userResult.ok) {
+      await this.refreshTokenRepository.deleteByToken({ token: dto.refreshToken })
+      return Err(userResult.error)
+    }
+
+    if (!userResult.value) {
+      await this.refreshTokenRepository.deleteByToken({ token: dto.refreshToken })
+      return Err(NotFoundError.create({ entityName: 'User', identifier: verifyRefreshTokenResult.value.userId }))
+    }
+
+    const createAccessTokenResult = this.tokenFactory.createAccessToken({
+      email: userResult.value.email.getValue(),
+      role: userResult.value.role.getValue(),
+      userId: userResult.value.id.getValue(),
     })
 
-    if (!refreshTokenPayloadResult.ok) {
-      return Err(refreshTokenPayloadResult.error)
-    }
-
-    const payload = refreshTokenPayloadResult.value
-
-    // Check if refresh token exists in database (not revoked)
-    const refreshToken = await this.refreshTokenRepository.findByToken(dto.refreshToken)
-    if (!refreshToken) {
-      return Err(
-        ValidationError.forField({
-          field: 'refreshToken',
-          message: 'Refresh token has been revoked',
-        }),
-      )
-    }
-
-    // Check if refresh token has expired
-    if (refreshToken.isExpired()) {
-      // Clean up expired token
-      await this.refreshTokenRepository.deleteByToken(dto.refreshToken)
-      return Err(
-        ValidationError.forField({
-          field: 'refreshToken',
-          message: 'Refresh token has expired',
-        }),
-      )
-    }
-
-    // Get user from database (ensure user still exists and is active)
-    const user = await this.userRepository.findById(payload.userId)
-    if (!user) {
-      // User was deleted, invalidate token
-      await this.refreshTokenRepository.deleteByToken(dto.refreshToken)
-      return Err(
-        ValidationError.forField({
-          field: 'refreshToken',
-          message: 'User no longer exists',
-        }),
-      )
-    }
-
-    // Generate new access token
-    const accessTokenResult = this.tokenFactory.createAccessToken({
-      email: user.email.getValue(),
-      role: user.role.getValue(),
-      userId: user.id.getValue(),
-    })
-
-    if (!accessTokenResult.ok) {
-      return Err(accessTokenResult.error)
+    if (!createAccessTokenResult.ok) {
+      return Err(createAccessTokenResult.error)
     }
 
     return Ok({
-      accessToken: accessTokenResult.value,
+      accessToken: createAccessTokenResult.value,
     })
   }
 }

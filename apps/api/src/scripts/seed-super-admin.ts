@@ -37,10 +37,15 @@ async function seedSuperAdmin() {
     console.log('✅ Database connected')
 
     // 3. Check if users exist
-    const userCount = await userRepository.count()
-    console.log(`📊 Current user count: ${userCount}`)
+    const userCountResult = await userRepository.count()
 
-    if (userCount > 0) {
+    if (!userCountResult.ok) {
+      throw new Error(`Failed to count users: ${userCountResult.error.message}`)
+    }
+
+    console.log(`📊 Current user count: ${userCountResult.value}`)
+
+    if (userCountResult.value > 0) {
       console.log('⚠️  Users already exist. Skipping seed.')
       console.log('ℹ️  If you want to create a new SUPER_ADMIN, use the /api/users endpoint')
       process.exit(0)

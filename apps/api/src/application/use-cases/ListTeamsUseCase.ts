@@ -21,17 +21,15 @@ export class ListTeamsUseCase {
   }
 
   async execute(): Promise<Result<TeamsListResponseDTO, RepositoryError>> {
-    const findResult = await this.teamRepository.findAll()
+    const findTeamResult = await this.teamRepository.findAll()
 
-    if (!findResult.ok) {
-      return Err(findResult.error)
+    if (!findTeamResult.ok) {
+      return Err(findTeamResult.error)
     }
 
-    const teams = findResult.value
-
     return Ok({
-      teams: teams.map((team) => team.toDTO()),
-      total: teams.length,
+      teams: findTeamResult.value.map((team) => team.toDTO()),
+      total: findTeamResult.value.length,
     })
   }
 }

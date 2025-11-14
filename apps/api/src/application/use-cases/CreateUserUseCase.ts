@@ -37,44 +37,30 @@ export class CreateUserUseCase {
   }
 
   async execute(dto: CreateUserDTO): Promise<Result<UserResponseDTO, DuplicatedError | RepositoryError | ValidationError>> {
-    const findResult = await this.userRepository.findByEmail({ email: dto.email })
+    const findUserResult = await this.userRepository.findByEmail({ email: dto.email })
 
-    if (!findResult.ok) {
-      return Err(findResult.error)
+    if (!findUserResult.ok) {
+      return Err(findUserResult.error)
     }
 
-    const existingUser = findResult.value
-
-    if (existingUser) {
-      return Err(
-        DuplicatedError.create({
-          entityName: 'User',
-          identifier: dto.email,
-        }),
-      )
+    if (findUserResult.value) {
+      return Err(DuplicatedError.create({ entityName: 'User', identifier: dto.email }))
     }
 
     const passwordHash = await hashPassword(dto.password)
 
-    const userResult = User.create({
-      email: dto.email,
-      id: randomUUID(),
-      passwordHash,
-      role: dto.role,
-    })
+    const createUserResult = User.create({ email: dto.email, id: randomUUID(), passwordHash, role: dto.role })
 
-    if (!userResult.ok) {
-      return Err(userResult.error)
+    if (!createUserResult.ok) {
+      return Err(createUserResult.error)
     }
 
-    const user = userResult.value
+    const saveUserResult = await this.userRepository.save({ user: createUserResult.value })
 
-    const savedUser = await this.userRepository.save({ user })
-
-    if (!savedUser.ok) {
-      return Err(savedUser.error)
+    if (!saveUserResult.ok) {
+      return Err(saveUserResult.error)
     }
 
-    return Ok(savedUser.value.toDTO())
+    return Ok(saveUserResult.value.toDTO())
   }
 }
