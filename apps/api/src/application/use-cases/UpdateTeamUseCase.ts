@@ -1,10 +1,5 @@
 import type { TeamResponseDTO, UpdateTeamDTO } from '@team-pulse/shared'
-import {
-  DuplicatedError,
-  NotFoundError,
-  type RepositoryError,
-  type ValidationError,
-} from '../../domain/errors/index.js'
+import { DuplicatedError, NotFoundError, type RepositoryError, type ValidationError } from '../../domain/errors/index.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
 import { Err, Ok, type Result } from '../../domain/types/index.js'
 
@@ -32,9 +27,7 @@ export class UpdateTeamUseCase {
   async execute(
     id: string,
     dto: UpdateTeamDTO,
-  ): Promise<
-    Result<TeamResponseDTO, DuplicatedError | NotFoundError | ValidationError | RepositoryError>
-  > {
+  ): Promise<Result<TeamResponseDTO, DuplicatedError | NotFoundError | ValidationError | RepositoryError>> {
     // Find existing team by ID
     const existingTeam = await this.teamRepository.findById({ id })
 

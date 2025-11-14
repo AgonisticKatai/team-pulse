@@ -2,13 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
 import { Ok } from '../../domain/types/Result.js'
-import {
-  buildExistingTeam,
-  buildTeam,
-  buildTeamWithoutFoundedYear,
-  expectSuccess,
-  TEST_CONSTANTS,
-} from '../../infrastructure/testing/index.js'
+import { buildExistingTeam, buildTeam, buildTeamWithoutFoundedYear, expectSuccess, TEST_CONSTANTS } from '../../infrastructure/testing/index.js'
 import { ListTeamsUseCase } from './ListTeamsUseCase.js'
 
 describe('ListTeamsUseCase', () => {

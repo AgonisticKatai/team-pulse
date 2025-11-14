@@ -26,13 +26,7 @@ export class DuplicatedError extends DomainError {
   /**
    * Factory method to create a DuplicatedError
    */
-  static create({
-    entityName,
-    identifier,
-  }: {
-    entityName?: string
-    identifier?: string | number
-  }): DuplicatedError {
+  static create({ entityName, identifier }: { entityName?: string; identifier?: string | number }): DuplicatedError {
     return new DuplicatedError({ entityName, identifier })
   }
 }

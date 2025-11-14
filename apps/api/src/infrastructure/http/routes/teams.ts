@@ -44,14 +44,7 @@ interface TeamRouteDependencies {
 }
 
 export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamRouteDependencies) {
-  const {
-    createTeamUseCase,
-    getTeamUseCase,
-    listTeamsUseCase,
-    updateTeamUseCase,
-    deleteTeamUseCase,
-    env,
-  } = dependencies
+  const { createTeamUseCase, getTeamUseCase, listTeamsUseCase, updateTeamUseCase, deleteTeamUseCase, env } = dependencies
 
   /**
    * POST /api/teams
@@ -59,33 +52,29 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
    *
    * Requires: ADMIN or SUPER_ADMIN role
    */
-  fastify.post(
-    '/api/teams',
-    { preHandler: [requireAuth(env), requireRole(['ADMIN', 'SUPER_ADMIN'])] },
-    async (request, reply) => {
-      try {
-        // Validate request body using Zod
-        const dto = CreateTeamDTOSchema.parse(request.body)
+  fastify.post('/api/teams', { preHandler: [requireAuth(env), requireRole(['ADMIN', 'SUPER_ADMIN'])] }, async (request, reply) => {
+    try {
+      // Validate request body using Zod
+      const dto = CreateTeamDTOSchema.parse(request.body)
 
-        // Execute use case - Returns Result<TeamResponseDTO, ValidationError>
-        const result = await createTeamUseCase.execute(dto)
+      // Execute use case - Returns Result<TeamResponseDTO, ValidationError>
+      const result = await createTeamUseCase.execute(dto)
 
-        // Handle use case error
-        if (!result.ok) {
-          return handleError(result.error, reply)
-        }
-
-        // Return success response
-        return reply.code(201).send({
-          data: result.value,
-          success: true,
-        })
-      } catch (error) {
-        // Handle unexpected errors (Zod validation, etc.)
-        return handleError(error, reply)
+      // Handle use case error
+      if (!result.ok) {
+        return handleError(result.error, reply)
       }
-    },
-  )
+
+      // Return success response
+      return reply.code(201).send({
+        data: result.value,
+        success: true,
+      })
+    } catch (error) {
+      // Handle unexpected errors (Zod validation, etc.)
+      return handleError(error, reply)
+    }
+  })
 
   /**
    * GET /api/teams
@@ -116,24 +105,20 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
    *
    * Requires: Authentication (any role)
    */
-  fastify.get<{ Params: { id: string } }>(
-    '/api/teams/:id',
-    { preHandler: requireAuth(env) },
-    async (request, reply) => {
-      try {
-        const { id } = request.params
+  fastify.get<{ Params: { id: string } }>('/api/teams/:id', { preHandler: requireAuth(env) }, async (request, reply) => {
+    try {
+      const { id } = request.params
 
-        const team = await getTeamUseCase.execute(id)
+      const team = await getTeamUseCase.execute(id)
 
-        return reply.code(200).send({
-          data: team,
-          success: true,
-        })
-      } catch (error) {
-        return handleError(error, reply)
-      }
-    },
-  )
+      return reply.code(200).send({
+        data: team,
+        success: true,
+      })
+    } catch (error) {
+      return handleError(error, reply)
+    }
+  })
 
   /**
    * PATCH /api/teams/:id

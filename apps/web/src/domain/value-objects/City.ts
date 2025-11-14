@@ -26,16 +26,12 @@ export class City {
 
     // Validate min length
     if (trimmedValue.length < City.MIN_LENGTH) {
-      return Err(
-        ValidationError.forField('city', `City must be at least ${City.MIN_LENGTH} characters`),
-      )
+      return Err(ValidationError.forField('city', `City must be at least ${City.MIN_LENGTH} characters`))
     }
 
     // Validate max length
     if (trimmedValue.length > City.MAX_LENGTH) {
-      return Err(
-        ValidationError.forField('city', `City must not exceed ${City.MAX_LENGTH} characters`),
-      )
+      return Err(ValidationError.forField('city', `City must not exceed ${City.MAX_LENGTH} characters`))
     }
 
     return Ok(new City(trimmedValue))

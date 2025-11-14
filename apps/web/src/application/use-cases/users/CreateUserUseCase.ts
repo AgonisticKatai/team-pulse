@@ -26,10 +26,7 @@ export class CreateUserUseCase {
    * Execute create user
    * Returns [error, null] or [null, user]
    */
-  async execute(
-    input: CreateUserUseCaseInput,
-    currentUser: User | null,
-  ): Promise<Result<User, DomainError>> {
+  async execute(input: CreateUserUseCaseInput, currentUser: User | null): Promise<Result<User, DomainError>> {
     // Check permissions
     const [permissionError] = canCreateUser(currentUser)
     if (permissionError) {
@@ -37,10 +34,7 @@ export class CreateUserUseCase {
     }
 
     // Validate credentials using domain service
-    const [validationError, credentials] = validateRegistrationCredentials(
-      input.email,
-      input.password,
-    )
+    const [validationError, credentials] = validateRegistrationCredentials(input.email, input.password)
 
     if (validationError) {
       return Err(validationError)
@@ -53,20 +47,13 @@ export class CreateUserUseCase {
     }
 
     // Check if user with email already exists
-    const [findError, existingUser] = await this.userRepository.findByEmail(
-      credentials.email.getValue(),
-    )
+    const [findError, existingUser] = await this.userRepository.findByEmail(credentials.email.getValue())
     if (findError) {
       return Err(findError)
     }
 
     if (existingUser) {
-      return Err(
-        ValidationError.forField(
-          'email',
-          `User with email '${credentials.email.getValue()}' already exists`,
-        ),
-      )
+      return Err(ValidationError.forField('email', `User with email '${credentials.email.getValue()}' already exists`))
     }
 
     // Create user via repository

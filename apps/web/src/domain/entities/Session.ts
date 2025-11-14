@@ -15,13 +15,7 @@ import type {
 import { User } from './User'
 
 // Re-export public types
-export type {
-  CreateSessionData,
-  SessionData,
-  SessionValueObjectsProps,
-  UpdateAccessTokenData,
-  UpdateTokensData,
-}
+export type { CreateSessionData, SessionData, SessionValueObjectsProps, UpdateAccessTokenData, UpdateTokensData }
 
 /**
  * Session Entity

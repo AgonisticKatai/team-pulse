@@ -20,10 +20,7 @@ import type { z } from 'zod'
  * expectZodError(result, 'Invalid email format')
  * ```
  */
-export function expectZodError(
-  result: { success: boolean; error?: z.ZodError },
-  expectedMessage: string,
-): void {
+export function expectZodError(result: { success: boolean; error?: z.ZodError }, expectedMessage: string): void {
   expect(result.success).toBe(false)
 
   if (!result.success && result.error) {
@@ -61,11 +58,7 @@ export function expectZodError(
  * const secondUser = expectMockCallArg<User>(vi.mocked(userRepository.save), 1)
  * ```
  */
-export function expectMockCallArg<T>(
-  mockFn: { mock: { calls: unknown[][] } },
-  callIndex = 0,
-  argIndex = 0,
-): T {
+export function expectMockCallArg<T>(mockFn: { mock: { calls: unknown[][] } }, callIndex = 0, argIndex = 0): T {
   const call = mockFn.mock.calls[callIndex]
   expect(call).toBeDefined()
 

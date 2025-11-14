@@ -3,13 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NotFoundError, RepositoryError } from '../../domain/errors/index.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
 import { Err, Ok } from '../../domain/types/Result.js'
-import {
-  buildTeam,
-  expectError,
-  expectErrorType,
-  expectSuccess,
-  TEST_CONSTANTS,
-} from '../../infrastructure/testing/index.js'
+import { buildTeam, expectError, expectErrorType, expectSuccess, TEST_CONSTANTS } from '../../infrastructure/testing/index.js'
 import { DeleteTeamUseCase } from './DeleteTeamUseCase.js'
 
 describe('DeleteTeamUseCase', () => {
@@ -137,9 +131,7 @@ describe('DeleteTeamUseCase', () => {
       it('should return RepositoryError when deletion fails', async () => {
         // Arrange
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
-        vi.mocked(teamRepository.delete).mockResolvedValue(
-          Err(RepositoryError.create({ message: 'Failed to delete team' })),
-        )
+        vi.mocked(teamRepository.delete).mockResolvedValue(Err(RepositoryError.create({ message: 'Failed to delete team' })))
 
         // Act
         const error = expectError(await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid))
@@ -152,9 +144,7 @@ describe('DeleteTeamUseCase', () => {
       it('should return RepositoryError if delete returns false', async () => {
         // Arrange - this is defensive programming, should never happen
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
-        vi.mocked(teamRepository.delete).mockResolvedValue(
-          Err(RepositoryError.create({ message: 'Failed to delete team', operation: 'delete' })),
-        )
+        vi.mocked(teamRepository.delete).mockResolvedValue(Err(RepositoryError.create({ message: 'Failed to delete team', operation: 'delete' })))
 
         // Act
         const error = expectErrorType({

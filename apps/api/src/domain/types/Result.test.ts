@@ -314,8 +314,7 @@ describe('Result Type', () => {
     it('should chain Result-returning operations successfully', () => {
       // Arrange
       const result = Ok(5)
-      const operation = (n: number): Result<number, Error> =>
-        n > 0 ? Ok(n * 2) : Err(new Error('Negative number'))
+      const operation = (n: number): Result<number, Error> => (n > 0 ? Ok(n * 2) : Err(new Error('Negative number')))
 
       // Act
       const value = expectSuccess(flatMap(result, operation))
@@ -340,8 +339,7 @@ describe('Result Type', () => {
     it('should propagate operation error', () => {
       // Arrange
       const result = Ok(-5)
-      const operation = (n: number): Result<number, Error> =>
-        n > 0 ? Ok(n * 2) : Err(new Error('Negative number'))
+      const operation = (n: number): Result<number, Error> => (n > 0 ? Ok(n * 2) : Err(new Error('Negative number')))
 
       // Act
       const error = expectError(flatMap(result, operation))
@@ -410,11 +408,9 @@ describe('Result Type', () => {
 
     it('should handle chaining with validation', () => {
       // Arrange
-      const validateEmail = (email: string) =>
-        email.includes('@') ? Ok(email) : Err(new Error('Invalid email'))
+      const validateEmail = (email: string) => (email.includes('@') ? Ok(email) : Err(new Error('Invalid email')))
 
-      const createUser = (email: string): Result<{ id: string; email: string }, Error> =>
-        Ok({ email, id: '123' })
+      const createUser = (email: string): Result<{ id: string; email: string }, Error> => Ok({ email, id: '123' })
 
       // Act
       const user = expectSuccess(flatMap(validateEmail('test@example.com'), createUser))
@@ -425,11 +421,9 @@ describe('Result Type', () => {
 
     it('should handle error propagation in chains', () => {
       // Arrange
-      const validateEmail = (email: string) =>
-        email.includes('@') ? Ok(email) : Err(new Error('Invalid email'))
+      const validateEmail = (email: string) => (email.includes('@') ? Ok(email) : Err(new Error('Invalid email')))
 
-      const createUser = (email: string): Result<{ id: string; email: string }, Error> =>
-        Ok({ email, id: '123' })
+      const createUser = (email: string): Result<{ id: string; email: string }, Error> => Ok({ email, id: '123' })
 
       // Act
       const error = expectError(flatMap(validateEmail('invalid'), createUser))

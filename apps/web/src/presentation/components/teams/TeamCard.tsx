@@ -60,20 +60,12 @@ export function TeamCard({ team, onEdit, onDelete }: TeamCardProps) {
 
       <div style={{ display: 'flex', gap: '0.5rem' }}>
         {onEdit && (
-          <button
-            type="button"
-            onClick={handleEdit}
-            className="team-card-button team-card-button-edit"
-          >
+          <button type="button" onClick={handleEdit} className="team-card-button team-card-button-edit">
             Edit
           </button>
         )}
         {onDelete && (
-          <button
-            type="button"
-            onClick={handleDelete}
-            className="team-card-button team-card-button-delete"
-          >
+          <button type="button" onClick={handleDelete} className="team-card-button team-card-button-delete">
             Delete
           </button>
         )}

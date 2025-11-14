@@ -2,13 +2,7 @@ import type { UserResponseDTO } from '@team-pulse/shared'
 import { ValidationError } from '../errors/index.js'
 import { Err, Ok, type Result } from '../types/index.js'
 import { Email, EntityId, Role, UserRole } from '../value-objects/index.js'
-import type {
-  CreateUserData,
-  UpdateUserData,
-  UserConstructorProps,
-  UserData,
-  UserProps,
-} from './User.types.js'
+import type { CreateUserData, UpdateUserData, UserConstructorProps, UserData, UserProps } from './User.types.js'
 
 // Re-export public types
 export type { CreateUserData, UpdateUserData, UserData, UserProps }
@@ -43,14 +37,7 @@ export class User {
   public readonly createdAt: Date
   public readonly updatedAt: Date
 
-  private constructor({
-    id,
-    email,
-    passwordHash,
-    role,
-    createdAt,
-    updatedAt,
-  }: UserConstructorProps) {
+  private constructor({ id, email, passwordHash, role, createdAt, updatedAt }: UserConstructorProps) {
     this.id = id
     this.email = email
     this.passwordHash = passwordHash
@@ -62,15 +49,9 @@ export class User {
   /**
    * Validate password hash
    */
-  private static validatePasswordHash({
-    passwordHash,
-  }: {
-    passwordHash: string
-  }): Result<string, ValidationError> {
+  private static validatePasswordHash({ passwordHash }: { passwordHash: string }): Result<string, ValidationError> {
     if (!passwordHash || passwordHash.trim().length === 0) {
-      return Err(
-        ValidationError.forField({ field: 'password', message: 'Password hash is required' }),
-      )
+      return Err(ValidationError.forField({ field: 'password', message: 'Password hash is required' }))
     }
     return Ok(passwordHash)
   }

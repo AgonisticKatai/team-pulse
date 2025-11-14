@@ -58,13 +58,7 @@ export function buildRefreshTokenDTO(overrides: Partial<RefreshTokenDTO> = {}): 
  * const expiredToken = buildRefreshToken({ expiresAt: TEST_CONSTANTS.pastDate })
  */
 export function buildRefreshToken(
-  overrides: {
-    id?: string
-    token?: string
-    userId?: string
-    expiresAt?: Date
-    createdAt?: Date
-  } = {},
+  overrides: { id?: string; token?: string; userId?: string; expiresAt?: Date; createdAt?: Date } = {},
 ): RefreshToken {
   const result = RefreshToken.create({
     createdAt: TEST_CONSTANTS.mockDate,
@@ -85,9 +79,7 @@ export function buildRefreshToken(
 /**
  * Builds a RefreshToken that is expired
  */
-export function buildExpiredRefreshToken(
-  overrides: { id?: string; token?: string; userId?: string; createdAt?: Date } = {},
-): RefreshToken {
+export function buildExpiredRefreshToken(overrides: { id?: string; token?: string; userId?: string; createdAt?: Date } = {}): RefreshToken {
   return buildRefreshToken({
     expiresAt: TEST_CONSTANTS.pastDate,
     token: TEST_CONSTANTS.auth.expiredRefreshToken,
@@ -98,9 +90,7 @@ export function buildExpiredRefreshToken(
 /**
  * Builds a RefreshToken that is valid (not expired)
  */
-export function buildValidRefreshToken(
-  overrides: { id?: string; token?: string; userId?: string; createdAt?: Date } = {},
-): RefreshToken {
+export function buildValidRefreshToken(overrides: { id?: string; token?: string; userId?: string; createdAt?: Date } = {}): RefreshToken {
   return buildRefreshToken({
     expiresAt: TEST_CONSTANTS.futureDate,
     token: TEST_CONSTANTS.auth.validRefreshToken,

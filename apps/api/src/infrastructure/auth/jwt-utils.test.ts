@@ -111,9 +111,7 @@ describe('JWT Utilities', () => {
     it('should throw error for invalid token', () => {
       const invalidToken = 'invalid.token.here'
 
-      expect(() => verifyAccessToken({ token: invalidToken, env: testEnv })).toThrow(
-        'Invalid access token',
-      )
+      expect(() => verifyAccessToken({ token: invalidToken, env: testEnv })).toThrow('Invalid access token')
     })
 
     it('should throw error for token with wrong secret', () => {
@@ -199,9 +197,7 @@ describe('JWT Utilities', () => {
       const now = new Date()
       const expiresAt = getRefreshTokenExpirationDate()
 
-      const daysDifference = Math.floor(
-        (expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
-      )
+      const daysDifference = Math.floor((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
 
       expect(expiresAt).toBeInstanceOf(Date)
       expect(expiresAt.getTime()).toBeGreaterThan(now.getTime())

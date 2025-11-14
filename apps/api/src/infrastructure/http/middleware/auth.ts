@@ -42,10 +42,7 @@ declare module 'fastify' {
  * @returns Decoded token payload
  * @throws Error if token is missing or invalid
  */
-async function extractAndVerifyToken(
-  request: FastifyRequest,
-  env: Env,
-): Promise<AccessTokenPayload> {
+async function extractAndVerifyToken(request: FastifyRequest, env: Env): Promise<AccessTokenPayload> {
   // Get Authorization header
   const authHeader = request.headers.authorization
 
@@ -107,10 +104,7 @@ export function requireAuth(env: Env) {
  * @param allowedRoles - Array of allowed roles
  * @returns true if user has required role
  */
-async function checkUserRole(
-  user: AuthenticatedUser | undefined,
-  allowedRoles: UserRole[],
-): Promise<boolean> {
+async function checkUserRole(user: AuthenticatedUser | undefined, allowedRoles: UserRole[]): Promise<boolean> {
   if (!user) {
     return false
   }

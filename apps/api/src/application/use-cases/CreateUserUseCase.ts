@@ -1,10 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import type { CreateUserDTO, UserResponseDTO } from '@team-pulse/shared'
-import {
-  DuplicatedError,
-  type RepositoryError,
-  type ValidationError,
-} from '../../domain/errors/index.js'
+import { DuplicatedError, type RepositoryError, type ValidationError } from '../../domain/errors/index.js'
 import { User } from '../../domain/models/User.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import { Err, Ok, type Result } from '../../domain/types/index.js'
@@ -40,9 +36,7 @@ export class CreateUserUseCase {
     return new CreateUserUseCase({ userRepository })
   }
 
-  async execute(
-    dto: CreateUserDTO,
-  ): Promise<Result<UserResponseDTO, DuplicatedError | RepositoryError | ValidationError>> {
+  async execute(dto: CreateUserDTO): Promise<Result<UserResponseDTO, DuplicatedError | RepositoryError | ValidationError>> {
     const findResult = await this.userRepository.findByEmail({ email: dto.email })
 
     if (!findResult.ok) {

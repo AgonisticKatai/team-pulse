@@ -38,9 +38,7 @@ export class ValidationError extends DomainError {
   /**
    * Create from Zod validation error
    */
-  static fromZodError(error: {
-    errors: Array<{ path: string[]; message: string }>
-  }): ValidationError {
+  static fromZodError(error: { errors: Array<{ path: string[]; message: string }> }): ValidationError {
     const firstError = error.errors[0]
     const field = firstError?.path.join('.') || 'unknown'
     const message = firstError?.message || 'Validation failed'

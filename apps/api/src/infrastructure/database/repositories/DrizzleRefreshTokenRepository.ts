@@ -28,11 +28,7 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
   constructor(private readonly db: Database) {}
 
   async findByToken(token: string): Promise<RefreshToken | null> {
-    const rows = await this.db
-      .select()
-      .from(refreshTokens)
-      .where(eq(refreshTokens.token, token))
-      .limit(1)
+    const rows = await this.db.select().from(refreshTokens).where(eq(refreshTokens.token, token)).limit(1)
 
     const row = rows[0]
     if (!row) {
@@ -48,11 +44,7 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
     return rows.map((row: typeof refreshTokens.$inferSelect) => this.mapToDomain(row))
   }
 
-  async save({
-    refreshToken,
-  }: {
-    refreshToken: RefreshToken
-  }): Promise<Result<RefreshToken, RepositoryError>> {
+  async save({ refreshToken }: { refreshToken: RefreshToken }): Promise<Result<RefreshToken, RepositoryError>> {
     try {
       const obj = refreshToken.toObject()
 

@@ -41,12 +41,7 @@ export class Role {
     // Validate role value
     const normalizedValue = value.trim().toUpperCase()
     if (!Object.values(UserRole).includes(normalizedValue as UserRole)) {
-      return Err(
-        ValidationError.forField(
-          'role',
-          `Invalid role: ${value}. Must be one of: ${Object.values(UserRole).join(', ')}`,
-        ),
-      )
+      return Err(ValidationError.forField('role', `Invalid role: ${value}. Must be one of: ${Object.values(UserRole).join(', ')}`))
     }
 
     return Ok(new Role(normalizedValue as UserRole))

@@ -25,19 +25,12 @@ export class AuthorizationError extends DomainError {
   /**
    * Factory method for insufficient permissions
    */
-  static insufficientPermissions(
-    action: string,
-    requiredRole: string,
-    currentRole: string,
-  ): AuthorizationError {
-    return new AuthorizationError(
-      `Insufficient permissions to ${action}. Required: ${requiredRole}, Current: ${currentRole}`,
-      {
-        action,
-        currentRole,
-        requiredRole,
-      },
-    )
+  static insufficientPermissions(action: string, requiredRole: string, currentRole: string): AuthorizationError {
+    return new AuthorizationError(`Insufficient permissions to ${action}. Required: ${requiredRole}, Current: ${currentRole}`, {
+      action,
+      currentRole,
+      requiredRole,
+    })
   }
 
   /**

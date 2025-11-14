@@ -31,9 +31,7 @@ export class Email {
    */
   private static validateFormat({ value }: { value: string }): Result<string, ValidationError> {
     if (!Email.EMAIL_REGEX.test(value)) {
-      return Err(
-        ValidationError.forField({ field: 'email', message: 'Email address format is invalid' }),
-      )
+      return Err(ValidationError.forField({ field: 'email', message: 'Email address format is invalid' }))
     }
     return Ok(value)
   }

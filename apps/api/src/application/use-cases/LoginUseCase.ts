@@ -1,19 +1,11 @@
 import { randomUUID } from 'node:crypto'
 import type { LoginDTO, LoginResponseDTO } from '@team-pulse/shared'
-import {
-  type NotFoundError,
-  type RepositoryError,
-  ValidationError,
-} from '../../domain/errors/index.js'
+import { type NotFoundError, type RepositoryError, ValidationError } from '../../domain/errors/index.js'
 import { RefreshToken } from '../../domain/models/RefreshToken.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import { Err, Ok, type Result } from '../../domain/types/index.js'
-import {
-  generateAccessToken,
-  generateRefreshToken,
-  getRefreshTokenExpirationDate,
-} from '../../infrastructure/auth/jwt-utils.js'
+import { generateAccessToken, generateRefreshToken, getRefreshTokenExpirationDate } from '../../infrastructure/auth/jwt-utils.js'
 import { verifyPassword } from '../../infrastructure/auth/password-utils.js'
 import type { Env } from '../../infrastructure/config/env.js'
 
@@ -66,9 +58,7 @@ export class LoginUseCase {
     return new LoginUseCase({ env, refreshTokenRepository, userRepository })
   }
 
-  async execute(
-    dto: LoginDTO,
-  ): Promise<Result<LoginResponseDTO, NotFoundError | RepositoryError | ValidationError>> {
+  async execute(dto: LoginDTO): Promise<Result<LoginResponseDTO, NotFoundError | RepositoryError | ValidationError>> {
     const findResult = await this.userRepository.findByEmail({ email: dto.email })
 
     if (!findResult.ok) {

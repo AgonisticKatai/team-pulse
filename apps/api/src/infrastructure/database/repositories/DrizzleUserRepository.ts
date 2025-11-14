@@ -41,11 +41,7 @@ export class DrizzleUserRepository implements IUserRepository {
   async findByEmail({ email }: { email: string }): Promise<Result<User | null, RepositoryError>> {
     try {
       // Case-insensitive email search using SQL LOWER
-      const [user] = await this.db
-        .select()
-        .from(usersSchema)
-        .where(sql`LOWER(${usersSchema.email}) = LOWER(${email})`)
-        .limit(1)
+      const [user] = await this.db.select().from(usersSchema).where(sql`LOWER(${usersSchema.email}) = LOWER(${email})`).limit(1)
 
       if (!user) {
         return Ok(null)
@@ -125,11 +121,7 @@ export class DrizzleUserRepository implements IUserRepository {
   }
 
   async existsByEmail(email: string): Promise<boolean> {
-    const rows = await this.db
-      .select({ id: usersSchema.id })
-      .from(usersSchema)
-      .where(sql`LOWER(${usersSchema.email}) = LOWER(${email})`)
-      .limit(1)
+    const rows = await this.db.select({ id: usersSchema.id }).from(usersSchema).where(sql`LOWER(${usersSchema.email}) = LOWER(${email})`).limit(1)
 
     return rows.length > 0
   }
@@ -160,9 +152,7 @@ export class DrizzleUserRepository implements IUserRepository {
 
     if (!result.ok) {
       // Data corruption - should never happen in production
-      throw new Error(
-        `Failed to map database row to User entity: ${result.error.message}. User ID: ${row.id}`,
-      )
+      throw new Error(`Failed to map database row to User entity: ${result.error.message}. User ID: ${row.id}`)
     }
 
     return result.value

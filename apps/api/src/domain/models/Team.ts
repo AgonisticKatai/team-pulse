@@ -137,8 +137,7 @@ export class Team {
     return Team.create({
       city: data.city ?? this.city.getValue(),
       createdAt: this.createdAt,
-      foundedYear:
-        data.foundedYear === undefined ? (this.foundedYear?.getValue() ?? null) : data.foundedYear,
+      foundedYear: data.foundedYear === undefined ? (this.foundedYear?.getValue() ?? null) : data.foundedYear,
       id: this.id.getValue(),
       name: data.name ?? this.name.getValue(),
       updatedAt: new Date(),

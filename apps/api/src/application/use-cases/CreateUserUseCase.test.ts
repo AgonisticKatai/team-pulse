@@ -123,9 +123,7 @@ describe('CreateUserUseCase', () => {
         expect(userRepository.save).toHaveBeenCalledTimes(1)
 
         // Get the saved user from the mock call
-        const { user: savedUser } = expectMockCallArg<{ user: User }>(
-          vi.mocked(userRepository.save),
-        )
+        const { user: savedUser } = expectMockCallArg<{ user: User }>(vi.mocked(userRepository.save))
 
         expect(savedUser).toBeInstanceOf(User)
         expect(savedUser.email.getValue()).toBe(TEST_CONSTANTS.users.johnDoe.email)
@@ -274,9 +272,7 @@ describe('CreateUserUseCase', () => {
         expect(data.role).toBe(TEST_CONSTANTS.users.adminUser.role)
 
         // Get the saved user from the mock call
-        const { user: savedUser } = expectMockCallArg<{ user: User }>(
-          vi.mocked(userRepository.save),
-        )
+        const { user: savedUser } = expectMockCallArg<{ user: User }>(vi.mocked(userRepository.save))
         expect(savedUser.role.getValue()).toBe(TEST_CONSTANTS.users.adminUser.role)
       })
 
@@ -301,9 +297,7 @@ describe('CreateUserUseCase', () => {
         expect(data.role).toBe(TEST_CONSTANTS.users.superAdminUser.role)
 
         // Get the saved user from the mock call
-        const { user: savedUser } = expectMockCallArg<{ user: User }>(
-          vi.mocked(userRepository.save),
-        )
+        const { user: savedUser } = expectMockCallArg<{ user: User }>(vi.mocked(userRepository.save))
         expect(savedUser.role.getValue()).toBe(TEST_CONSTANTS.users.superAdminUser.role)
       })
 
@@ -324,9 +318,7 @@ describe('CreateUserUseCase', () => {
         expect(randomUUID).toHaveBeenCalled()
 
         // Get the saved user from the mock call
-        const { user: savedUser } = expectMockCallArg<{ user: User }>(
-          vi.mocked(userRepository.save),
-        )
+        const { user: savedUser } = expectMockCallArg<{ user: User }>(vi.mocked(userRepository.save))
         expect(savedUser.id.getValue()).toBe(TEST_CONSTANTS.mockUuid)
       })
     })

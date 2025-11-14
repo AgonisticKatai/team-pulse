@@ -80,13 +80,7 @@ export function expectDefined<T, E>(result: Result<T, E>): NonNullable<T> {
  * const error = expectErrorType({ result, errorType: ValidationError })
  * expect(error.field).toBe('name') // ← TypeScript knows error is ValidationError
  */
-export function expectErrorType<E extends Error>({
-  result,
-  errorType,
-}: {
-  result: Result<any, any>
-  errorType: Function & { prototype: E }
-}): E {
+export function expectErrorType<E extends Error>({ result, errorType }: { result: Result<any, any>; errorType: Function & { prototype: E } }): E {
   const error = expectError(result)
   expect(error).toBeInstanceOf(errorType)
   return error as E

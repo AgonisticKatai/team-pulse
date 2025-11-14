@@ -67,13 +67,7 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
  *
  * Shown when user doesn't have required role
  */
-function ForbiddenPage({
-  userRole,
-  requiredRoles,
-}: {
-  userRole: UserRole
-  requiredRoles: UserRole[]
-}) {
+function ForbiddenPage({ userRole, requiredRoles }: { userRole: UserRole; requiredRoles: UserRole[] }) {
   return (
     <div className="forbidden-page">
       <div className="forbidden-container">

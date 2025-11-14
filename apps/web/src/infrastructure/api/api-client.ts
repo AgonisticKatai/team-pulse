@@ -152,13 +152,7 @@ export class ApiClient {
       // Handle error responses
       if (!(response.ok && responseData.success)) {
         const errorData = responseData as ApiErrorResponse
-        throw new ApiError(
-          errorData.error.message,
-          errorData.error.code,
-          response.status,
-          errorData.error.field,
-          errorData.error.details,
-        )
+        throw new ApiError(errorData.error.message, errorData.error.code, response.status, errorData.error.field, errorData.error.details)
       }
 
       // Return successful data

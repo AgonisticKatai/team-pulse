@@ -45,19 +45,9 @@ export class User {
     if (roleError) return Err(roleError)
 
     // Handle dates
-    const createdAt =
-      data.createdAt instanceof Date
-        ? data.createdAt
-        : data.createdAt
-          ? new Date(data.createdAt)
-          : new Date()
+    const createdAt = data.createdAt instanceof Date ? data.createdAt : data.createdAt ? new Date(data.createdAt) : new Date()
 
-    const updatedAt =
-      data.updatedAt instanceof Date
-        ? data.updatedAt
-        : data.updatedAt
-          ? new Date(data.updatedAt)
-          : new Date()
+    const updatedAt = data.updatedAt instanceof Date ? data.updatedAt : data.updatedAt ? new Date(data.updatedAt) : new Date()
 
     return Ok(
       new User({

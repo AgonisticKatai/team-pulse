@@ -141,11 +141,7 @@ export class DrizzleTeamRepository implements ITeamRepository {
 
   async existsByName(name: string): Promise<Result<boolean, RepositoryError>> {
     try {
-      const rows = await this.db
-        .select({ id: teams.id })
-        .from(teams)
-        .where(eq(teams.name, name))
-        .limit(1)
+      const rows = await this.db.select({ id: teams.id }).from(teams).where(eq(teams.name, name)).limit(1)
 
       return Ok(rows.length > 0)
     } catch (error) {

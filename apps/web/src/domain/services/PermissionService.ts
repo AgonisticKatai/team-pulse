@@ -31,9 +31,7 @@ export function canUpdateTeam(user: User | null): Result<true, AuthorizationErro
 
   // Only ADMIN and SUPER_ADMIN can update teams
   if (!user.isAdmin()) {
-    return Err(
-      AuthorizationError.insufficientPermissions('update team', 'ADMIN', user.getRole().getValue()),
-    )
+    return Err(AuthorizationError.insufficientPermissions('update team', 'ADMIN', user.getRole().getValue()))
   }
 
   return Ok(true)
@@ -49,9 +47,7 @@ export function canDeleteTeam(user: User | null): Result<true, AuthorizationErro
 
   // Only ADMIN and SUPER_ADMIN can delete teams
   if (!user.isAdmin()) {
-    return Err(
-      AuthorizationError.insufficientPermissions('delete team', 'ADMIN', user.getRole().getValue()),
-    )
+    return Err(AuthorizationError.insufficientPermissions('delete team', 'ADMIN', user.getRole().getValue()))
   }
 
   return Ok(true)
@@ -79,9 +75,7 @@ export function canCreateUser(user: User | null): Result<true, AuthorizationErro
 
   // Only ADMIN and SUPER_ADMIN can create users
   if (!user.isAdmin()) {
-    return Err(
-      AuthorizationError.insufficientPermissions('create user', 'ADMIN', user.getRole().getValue()),
-    )
+    return Err(AuthorizationError.insufficientPermissions('create user', 'ADMIN', user.getRole().getValue()))
   }
 
   return Ok(true)
@@ -97,9 +91,7 @@ export function canListUsers(user: User | null): Result<true, AuthorizationError
 
   // Only ADMIN and SUPER_ADMIN can list users
   if (!user.isAdmin()) {
-    return Err(
-      AuthorizationError.insufficientPermissions('list users', 'ADMIN', user.getRole().getValue()),
-    )
+    return Err(AuthorizationError.insufficientPermissions('list users', 'ADMIN', user.getRole().getValue()))
   }
 
   return Ok(true)
@@ -115,13 +107,7 @@ export function canAccessAdminDashboard(user: User | null): Result<true, Authori
 
   // Only ADMIN and SUPER_ADMIN can access admin dashboard
   if (!user.isAdmin()) {
-    return Err(
-      AuthorizationError.insufficientPermissions(
-        'access admin dashboard',
-        'ADMIN',
-        user.getRole().getValue(),
-      ),
-    )
+    return Err(AuthorizationError.insufficientPermissions('access admin dashboard', 'ADMIN', user.getRole().getValue()))
   }
 
   return Ok(true)
@@ -130,10 +116,7 @@ export function canAccessAdminDashboard(user: User | null): Result<true, Authori
 /**
  * Check if user has minimum required role
  */
-export function hasMinimumRole(
-  user: User | null,
-  requiredRole: UserRole,
-): Result<true, AuthorizationError> {
+export function hasMinimumRole(user: User | null, requiredRole: UserRole): Result<true, AuthorizationError> {
   if (!user) {
     return Err(AuthorizationError.unauthenticated())
   }
@@ -148,13 +131,7 @@ export function hasMinimumRole(
   }
 
   if (!user.hasRoleLevel(required)) {
-    return Err(
-      AuthorizationError.insufficientPermissions(
-        'perform this action',
-        requiredRole,
-        user.getRole().getValue(),
-      ),
-    )
+    return Err(AuthorizationError.insufficientPermissions('perform this action', requiredRole, user.getRole().getValue()))
   }
 
   return Ok(true)
@@ -190,10 +167,7 @@ export function getAllowedActions(user: User | null): string[] {
 /**
  * Check if user can perform a specific action
  */
-export function canPerformAction(
-  user: User | null,
-  action: string,
-): Result<true, AuthorizationError> {
+export function canPerformAction(user: User | null, action: string): Result<true, AuthorizationError> {
   const allowedActions = getAllowedActions(user)
 
   if (!allowedActions.includes(action)) {

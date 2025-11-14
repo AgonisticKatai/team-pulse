@@ -47,10 +47,7 @@ export class UpdateTeamUseCase {
   /**
    * Check if name is being changed and doesn't conflict
    */
-  private async checkNameUniqueness(
-    newName: string | undefined,
-    existingTeam: Team,
-  ): Promise<DomainError | null> {
+  private async checkNameUniqueness(newName: string | undefined, existingTeam: Team): Promise<DomainError | null> {
     if (!newName || newName === existingTeam.getName().getValue()) {
       return null
     }
@@ -68,11 +65,7 @@ export class UpdateTeamUseCase {
    * Execute update team
    * Returns [error, null] or [null, team]
    */
-  async execute(
-    teamId: string,
-    input: UpdateTeamUseCaseInput,
-    currentUser: User | null,
-  ): Promise<Result<Team, DomainError>> {
+  async execute(teamId: string, input: UpdateTeamUseCaseInput, currentUser: User | null): Promise<Result<Team, DomainError>> {
     const [permissionError] = canUpdateTeam(currentUser)
     if (permissionError) return Err(permissionError)
 

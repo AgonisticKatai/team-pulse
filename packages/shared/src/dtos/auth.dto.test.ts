@@ -161,9 +161,7 @@ describe('Auth DTOs', () => {
         const result = CreateUserDTOSchema.safeParse(data)
         expect(result.success).toBe(false)
         if (!result.success) {
-          const uppercaseError = result.error.issues.find((issue) =>
-            issue.message.includes('uppercase'),
-          )
+          const uppercaseError = result.error.issues.find((issue) => issue.message.includes('uppercase'))
           expect(uppercaseError).toBeDefined()
         }
       })
@@ -178,9 +176,7 @@ describe('Auth DTOs', () => {
         const result = CreateUserDTOSchema.safeParse(data)
         expect(result.success).toBe(false)
         if (!result.success) {
-          const lowercaseError = result.error.issues.find((issue) =>
-            issue.message.includes('lowercase'),
-          )
+          const lowercaseError = result.error.issues.find((issue) => issue.message.includes('lowercase'))
           expect(lowercaseError).toBeDefined()
         }
       })

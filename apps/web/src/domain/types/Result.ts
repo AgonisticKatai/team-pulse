@@ -25,14 +25,12 @@ export const Err = <E extends Error>(error: E): Result<never, E> => [error, null
 /**
  * Type guard to check if result is an error
  */
-export const isError = <T, E extends Error>(result: Result<T, E>): result is [E, null] =>
-  result[0] !== null
+export const isError = <T, E extends Error>(result: Result<T, E>): result is [E, null] => result[0] !== null
 
 /**
  * Type guard to check if result is successful
  */
-export const isOk = <T, E extends Error>(result: Result<T, E>): result is [null, T] =>
-  result[0] === null
+export const isOk = <T, E extends Error>(result: Result<T, E>): result is [null, T] => result[0] === null
 
 /**
  * Unwrap result or throw error
@@ -58,10 +56,7 @@ export const unwrapOr = <T, E extends Error>(result: Result<T, E>, defaultValue:
 /**
  * Map result value if Ok
  */
-export const map = <T, U, E extends Error>(
-  result: Result<T, E>,
-  fn: (value: T) => U,
-): Result<U, E> => {
+export const map = <T, U, E extends Error>(result: Result<T, E>, fn: (value: T) => U): Result<U, E> => {
   if (isError(result)) {
     return result
   }
@@ -71,10 +66,7 @@ export const map = <T, U, E extends Error>(
 /**
  * FlatMap for chaining Result-returning operations
  */
-export const flatMap = <T, U, E extends Error>(
-  result: Result<T, E>,
-  fn: (value: T) => Result<U, E>,
-): Result<U, E> => {
+export const flatMap = <T, U, E extends Error>(result: Result<T, E>, fn: (value: T) => Result<U, E>): Result<U, E> => {
   if (isError(result)) {
     return result
   }

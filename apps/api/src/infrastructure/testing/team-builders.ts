@@ -37,14 +37,7 @@ export function buildCreateTeamDTO(overrides: Partial<CreateTeamDTO> = {}): Crea
  * const team = buildTeam({ name: 'Custom Team' })
  */
 export function buildTeam(
-  overrides: {
-    id?: string
-    name?: string
-    city?: string
-    foundedYear?: number | null
-    createdAt?: Date
-    updatedAt?: Date
-  } = {},
+  overrides: { id?: string; name?: string; city?: string; foundedYear?: number | null; createdAt?: Date; updatedAt?: Date } = {},
 ): Team {
   const result = Team.create({
     city: TEST_CONSTANTS.teams.fcBarcelona.city,
@@ -66,9 +59,7 @@ export function buildTeam(
 /**
  * Builds a Team entity without a founded year
  */
-export function buildTeamWithoutFoundedYear(
-  overrides: { id?: string; name?: string; city?: string; createdAt?: Date; updatedAt?: Date } = {},
-): Team {
+export function buildTeamWithoutFoundedYear(overrides: { id?: string; name?: string; city?: string; createdAt?: Date; updatedAt?: Date } = {}): Team {
   return buildTeam({
     foundedYear: undefined,
     ...overrides,
@@ -79,14 +70,7 @@ export function buildTeamWithoutFoundedYear(
  * Builds an "existing" team (with a different ID to simulate conflicts)
  */
 export function buildExistingTeam(
-  overrides: {
-    id?: string
-    name?: string
-    city?: string
-    foundedYear?: number
-    createdAt?: Date
-    updatedAt?: Date
-  } = {},
+  overrides: { id?: string; name?: string; city?: string; foundedYear?: number; createdAt?: Date; updatedAt?: Date } = {},
 ): Team {
   return buildTeam({
     id: TEST_CONSTANTS.existingTeamId,

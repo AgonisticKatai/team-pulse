@@ -27,10 +27,7 @@ export class CreateTeamUseCase {
    * Execute create team
    * Returns [error, null] or [null, team]
    */
-  async execute(
-    input: CreateTeamUseCaseInput,
-    currentUser: User | null,
-  ): Promise<Result<Team, DomainError>> {
+  async execute(input: CreateTeamUseCaseInput, currentUser: User | null): Promise<Result<Team, DomainError>> {
     // Check permissions
     const [permissionError] = canCreateTeam(currentUser)
     if (permissionError) {

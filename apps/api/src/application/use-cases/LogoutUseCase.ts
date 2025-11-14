@@ -24,17 +24,11 @@ import { Ok, type Result } from '../../domain/types/index.js'
 export class LogoutUseCase {
   private readonly refreshTokenRepository: IRefreshTokenRepository
 
-  private constructor({
-    refreshTokenRepository,
-  }: { refreshTokenRepository: IRefreshTokenRepository }) {
+  private constructor({ refreshTokenRepository }: { refreshTokenRepository: IRefreshTokenRepository }) {
     this.refreshTokenRepository = refreshTokenRepository
   }
 
-  static create({
-    refreshTokenRepository,
-  }: {
-    refreshTokenRepository: IRefreshTokenRepository
-  }): LogoutUseCase {
+  static create({ refreshTokenRepository }: { refreshTokenRepository: IRefreshTokenRepository }): LogoutUseCase {
     return new LogoutUseCase({ refreshTokenRepository })
   }
 

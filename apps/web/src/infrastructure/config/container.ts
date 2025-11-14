@@ -23,12 +23,7 @@ import {
   RefreshTokenUseCase,
   UpdateTeamUseCase,
 } from '../../application/use-cases'
-import type {
-  IAuthRepository,
-  IStorageRepository,
-  ITeamRepository,
-  IUserRepository,
-} from '../../domain/repositories'
+import type { IAuthRepository, IStorageRepository, ITeamRepository, IUserRepository } from '../../domain/repositories'
 import { createApiClient } from '../api/api-client'
 import { createAuthApiClient } from '../api/auth-api-client'
 import { createTeamApiClient } from '../api/team-api-client'

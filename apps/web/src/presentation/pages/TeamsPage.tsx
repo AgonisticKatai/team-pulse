@@ -1,12 +1,7 @@
 import type { CreateTeamDTO, TeamResponseDTO, UpdateTeamDTO } from '@team-pulse/shared'
 import { useState } from 'react'
 import { useAuth } from '../../application/hooks/use-auth'
-import {
-  useCreateTeam,
-  useDeleteTeam,
-  useTeams,
-  useUpdateTeam,
-} from '../../application/hooks/use-teams'
+import { useCreateTeam, useDeleteTeam, useTeams, useUpdateTeam } from '../../application/hooks/use-teams'
 import type { TeamApiClient } from '../../infrastructure/api/team-api-client'
 import { DashboardLayout } from '../components/layout/DashboardLayout'
 import { TeamForm } from '../components/teams/TeamForm'
@@ -110,9 +105,7 @@ export function TeamsPage({ teamApiClient }: TeamsPageProps) {
         >
           <div>
             <h1 style={{ color: '#1f2937', margin: 0 }}>Teams</h1>
-            <p style={{ color: '#6b7280', margin: '0.5rem 0 0 0' }}>
-              {canEdit ? 'Manage your football teams' : 'View football teams'}
-            </p>
+            <p style={{ color: '#6b7280', margin: '0.5rem 0 0 0' }}>{canEdit ? 'Manage your football teams' : 'View football teams'}</p>
           </div>
 
           {canEdit && (

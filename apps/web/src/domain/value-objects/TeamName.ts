@@ -26,22 +26,12 @@ export class TeamName {
 
     // Validate min length
     if (trimmedValue.length < TeamName.MIN_LENGTH) {
-      return Err(
-        ValidationError.forField(
-          'name',
-          `Team name must be at least ${TeamName.MIN_LENGTH} characters`,
-        ),
-      )
+      return Err(ValidationError.forField('name', `Team name must be at least ${TeamName.MIN_LENGTH} characters`))
     }
 
     // Validate max length
     if (trimmedValue.length > TeamName.MAX_LENGTH) {
-      return Err(
-        ValidationError.forField(
-          'name',
-          `Team name must not exceed ${TeamName.MAX_LENGTH} characters`,
-        ),
-      )
+      return Err(ValidationError.forField('name', `Team name must not exceed ${TeamName.MAX_LENGTH} characters`))
     }
 
     return Ok(new TeamName(trimmedValue))

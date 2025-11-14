@@ -31,10 +31,7 @@ export class SessionStorageService implements IStorageRepository {
       }
     } catch (error) {
       return Err(
-        new DomainError(
-          `Failed to get item from storage: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          { isOperational: true },
-        ),
+        new DomainError(`Failed to get item from storage: ${error instanceof Error ? error.message : 'Unknown error'}`, { isOperational: true }),
       )
     }
   }
@@ -53,10 +50,7 @@ export class SessionStorageService implements IStorageRepository {
       return Ok(true)
     } catch (error) {
       return Err(
-        new DomainError(
-          `Failed to set item in storage: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          { isOperational: true },
-        ),
+        new DomainError(`Failed to set item in storage: ${error instanceof Error ? error.message : 'Unknown error'}`, { isOperational: true }),
       )
     }
   }
@@ -72,10 +66,7 @@ export class SessionStorageService implements IStorageRepository {
       return Ok(true)
     } catch (error) {
       return Err(
-        new DomainError(
-          `Failed to remove item from storage: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          { isOperational: true },
-        ),
+        new DomainError(`Failed to remove item from storage: ${error instanceof Error ? error.message : 'Unknown error'}`, { isOperational: true }),
       )
     }
   }
@@ -90,12 +81,7 @@ export class SessionStorageService implements IStorageRepository {
 
       return Ok(true)
     } catch (error) {
-      return Err(
-        new DomainError(
-          `Failed to clear storage: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          { isOperational: true },
-        ),
-      )
+      return Err(new DomainError(`Failed to clear storage: ${error instanceof Error ? error.message : 'Unknown error'}`, { isOperational: true }))
     }
   }
 
@@ -110,10 +96,7 @@ export class SessionStorageService implements IStorageRepository {
       return Ok(item !== null)
     } catch (error) {
       return Err(
-        new DomainError(
-          `Failed to check item in storage: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          { isOperational: true },
-        ),
+        new DomainError(`Failed to check item in storage: ${error instanceof Error ? error.message : 'Unknown error'}`, { isOperational: true }),
       )
     }
   }

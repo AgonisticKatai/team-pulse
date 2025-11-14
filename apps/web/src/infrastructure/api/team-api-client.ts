@@ -1,9 +1,4 @@
-import type {
-  CreateTeamDTO,
-  TeamResponseDTO,
-  TeamsListResponseDTO,
-  UpdateTeamDTO,
-} from '@team-pulse/shared'
+import type { CreateTeamDTO, TeamResponseDTO, TeamsListResponseDTO, UpdateTeamDTO } from '@team-pulse/shared'
 import type { ApiClient } from './api-client'
 
 /**

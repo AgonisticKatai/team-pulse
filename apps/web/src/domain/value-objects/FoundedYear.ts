@@ -31,21 +31,11 @@ export class FoundedYear {
 
     // Validate range
     if (value < FoundedYear.MIN_YEAR) {
-      return Err(
-        ValidationError.forField(
-          'foundedYear',
-          `Founded year must be ${FoundedYear.MIN_YEAR} or later`,
-        ),
-      )
+      return Err(ValidationError.forField('foundedYear', `Founded year must be ${FoundedYear.MIN_YEAR} or later`))
     }
 
     if (value > FoundedYear.MAX_YEAR) {
-      return Err(
-        ValidationError.forField(
-          'foundedYear',
-          `Founded year cannot be in the future (max: ${FoundedYear.MAX_YEAR})`,
-        ),
-      )
+      return Err(ValidationError.forField('foundedYear', `Founded year cannot be in the future (max: ${FoundedYear.MAX_YEAR})`))
     }
 
     return Ok(new FoundedYear(value))

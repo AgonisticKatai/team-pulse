@@ -2,11 +2,7 @@ import { randomUUID } from 'node:crypto'
 
 import type { CreateTeamDTO, TeamResponseDTO } from '@team-pulse/shared'
 
-import {
-  DuplicatedError,
-  type RepositoryError,
-  type ValidationError,
-} from '../../domain/errors/index.js'
+import { DuplicatedError, type RepositoryError, type ValidationError } from '../../domain/errors/index.js'
 import { Team } from '../../domain/models/Team.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
 import { Err, Ok, type Result } from '../../domain/types/index.js'
@@ -42,9 +38,7 @@ export class CreateTeamUseCase {
     return new CreateTeamUseCase({ teamRepository })
   }
 
-  async execute(
-    dto: CreateTeamDTO,
-  ): Promise<Result<TeamResponseDTO, DuplicatedError | RepositoryError | ValidationError>> {
+  async execute(dto: CreateTeamDTO): Promise<Result<TeamResponseDTO, DuplicatedError | RepositoryError | ValidationError>> {
     const findResult = await this.teamRepository.findByName({ name: dto.name })
 
     if (!findResult.ok) {

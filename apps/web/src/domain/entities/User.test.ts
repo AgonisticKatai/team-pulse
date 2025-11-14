@@ -71,11 +71,7 @@ describe('User', () => {
     it('should create user with default dates when not provided', () => {
       // Arrange
       const before = Date.now()
-      const {
-        createdAt: _createdAt,
-        updatedAt: _updatedAt,
-        ...dataWithoutDates
-      } = createValidUserData()
+      const { createdAt: _createdAt, updatedAt: _updatedAt, ...dataWithoutDates } = createValidUserData()
 
       // Act
       const [error, user] = User.create(dataWithoutDates)

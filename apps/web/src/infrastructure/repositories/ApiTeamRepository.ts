@@ -1,11 +1,6 @@
 import { Team } from '../../domain/entities'
 import { DomainError, NotFoundError, ValidationError } from '../../domain/errors'
-import type {
-  CreateTeamData,
-  ITeamRepository,
-  TeamListResponse,
-  UpdateTeamData,
-} from '../../domain/repositories'
+import type { CreateTeamData, ITeamRepository, TeamListResponse, UpdateTeamData } from '../../domain/repositories'
 import type { Result } from '../../domain/types/Result'
 import { Err, Ok } from '../../domain/types/Result'
 import { ApiError } from '../api/api-client'

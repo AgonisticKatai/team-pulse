@@ -3,13 +3,7 @@ import type { ValidationError } from '../errors'
 import type { Result } from '../types/Result'
 import { Err, Ok } from '../types/Result'
 import { City, EntityId, FoundedYear, TeamName } from '../value-objects'
-import type {
-  CreateTeamData,
-  TeamConstructorProps,
-  TeamData,
-  TeamProps,
-  TeamUpdateData,
-} from './Team.types'
+import type { CreateTeamData, TeamConstructorProps, TeamData, TeamProps, TeamUpdateData } from './Team.types'
 
 // Re-export public types
 export type { CreateTeamData, TeamData, TeamProps, TeamUpdateData }
@@ -57,19 +51,9 @@ export class Team {
     if (yearError) return Err(yearError)
 
     // Handle dates
-    const createdAt =
-      data.createdAt instanceof Date
-        ? data.createdAt
-        : data.createdAt
-          ? new Date(data.createdAt)
-          : new Date()
+    const createdAt = data.createdAt instanceof Date ? data.createdAt : data.createdAt ? new Date(data.createdAt) : new Date()
 
-    const updatedAt =
-      data.updatedAt instanceof Date
-        ? data.updatedAt
-        : data.updatedAt
-          ? new Date(data.updatedAt)
-          : new Date()
+    const updatedAt = data.updatedAt instanceof Date ? data.updatedAt : data.updatedAt ? new Date(data.updatedAt) : new Date()
 
     return Ok(
       new Team({

@@ -37,32 +37,28 @@ export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserR
    *
    * Requires: SUPER_ADMIN or ADMIN role
    */
-  fastify.post(
-    '/api/users',
-    { preHandler: [requireAuth(env), requireRole(['SUPER_ADMIN', 'ADMIN'])] },
-    async (request, reply) => {
-      try {
-        // Validate request body using Zod
-        const dto = CreateUserDTOSchema.parse(request.body)
+  fastify.post('/api/users', { preHandler: [requireAuth(env), requireRole(['SUPER_ADMIN', 'ADMIN'])] }, async (request, reply) => {
+    try {
+      // Validate request body using Zod
+      const dto = CreateUserDTOSchema.parse(request.body)
 
-        // Execute use case
-        const result = await createUserUseCase.execute(dto)
+      // Execute use case
+      const result = await createUserUseCase.execute(dto)
 
-        // Handle Result type
-        if (!result.ok) {
-          return handleError(result.error, reply)
-        }
-
-        // Return success response
-        return reply.code(201).send({
-          data: result.value,
-          success: true,
-        })
-      } catch (error) {
-        return handleError(error, reply)
+      // Handle Result type
+      if (!result.ok) {
+        return handleError(result.error, reply)
       }
-    },
-  )
+
+      // Return success response
+      return reply.code(201).send({
+        data: result.value,
+        success: true,
+      })
+    } catch (error) {
+      return handleError(error, reply)
+    }
+  })
 
   /**
    * GET /api/users
@@ -70,27 +66,23 @@ export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserR
    *
    * Requires: SUPER_ADMIN or ADMIN role
    */
-  fastify.get(
-    '/api/users',
-    { preHandler: [requireAuth(env), requireRole(['SUPER_ADMIN', 'ADMIN'])] },
-    async (_request, reply) => {
-      try {
-        const result = await listUsersUseCase.execute()
+  fastify.get('/api/users', { preHandler: [requireAuth(env), requireRole(['SUPER_ADMIN', 'ADMIN'])] }, async (_request, reply) => {
+    try {
+      const result = await listUsersUseCase.execute()
 
-        // Handle Result type
-        if (!result.ok) {
-          return handleError(result.error, reply)
-        }
-
-        return reply.code(200).send({
-          data: result.value,
-          success: true,
-        })
-      } catch (error) {
-        return handleError(error, reply)
+      // Handle Result type
+      if (!result.ok) {
+        return handleError(result.error, reply)
       }
-    },
-  )
+
+      return reply.code(200).send({
+        data: result.value,
+        success: true,
+      })
+    } catch (error) {
+      return handleError(error, reply)
+    }
+  })
 }
 
 /**

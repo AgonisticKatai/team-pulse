@@ -12,7 +12,7 @@
     "enabled": true,
     "indentStyle": "space",
     "indentWidth": 2,
-    "lineWidth": 100,
+    "lineWidth": 150,
     "lineEnding": "lf"
   },
   "javascript": {
@@ -212,15 +212,7 @@
       }
     },
     {
-      "includes": [
-        "**/env.ts",
-        "**/test-env.ts",
-        "**/config/env.ts",
-        "**/*env*.test.ts",
-        "**/jwt-utils.test.ts",
-        "**/vite-env.d.ts",
-        "apps/web/**"
-      ],
+      "includes": ["**/env.ts", "**/test-env.ts", "**/config/env.ts", "**/*env*.test.ts", "**/jwt-utils.test.ts", "**/vite-env.d.ts", "apps/web/**"],
       "linter": {
         "rules": {
           "style": {

@@ -37,14 +37,7 @@ export function buildCreateUserDTO(overrides: Partial<CreateUserDTO> = {}): Crea
  * const user = buildUser({ email: 'custom@example.com' })
  */
 export function buildUser(
-  overrides: {
-    id?: string
-    email?: string
-    passwordHash?: string
-    role?: 'USER' | 'ADMIN' | 'SUPER_ADMIN'
-    createdAt?: Date
-    updatedAt?: Date
-  } = {},
+  overrides: { id?: string; email?: string; passwordHash?: string; role?: 'USER' | 'ADMIN' | 'SUPER_ADMIN'; createdAt?: Date; updatedAt?: Date } = {},
 ): User {
   const result = User.create({
     createdAt: TEST_CONSTANTS.mockDate,
@@ -67,14 +60,7 @@ export function buildUser(
  * Builds an "existing" user (with a different ID to simulate conflicts)
  */
 export function buildExistingUser(
-  overrides: {
-    id?: string
-    email?: string
-    passwordHash?: string
-    role?: 'USER' | 'ADMIN' | 'SUPER_ADMIN'
-    createdAt?: Date
-    updatedAt?: Date
-  } = {},
+  overrides: { id?: string; email?: string; passwordHash?: string; role?: 'USER' | 'ADMIN' | 'SUPER_ADMIN'; createdAt?: Date; updatedAt?: Date } = {},
 ): User {
   return buildUser({
     id: TEST_CONSTANTS.existingUserId,
@@ -85,15 +71,7 @@ export function buildExistingUser(
 /**
  * Builds a user with ADMIN role
  */
-export function buildAdminUser(
-  overrides: {
-    id?: string
-    email?: string
-    passwordHash?: string
-    createdAt?: Date
-    updatedAt?: Date
-  } = {},
-): User {
+export function buildAdminUser(overrides: { id?: string; email?: string; passwordHash?: string; createdAt?: Date; updatedAt?: Date } = {}): User {
   return buildUser({
     email: TEST_CONSTANTS.users.adminUser.email,
     id: TEST_CONSTANTS.users.adminUser.id,
@@ -107,13 +85,7 @@ export function buildAdminUser(
  * Builds a user with SUPER_ADMIN role
  */
 export function buildSuperAdminUser(
-  overrides: {
-    id?: string
-    email?: string
-    passwordHash?: string
-    createdAt?: Date
-    updatedAt?: Date
-  } = {},
+  overrides: { id?: string; email?: string; passwordHash?: string; createdAt?: Date; updatedAt?: Date } = {},
 ): User {
   return buildUser({
     email: TEST_CONSTANTS.users.superAdminUser.email,

@@ -42,7 +42,9 @@ const ACCESS_TOKEN_EXPIRATION = '15m'
  */
 const REFRESH_TOKEN_EXPIRATION = '7d'
 
-/** Mapping of JWT error types to messages */
+/**
+ * Mapping of JWT error types to messages
+ */
 const JWT_ERROR_TYPES: Record<string, string> = {
   JsonWebTokenError: 'Invalid token',
   TokenExpiredError: 'Token has expired',
@@ -55,13 +57,7 @@ const JWT_ERROR_TYPES: Record<string, string> = {
  * @param payload - The token payload
  * @returns The signed JWT token
  */
-export function generateAccessToken({
-  env,
-  payload,
-}: {
-  env: Env
-  payload: AccessTokenPayload
-}): string {
+export function generateAccessToken({ env, payload }: { env: Env; payload: AccessTokenPayload }): string {
   return jwt.sign(payload, env.JWT_SECRET, {
     audience: 'team-pulse-app',
     expiresIn: ACCESS_TOKEN_EXPIRATION,
@@ -76,13 +72,7 @@ export function generateAccessToken({
  * @param payload - The token payload
  * @returns The signed JWT token
  */
-export function generateRefreshToken({
-  env,
-  payload,
-}: {
-  env: Env
-  payload: RefreshTokenPayload
-}): string {
+export function generateRefreshToken({ env, payload }: { env: Env; payload: RefreshTokenPayload }): string {
   return jwt.sign(payload, env.JWT_REFRESH_SECRET, {
     audience: 'team-pulse-app',
     expiresIn: REFRESH_TOKEN_EXPIRATION,
@@ -125,13 +115,7 @@ export function verifyAccessToken({ env, token }: { env: Env; token: string }): 
  * @returns The decoded payload
  * @throws Error if the token is invalid or expired
  */
-export function verifyRefreshToken({
-  env,
-  token,
-}: {
-  env: Env
-  token: string
-}): Result<RefreshTokenPayload, ValidationError> {
+export function verifyRefreshToken({ env, token }: { env: Env; token: string }): Result<RefreshTokenPayload, ValidationError> {
   try {
     const payload = jwt.verify(token, env.JWT_REFRESH_SECRET, {
       audience: 'team-pulse-app',

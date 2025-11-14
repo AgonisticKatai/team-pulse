@@ -40,9 +40,7 @@ export const Err = <E extends Error>(error: E): Result<never, E> => ({ error, ok
  *   console.log(result.error.message)
  * }
  */
-export const isError = <T, E extends Error>(
-  result: Result<T, E>,
-): result is { ok: false; error: E } => !result.ok
+export const isError = <T, E extends Error>(result: Result<T, E>): result is { ok: false; error: E } => !result.ok
 
 /**
  * Type guard to check if result is successful
@@ -52,8 +50,7 @@ export const isError = <T, E extends Error>(
  *   console.log(result.value)
  * }
  */
-export const isOk = <T, E extends Error>(result: Result<T, E>): result is { ok: true; value: T } =>
-  result.ok
+export const isOk = <T, E extends Error>(result: Result<T, E>): result is { ok: true; value: T } => result.ok
 
 /**
  * Unwrap result or throw error
@@ -88,10 +85,7 @@ export const unwrapOr = <T, E extends Error>(result: Result<T, E>, defaultValue:
  * @example
  * const upperName = map(result, user => user.name.toUpperCase())
  */
-export const map = <T, U, E extends Error>(
-  result: Result<T, E>,
-  fn: (value: T) => U,
-): Result<U, E> => {
+export const map = <T, U, E extends Error>(result: Result<T, E>, fn: (value: T) => U): Result<U, E> => {
   if (!result.ok) {
     return result
   }
@@ -104,10 +98,7 @@ export const map = <T, U, E extends Error>(
  * @example
  * const result = flatMap(userResult, user => validateUser(user))
  */
-export const flatMap = <T, U, E extends Error>(
-  result: Result<T, E>,
-  fn: (value: T) => Result<U, E>,
-): Result<U, E> => {
+export const flatMap = <T, U, E extends Error>(result: Result<T, E>, fn: (value: T) => Result<U, E>): Result<U, E> => {
   if (!result.ok) {
     return result
   }

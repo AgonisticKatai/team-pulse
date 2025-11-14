@@ -26,13 +26,7 @@ export class NotFoundError extends DomainError {
   /**
    * Factory method to create a NotFoundError
    */
-  static create({
-    entityName,
-    identifier,
-  }: {
-    entityName?: string
-    identifier?: string | number
-  }): NotFoundError {
+  static create({ entityName, identifier }: { entityName?: string; identifier?: string | number }): NotFoundError {
     return new NotFoundError({ entityName, identifier })
   }
 }

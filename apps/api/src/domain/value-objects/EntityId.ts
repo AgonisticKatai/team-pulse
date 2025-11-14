@@ -31,9 +31,7 @@ export class EntityId {
    */
   private static validateFormat({ value }: { value: string }): Result<string, ValidationError> {
     if (!EntityId.ID_REGEX.test(value)) {
-      return Err(
-        ValidationError.forField({ field: 'id', message: 'Entity ID contains invalid characters' }),
-      )
+      return Err(ValidationError.forField({ field: 'id', message: 'Entity ID contains invalid characters' }))
     }
     return Ok(value)
   }

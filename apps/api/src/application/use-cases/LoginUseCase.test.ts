@@ -82,9 +82,7 @@ describe('LoginUseCase', () => {
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(true)
-        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) =>
-          Ok(refreshToken),
-        )
+        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
 
         // Act
         const result = await loginUseCase.execute(loginDTO)
@@ -110,9 +108,7 @@ describe('LoginUseCase', () => {
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(true)
-        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) =>
-          Ok(refreshToken),
-        )
+        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
 
         // Act
         const result = await loginUseCase.execute(loginDTO)
@@ -132,19 +128,14 @@ describe('LoginUseCase', () => {
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(true)
-        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) =>
-          Ok(refreshToken),
-        )
+        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
 
         // Act
         const result = await loginUseCase.execute(loginDTO)
 
         // Assert
         expectSuccess(result)
-        expect(verifyPassword).toHaveBeenCalledWith(
-          TEST_CONSTANTS.users.johnDoe.password,
-          TEST_CONSTANTS.users.johnDoe.passwordHash,
-        )
+        expect(verifyPassword).toHaveBeenCalledWith(TEST_CONSTANTS.users.johnDoe.password, TEST_CONSTANTS.users.johnDoe.passwordHash)
         expect(verifyPassword).toHaveBeenCalledTimes(1)
       })
 
@@ -155,9 +146,7 @@ describe('LoginUseCase', () => {
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(true)
-        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) =>
-          Ok(refreshToken),
-        )
+        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
 
         const { generateAccessToken } = await import('../../infrastructure/auth/jwt-utils.js')
 
@@ -184,9 +173,7 @@ describe('LoginUseCase', () => {
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(true)
-        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) =>
-          Ok(refreshToken),
-        )
+        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
 
         const { generateRefreshToken } = await import('../../infrastructure/auth/jwt-utils.js')
 
@@ -212,9 +199,7 @@ describe('LoginUseCase', () => {
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(true)
-        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) =>
-          Ok(refreshToken),
-        )
+        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
 
         // Act
         const result = await loginUseCase.execute(loginDTO)
@@ -223,9 +208,7 @@ describe('LoginUseCase', () => {
         expectSuccess(result)
         expect(refreshTokenRepository.save).toHaveBeenCalledTimes(1)
 
-        const { refreshToken: savedToken } = expectMockCallArg<{ refreshToken: RefreshToken }>(
-          vi.mocked(refreshTokenRepository.save),
-        )
+        const { refreshToken: savedToken } = expectMockCallArg<{ refreshToken: RefreshToken }>(vi.mocked(refreshTokenRepository.save))
 
         expect(savedToken).toBeInstanceOf(RefreshToken)
         expect(savedToken.id.getValue()).toBe(TEST_CONSTANTS.mockUuid)
@@ -241,9 +224,7 @@ describe('LoginUseCase', () => {
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(true)
-        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) =>
-          Ok(refreshToken),
-        )
+        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
 
         // Act
         const result = await loginUseCase.execute(loginDTO)
@@ -315,9 +296,7 @@ describe('LoginUseCase', () => {
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(false)
 
-        const { generateAccessToken, generateRefreshToken } = await import(
-          '../../infrastructure/auth/jwt-utils.js'
-        )
+        const { generateAccessToken, generateRefreshToken } = await import('../../infrastructure/auth/jwt-utils.js')
 
         // Act
         const result = await loginUseCase.execute(loginDTO)
@@ -436,9 +415,7 @@ describe('LoginUseCase', () => {
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(adminUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(true)
-        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) =>
-          Ok(refreshToken),
-        )
+        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
 
         // Act
         const result = await loginUseCase.execute(loginDTO)
@@ -460,9 +437,7 @@ describe('LoginUseCase', () => {
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(superAdminUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(true)
-        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) =>
-          Ok(refreshToken),
-        )
+        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
 
         // Act
         const result = await loginUseCase.execute(loginDTO)
@@ -479,9 +454,7 @@ describe('LoginUseCase', () => {
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(true)
-        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) =>
-          Ok(refreshToken),
-        )
+        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
 
         // Act
         const result = await loginUseCase.execute(loginDTO)

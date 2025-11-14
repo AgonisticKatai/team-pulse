@@ -65,10 +65,7 @@ export function validatePassword(password: string): PasswordValidation {
  * Validate login credentials
  * Returns [error, null] or [null, { email, password }]
  */
-export function validateLoginCredentials(
-  email: string,
-  password: string,
-): Result<{ email: Email; password: string }, ValidationError> {
+export function validateLoginCredentials(email: string, password: string): Result<{ email: Email; password: string }, ValidationError> {
   // Validate email
   const [emailError, validEmail] = Email.create(email)
   if (emailError) return Err(emailError)
@@ -85,10 +82,7 @@ export function validateLoginCredentials(
  * Validate registration credentials
  * Returns [error, null] or [null, { email, password }]
  */
-export function validateRegistrationCredentials(
-  email: string,
-  password: string,
-): Result<{ email: Email; password: string }, ValidationError> {
+export function validateRegistrationCredentials(email: string, password: string): Result<{ email: Email; password: string }, ValidationError> {
   // Validate email
   const [emailError, validEmail] = Email.create(email)
   if (emailError) return Err(emailError)

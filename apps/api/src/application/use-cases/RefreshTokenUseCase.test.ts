@@ -132,9 +132,7 @@ describe('RefreshTokenUseCase', () => {
 
         // Assert
         expectSuccess(result)
-        expect(refreshTokenRepository.findByToken).toHaveBeenCalledWith(
-          TEST_CONSTANTS.auth.validRefreshToken,
-        )
+        expect(refreshTokenRepository.findByToken).toHaveBeenCalledWith(TEST_CONSTANTS.auth.validRefreshToken)
         expect(refreshTokenRepository.findByToken).toHaveBeenCalledTimes(1)
       })
 
@@ -160,9 +158,7 @@ describe('RefreshTokenUseCase', () => {
         // Arrange
         const dto = buildRefreshTokenDTO({ refreshToken: TEST_CONSTANTS.auth.validRefreshToken })
 
-        const { verifyRefreshToken, generateAccessToken } = await import(
-          '../../infrastructure/auth/jwt-utils.js'
-        )
+        const { verifyRefreshToken, generateAccessToken } = await import('../../infrastructure/auth/jwt-utils.js')
         vi.mocked(verifyRefreshToken).mockReturnValue(Ok(mockPayload))
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(mockRefreshToken)
         vi.mocked(userRepository.findById).mockResolvedValue(mockUser)
@@ -250,9 +246,7 @@ describe('RefreshTokenUseCase', () => {
         expect(error.message).toBe('Refresh token has expired')
 
         // Should clean up expired token
-        expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith(
-          TEST_CONSTANTS.auth.expiredRefreshToken,
-        )
+        expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith(TEST_CONSTANTS.auth.expiredRefreshToken)
         expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledTimes(1)
       })
 
@@ -273,9 +267,7 @@ describe('RefreshTokenUseCase', () => {
         expect(error.message).toBe('User no longer exists')
 
         // Should clean up orphaned token
-        expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith(
-          TEST_CONSTANTS.auth.validRefreshToken,
-        )
+        expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith(TEST_CONSTANTS.auth.validRefreshToken)
         expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledTimes(1)
       })
 
@@ -310,9 +302,7 @@ describe('RefreshTokenUseCase', () => {
 
         const dto = buildRefreshTokenDTO()
 
-        const { verifyRefreshToken, generateAccessToken } = await import(
-          '../../infrastructure/auth/jwt-utils.js'
-        )
+        const { verifyRefreshToken, generateAccessToken } = await import('../../infrastructure/auth/jwt-utils.js')
         vi.mocked(verifyRefreshToken).mockReturnValue(
           Ok({
             tokenId: TEST_CONSTANTS.mockTokenId,
@@ -343,9 +333,7 @@ describe('RefreshTokenUseCase', () => {
 
         const dto = buildRefreshTokenDTO()
 
-        const { verifyRefreshToken, generateAccessToken } = await import(
-          '../../infrastructure/auth/jwt-utils.js'
-        )
+        const { verifyRefreshToken, generateAccessToken } = await import('../../infrastructure/auth/jwt-utils.js')
         vi.mocked(verifyRefreshToken).mockReturnValue(
           Ok({
             tokenId: TEST_CONSTANTS.mockTokenId,
