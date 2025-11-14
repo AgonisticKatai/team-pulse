@@ -83,7 +83,7 @@ export class Container {
    */
   get teamRepository(): ITeamRepository {
     if (!this._teamRepository) {
-      this._teamRepository = new DrizzleTeamRepository(this.database)
+      this._teamRepository = DrizzleTeamRepository.create({ db: this.database })
     }
     return this._teamRepository
   }
@@ -93,7 +93,7 @@ export class Container {
    */
   get userRepository(): IUserRepository {
     if (!this._userRepository) {
-      this._userRepository = new DrizzleUserRepository(this.database)
+      this._userRepository = DrizzleUserRepository.create({ db: this.database })
     }
     return this._userRepository
   }
@@ -103,7 +103,7 @@ export class Container {
    */
   get refreshTokenRepository(): IRefreshTokenRepository {
     if (!this._refreshTokenRepository) {
-      this._refreshTokenRepository = new DrizzleRefreshTokenRepository(this.database)
+      this._refreshTokenRepository = DrizzleRefreshTokenRepository.create({ db: this.database })
     }
     return this._refreshTokenRepository
   }

@@ -33,7 +33,7 @@ async function seedSuperAdmin() {
 
     // 2. Connect to database
     const db = createDatabase(env.DATABASE_URL)
-    const userRepository = new DrizzleUserRepository(db)
+    const userRepository = DrizzleUserRepository.create({ db })
     console.log('✅ Database connected')
 
     // 3. Check if users exist

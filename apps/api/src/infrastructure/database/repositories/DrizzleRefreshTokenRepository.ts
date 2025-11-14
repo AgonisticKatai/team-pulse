@@ -25,7 +25,15 @@ import { refreshTokens as refreshTokensSchema } from '../schema.js'
  * but implements a FRAMEWORK-AGNOSTIC interface.
  */
 export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
-  constructor(private readonly db: Database) {}
+  private readonly db: Database
+
+  private constructor({ db }: { db: Database }) {
+    this.db = db
+  }
+
+  static create({ db }: { db: Database }): DrizzleRefreshTokenRepository {
+    return new DrizzleRefreshTokenRepository({ db })
+  }
 
   async findByToken({ token }: { token: string }): Promise<Result<RefreshToken | null, RepositoryError>> {
     try {

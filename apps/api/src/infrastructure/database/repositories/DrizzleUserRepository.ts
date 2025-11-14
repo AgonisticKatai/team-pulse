@@ -26,7 +26,15 @@ import { users as usersSchema } from '../schema.js'
  * but implements a FRAMEWORK-AGNOSTIC interface.
  */
 export class DrizzleUserRepository implements IUserRepository {
-  constructor(private readonly db: Database) {}
+  private readonly db: Database
+
+  private constructor({ db }: { db: Database }) {
+    this.db = db
+  }
+
+  static create({ db }: { db: Database }): DrizzleUserRepository {
+    return new DrizzleUserRepository({ db })
+  }
 
   async findById({ id }: { id: string }): Promise<Result<User | null, RepositoryError>> {
     try {

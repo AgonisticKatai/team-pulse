@@ -25,7 +25,15 @@ import { teams as teamsSchema } from '../schema.js'
  * but implements a FRAMEWORK-AGNOSTIC interface.
  */
 export class DrizzleTeamRepository implements ITeamRepository {
-  constructor(private readonly db: Database) {}
+  private readonly db: Database
+
+  private constructor({ db }: { db: Database }) {
+    this.db = db
+  }
+
+  static create({ db }: { db: Database }): DrizzleTeamRepository {
+    return new DrizzleTeamRepository({ db })
+  }
 
   async findById({ id }: { id: string }): Promise<Result<Team | null, RepositoryError>> {
     try {
