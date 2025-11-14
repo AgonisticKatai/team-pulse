@@ -51,11 +51,18 @@ describe('JWT Utilities', () => {
       }
 
       const token = generateAccessToken({ payload, env: testEnv })
-      const decoded = verifyAccessToken({ token, env: testEnv })
+      const verifyResult = verifyAccessToken({ token, env: testEnv })
 
-      expect(decoded.userId).toBe(payload.userId)
-      expect(decoded.email).toBe(payload.email)
-      expect(decoded.role).toBe(payload.role)
+      expect(verifyResult).toBeDefined()
+      expect(verifyResult.ok).toBe(true)
+
+      if (verifyResult.ok) {
+        const decoded = verifyResult.value
+
+        expect(decoded.userId).toBe(payload.userId)
+        expect(decoded.email).toBe(payload.email)
+        expect(decoded.role).toBe(payload.role)
+      }
     })
   })
 
@@ -102,19 +109,34 @@ describe('JWT Utilities', () => {
       }
 
       const token = generateAccessToken({ payload, env: testEnv })
-      const decoded = verifyAccessToken({ token, env: testEnv })
+      const verifyResult = verifyAccessToken({ token, env: testEnv })
 
-      expect(decoded).toBeDefined()
-      expect(decoded.userId).toBe(payload.userId)
+      expect(verifyResult).toBeDefined()
+      expect(verifyResult.ok).toBe(true)
+
+      if (verifyResult.ok) {
+        const decoded = verifyResult.value
+        expect(decoded.email).toBe(payload.email)
+        expect(decoded.role).toBe(payload.role)
+        expect(decoded.userId).toBe(payload.userId)
+      }
     })
 
-    it('should throw error for invalid token', () => {
+    it('should handle invalid token', () => {
       const invalidToken = 'invalid.token.here'
 
-      expect(() => verifyAccessToken({ token: invalidToken, env: testEnv })).toThrow('Invalid access token')
+      const verifyResult = verifyAccessToken({ token: invalidToken, env: testEnv })
+
+      expect(verifyResult.ok).toBe(false)
+
+      if (!verifyResult.ok) {
+        expect(verifyResult.error).toBeInstanceOf(ValidationError)
+        expect(verifyResult.error.field).toBe('accessToken')
+        expect(verifyResult.error.message).toBe('Invalid token')
+      }
     })
 
-    it('should throw error for token with wrong secret', () => {
+    it('should handle token with wrong secret', () => {
       const payload: AccessTokenPayload = {
         email: 'test@example.com',
         role: 'USER',
@@ -128,11 +150,26 @@ describe('JWT Utilities', () => {
         JWT_SECRET: 'wrong-secret-key-completely-different',
       }
 
-      expect(() => verifyAccessToken({ token, env: wrongEnv })).toThrow('Invalid access token')
+      const verifyResult = verifyAccessToken({ token, env: wrongEnv })
+
+      expect(verifyResult.ok).toBe(false)
+
+      if (!verifyResult.ok) {
+        expect(verifyResult.error).toBeInstanceOf(ValidationError)
+        expect(verifyResult.error.field).toBe('accessToken')
+        expect(verifyResult.error.message).toBe('Invalid token')
+      }
     })
 
-    it('should throw error for malformed token', () => {
-      expect(() => verifyAccessToken({ token: 'not-a-jwt', env: testEnv })).toThrow()
+    it('should handle malformed token', () => {
+      const verifyResult = verifyAccessToken({ token: 'not-a-jwt', env: testEnv })
+
+      expect(verifyResult.ok).toBe(false)
+
+      if (!verifyResult.ok) {
+        expect(verifyResult.error).toBeInstanceOf(ValidationError)
+        expect(verifyResult.error.field).toBe('accessToken')
+      }
     })
   })
 
@@ -226,10 +263,14 @@ describe('JWT Utilities', () => {
       }
 
       const token = generateAccessToken({ payload, env: testEnv })
-      const decoded = verifyAccessToken({ token, env: testEnv })
+      const verifyResult = verifyAccessToken({ token, env: testEnv })
 
-      expect(decoded).toHaveProperty('exp')
-      expect(decoded).toHaveProperty('iat')
+      expect(verifyResult.ok).toBe(true)
+
+      if (verifyResult.ok) {
+        expect(verifyResult.value).toHaveProperty('exp')
+        expect(verifyResult.value).toHaveProperty('iat')
+      }
     })
 
     it('should include issuer and audience in tokens', () => {
@@ -240,10 +281,14 @@ describe('JWT Utilities', () => {
       }
 
       const token = generateAccessToken({ payload, env: testEnv })
-      const decoded = verifyAccessToken({ token, env: testEnv })
+      const verifyResult = verifyAccessToken({ token, env: testEnv })
 
-      expect(decoded).toHaveProperty('iss', 'team-pulse-api')
-      expect(decoded).toHaveProperty('aud', 'team-pulse-app')
+      expect(verifyResult.ok).toBe(true)
+
+      if (verifyResult.ok) {
+        expect(verifyResult.value).toHaveProperty('iss', 'team-pulse-api')
+        expect(verifyResult.value).toHaveProperty('aud', 'team-pulse-app')
+      }
     })
   })
 })

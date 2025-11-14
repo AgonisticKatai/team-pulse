@@ -50,6 +50,16 @@ const JWT_ERROR_TYPES: Record<string, string> = {
   TokenExpiredError: 'Token has expired',
 }
 
+const handleJwtError = ({ error, field }: { error: unknown; field: string }): ValidationError => {
+  const errorName = error instanceof Error ? error.name : 'UnknownError'
+  const errorMessage = JWT_ERROR_TYPES[errorName]
+
+  return ValidationError.forField({
+    field,
+    message: errorMessage || 'Invalid token',
+  })
+}
+
 /**
  * Generate an access token
  *
@@ -88,22 +98,16 @@ export function generateRefreshToken({ env, payload }: { env: Env; payload: Refr
  * @returns The decoded payload
  * @throws Error if the token is invalid or expired
  */
-export function verifyAccessToken({ env, token }: { env: Env; token: string }): AccessTokenPayload {
+export function verifyAccessToken({ env, token }: { env: Env; token: string }): Result<AccessTokenPayload, ValidationError> {
   try {
     const payload = jwt.verify(token, env.JWT_SECRET, {
       audience: 'team-pulse-app',
       issuer: 'team-pulse-api',
     }) as AccessTokenPayload
 
-    return payload
+    return Ok(payload)
   } catch (error) {
-    if (error instanceof jwt.TokenExpiredError) {
-      throw new Error('Access token has expired')
-    }
-    if (error instanceof jwt.JsonWebTokenError) {
-      throw new Error('Invalid access token')
-    }
-    throw error
+    return Err(handleJwtError({ error, field: 'accessToken' }))
   }
 }
 
@@ -124,15 +128,7 @@ export function verifyRefreshToken({ env, token }: { env: Env; token: string }):
 
     return Ok(payload)
   } catch (error) {
-    const errorName = error instanceof Error ? error.name : 'UnknownError'
-    const errorMessage = JWT_ERROR_TYPES[errorName]
-
-    return Err(
-      ValidationError.forField({
-        field: 'refreshToken',
-        message: errorMessage || 'Invalid refresh token',
-      }),
-    )
+    return Err(handleJwtError({ error, field: 'refreshToken' }))
   }
 }
 
