@@ -5,7 +5,6 @@ import { RefreshToken } from '../../domain/models/RefreshToken.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import { Err, Ok } from '../../domain/types/Result.js'
-import type { Env } from '../../infrastructure/config/env.js'
 import {
   buildAdminUser,
   buildLoginDTO,
@@ -15,39 +14,44 @@ import {
   expectSuccess,
   TEST_CONSTANTS,
 } from '../../infrastructure/testing/index.js'
-import { TEST_ENV } from '../../infrastructure/testing/test-env.js'
+import type { TokenFactory } from '../factories/TokenFactory.js'
 import { LoginUseCase } from './LoginUseCase.js'
 
 // Mock external dependencies
-vi.mock('../../infrastructure/auth/jwt-utils.js', () => ({
-  generateAccessToken: vi.fn(() => Ok(TEST_CONSTANTS.auth.mockAccessToken)),
-  generateRefreshToken: vi.fn(() => TEST_CONSTANTS.auth.mockRefreshToken),
-  getRefreshTokenExpirationDate: vi.fn(() => TEST_CONSTANTS.futureDate),
-}))
-
 vi.mock('../../infrastructure/auth/password-utils.js', () => ({
   verifyPassword: vi.fn(),
-}))
-
-vi.mock('node:crypto', () => ({
-  randomUUID: vi.fn(() => TEST_CONSTANTS.mockUuid),
 }))
 
 describe('LoginUseCase', () => {
   let loginUseCase: LoginUseCase
   let userRepository: IUserRepository
   let refreshTokenRepository: IRefreshTokenRepository
-  let env: Env
+  let tokenFactory: TokenFactory
 
   // Mock user data
   const mockUser = buildUser()
+
+  // Mock refresh token
+  const mockRefreshTokenResult = RefreshToken.create({
+    id: TEST_CONSTANTS.mockUuid,
+    token: TEST_CONSTANTS.auth.mockRefreshToken,
+    userId: mockUser.id.getValue(),
+    expiresAt: TEST_CONSTANTS.futureDate,
+  })
+  if (!mockRefreshTokenResult.ok) throw new Error('Failed to create mock refresh token')
+  const mockRefreshToken = mockRefreshTokenResult.value
 
   beforeEach(() => {
     // Reset all mocks before each test
     vi.clearAllMocks()
 
-    // Mock environment
-    env = TEST_ENV
+    // Mock TokenFactory
+    tokenFactory = {
+      createAccessToken: vi.fn(() => Ok(TEST_CONSTANTS.auth.mockAccessToken)),
+      createRefreshToken: vi.fn(() => Ok(mockRefreshToken)),
+      verifyAccessToken: vi.fn(),
+      verifyRefreshToken: vi.fn(),
+    } as unknown as TokenFactory
 
     // Mock repositories
     userRepository = {
@@ -70,7 +74,7 @@ describe('LoginUseCase', () => {
     }
 
     // Create use case instance
-    loginUseCase = LoginUseCase.create({ env, refreshTokenRepository, userRepository })
+    loginUseCase = LoginUseCase.create({ tokenFactory, refreshTokenRepository, userRepository })
   })
 
   describe('execute', () => {
@@ -148,22 +152,17 @@ describe('LoginUseCase', () => {
         vi.mocked(verifyPassword).mockResolvedValue(true)
         vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
 
-        const { generateAccessToken } = await import('../../infrastructure/auth/jwt-utils.js')
-
         // Act
         const result = await loginUseCase.execute(loginDTO)
 
         // Assert
         expectSuccess(result)
-        expect(generateAccessToken).toHaveBeenCalledWith({
-          payload: {
-            email: TEST_CONSTANTS.users.johnDoe.email,
-            role: TEST_CONSTANTS.users.johnDoe.role,
-            userId: TEST_CONSTANTS.users.johnDoe.id,
-          },
-          env,
+        expect(tokenFactory.createAccessToken).toHaveBeenCalledWith({
+          email: TEST_CONSTANTS.users.johnDoe.email,
+          role: TEST_CONSTANTS.users.johnDoe.role,
+          userId: TEST_CONSTANTS.users.johnDoe.id,
         })
-        expect(generateAccessToken).toHaveBeenCalledTimes(1)
+        expect(tokenFactory.createAccessToken).toHaveBeenCalledTimes(1)
       })
 
       it('should generate refresh token with correct payload', async () => {
@@ -175,21 +174,15 @@ describe('LoginUseCase', () => {
         vi.mocked(verifyPassword).mockResolvedValue(true)
         vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
 
-        const { generateRefreshToken } = await import('../../infrastructure/auth/jwt-utils.js')
-
         // Act
         const result = await loginUseCase.execute(loginDTO)
 
         // Assert
         expectSuccess(result)
-        expect(generateRefreshToken).toHaveBeenCalledWith({
-          payload: {
-            tokenId: TEST_CONSTANTS.mockUuid,
-            userId: TEST_CONSTANTS.users.johnDoe.id,
-          },
-          env,
+        expect(tokenFactory.createRefreshToken).toHaveBeenCalledWith({
+          userId: TEST_CONSTANTS.users.johnDoe.id,
         })
-        expect(generateRefreshToken).toHaveBeenCalledTimes(1)
+        expect(tokenFactory.createRefreshToken).toHaveBeenCalledTimes(1)
       })
 
       it('should save refresh token to repository', async () => {
@@ -296,15 +289,13 @@ describe('LoginUseCase', () => {
         const { verifyPassword } = await import('../../infrastructure/auth/password-utils.js')
         vi.mocked(verifyPassword).mockResolvedValue(false)
 
-        const { generateAccessToken, generateRefreshToken } = await import('../../infrastructure/auth/jwt-utils.js')
-
         // Act
         const result = await loginUseCase.execute(loginDTO)
 
         // Assert
         expectErrorType({ errorType: ValidationError, result })
-        expect(generateAccessToken).not.toHaveBeenCalled()
-        expect(generateRefreshToken).not.toHaveBeenCalled()
+        expect(tokenFactory.createAccessToken).not.toHaveBeenCalled()
+        expect(tokenFactory.createRefreshToken).not.toHaveBeenCalled()
         expect(refreshTokenRepository.save).not.toHaveBeenCalled()
       })
 
@@ -362,8 +353,6 @@ describe('LoginUseCase', () => {
         vi.mocked(verifyPassword).mockResolvedValue(true)
         vi.mocked(refreshTokenRepository.save).mockResolvedValue(Err(repositoryError))
 
-        const { generateAccessToken } = await import('../../infrastructure/auth/jwt-utils.js')
-
         // Act
         const result = await loginUseCase.execute(loginDTO)
 
@@ -371,7 +360,7 @@ describe('LoginUseCase', () => {
         expectErrorType({ errorType: RepositoryError, result })
         // Access token should still be generated, but the overall operation should fail
         // This is intentional - we fail fast before returning tokens to the user
-        expect(generateAccessToken).not.toHaveBeenCalled()
+        expect(tokenFactory.createAccessToken).not.toHaveBeenCalled()
       })
 
       it('should verify password and generate refresh token before attempting to save', async () => {
@@ -388,8 +377,6 @@ describe('LoginUseCase', () => {
         vi.mocked(verifyPassword).mockResolvedValue(true)
         vi.mocked(refreshTokenRepository.save).mockResolvedValue(Err(repositoryError))
 
-        const { generateRefreshToken } = await import('../../infrastructure/auth/jwt-utils.js')
-
         // Act
         const result = await loginUseCase.execute(loginDTO)
 
@@ -397,7 +384,7 @@ describe('LoginUseCase', () => {
         expectErrorType({ errorType: RepositoryError, result })
         // These operations should have been called before the save fails
         expect(verifyPassword).toHaveBeenCalledTimes(1)
-        expect(generateRefreshToken).toHaveBeenCalledTimes(1)
+        expect(tokenFactory.createRefreshToken).toHaveBeenCalledTimes(1)
         expect(refreshTokenRepository.save).toHaveBeenCalledTimes(1)
       })
     })

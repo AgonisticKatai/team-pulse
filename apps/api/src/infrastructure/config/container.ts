@@ -1,3 +1,4 @@
+import { TokenFactory } from '../../application/factories/TokenFactory.js'
 import { CreateTeamUseCase } from '../../application/use-cases/CreateTeamUseCase.js'
 import { CreateUserUseCase } from '../../application/use-cases/CreateUserUseCase.js'
 import { DeleteTeamUseCase } from '../../application/use-cases/DeleteTeamUseCase.js'
@@ -45,6 +46,7 @@ export class Container {
   private _teamRepository?: ITeamRepository
   private _userRepository?: IUserRepository
   private _refreshTokenRepository?: IRefreshTokenRepository
+  private _tokenFactory?: TokenFactory
 
   // Team Use Cases
   private _createTeamUseCase?: CreateTeamUseCase
@@ -107,6 +109,16 @@ export class Container {
   }
 
   /**
+   * Token Factory (singleton)
+   */
+  get tokenFactory(): TokenFactory {
+    if (!this._tokenFactory) {
+      this._tokenFactory = TokenFactory.create({ env: this.env })
+    }
+    return this._tokenFactory
+  }
+
+  /**
    * Create Team Use Case
    */
   get createTeamUseCase(): CreateTeamUseCase {
@@ -162,7 +174,7 @@ export class Container {
   get loginUseCase(): LoginUseCase {
     if (!this._loginUseCase) {
       this._loginUseCase = LoginUseCase.create({
-        env: this.env,
+        tokenFactory: this.tokenFactory,
         refreshTokenRepository: this.refreshTokenRepository,
         userRepository: this.userRepository,
       })
@@ -176,7 +188,7 @@ export class Container {
   get refreshTokenUseCase(): RefreshTokenUseCase {
     if (!this._refreshTokenUseCase) {
       this._refreshTokenUseCase = RefreshTokenUseCase.create({
-        env: this.env,
+        tokenFactory: this.tokenFactory,
         refreshTokenRepository: this.refreshTokenRepository,
         userRepository: this.userRepository,
       })

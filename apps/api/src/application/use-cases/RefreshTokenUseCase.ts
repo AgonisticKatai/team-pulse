@@ -3,8 +3,7 @@ import { ValidationError } from '../../domain/errors/index.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import { Err, Ok, type Result } from '../../domain/types/index.js'
-import { generateAccessToken, verifyRefreshToken } from '../../infrastructure/auth/jwt-utils.js'
-import type { Env } from '../../infrastructure/config/env.js'
+import type { TokenFactory } from '../factories/TokenFactory.js'
 
 /**
  * Refresh Token Use Case
@@ -24,39 +23,39 @@ import type { Env } from '../../infrastructure/config/env.js'
  * It's PURE business logic.
  */
 export class RefreshTokenUseCase {
-  private readonly env: Env
+  private readonly tokenFactory: TokenFactory
   private readonly refreshTokenRepository: IRefreshTokenRepository
   private readonly userRepository: IUserRepository
 
   private constructor({
-    env,
+    tokenFactory,
     refreshTokenRepository,
     userRepository,
   }: {
-    env: Env
+    tokenFactory: TokenFactory
     refreshTokenRepository: IRefreshTokenRepository
     userRepository: IUserRepository
   }) {
-    this.env = env
+    this.tokenFactory = tokenFactory
     this.refreshTokenRepository = refreshTokenRepository
     this.userRepository = userRepository
   }
 
   static create({
-    env,
+    tokenFactory,
     refreshTokenRepository,
     userRepository,
   }: {
-    env: Env
+    tokenFactory: TokenFactory
     refreshTokenRepository: IRefreshTokenRepository
     userRepository: IUserRepository
   }): RefreshTokenUseCase {
-    return new RefreshTokenUseCase({ env, refreshTokenRepository, userRepository })
+    return new RefreshTokenUseCase({ tokenFactory, refreshTokenRepository, userRepository })
   }
 
   async execute(dto: RefreshTokenDTO): Promise<Result<RefreshTokenResponseDTO, ValidationError>> {
-    const refreshTokenPayloadResult = verifyRefreshToken({
-      env: this.env,
+    // Verify refresh token JWT signature
+    const refreshTokenPayloadResult = this.tokenFactory.verifyRefreshToken({
       token: dto.refreshToken,
     })
 
@@ -103,13 +102,10 @@ export class RefreshTokenUseCase {
     }
 
     // Generate new access token
-    const accessTokenResult = generateAccessToken({
-      payload: {
-        email: user.email.getValue(),
-        role: user.role.getValue(),
-        userId: user.id.getValue(),
-      },
-      env: this.env,
+    const accessTokenResult = this.tokenFactory.createAccessToken({
+      email: user.email.getValue(),
+      role: user.role.getValue(),
+      userId: user.id.getValue(),
     })
 
     if (!accessTokenResult.ok) {

@@ -1,13 +1,10 @@
-import { randomUUID } from 'node:crypto'
 import type { LoginDTO, LoginResponseDTO } from '@team-pulse/shared'
 import { type NotFoundError, type RepositoryError, ValidationError } from '../../domain/errors/index.js'
-import { RefreshToken } from '../../domain/models/RefreshToken.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import { Err, Ok, type Result } from '../../domain/types/index.js'
-import { generateAccessToken, generateRefreshToken, getRefreshTokenExpirationDate } from '../../infrastructure/auth/jwt-utils.js'
 import { verifyPassword } from '../../infrastructure/auth/password-utils.js'
-import type { Env } from '../../infrastructure/config/env.js'
+import type { TokenFactory } from '../factories/TokenFactory.js'
 
 /**
  * Login Use Case
@@ -28,34 +25,34 @@ import type { Env } from '../../infrastructure/config/env.js'
  * It's PURE business logic.
  */
 export class LoginUseCase {
-  private readonly env: Env
+  private readonly tokenFactory: TokenFactory
   private readonly refreshTokenRepository: IRefreshTokenRepository
   private readonly userRepository: IUserRepository
 
   private constructor({
-    env,
+    tokenFactory,
     refreshTokenRepository,
     userRepository,
   }: {
-    env: Env
+    tokenFactory: TokenFactory
     refreshTokenRepository: IRefreshTokenRepository
     userRepository: IUserRepository
   }) {
-    this.env = env
+    this.tokenFactory = tokenFactory
     this.refreshTokenRepository = refreshTokenRepository
     this.userRepository = userRepository
   }
 
   static create({
-    env,
+    tokenFactory,
     refreshTokenRepository,
     userRepository,
   }: {
-    env: Env
+    tokenFactory: TokenFactory
     refreshTokenRepository: IRefreshTokenRepository
     userRepository: IUserRepository
   }): LoginUseCase {
-    return new LoginUseCase({ env, refreshTokenRepository, userRepository })
+    return new LoginUseCase({ tokenFactory, refreshTokenRepository, userRepository })
   }
 
   async execute(dto: LoginDTO): Promise<Result<LoginResponseDTO, NotFoundError | RepositoryError | ValidationError>> {
@@ -87,20 +84,8 @@ export class LoginUseCase {
       )
     }
 
-    const refreshTokenId = randomUUID()
-
-    const refreshTokenString = generateRefreshToken({
-      env: this.env,
-      payload: {
-        tokenId: refreshTokenId,
-        userId: user.id.getValue(),
-      },
-    })
-
-    const refreshTokenResult = RefreshToken.create({
-      expiresAt: getRefreshTokenExpirationDate(),
-      id: refreshTokenId,
-      token: refreshTokenString,
+    // Create refresh token (coordinates JWT generation + domain entity creation)
+    const refreshTokenResult = this.tokenFactory.createRefreshToken({
       userId: user.id.getValue(),
     })
 
@@ -108,21 +93,21 @@ export class LoginUseCase {
       return Err(refreshTokenResult.error)
     }
 
+    const refreshToken = refreshTokenResult.value
+
     const saveResult = await this.refreshTokenRepository.save({
-      refreshToken: refreshTokenResult.value,
+      refreshToken,
     })
 
     if (!saveResult.ok) {
       return Err(saveResult.error)
     }
 
-    const accessTokenResult = generateAccessToken({
-      env: this.env,
-      payload: {
-        email: user.email.getValue(),
-        role: user.role.getValue(),
-        userId: user.id.getValue(),
-      },
+    // Create access token
+    const accessTokenResult = this.tokenFactory.createAccessToken({
+      email: user.email.getValue(),
+      role: user.role.getValue(),
+      userId: user.id.getValue(),
     })
 
     if (!accessTokenResult.ok) {
@@ -131,7 +116,7 @@ export class LoginUseCase {
 
     return Ok({
       accessToken: accessTokenResult.value,
-      refreshToken: refreshTokenString,
+      refreshToken: refreshToken.token,
       user: user.toDTO(),
     })
   }
