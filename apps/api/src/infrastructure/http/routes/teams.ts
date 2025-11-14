@@ -109,10 +109,14 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
     try {
       const { id } = request.params
 
-      const team = await getTeamUseCase.execute(id)
+      const result = await getTeamUseCase.execute(id)
+
+      if (!result.ok) {
+        return handleError(result.error, reply)
+      }
 
       return reply.code(200).send({
-        data: team,
+        data: result.value,
         success: true,
       })
     } catch (error) {

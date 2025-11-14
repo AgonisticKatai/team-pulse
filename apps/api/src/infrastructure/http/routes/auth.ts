@@ -35,29 +35,42 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
   /**
    * POST /api/auth/login
    * Login with email and password
+   *
+   * Rate limit: 5 attempts per 15 minutes to prevent brute force attacks
    */
-  fastify.post('/api/auth/login', async (request, reply) => {
-    try {
-      // Validate request body using Zod
-      const dto = LoginDTOSchema.parse(request.body)
+  fastify.post(
+    '/api/auth/login',
+    {
+      config: {
+        rateLimit: {
+          max: 5,
+          timeWindow: '15 minutes',
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        // Validate request body using Zod
+        const dto = LoginDTOSchema.parse(request.body)
 
-      // Execute use case
-      const result = await loginUseCase.execute(dto)
+        // Execute use case
+        const result = await loginUseCase.execute(dto)
 
-      // Handle Result type
-      if (!result.ok) {
-        return handleError(result.error, reply)
+        // Handle Result type
+        if (!result.ok) {
+          return handleError(result.error, reply)
+        }
+
+        // Return success response
+        return reply.code(200).send({
+          data: result.value,
+          success: true,
+        })
+      } catch (error) {
+        return handleError(error, reply)
       }
-
-      // Return success response
-      return reply.code(200).send({
-        data: result.value,
-        success: true,
-      })
-    } catch (error) {
-      return handleError(error, reply)
-    }
-  })
+    },
+  )
 
   /**
    * POST /api/auth/refresh

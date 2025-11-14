@@ -3,8 +3,8 @@ import type { CreateUserDTO, UserResponseDTO } from '@team-pulse/shared'
 import { DuplicatedError, type RepositoryError, type ValidationError } from '../../domain/errors/index.js'
 import { User } from '../../domain/models/User.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
+import type { IPasswordHasher } from '../../domain/services/IPasswordHasher.js'
 import { Err, Ok, type Result } from '../../domain/types/index.js'
-import { hashPassword } from '../../infrastructure/auth/password-utils.js'
 
 /**
  * Create User Use Case
@@ -27,13 +27,15 @@ import { hashPassword } from '../../infrastructure/auth/password-utils.js'
  */
 export class CreateUserUseCase {
   private readonly userRepository: IUserRepository
+  private readonly passwordHasher: IPasswordHasher
 
-  private constructor({ userRepository }: { userRepository: IUserRepository }) {
+  private constructor({ userRepository, passwordHasher }: { userRepository: IUserRepository; passwordHasher: IPasswordHasher }) {
     this.userRepository = userRepository
+    this.passwordHasher = passwordHasher
   }
 
-  static create({ userRepository }: { userRepository: IUserRepository }): CreateUserUseCase {
-    return new CreateUserUseCase({ userRepository })
+  static create({ userRepository, passwordHasher }: { userRepository: IUserRepository; passwordHasher: IPasswordHasher }): CreateUserUseCase {
+    return new CreateUserUseCase({ userRepository, passwordHasher })
   }
 
   async execute(dto: CreateUserDTO): Promise<Result<UserResponseDTO, DuplicatedError | RepositoryError | ValidationError>> {
@@ -47,9 +49,13 @@ export class CreateUserUseCase {
       return Err(DuplicatedError.create({ entityName: 'User', identifier: dto.email }))
     }
 
-    const passwordHash = await hashPassword(dto.password)
+    const hashResult = await this.passwordHasher.hash({ password: dto.password })
 
-    const createUserResult = User.create({ email: dto.email, id: randomUUID(), passwordHash, role: dto.role })
+    if (!hashResult.ok) {
+      return Err(hashResult.error)
+    }
+
+    const createUserResult = User.create({ email: dto.email, id: randomUUID(), passwordHash: hashResult.value, role: dto.role })
 
     if (!createUserResult.ok) {
       return Err(createUserResult.error)

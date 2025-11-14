@@ -12,6 +12,8 @@ import { UpdateTeamUseCase } from '../../application/use-cases/UpdateTeamUseCase
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
+import type { IPasswordHasher } from '../../domain/services/IPasswordHasher.js'
+import { BcryptPasswordHasher } from '../auth/BcryptPasswordHasher.js'
 import { createDatabase, type Database } from '../database/connection.js'
 import { DrizzleRefreshTokenRepository } from '../database/repositories/DrizzleRefreshTokenRepository.js'
 import { DrizzleTeamRepository } from '../database/repositories/DrizzleTeamRepository.js'
@@ -47,6 +49,7 @@ export class Container {
   private _userRepository?: IUserRepository
   private _refreshTokenRepository?: IRefreshTokenRepository
   private _tokenFactory?: TokenFactory
+  private _passwordHasher?: IPasswordHasher
 
   // Team Use Cases
   private _createTeamUseCase?: CreateTeamUseCase
@@ -119,6 +122,16 @@ export class Container {
   }
 
   /**
+   * Password Hasher (singleton)
+   */
+  get passwordHasher(): IPasswordHasher {
+    if (!this._passwordHasher) {
+      this._passwordHasher = BcryptPasswordHasher.create()
+    }
+    return this._passwordHasher
+  }
+
+  /**
    * Create Team Use Case
    */
   get createTeamUseCase(): CreateTeamUseCase {
@@ -177,6 +190,7 @@ export class Container {
         tokenFactory: this.tokenFactory,
         refreshTokenRepository: this.refreshTokenRepository,
         userRepository: this.userRepository,
+        passwordHasher: this.passwordHasher,
       })
     }
     return this._loginUseCase
@@ -213,7 +227,10 @@ export class Container {
    */
   get createUserUseCase(): CreateUserUseCase {
     if (!this._createUserUseCase) {
-      this._createUserUseCase = CreateUserUseCase.create({ userRepository: this.userRepository })
+      this._createUserUseCase = CreateUserUseCase.create({
+        userRepository: this.userRepository,
+        passwordHasher: this.passwordHasher,
+      })
     }
     return this._createUserUseCase
   }

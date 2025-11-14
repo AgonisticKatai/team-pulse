@@ -2,8 +2,8 @@ import type { LoginDTO, LoginResponseDTO } from '@team-pulse/shared'
 import { type NotFoundError, type RepositoryError, ValidationError } from '../../domain/errors/index.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
+import type { IPasswordHasher } from '../../domain/services/IPasswordHasher.js'
 import { Err, Ok, type Result } from '../../domain/types/index.js'
-import { verifyPassword } from '../../infrastructure/auth/password-utils.js'
 import type { TokenFactory } from '../factories/TokenFactory.js'
 
 /**
@@ -28,27 +28,37 @@ export class LoginUseCase {
   private readonly tokenFactory: TokenFactory
   private readonly refreshTokenRepository: IRefreshTokenRepository
   private readonly userRepository: IUserRepository
+  private readonly passwordHasher: IPasswordHasher
 
   private constructor({
     tokenFactory,
     refreshTokenRepository,
     userRepository,
-  }: { tokenFactory: TokenFactory; refreshTokenRepository: IRefreshTokenRepository; userRepository: IUserRepository }) {
+    passwordHasher,
+  }: {
+    tokenFactory: TokenFactory
+    refreshTokenRepository: IRefreshTokenRepository
+    userRepository: IUserRepository
+    passwordHasher: IPasswordHasher
+  }) {
     this.tokenFactory = tokenFactory
     this.refreshTokenRepository = refreshTokenRepository
     this.userRepository = userRepository
+    this.passwordHasher = passwordHasher
   }
 
   static create({
     tokenFactory,
     refreshTokenRepository,
     userRepository,
+    passwordHasher,
   }: {
     tokenFactory: TokenFactory
     refreshTokenRepository: IRefreshTokenRepository
     userRepository: IUserRepository
+    passwordHasher: IPasswordHasher
   }): LoginUseCase {
-    return new LoginUseCase({ tokenFactory, refreshTokenRepository, userRepository })
+    return new LoginUseCase({ tokenFactory, refreshTokenRepository, userRepository, passwordHasher })
   }
 
   async execute(dto: LoginDTO): Promise<Result<LoginResponseDTO, NotFoundError | RepositoryError | ValidationError>> {
@@ -62,9 +72,13 @@ export class LoginUseCase {
       return Err(ValidationError.forField({ field: 'credentials', message: 'Invalid email or password' }))
     }
 
-    const isPasswordValid = await verifyPassword(dto.password, findUserResult.value.getPasswordHash())
+    const verifyResult = await this.passwordHasher.verify({ password: dto.password, hash: findUserResult.value.getPasswordHash() })
 
-    if (!isPasswordValid) {
+    if (!verifyResult.ok) {
+      return Err(verifyResult.error)
+    }
+
+    if (!verifyResult.value) {
       return Err(ValidationError.forField({ field: 'credentials', message: 'Invalid email or password' }))
     }
 

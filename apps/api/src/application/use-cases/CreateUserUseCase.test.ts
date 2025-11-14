@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { DuplicatedError, RepositoryError } from '../../domain/errors/index.js'
 import { User } from '../../domain/models/User.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
+import type { IPasswordHasher } from '../../domain/services/IPasswordHasher.js'
 import { Err, Ok } from '../../domain/types/Result.js'
 import {
   buildAdminUser,
@@ -18,10 +19,6 @@ import {
 import { CreateUserUseCase } from './CreateUserUseCase.js'
 
 // Mock external dependencies
-vi.mock('../../infrastructure/auth/password-utils.js', () => ({
-  hashPassword: vi.fn(() => Promise.resolve(TEST_CONSTANTS.users.johnDoe.passwordHash)),
-}))
-
 vi.mock('node:crypto', () => ({
   randomUUID: vi.fn(() => TEST_CONSTANTS.mockUuid),
 }))
@@ -29,6 +26,7 @@ vi.mock('node:crypto', () => ({
 describe('CreateUserUseCase', () => {
   let createUserUseCase: CreateUserUseCase
   let userRepository: IUserRepository
+  let passwordHasher: IPasswordHasher
 
   // Mock user data - represents a newly created user with generated UUID
   const mockUser = buildUser({ id: TEST_CONSTANTS.mockUuid })
@@ -48,8 +46,14 @@ describe('CreateUserUseCase', () => {
       save: vi.fn(),
     }
 
+    // Mock password hasher
+    passwordHasher = {
+      hash: vi.fn(() => Promise.resolve(Ok(TEST_CONSTANTS.users.johnDoe.passwordHash))),
+      verify: vi.fn(),
+    }
+
     // Create use case instance
-    createUserUseCase = CreateUserUseCase.create({ userRepository })
+    createUserUseCase = CreateUserUseCase.create({ userRepository, passwordHasher })
   })
 
   describe('execute', () => {
@@ -97,15 +101,13 @@ describe('CreateUserUseCase', () => {
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(null))
         vi.mocked(userRepository.save).mockResolvedValue(Ok(mockUser))
 
-        const { hashPassword } = await import('../../infrastructure/auth/password-utils.js')
-
         // Act
         const result = await createUserUseCase.execute(dto)
 
         // Assert
         expectSuccess(result)
-        expect(hashPassword).toHaveBeenCalledWith(TEST_CONSTANTS.users.johnDoe.password)
-        expect(hashPassword).toHaveBeenCalledTimes(1)
+        expect(passwordHasher.hash).toHaveBeenCalledWith({ password: TEST_CONSTANTS.users.johnDoe.password })
+        expect(passwordHasher.hash).toHaveBeenCalledTimes(1)
       })
 
       it('should save user with hashed password', async () => {
@@ -199,14 +201,12 @@ describe('CreateUserUseCase', () => {
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(existingUser))
 
-        const { hashPassword } = await import('../../infrastructure/auth/password-utils.js')
-
         // Act
         const result = await createUserUseCase.execute(dto)
 
         // Assert - Should fail before hashing password
         expectErrorType({ errorType: DuplicatedError, result })
-        expect(hashPassword).not.toHaveBeenCalled()
+        expect(passwordHasher.hash).not.toHaveBeenCalled()
         expect(userRepository.save).not.toHaveBeenCalled()
       })
 

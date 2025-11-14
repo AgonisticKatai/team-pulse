@@ -1,4 +1,5 @@
 import cors from '@fastify/cors'
+import rateLimit from '@fastify/rate-limit'
 import Fastify, { type FastifyError, type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify'
 import { type Container, createContainer } from './infrastructure/config/container.js'
 import { type Env, validateEnv, validateProductionEnv } from './infrastructure/config/env.js'
@@ -43,7 +44,22 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     origin: env.NODE_ENV === 'production' ? env.FRONTEND_URL : 'http://localhost:5173',
   })
 
-  // 5. Register routes (HTTP adapters)
+  // 5. Register Rate Limiting
+  // Global rate limit: 100 requests per 15 minutes per IP
+  // Protects against DDoS and brute force attacks
+  await fastify.register(rateLimit, {
+    max: 100,
+    timeWindow: '15 minutes',
+    errorResponseBuilder: () => ({
+      error: {
+        code: 'TOO_MANY_REQUESTS',
+        message: 'Rate limit exceeded. Please try again later.',
+      },
+      success: false,
+    }),
+  })
+
+  // 6. Register routes (HTTP adapters)
 
   // Authentication routes
   await registerAuthRoutes(fastify, {
@@ -70,7 +86,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     updateTeamUseCase: container.updateTeamUseCase,
   })
 
-  // 6. Health check endpoint
+  // 7. Health check endpoint
   fastify.get('/api/health', () => {
     return {
       environment: env.NODE_ENV,
@@ -81,7 +97,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     }
   })
 
-  // 7. API info endpoint
+  // 8. API info endpoint
   fastify.get('/api', () => {
     return {
       description: 'Football team statistics platform API',
@@ -96,7 +112,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     }
   })
 
-  // 8. 404 handler
+  // 9. 404 handler
   fastify.setNotFoundHandler((request: FastifyRequest, reply: FastifyReply) => {
     return reply.code(404).send({
       error: {
@@ -107,7 +123,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     })
   })
 
-  // 9. Global error handler
+  // 10. Global error handler
   fastify.setErrorHandler((error: FastifyError, _request: FastifyRequest, reply: FastifyReply) => {
     fastify.log.error(error)
 

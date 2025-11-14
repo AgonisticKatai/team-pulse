@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@fastify/cors": "^11.1.0",
+    "@fastify/rate-limit": "^10.3.0",
     "@team-pulse/shared": "workspace:*",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.3",
