@@ -10,7 +10,7 @@ import type { TokenFactory } from '../factories/TokenFactory.js'
  *
  * This is an APPLICATION SERVICE / USE CASE:
  * - Validates a refresh token
- * - Generates a new access token
+ * - Generates a new access token AND new refresh token (rotation)
  *
  * Responsibilities:
  * 1. Verify refresh token JWT signature
@@ -18,6 +18,14 @@ import type { TokenFactory } from '../factories/TokenFactory.js'
  * 3. Check if refresh token has expired
  * 4. Get user from database
  * 5. Generate new access token
+ * 6. Generate new refresh token (ROTATION)
+ * 7. Delete old refresh token
+ * 8. Save new refresh token
+ *
+ * SECURITY: Token Rotation
+ * - Each refresh request generates a new refresh token
+ * - The old refresh token is immediately invalidated
+ * - This reduces the window of opportunity if a token is compromised
  *
  * Note: This doesn't know about HTTP, Fastify, or any framework.
  * It's PURE business logic.
@@ -98,8 +106,38 @@ export class RefreshTokenUseCase {
       return Err(createAccessTokenResult.error)
     }
 
+    // TOKEN ROTATION: Generate new refresh token
+    const createRefreshTokenResult = this.tokenFactory.createRefreshToken({
+      userId: userResult.value.id.getValue(),
+    })
+
+    if (!createRefreshTokenResult.ok) {
+      return Err(createRefreshTokenResult.error)
+    }
+
+    // TOKEN ROTATION: Save new refresh token
+    const saveRefreshTokenResult = await this.refreshTokenRepository.save({
+      refreshToken: createRefreshTokenResult.value,
+    })
+
+    if (!saveRefreshTokenResult.ok) {
+      return Err(saveRefreshTokenResult.error)
+    }
+
+    // TOKEN ROTATION: Delete old refresh token
+    const deleteOldTokenResult = await this.refreshTokenRepository.deleteByToken({
+      token: dto.refreshToken,
+    })
+
+    if (!deleteOldTokenResult.ok) {
+      // Don't fail the request if we can't delete the old token
+      // It will be cleaned up by the expired token cleanup job
+      // Just log the error (will be implemented with logging system)
+    }
+
     return Ok({
       accessToken: createAccessTokenResult.value,
+      refreshToken: createRefreshTokenResult.value.token,
     })
   }
 }

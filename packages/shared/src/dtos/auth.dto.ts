@@ -78,9 +78,14 @@ export interface LoginResponseDTO {
 
 /**
  * Refresh token response DTO
+ *
+ * IMPORTANT: Includes new refreshToken for token rotation
+ * Token rotation improves security by issuing a new refresh token
+ * and invalidating the old one with each refresh request
  */
 export interface RefreshTokenResponseDTO {
   accessToken: string
+  refreshToken: string
 }
 
 /**
