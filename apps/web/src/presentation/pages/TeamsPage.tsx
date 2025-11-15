@@ -156,7 +156,7 @@ export function TeamsPage({ teamApiClient }: TeamsPageProps) {
               textAlign: 'center',
             }}
           >
-            Total teams: {data?.total || 0}
+            Total teams: {data?.pagination.total || 0}
           </div>
         )}
       </div>

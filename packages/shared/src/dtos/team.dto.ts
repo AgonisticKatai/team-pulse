@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { PaginatedResponse } from './pagination.dto.js'
 
 /**
  * Team Data Transfer Objects (DTOs)
@@ -72,8 +73,6 @@ export interface TeamResponseDTO {
 
 /**
  * List of teams response
+ * Uses the generic PaginatedResponse type with 'teams' as the key
  */
-export interface TeamsListResponseDTO {
-  teams: TeamResponseDTO[]
-  total: number
-}
+export type TeamsListResponseDTO = PaginatedResponse<TeamResponseDTO, 'teams'>

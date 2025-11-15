@@ -259,7 +259,7 @@ describe('Protected Routes and RBAC', () => {
       const body = JSON.parse(response.body)
       expect(body.success).toBe(true)
       expect(body.data.users).toBeInstanceOf(Array)
-      expect(body.data.total).toBeGreaterThan(0)
+      expect(body.data.pagination.total).toBeGreaterThan(0)
     })
 
     it('should allow ADMIN to list users', async () => {

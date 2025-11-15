@@ -18,6 +18,7 @@ describe('ListUsersUseCase', () => {
       delete: vi.fn(),
       existsByEmail: vi.fn(),
       findAll: vi.fn(),
+      findAllPaginated: vi.fn(),
       findByEmail: vi.fn(),
       findById: vi.fn(),
       save: vi.fn(),
@@ -33,7 +34,7 @@ describe('ListUsersUseCase', () => {
         // Arrange
         const mockUsers = [buildUser(), buildAdminUser()]
 
-        vi.mocked(userRepository.findAll).mockResolvedValue(Ok(mockUsers))
+        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ users: mockUsers, total: 2 }))
 
         // Act
         const result = await listUsersUseCase.execute()
@@ -42,25 +43,28 @@ describe('ListUsersUseCase', () => {
         const data = expectSuccess(result)
         expect(data).toBeDefined()
         expect(data.users).toHaveLength(2)
-        expect(data.total).toBe(2)
+        expect(data.pagination.total).toBe(2)
+        expect(data.pagination.page).toBe(1)
+        expect(data.pagination.limit).toBe(10)
       })
 
-      it('should call userRepository.findAll', async () => {
+      it('should call userRepository.findAllPaginated with default pagination', async () => {
         // Arrange
-        vi.mocked(userRepository.findAll).mockResolvedValue(Ok([]))
+        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ users: [], total: 0 }))
 
         // Act
         await listUsersUseCase.execute()
 
         // Assert
-        expect(userRepository.findAll).toHaveBeenCalledTimes(1)
+        expect(userRepository.findAllPaginated).toHaveBeenCalledTimes(1)
+        expect(userRepository.findAllPaginated).toHaveBeenCalledWith({ page: 1, limit: 10 })
       })
 
       it('should return users without password hashes', async () => {
         // Arrange
         const mockUsers = [buildUser()]
 
-        vi.mocked(userRepository.findAll).mockResolvedValue(Ok(mockUsers))
+        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ users: mockUsers, total: 1 }))
 
         // Act
         const result = await listUsersUseCase.execute()
@@ -81,7 +85,7 @@ describe('ListUsersUseCase', () => {
         // Arrange
         const mockUsers = [buildUser()]
 
-        vi.mocked(userRepository.findAll).mockResolvedValue(Ok(mockUsers))
+        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ users: mockUsers, total: 1 }))
 
         // Act
         const result = await listUsersUseCase.execute()
@@ -98,7 +102,7 @@ describe('ListUsersUseCase', () => {
 
       it('should handle empty user list', async () => {
         // Arrange
-        vi.mocked(userRepository.findAll).mockResolvedValue(Ok([]))
+        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ users: [], total: 0 }))
 
         // Act
         const result = await listUsersUseCase.execute()
@@ -106,14 +110,15 @@ describe('ListUsersUseCase', () => {
         // Assert
         const data = expectSuccess(result)
         expect(data.users).toHaveLength(0)
-        expect(data.total).toBe(0)
+        expect(data.pagination.total).toBe(0)
+        expect(data.pagination.totalPages).toBe(0)
       })
 
       it('should handle single user', async () => {
         // Arrange
         const mockUsers = [buildSuperAdminUser()]
 
-        vi.mocked(userRepository.findAll).mockResolvedValue(Ok(mockUsers))
+        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ users: mockUsers, total: 1 }))
 
         // Act
         const result = await listUsersUseCase.execute()
@@ -121,7 +126,7 @@ describe('ListUsersUseCase', () => {
         // Assert
         const data = expectSuccess(result)
         expect(data.users).toHaveLength(1)
-        expect(data.total).toBe(1)
+        expect(data.pagination.total).toBe(1)
         expect(data.users[0]?.email).toBe(TEST_CONSTANTS.users.superAdminUser.email)
       })
 
@@ -129,7 +134,7 @@ describe('ListUsersUseCase', () => {
         // Arrange
         const mockUsers = [buildUser(), buildAdminUser(), buildSuperAdminUser()]
 
-        vi.mocked(userRepository.findAll).mockResolvedValue(Ok(mockUsers))
+        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ users: mockUsers, total: 3 }))
 
         // Act
         const result = await listUsersUseCase.execute()
@@ -142,7 +147,7 @@ describe('ListUsersUseCase', () => {
         expect(data.users[2]?.role).toBe(TEST_CONSTANTS.users.superAdminUser.role)
       })
 
-      it('should return correct total count', async () => {
+      it('should return correct pagination metadata', async () => {
         // Arrange
         const mockUsers = Array.from({ length: 10 }, (_, i) =>
           buildUser({
@@ -150,15 +155,18 @@ describe('ListUsersUseCase', () => {
             id: `user-${i}`,
           }),
         )
-        vi.mocked(userRepository.findAll).mockResolvedValue(Ok(mockUsers))
+        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ users: mockUsers, total: 10 }))
 
         // Act
         const result = await listUsersUseCase.execute()
 
         // Assert
         const data = expectSuccess(result)
-        expect(data.total).toBe(10)
+        expect(data.pagination.total).toBe(10)
         expect(data.users).toHaveLength(10)
+        expect(data.pagination.page).toBe(1)
+        expect(data.pagination.limit).toBe(10)
+        expect(data.pagination.totalPages).toBe(1)
       })
 
       it('should maintain user order from repository', async () => {
@@ -169,7 +177,7 @@ describe('ListUsersUseCase', () => {
           buildUser({ email: 'second@example.com', id: 'user-2' }),
         ]
 
-        vi.mocked(userRepository.findAll).mockResolvedValue(Ok(mockUsers))
+        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ users: mockUsers, total: 3 }))
 
         // Act
         const result = await listUsersUseCase.execute()
@@ -179,6 +187,23 @@ describe('ListUsersUseCase', () => {
         expect(data.users[0]?.email).toBe('third@example.com')
         expect(data.users[1]?.email).toBe('first@example.com')
         expect(data.users[2]?.email).toBe('second@example.com')
+      })
+
+      it('should respect custom page and limit parameters', async () => {
+        // Arrange
+        const mockUsers = [buildUser(), buildAdminUser()]
+        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ users: mockUsers, total: 20 }))
+
+        // Act
+        const result = await listUsersUseCase.execute({ page: 2, limit: 5 })
+
+        // Assert
+        expect(userRepository.findAllPaginated).toHaveBeenCalledWith({ page: 2, limit: 5 })
+        const data = expectSuccess(result)
+        expect(data.pagination.page).toBe(2)
+        expect(data.pagination.limit).toBe(5)
+        expect(data.pagination.total).toBe(20)
+        expect(data.pagination.totalPages).toBe(4)
       })
     })
 
@@ -190,7 +215,7 @@ describe('ListUsersUseCase', () => {
           code: 'DB_CONN_ERR',
         }
 
-        vi.mocked(userRepository.findAll).mockResolvedValueOnce({
+        vi.mocked(userRepository.findAllPaginated).mockResolvedValueOnce({
           ok: false,
           error: mockError,
         } as any)

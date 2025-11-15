@@ -132,6 +132,44 @@ export class DrizzleUserRepository implements IUserRepository {
     }
   }
 
+  async findAllPaginated({ page, limit }: { page: number; limit: number }): Promise<Result<{ users: User[]; total: number }, RepositoryError>> {
+    try {
+      const offset = (page - 1) * limit
+
+      // Execute both queries in parallel
+      const [rows, totalResult] = await Promise.all([
+        this.db.select().from(usersSchema).limit(limit).offset(offset),
+        this.db.select({ count: sql<number>`count(*)` }).from(usersSchema),
+      ])
+
+      const total = Number(totalResult[0]?.count ?? 0)
+
+      const mappedResults = rows.map((user: typeof usersSchema.$inferSelect) => this.mapToDomain({ user }))
+
+      const collectedResult = collect(mappedResults)
+
+      if (!collectedResult.ok) {
+        return Err(
+          RepositoryError.forOperation({
+            cause: collectedResult.error,
+            message: 'Failed to map user to domain',
+            operation: 'findAllPaginated',
+          }),
+        )
+      }
+
+      return Ok({ users: collectedResult.value, total })
+    } catch (error) {
+      return Err(
+        RepositoryError.forOperation({
+          cause: error instanceof Error ? error : new Error(String(error)),
+          message: 'Failed to find paginated users',
+          operation: 'findAllPaginated',
+        }),
+      )
+    }
+  }
+
   async save({ user }: { user: User }): Promise<Result<User, RepositoryError>> {
     try {
       const obj = user.toObject()
@@ -206,7 +244,7 @@ export class DrizzleUserRepository implements IUserRepository {
   async count(): Promise<Result<number, RepositoryError>> {
     try {
       const result = await this.db.select({ count: sql<number>`count(*)` }).from(usersSchema)
-      return Ok(result[0]?.count ?? 0)
+      return Ok(Number(result[0]?.count ?? 0))
     } catch (error) {
       return Err(
         RepositoryError.forOperation({

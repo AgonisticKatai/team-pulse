@@ -38,6 +38,15 @@ export interface ITeamRepository {
   findAll(): Promise<Result<Team[], RepositoryError>>
 
   /**
+   * Find teams with pagination
+   *
+   * @param page - Page number (1-indexed)
+   * @param limit - Number of items per page
+   * @returns Result with paginated teams and total count, or RepositoryError if operation fails
+   */
+  findAllPaginated({ page, limit }: { page: number; limit: number }): Promise<Result<{ teams: Team[]; total: number }, RepositoryError>>
+
+  /**
    * Find a team by name
    *
    * @param name - The team's name (case-insensitive search)

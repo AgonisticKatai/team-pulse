@@ -37,6 +37,7 @@ describe('CreateTeamUseCase', () => {
       delete: vi.fn(),
       existsByName: vi.fn(),
       findAll: vi.fn(),
+      findAllPaginated: vi.fn(),
       findById: vi.fn(),
       findByName: vi.fn(),
       save: vi.fn(),

@@ -82,7 +82,7 @@ export class ApiTeamRepository implements ITeamRepository {
 
       return Ok({
         teams,
-        total: response.total,
+        total: response.pagination.total,
       })
     } catch (error) {
       return Err(this.mapApiErrorToDomain(error))

@@ -1,4 +1,4 @@
-import { CreateUserDTOSchema } from '@team-pulse/shared'
+import { CreateUserDTOSchema, PaginationQuerySchema } from '@team-pulse/shared'
 import type { FastifyInstance } from 'fastify'
 import type { TokenFactory } from '../../../application/factories/TokenFactory.js'
 import type { CreateUserUseCase } from '../../../application/use-cases/CreateUserUseCase.js'
@@ -62,13 +62,20 @@ export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserR
 
   /**
    * GET /api/users
-   * List all users
+   * List all users with pagination
+   *
+   * Query params:
+   * - page: Page number (default: 1)
+   * - limit: Items per page (default: 10, max: 100)
    *
    * Requires: SUPER_ADMIN or ADMIN role
    */
-  fastify.get('/api/users', { preHandler: [requireAuth({ tokenFactory }), requireRole(['SUPER_ADMIN', 'ADMIN'])] }, async (_request, reply) => {
+  fastify.get('/api/users', { preHandler: [requireAuth({ tokenFactory }), requireRole(['SUPER_ADMIN', 'ADMIN'])] }, async (request, reply) => {
     try {
-      const result = await listUsersUseCase.execute()
+      // Parse and validate pagination query params
+      const { page, limit } = PaginationQuerySchema.parse(request.query)
+
+      const result = await listUsersUseCase.execute({ page, limit })
 
       // Handle Result type
       if (!result.ok) {

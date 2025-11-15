@@ -56,6 +56,7 @@ describe('LoginUseCase', () => {
       delete: vi.fn(),
       existsByEmail: vi.fn(),
       findAll: vi.fn(),
+      findAllPaginated: vi.fn(),
       findByEmail: vi.fn(),
       findById: vi.fn(),
       save: vi.fn(),

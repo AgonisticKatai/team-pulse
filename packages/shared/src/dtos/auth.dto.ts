@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import type { UserRole } from '../types/index.js'
+import type { PaginatedResponse } from './pagination.dto.js'
 
 /**
  * Authentication Data Transfer Objects (DTOs)
@@ -84,8 +85,6 @@ export interface RefreshTokenResponseDTO {
 
 /**
  * List of users response
+ * Uses the generic PaginatedResponse type with 'users' as the key
  */
-export interface UsersListResponseDTO {
-  users: UserResponseDTO[]
-  total: number
-}
+export type UsersListResponseDTO = PaginatedResponse<UserResponseDTO, 'users'>

@@ -18,6 +18,14 @@ export {
   type UsersListResponseDTO,
 } from './auth.dto.js'
 
+// Pagination DTOs
+export {
+  type PaginatedResponse,
+  type PaginationMetadata,
+  type PaginationQuery,
+  PaginationQuerySchema,
+} from './pagination.dto.js'
+
 // Team DTOs
 export {
   type CreateTeamDTO,

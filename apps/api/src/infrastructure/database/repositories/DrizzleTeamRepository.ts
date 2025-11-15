@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { RepositoryError } from '../../../domain/errors/index.js'
 import type { ValidationError } from '../../../domain/errors/ValidationError.js'
 import { Team } from '../../../domain/models/Team.js'
@@ -93,6 +93,44 @@ export class DrizzleTeamRepository implements ITeamRepository {
           cause: error instanceof Error ? error : new Error(String(error)),
           message: 'Failed to find all teams',
           operation: 'findAll',
+        }),
+      )
+    }
+  }
+
+  async findAllPaginated({ page, limit }: { page: number; limit: number }): Promise<Result<{ teams: Team[]; total: number }, RepositoryError>> {
+    try {
+      const offset = (page - 1) * limit
+
+      // Execute both queries in parallel
+      const [teams, totalResult] = await Promise.all([
+        this.db.select().from(teamsSchema).limit(limit).offset(offset),
+        this.db.select({ count: sql<number>`count(*)` }).from(teamsSchema),
+      ])
+
+      const total = Number(totalResult[0]?.count ?? 0)
+
+      const mappedResults = teams.map((team: typeof teamsSchema.$inferSelect) => this.mapToDomain({ team }))
+
+      const collectedResult = collect(mappedResults)
+
+      if (!collectedResult.ok) {
+        return Err(
+          RepositoryError.forOperation({
+            cause: collectedResult.error,
+            message: 'Failed to map team to domain',
+            operation: 'findAllPaginated',
+          }),
+        )
+      }
+
+      return Ok({ teams: collectedResult.value, total })
+    } catch (error) {
+      return Err(
+        RepositoryError.forOperation({
+          cause: error instanceof Error ? error : new Error(String(error)),
+          message: 'Failed to find paginated teams',
+          operation: 'findAllPaginated',
         }),
       )
     }

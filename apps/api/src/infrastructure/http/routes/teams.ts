@@ -1,4 +1,4 @@
-import { CreateTeamDTOSchema, UpdateTeamDTOSchema } from '@team-pulse/shared'
+import { CreateTeamDTOSchema, PaginationQuerySchema, UpdateTeamDTOSchema } from '@team-pulse/shared'
 import type { FastifyInstance } from 'fastify'
 import type { TokenFactory } from '../../../application/factories/TokenFactory.js'
 import type { CreateTeamUseCase } from '../../../application/use-cases/CreateTeamUseCase.js'
@@ -78,13 +78,20 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
 
   /**
    * GET /api/teams
-   * List all teams
+   * List all teams with pagination
+   *
+   * Query params:
+   * - page: Page number (default: 1)
+   * - limit: Items per page (default: 10, max: 100)
    *
    * Requires: Authentication (any role)
    */
-  fastify.get('/api/teams', { preHandler: requireAuth({ tokenFactory }) }, async (_request, reply) => {
+  fastify.get('/api/teams', { preHandler: requireAuth({ tokenFactory }) }, async (request, reply) => {
     try {
-      const result = await listTeamsUseCase.execute()
+      // Parse and validate pagination query params
+      const { page, limit } = PaginationQuerySchema.parse(request.query)
+
+      const result = await listTeamsUseCase.execute({ page, limit })
 
       if (!result.ok) {
         return handleError({ error: result.error, reply })
