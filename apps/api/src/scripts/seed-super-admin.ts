@@ -14,7 +14,7 @@ import { DrizzleUserRepository } from '../infrastructure/database/repositories/D
  * 3. Output the credentials for first login
  *
  * Usage:
- *   pnpm tsx src/scripts/seedSuperAdmin.ts
+ *   pnpm tsx src/scripts/seed-super-admin.ts
  *
  * Environment variables required:
  *   DATABASE_URL - PostgreSQL connection string
