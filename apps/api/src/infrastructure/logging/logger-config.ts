@@ -65,18 +65,12 @@ export function createLoggerConfig(env: 'development' | 'production' | 'test', l
   }
 
   if (env === 'development') {
+    // NOTE: pino-pretty causes deadlock with Fastify hooks (onRequest, etc.)
+    // Using simple JSON logs in development to avoid this issue
+    // If you need pretty logs, use: pnpm dev | pnpm exec pino-pretty
     return {
       ...baseConfig,
-      transport: {
-        target: 'pino-pretty',
-        options: {
-          colorize: true,
-          translateTime: 'HH:MM:ss Z',
-          ignore: 'pid,hostname',
-          // Show correlation ID in logs
-          messageFormat: '{correlationId} {msg}',
-        },
-      },
+      // JSON logs, can be piped to pino-pretty externally if needed
     }
   }
 

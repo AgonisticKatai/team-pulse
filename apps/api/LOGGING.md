@@ -7,34 +7,34 @@ This project uses **Fastify's built-in logger (Pino)** with structured logging.
 - **Structured Logging**: JSON format in production for machine parsing
 - **Pretty Logging**: Human-readable format in development with colors
 - **Request Context**: Automatic logging of request/response details
+- **Correlation IDs**: Track requests across the entire system
 - **Error Serialization**: Proper stack trace and error details in logs
 
-## ⚠️ Correlation IDs - Currently Disabled
+## Correlation IDs
 
-**Note:** The correlation ID middleware is currently **disabled** due to compatibility issues with pino-pretty in development environments. The `request.log.child()` call in the correlation hook causes the server to hang.
-
-**Status:** TODO - Needs reimplementation without child loggers
-**Tracking:** The hook creates child loggers which deadlock with pino-pretty transport
-
-For production environments with proper log aggregation (CloudWatch, Datadog), a simpler correlation ID solution can be implemented that:
-- Adds correlation ID to the request object
-- Includes it in structured log fields (not via child logger)
-- Returns it in response headers
-
-### Previous Implementation (Disabled)
-
-The correlation ID system was designed to:
-- Tracks a request through the entire system
-- Appears in all log messages for that request
-- Can be passed to external services for distributed tracing
-- Helps debug issues in production
+Correlation IDs help track a single request through the entire system, making debugging easier in production.
 
 ### How It Works
 
 1. **Client sends request** (optionally with `X-Correlation-ID` header)
-2. **Middleware extracts or generates** correlation ID
-3. **All logs for that request** include the correlation ID
-4. **Response includes** `X-Correlation-ID` header
+2. **Middleware extracts or generates** correlation ID (UUID)
+3. **Correlation ID is attached** to `request.correlationId`
+4. **Response includes** `X-Correlation-ID` header for client tracking
+5. **Manually include in logs** when needed
+
+### Important: Manual Logging
+
+⚠️ **The correlation ID is NOT automatically included in logs** to avoid deadlocks with pino-pretty in development.
+
+Instead, manually include it when logging:
+
+```typescript
+// ✅ Correct - Include correlationId manually
+request.log.info({ correlationId: request.correlationId }, 'User logged in')
+
+// ❌ Incorrect - correlationId won't be in the log
+request.log.info('User logged in')
+```
 
 ### Example
 
@@ -42,7 +42,6 @@ The correlation ID system was designed to:
 # Client sends request with correlation ID
 curl -H "X-Correlation-ID: abc-123" http://localhost:3000/api/teams
 
-# All logs for this request will include: correlationId: "abc-123"
 # Response will include: X-Correlation-ID: abc-123
 ```
 
@@ -54,6 +53,18 @@ curl http://localhost:3000/api/teams
 
 # System generates UUID: X-Correlation-ID: 550e8400-e29b-41d4-a716-446655440000
 ```
+
+### Why Not Child Loggers?
+
+We deliberately avoid using `request.log.child({ correlationId })` because:
+- **Deadlocks with pino-pretty**: Child loggers hang when using pino-pretty transport in development
+- **Manual is explicit**: Forces you to think about what to log
+- **More flexible**: You can include correlation IDs only when needed
+
+For automatic correlation ID inclusion in ALL logs, you'd need:
+- Remove pino-pretty in development (use JSON logs)
+- Use a proper log aggregation service (CloudWatch, Datadog, etc.)
+- Create child loggers safely without transports
 
 ## Log Formats
 
@@ -91,19 +102,22 @@ Structured JSON logs for machine parsing and log aggregation:
 
 ### In Route Handlers
 
-The logger is available on the `request` object and automatically includes the correlation ID:
+The logger is available on the `request` object. Include `correlationId` manually when needed:
 
 ```typescript
 fastify.get('/api/teams', async (request, reply) => {
-  // Log with correlation ID automatically included
-  request.log.info('Fetching teams')
+  // Log with correlation ID manually included
+  request.log.info({ correlationId: request.correlationId }, 'Fetching teams')
 
   try {
     const teams = await teamRepository.findAll()
-    request.log.info({ count: teams.length }, 'Teams fetched successfully')
+    request.log.info(
+      { correlationId: request.correlationId, count: teams.length },
+      'Teams fetched successfully'
+    )
     return teams
   } catch (error) {
-    request.log.error(error, 'Failed to fetch teams')
+    request.log.error({ correlationId: request.correlationId, error }, 'Failed to fetch teams')
     throw error
   }
 })
@@ -123,20 +137,22 @@ fastify.get('/api/teams', async (request, reply) => {
 Include additional context with structured fields:
 
 ```typescript
-// Log with structured data
+// Log with structured data (including correlationId)
 request.log.info({
+  correlationId: request.correlationId,
   userId: user.id,
   action: 'login',
   ip: request.ip
 }, 'User logged in successfully')
 
-// Produces:
+// Produces (in production JSON format):
 // {
-//   "correlationId": "...",
+//   "correlationId": "550e8400-e29b-41d4-a716-446655440000",
 //   "userId": "123",
 //   "action": "login",
 //   "ip": "192.168.1.1",
 //   "msg": "User logged in successfully"
+// }
 // }
 ```
 
