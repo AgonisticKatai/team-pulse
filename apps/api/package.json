@@ -25,7 +25,7 @@
   "name": "@team-pulse/api",
   "private": true,
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && bash scripts/copy-migrations.sh",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:migrate:run": "tsx --env-file=.env src/scripts/run-migrations.ts",

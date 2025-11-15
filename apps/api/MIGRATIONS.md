@@ -122,6 +122,22 @@ During development, you can use either:
 3. Migration history is preserved
 4. Team members see the same schema evolution
 
+**Build Process**:
+- TypeScript compilation: `tsc`
+- Migration files copied: `scripts/copy-migrations.sh`
+- Files copied from `drizzle/` to `dist/drizzle/`
+- Includes both `.sql` and `.json` files (including `meta/_journal.json`)
+
+**Path Resolution**:
+- Migrations use absolute paths from compiled code location
+- `migrate.ts` resolves from `dist/infrastructure/database/` to `dist/drizzle/`
+- Works in both local builds and serverless environments (Vercel)
+
+**Vercel Deployment**:
+- Build command: `turbo build` (runs `tsc && bash scripts/copy-migrations.sh`)
+- Function includes: `apps/api/dist/drizzle/**/*.{sql,json}` via `vercel.json`
+- Migration files must be in `dist/` folder for serverless function access
+
 ## Common Tasks
 
 ### Create a New Migration
