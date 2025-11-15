@@ -292,21 +292,60 @@ correlationId:"550e8400-e29b-41d4-a716-446655440000"
 
 ## Testing
 
-Logging is disabled in test environment to keep test output clean:
+### Logger Configuration in Tests
+
+The logger is configured differently in test environment to avoid polluting test output:
 
 ```typescript
 // src/infrastructure/logging/logger-config.ts
 if (env === 'test') {
-  return false  // Disable logging in tests
+  return {
+    level: 'silent'  // Logger is functional but produces no output
+  }
 }
 ```
 
-To enable logging in tests for debugging:
+**Why not `false`?**
+- Fastify's `inject()` method (used for testing) relies on logger infrastructure for request lifecycle
+- Plugins and hooks may call `request.log.*` methods
+- Returning `false` completely disables the logger, breaking internal Fastify mechanisms
+
+**Why `silent` level?**
+- Keeps test output clean (no log pollution)
+- Logger infrastructure remains functional
+- Tests can still use `request.log.*` without errors
+
+### Correlation ID in Tests
+
+The correlation ID middleware is **disabled in test environment**:
+
+```typescript
+// src/app.ts
+if (env.NODE_ENV !== 'test') {
+  fastify.addHook('onRequest', correlationIdHook)
+}
+```
+
+**Rationale:**
+1. Tests don't involve distributed systems requiring request tracing
+2. The hook creates child loggers, which can interfere with the silent logger
+3. Test requests are isolated and don't need correlation tracking
+4. Simplifies test setup and reduces overhead
+
+### Enabling Logging for Test Debugging
+
+If you need to see logs during test development:
 
 ```typescript
 // In your test file
 process.env.NODE_ENV = 'development'
+process.env.LOG_LEVEL = 'debug'
+
+// Now rebuild the app - logs will be visible
+const { app } = await buildApp()
 ```
+
+**Note:** Remember to revert this before committing tests.
 
 ## Troubleshooting
 

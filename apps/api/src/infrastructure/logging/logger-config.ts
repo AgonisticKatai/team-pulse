@@ -23,11 +23,22 @@ import type { PinoLoggerOptions } from 'fastify/types/logger.js'
  * - JSON structured logs
  * - Machine-parseable
  * - Optimized for log aggregation (e.g., CloudWatch, Datadog)
+ *
+ * Test:
+ * - Silent logs (no stdout pollution)
+ * - Logger infrastructure enabled (required for Fastify lifecycle)
+ * - No correlation IDs needed
  */
 export function createLoggerConfig(env: 'development' | 'production' | 'test', logLevel: string): PinoLoggerOptions | boolean {
-  // Disable logging in tests
+  // In test environment, use silent logger to avoid stdout pollution
+  // We CANNOT return false because:
+  // 1. Fastify's inject() method relies on logger infrastructure for request lifecycle
+  // 2. Plugins and hooks may call request.log.* methods
+  // 3. Returning false disables the entire logger, breaking internal Fastify mechanisms
   if (env === 'test') {
-    return false
+    return {
+      level: 'silent', // Suppress output but keep logger functional
+    }
   }
 
   const baseConfig: PinoLoggerOptions = {

@@ -62,6 +62,17 @@ When the app starts (via `buildApp()`), it:
 3. Tracks applied migrations in the `__drizzle_migrations` table
 4. Gracefully handles already-existing schemas
 
+**Exception: Test Environment**
+```typescript
+// In buildApp()
+if (!(env.NODE_ENV === 'test' && process.env.SKIP_MIGRATIONS === 'true')) {
+  await runMigrations(env.DATABASE_URL)
+}
+```
+
+- Tests that use `testcontainers` set `SKIP_MIGRATIONS=true` because they use `db:push` instead
+- Tests using shared database (`app.test.ts`) keep migrations enabled (`SKIP_MIGRATIONS=false`)
+
 ### Manual Migrations
 
 Use the standalone script for manual migration control:
@@ -77,6 +88,31 @@ npm run db:migrate:run
 During development, you can use either:
 - **Migrations** (recommended): `npm run db:generate && npm run db:migrate:run`
 - **Schema Push** (faster): `npm run db:push` - directly syncs schema to DB without migration files
+
+### Test Environment
+
+**Two approaches:**
+
+1. **Testcontainers** (integration tests with isolated databases):
+   ```typescript
+   // Uses db:push for fast schema creation
+   process.env.SKIP_MIGRATIONS = 'true'
+   const { db, container } = await setupTestContainer()
+   ```
+   - Each test suite gets an isolated PostgreSQL container
+   - Schema created via `db:push` (faster than migrations)
+   - No migration files needed
+   - Parallel test execution supported
+
+2. **Shared Database** (basic app tests):
+   ```typescript
+   // Uses migrations for consistent schema
+   process.env.SKIP_MIGRATIONS = 'false'
+   const { app } = await buildApp()
+   ```
+   - Tests share a single database
+   - Migrations ensure schema consistency
+   - Slower but simpler setup
 
 ### Production
 
@@ -126,7 +162,16 @@ Opens a visual database browser at http://localhost:4983
 
 ### "relation already exists" Error
 
-The migration system gracefully handles this - it means your schema is already up-to-date (e.g., from using `db:push`).
+The migration system gracefully handles this - it means your schema is already up-to-date (e.g., from using `db:push` or running migrations multiple times).
+
+You'll see notices like:
+```
+NOTICE: schema "drizzle" already exists, skipping
+NOTICE: relation "__drizzle_migrations" already exists, skipping
+ℹ️  Database schema already exists (skipping migrations)
+```
+
+This is **normal behavior** and not an error - the migration system detects existing schema and skips gracefully.
 
 ### Migrations Not Running
 
@@ -135,6 +180,7 @@ Check:
 2. Database is accessible
 3. Migration files exist in `drizzle/` directory
 4. Check logs for "🔄 Running database migrations..."
+5. In tests with testcontainers, verify `SKIP_MIGRATIONS` is set correctly
 
 ### Migration Failed
 
