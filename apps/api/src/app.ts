@@ -4,7 +4,6 @@ import Fastify, { type FastifyError, type FastifyInstance, type FastifyReply, ty
 import { type Container, createContainer } from './infrastructure/config/container.js'
 import { type Env, validateEnv, validateProductionEnv } from './infrastructure/config/env.js'
 import { runMigrations } from './infrastructure/database/migrate.js'
-import { correlationIdHook } from './infrastructure/http/middleware/correlation-id.js'
 import { registerAuthRoutes } from './infrastructure/http/routes/auth.js'
 import { registerTeamRoutes } from './infrastructure/http/routes/teams.js'
 import { registerUserRoutes } from './infrastructure/http/routes/users.js'
@@ -52,14 +51,12 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
   })
 
   // 5. Add correlation ID to all requests (for tracing)
-  // Correlation IDs are used in production for distributed tracing across services.
-  // In test environment, we skip this middleware because:
-  // 1. Tests don't involve distributed systems requiring request tracing
-  // 2. The hook creates child loggers, which can interfere with silent logger
-  // 3. Test requests are isolated and don't need correlation tracking
-  if (env.NODE_ENV !== 'test') {
-    fastify.addHook('onRequest', correlationIdHook)
-  }
+  // DISABLED: The correlationIdHook creates child loggers which can deadlock with pino-pretty
+  // For now, correlation IDs are only needed in production with proper log aggregation
+  // TODO: Implement a simpler correlation ID solution that doesn't use child loggers
+  // if (env.NODE_ENV === 'production') {
+  //   fastify.addHook('onRequest', correlationIdHook)
+  // }
 
   // 6. Register CORS plugin
   await fastify.register(cors, {

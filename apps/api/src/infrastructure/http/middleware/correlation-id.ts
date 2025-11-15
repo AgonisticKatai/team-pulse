@@ -54,7 +54,15 @@ export function correlationIdHook(request: FastifyRequest, reply: FastifyReply):
   // Add to response headers so clients can track their requests
   reply.header('X-Correlation-ID', correlationId)
 
-  // Create child logger with correlation ID
-  // This ensures all logs for this request include the correlation ID
-  request.log = request.log.child({ correlationId })
+  // Create child logger with correlation ID in production only
+  // In development, pino-pretty transport can cause deadlocks when creating child loggers
+  // The correlation ID is still available in request.correlationId for manual logging
+  if (process.env.NODE_ENV === 'production') {
+    try {
+      request.log = request.log.child({ correlationId })
+    } catch (error) {
+      // Fallback to base logger if child creation fails
+      request.log.warn({ error, correlationId }, 'Failed to create child logger')
+    }
+  }
 }

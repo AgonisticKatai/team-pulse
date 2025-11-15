@@ -1,20 +1,29 @@
 # Structured Logging Guide
 
-This project uses **Fastify's built-in logger (Pino)** with structured logging and correlation IDs for request tracing.
+This project uses **Fastify's built-in logger (Pino)** with structured logging.
 
 ## Features
 
 - **Structured Logging**: JSON format in production for machine parsing
 - **Pretty Logging**: Human-readable format in development with colors
-- **Correlation IDs**: Track requests across the entire system
 - **Request Context**: Automatic logging of request/response details
 - **Error Serialization**: Proper stack trace and error details in logs
 
-## Correlation IDs
+## ⚠️ Correlation IDs - Currently Disabled
 
-### What is a Correlation ID?
+**Note:** The correlation ID middleware is currently **disabled** due to compatibility issues with pino-pretty in development environments. The `request.log.child()` call in the correlation hook causes the server to hang.
 
-A correlation ID is a unique identifier (UUID) attached to each HTTP request that:
+**Status:** TODO - Needs reimplementation without child loggers
+**Tracking:** The hook creates child loggers which deadlock with pino-pretty transport
+
+For production environments with proper log aggregation (CloudWatch, Datadog), a simpler correlation ID solution can be implemented that:
+- Adds correlation ID to the request object
+- Includes it in structured log fields (not via child logger)
+- Returns it in response headers
+
+### Previous Implementation (Disabled)
+
+The correlation ID system was designed to:
 - Tracks a request through the entire system
 - Appears in all log messages for that request
 - Can be passed to external services for distributed tracing
