@@ -3,6 +3,7 @@ import rateLimit from '@fastify/rate-limit'
 import Fastify, { type FastifyError, type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify'
 import { type Container, createContainer } from './infrastructure/config/container.js'
 import { type Env, validateEnv, validateProductionEnv } from './infrastructure/config/env.js'
+import { runMigrations } from './infrastructure/database/migrate.js'
 import { registerAuthRoutes } from './infrastructure/http/routes/auth.js'
 import { registerTeamRoutes } from './infrastructure/http/routes/teams.js'
 import { registerUserRoutes } from './infrastructure/http/routes/users.js'
@@ -12,10 +13,11 @@ import { registerUserRoutes } from './infrastructure/http/routes/users.js'
  *
  * This is the main entry point for assembling the application:
  * 1. Validate environment configuration
- * 2. Create dependency injection container
- * 3. Configure Fastify plugins
- * 4. Register routes (HTTP adapters)
- * 5. Setup error handlers
+ * 2. Run database migrations
+ * 3. Create dependency injection container
+ * 4. Configure Fastify plugins
+ * 5. Register routes (HTTP adapters)
+ * 6. Setup error handlers
  *
  * The application follows Hexagonal Architecture:
  * - Domain: Business logic (entities, repository interfaces)
@@ -28,23 +30,26 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
   const env: Env = validateEnv()
   validateProductionEnv(env)
 
-  // 2. Create dependency injection container
+  // 2. Run database migrations (ensures database schema is up-to-date)
+  await runMigrations(env.DATABASE_URL)
+
+  // 3. Create dependency injection container
   const container = createContainer(env)
 
-  // 3. Create Fastify instance
+  // 4. Create Fastify instance
   const fastify = Fastify({
     logger: {
       level: env.LOG_LEVEL,
     },
   })
 
-  // 4. Register CORS plugin
+  // 5. Register CORS plugin
   await fastify.register(cors, {
     credentials: true,
     origin: env.NODE_ENV === 'production' ? env.FRONTEND_URL : 'http://localhost:5173',
   })
 
-  // 5. Register Rate Limiting
+  // 6. Register Rate Limiting
   // Global rate limit: 100 requests per 15 minutes per IP
   // Protects against DDoS and brute force attacks
   await fastify.register(rateLimit, {
@@ -59,7 +64,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     }),
   })
 
-  // 6. Register routes (HTTP adapters)
+  // 7. Register routes (HTTP adapters)
 
   // Authentication routes
   await registerAuthRoutes(fastify, {
@@ -86,7 +91,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     updateTeamUseCase: container.updateTeamUseCase,
   })
 
-  // 7. Health check endpoint
+  // 8. Health check endpoint
   fastify.get('/api/health', () => {
     return {
       environment: env.NODE_ENV,
@@ -97,7 +102,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     }
   })
 
-  // 8. API info endpoint
+  // 9. API info endpoint
   fastify.get('/api', () => {
     return {
       description: 'Football team statistics platform API',
@@ -112,7 +117,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     }
   })
 
-  // 9. 404 handler
+  // 10. 404 handler
   fastify.setNotFoundHandler((request: FastifyRequest, reply: FastifyReply) => {
     return reply.code(404).send({
       error: {
@@ -123,7 +128,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     })
   })
 
-  // 10. Global error handler
+  // 11. Global error handler
   fastify.setErrorHandler((error: FastifyError, _request: FastifyRequest, reply: FastifyReply) => {
     fastify.log.error(error)
 
