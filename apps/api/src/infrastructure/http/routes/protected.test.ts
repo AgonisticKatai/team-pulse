@@ -7,9 +7,10 @@ import { hashPassword } from '../../auth/password-utils.js'
 import type { Container } from '../../config/container.js'
 import type { Database } from '../../database/connection.js'
 import { expectSuccess } from '../../testing/result-helpers.js'
-import { setupTestContainer } from '../../testing/test-containers.js'
+import { isDockerAvailable, setupTestContainer } from '../../testing/test-containers.js'
 
-describe('Protected Routes and RBAC', () => {
+// Skip integration tests if Docker is not available
+describe.skipIf(!isDockerAvailable())('Protected Routes and RBAC', () => {
   let app: FastifyInstance
   let container: Container
   let db: Database

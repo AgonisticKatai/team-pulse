@@ -33,6 +33,19 @@ import { createDatabase, type Database } from '../database/connection.js'
  * ```
  */
 
+/**
+ * Checks if Docker is available in the environment
+ * @returns true if Docker is available, false otherwise
+ */
+export function isDockerAvailable(): boolean {
+  try {
+    execSync('docker version', { stdio: 'pipe' })
+    return true
+  } catch {
+    return false
+  }
+}
+
 interface TestContainerResult {
   db: Database
   container: StartedPostgreSqlContainer

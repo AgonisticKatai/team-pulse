@@ -1,20 +1,33 @@
 import type { FastifyInstance } from 'fastify'
-import { afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import { buildApp } from './app.js'
 import type { Container } from './infrastructure/config/container.js'
+import { isDockerAvailable, setupTestContainer } from './infrastructure/testing/test-containers.js'
 
-describe('Fastify App', () => {
+// Skip integration tests if Docker is not available
+describe.skipIf(!isDockerAvailable())('Fastify App', () => {
   let app: FastifyInstance
   let container: Container
+  let cleanup: () => Promise<void>
 
-  // Set test environment variables
-  beforeAll(() => {
+  // Set test environment variables and setup test container
+  beforeAll(async () => {
     process.env.NODE_ENV = 'test'
     process.env.JWT_SECRET = 'test-jwt-secret-key-min-32-chars-long'
     process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-min-32-chars-long'
-    // DATABASE_URL should be set via environment or vitest config
-    // In CI: postgresql://test:test@localhost:5432/test
-    // Locally: :memory: (set in vitest.config.ts)
+
+    // Setup isolated PostgreSQL container for this test suite
+    const result = await setupTestContainer()
+    cleanup = result.cleanup
+
+    // Set DATABASE_URL to use the test container
+    process.env.DATABASE_URL = result.container.getConnectionUri()
+  }, 120_000) // 2 minute timeout for container startup
+
+  afterAll(async () => {
+    if (cleanup) {
+      await cleanup()
+    }
   })
 
   afterEach(async () => {
