@@ -4,9 +4,11 @@ import Fastify, { type FastifyError, type FastifyInstance, type FastifyReply, ty
 import { type Container, createContainer } from './infrastructure/config/container.js'
 import { type Env, validateEnv, validateProductionEnv } from './infrastructure/config/env.js'
 import { runMigrations } from './infrastructure/database/migrate.js'
+import { correlationIdHook } from './infrastructure/http/middleware/correlation-id.js'
 import { registerAuthRoutes } from './infrastructure/http/routes/auth.js'
 import { registerTeamRoutes } from './infrastructure/http/routes/teams.js'
 import { registerUserRoutes } from './infrastructure/http/routes/users.js'
+import { createLoggerConfig } from './infrastructure/logging/logger-config.js'
 
 /**
  * Build and configure the Fastify application
@@ -15,9 +17,15 @@ import { registerUserRoutes } from './infrastructure/http/routes/users.js'
  * 1. Validate environment configuration
  * 2. Run database migrations
  * 3. Create dependency injection container
- * 4. Configure Fastify plugins
- * 5. Register routes (HTTP adapters)
- * 6. Setup error handlers
+ * 4. Configure Fastify with structured logging
+ * 5. Add correlation ID middleware
+ * 6. Configure CORS
+ * 7. Configure rate limiting
+ * 8. Register routes (HTTP adapters)
+ * 9. Setup health check endpoint
+ * 10. Setup API info endpoint
+ * 11. Setup 404 handler
+ * 12. Setup global error handler
  *
  * The application follows Hexagonal Architecture:
  * - Domain: Business logic (entities, repository interfaces)
@@ -36,20 +44,23 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
   // 3. Create dependency injection container
   const container = createContainer(env)
 
-  // 4. Create Fastify instance
+  // 4. Create Fastify instance with structured logging
   const fastify = Fastify({
-    logger: {
-      level: env.LOG_LEVEL,
-    },
+    logger: createLoggerConfig(env.NODE_ENV, env.LOG_LEVEL),
+    // Generate unique request IDs
+    genReqId: () => crypto.randomUUID(),
   })
 
-  // 5. Register CORS plugin
+  // 5. Add correlation ID to all requests (for tracing)
+  fastify.addHook('onRequest', correlationIdHook)
+
+  // 6. Register CORS plugin
   await fastify.register(cors, {
     credentials: true,
     origin: env.NODE_ENV === 'production' ? env.FRONTEND_URL : 'http://localhost:5173',
   })
 
-  // 6. Register Rate Limiting
+  // 7. Register Rate Limiting
   // Global rate limit: 100 requests per 15 minutes per IP
   // Protects against DDoS and brute force attacks
   await fastify.register(rateLimit, {
@@ -64,7 +75,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     }),
   })
 
-  // 7. Register routes (HTTP adapters)
+  // 8. Register routes (HTTP adapters)
 
   // Authentication routes
   await registerAuthRoutes(fastify, {
@@ -91,7 +102,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     updateTeamUseCase: container.updateTeamUseCase,
   })
 
-  // 8. Health check endpoint
+  // 9. Health check endpoint
   fastify.get('/api/health', () => {
     return {
       environment: env.NODE_ENV,
@@ -102,7 +113,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     }
   })
 
-  // 9. API info endpoint
+  // 10. API info endpoint
   fastify.get('/api', () => {
     return {
       description: 'Football team statistics platform API',
@@ -117,7 +128,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     }
   })
 
-  // 10. 404 handler
+  // 11. 404 handler
   fastify.setNotFoundHandler((request: FastifyRequest, reply: FastifyReply) => {
     return reply.code(404).send({
       error: {
@@ -128,7 +139,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     })
   })
 
-  // 11. Global error handler
+  // 12. Global error handler
   fastify.setErrorHandler((error: FastifyError, _request: FastifyRequest, reply: FastifyReply) => {
     fastify.log.error(error)
 
