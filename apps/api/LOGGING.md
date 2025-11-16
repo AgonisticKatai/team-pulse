@@ -1,14 +1,15 @@
 # Structured Logging Guide
 
-This project uses **Fastify's built-in logger (Pino)** with structured logging.
+This project uses **Fastify's built-in logger (Pino)** with structured logging and **automatic correlation ID injection** via AsyncLocalStorage.
 
 ## Features
 
 - **Structured Logging**: JSON format in production for machine parsing
-- **Pretty Logging**: Human-readable format in development with colors
+- **Pretty Logging**: Human-readable format in development (via piping)
 - **Request Context**: Automatic logging of request/response details
-- **Correlation IDs**: Track requests across the entire system
+- **Automatic Correlation IDs**: Track requests across the entire system automatically
 - **Error Serialization**: Proper stack trace and error details in logs
+- **AsyncLocalStorage**: Thread-safe request context without manual propagation
 
 ## Correlation IDs
 
@@ -18,22 +19,31 @@ Correlation IDs help track a single request through the entire system, making de
 
 1. **Client sends request** (optionally with `X-Correlation-ID` header)
 2. **Middleware extracts or generates** correlation ID (UUID)
-3. **Correlation ID is attached** to `request.correlationId`
-4. **Response includes** `X-Correlation-ID` header for client tracking
-5. **Manually include in logs** when needed
+3. **Correlation ID is stored** in AsyncLocalStorage
+4. **Pino mixin automatically reads** from AsyncLocalStorage
+5. **ALL logs automatically include** `correlationId` field
+6. **Response includes** `X-Correlation-ID` header for client tracking
 
-### Important: Manual Logging
+### Automatic Correlation ID Injection ✨
 
-⚠️ **The correlation ID is NOT automatically included in logs** to avoid deadlocks with pino-pretty in development.
+**The correlation ID is AUTOMATICALLY included in ALL logs** via AsyncLocalStorage + Pino mixin.
 
-Instead, manually include it when logging:
+No manual work needed:
 
 ```typescript
-// ✅ Correct - Include correlationId manually
-request.log.info({ correlationId: request.correlationId }, 'User logged in')
-
-// ❌ Incorrect - correlationId won't be in the log
+// ✅ This is all you need - correlationId is added automatically!
 request.log.info('User logged in')
+
+// Output in JSON:
+// {
+//   "level": "info",
+//   "correlationId": "550e8400-e29b-41d4-a716-446655440000",
+//   "reqId": "req-1",
+//   "msg": "User logged in"
+// }
+
+// You can still add more context if needed
+request.log.info({ userId: user.id }, 'User logged in')
 ```
 
 ### Example
@@ -54,27 +64,46 @@ curl http://localhost:3000/api/teams
 # System generates UUID: X-Correlation-ID: 550e8400-e29b-41d4-a716-446655440000
 ```
 
-### Why Not Child Loggers?
+### Why AsyncLocalStorage + Mixin?
 
-We deliberately avoid using `request.log.child({ correlationId })` because:
-- **Deadlocks with pino-pretty**: Child loggers hang when using pino-pretty transport in development
-- **Manual is explicit**: Forces you to think about what to log
-- **More flexible**: You can include correlation IDs only when needed
+We use AsyncLocalStorage with Pino mixin instead of child loggers because:
 
-For automatic correlation ID inclusion in ALL logs, you'd need:
-- Remove pino-pretty in development (use JSON logs)
-- Use a proper log aggregation service (CloudWatch, Datadog, etc.)
-- Create child loggers safely without transports
+**✅ Benefits:**
+- **No deadlocks**: Doesn't suffer from child logger + pino-pretty issues
+- **Automatic**: No need to manually pass `correlationId` to every log call
+- **Clean code**: No `{ correlationId: request.correlationId }` everywhere
+- **Thread-safe**: Works correctly across async operations
+- **Minimal overhead**: ~1-2% performance impact in most applications
+- **Modern best practice**: Recommended approach in 2025 for Node.js logging
+
+**❌ Why not child loggers:**
+- Child loggers with pino-pretty transport can cause deadlocks
+- Require explicit logger passing through function calls
+- More complex setup and error-prone
+
+**❌ Why not manual inclusion:**
+- Verbose and error-prone (easy to forget)
+- Clutters code with repetitive correlation ID passing
+- Harder to maintain consistency
 
 ## Log Formats
 
 ### Development
 
-Pretty-printed logs with colors for easy reading:
+JSON logs by default, can be piped to pino-pretty for human-readable output:
 
+```bash
+# Run with pretty printing
+pnpm dev | pnpm exec pino-pretty
+
+# Output:
+# [12:34:56 INFO] (correlationId: 550e8400-e29b-41d4-a716-446655440000): GET /api/teams
+# [12:34:56 INFO] (correlationId: 550e8400-e29b-41d4-a716-446655440000): User logged in
 ```
-[12:34:56 INFO] 550e8400-e29b-41d4-a716-446655440000 GET /api/teams 200 15ms
-[12:34:57 ERROR] 550e8400-e29b-41d4-a716-446655440000 Database connection failed
+
+Raw JSON (default):
+```json
+{"level":"info","correlationId":"550e8400-e29b-41d4-a716-446655440000","reqId":"req-1","msg":"User logged in"}
 ```
 
 ### Production
@@ -85,7 +114,10 @@ Structured JSON logs for machine parsing and log aggregation:
 {
   "level": "info",
   "time": "2025-11-15T12:34:56.789Z",
+  "env": "production",
+  "service": "team-pulse-api",
   "correlationId": "550e8400-e29b-41d4-a716-446655440000",
+  "reqId": "req-1",
   "req": {
     "method": "GET",
     "url": "/api/teams"
@@ -102,26 +134,46 @@ Structured JSON logs for machine parsing and log aggregation:
 
 ### In Route Handlers
 
-The logger is available on the `request` object. Include `correlationId` manually when needed:
+The logger is available on the `request` object. Correlation IDs are **automatically included**:
 
 ```typescript
 fastify.get('/api/teams', async (request, reply) => {
-  // Log with correlation ID manually included
-  request.log.info({ correlationId: request.correlationId }, 'Fetching teams')
+  // ✨ Correlation ID is automatically included in all logs!
+  request.log.info('Fetching teams')
 
   try {
     const teams = await teamRepository.findAll()
-    request.log.info(
-      { correlationId: request.correlationId, count: teams.length },
-      'Teams fetched successfully'
-    )
+    request.log.info({ count: teams.length }, 'Teams fetched successfully')
     return teams
   } catch (error) {
-    request.log.error({ correlationId: request.correlationId, error }, 'Failed to fetch teams')
+    request.log.error({ error }, 'Failed to fetch teams')
     throw error
   }
 })
 ```
+
+### In Service Layers (Outside Request Context)
+
+You can also access the correlation ID from anywhere in your service layer:
+
+```typescript
+import { getCorrelationId } from '../infrastructure/logging/context.js'
+import { logger } from '../infrastructure/logging/logger.js' // App-level logger
+
+class TeamService {
+  async findTeam(id: string) {
+    // Get correlation ID from AsyncLocalStorage
+    const correlationId = getCorrelationId()
+
+    // Log with app logger (outside request context)
+    logger.info({ correlationId, teamId: id }, 'Finding team')
+
+    // ... rest of logic
+  }
+}
+```
+
+**Note:** When using `request.log`, the correlation ID is automatic. When using a standalone logger outside the request context, you can manually get it from AsyncLocalStorage if needed.
 
 ### Log Levels
 
@@ -134,12 +186,11 @@ fastify.get('/api/teams', async (request, reply) => {
 
 ### Structured Logging
 
-Include additional context with structured fields:
+Include additional context with structured fields (correlation ID is automatic):
 
 ```typescript
-// Log with structured data (including correlationId)
+// ✨ Log with structured data - correlationId added automatically!
 request.log.info({
-  correlationId: request.correlationId,
   userId: user.id,
   action: 'login',
   ip: request.ip
@@ -147,12 +198,14 @@ request.log.info({
 
 // Produces (in production JSON format):
 // {
-//   "correlationId": "550e8400-e29b-41d4-a716-446655440000",
+//   "level": "info",
+//   "time": "2025-11-15T12:34:56.789Z",
+//   "correlationId": "550e8400-e29b-41d4-a716-446655440000",  // ← Automatic!
+//   "reqId": "req-1",                                          // ← Automatic!
 //   "userId": "123",
 //   "action": "login",
 //   "ip": "192.168.1.1",
 //   "msg": "User logged in successfully"
-// }
 // }
 ```
 
@@ -174,7 +227,7 @@ try {
 ### Environment Variables
 
 - `LOG_LEVEL`: Set log level (trace, debug, info, warn, error, fatal)
-- `NODE_ENV`: Controls log format (development = pretty, production = JSON)
+- `NODE_ENV`: Controls log format (development = JSON, production = JSON with metadata)
 
 ### Development Setup
 
@@ -184,11 +237,16 @@ LOG_LEVEL=debug
 NODE_ENV=development
 ```
 
-Pretty printed logs with colors:
+Run with pretty printing (optional):
 
+```bash
+pnpm dev | pnpm exec pino-pretty
 ```
-[12:34:56 DEBUG] abc-123 Checking user permissions
-[12:34:56 INFO] abc-123 User authenticated successfully
+
+Output:
+```
+[12:34:56 DEBUG] (correlationId: abc-123): Checking user permissions
+[12:34:56 INFO] (correlationId: abc-123): User authenticated successfully
 ```
 
 ### Production Setup
@@ -347,15 +405,16 @@ The correlation ID middleware is **disabled in test environment**:
 ```typescript
 // src/app.ts
 if (env.NODE_ENV !== 'test') {
-  fastify.addHook('onRequest', correlationIdHook)
+  fastify.addHook('onRequest', correlationIdMiddleware)
 }
 ```
 
 **Rationale:**
 1. Tests don't involve distributed systems requiring request tracing
-2. The hook creates child loggers, which can interfere with the silent logger
+2. Logger is set to 'silent' level anyway
 3. Test requests are isolated and don't need correlation tracking
 4. Simplifies test setup and reduces overhead
+5. AsyncLocalStorage context not needed in tests
 
 ### Enabling Logging for Test Debugging
 
@@ -372,6 +431,31 @@ const { app } = await buildApp()
 
 **Note:** Remember to revert this before committing tests.
 
+## How It Works Internally
+
+### AsyncLocalStorage + Pino Mixin
+
+1. **Request arrives** → `correlationIdMiddleware` runs
+2. **Correlation ID extracted/generated** → Stored in AsyncLocalStorage
+3. **Every log call** → Pino mixin function executes
+4. **Mixin reads** from AsyncLocalStorage → Injects `correlationId` field
+5. **Log output** → Includes correlation ID automatically
+
+```typescript
+// In logger-config.ts
+{
+  mixin() {
+    const context = getRequestContext()  // ← Reads from AsyncLocalStorage
+    return context ? {
+      correlationId: context.correlationId,
+      reqId: context.requestId,
+    } : {}
+  }
+}
+```
+
+This happens **automatically for every log**, so you never have to think about it.
+
 ## Troubleshooting
 
 ### Logs not appearing
@@ -381,19 +465,25 @@ Check:
 2. You're using `request.log` not `console.log`
 3. Test environment doesn't disable logging
 
-### Correlation ID missing
+### Correlation ID missing from logs
 
 Check:
-1. Correlation ID middleware is registered (`correlationIdHook`)
-2. You're using the logger from the request object
-3. The hook runs before your route handlers
+1. Correlation ID middleware is registered in `app.ts`
+2. Middleware runs before your route handlers (`onRequest` hook)
+3. You're in development or production environment (not test)
+4. The mixin function is configured in logger config
 
 ### Pretty printing not working
 
-Check:
-1. `NODE_ENV=development` is set
-2. `pino-pretty` is installed (optional dependency)
-3. Running in a TTY (terminal) not a pipe
+Pretty printing requires piping:
+
+```bash
+# ❌ Wrong - pretty printing not configured as transport
+pnpm dev
+
+# ✅ Correct - pipe to pino-pretty
+pnpm dev | pnpm exec pino-pretty
+```
 
 ## Additional Resources
 
