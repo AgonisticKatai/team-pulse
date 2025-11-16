@@ -4,7 +4,7 @@ import Fastify, { type FastifyError, type FastifyInstance, type FastifyReply, ty
 import { type Container, createContainer } from './infrastructure/config/container.js'
 import { type Env, validateEnv, validateProductionEnv } from './infrastructure/config/env.js'
 import { runMigrations } from './infrastructure/database/migrate.js'
-// import { correlationIdMiddleware } from './infrastructure/http/middleware/correlation-id.js'
+import { correlationIdMiddleware } from './infrastructure/http/middleware/correlation-id.js'
 import { registerAuthRoutes } from './infrastructure/http/routes/auth.js'
 import { registerTeamRoutes } from './infrastructure/http/routes/teams.js'
 import { registerUserRoutes } from './infrastructure/http/routes/users.js'
@@ -51,15 +51,20 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     genReqId: () => crypto.randomUUID(),
   })
 
-  // Register middleware
-  // NOTE: Correlation ID middleware is DISABLED due to compatibility issues with Fastify + Pino
-  // The onRequest hook causes deadlocks in development environment
-  // Even without using pino-pretty or child loggers, the hook blocks request processing
-  // This is a known issue with Fastify's logger integration
-  // TODO: Consider using AsyncLocalStorage or fastify-request-context as alternative
-  // if (env.NODE_ENV !== 'test') {
-  //   fastify.addHook('onRequest', correlationIdMiddleware)
-  // }
+  // 5. Register correlation ID middleware (for request tracing)
+  // Uses AsyncLocalStorage to store correlation ID, which is automatically
+  // injected into all logs via Pino mixin. This approach:
+  // - Avoids child logger deadlocks
+  // - Works seamlessly with pino-pretty
+  // - Requires no manual correlation ID passing
+  //
+  // In test environment, we skip this middleware because:
+  // - Tests don't need distributed tracing
+  // - Logger is set to 'silent' level anyway
+  // - Reduces test complexity
+  if (env.NODE_ENV !== 'test') {
+    fastify.addHook('onRequest', correlationIdMiddleware)
+  }
 
   // 6. Register CORS plugin
   await fastify.register(cors, {
