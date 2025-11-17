@@ -6,10 +6,12 @@ import { type Container, createContainer } from './infrastructure/config/contain
 import { type Env, validateEnv, validateProductionEnv } from './infrastructure/config/env.js'
 import { runMigrations } from './infrastructure/database/migrate.js'
 import { correlationIdMiddleware } from './infrastructure/http/middleware/correlation-id.js'
+import { metricsOnRequest, metricsOnResponse } from './infrastructure/http/middleware/metrics.js'
 import { registerAuthRoutes } from './infrastructure/http/routes/auth.js'
 import { registerTeamRoutes } from './infrastructure/http/routes/teams.js'
 import { registerUserRoutes } from './infrastructure/http/routes/users.js'
 import { createLoggerConfig } from './infrastructure/logging/logger-config.js'
+import { metricsService } from './infrastructure/monitoring/MetricsService.js'
 
 /**
  * Build and configure the Fastify application
@@ -68,7 +70,12 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
   // The middleware is async for proper Fastify lifecycle handling with pino-pretty.
   fastify.addHook('onRequest', correlationIdMiddleware)
 
-  // 6. Register HTTP Compression
+  // 6. Register Metrics hooks (for Prometheus)
+  // Uses onRequest to capture start time and onResponse to record metrics
+  // This is the recommended Fastify pattern for metrics collection
+  // onResponse hook fires after response is sent, ideal for statistics
+  fastify.addHook('onRequest', metricsOnRequest)
+  fastify.addHook('onResponse', metricsOnResponse) // 7. Register HTTP Compression
   // Compresses responses using gzip, deflate, or brotli based on Accept-Encoding header
   // Only compresses responses larger than 1KB for efficiency
   // Brotli provides best compression but more CPU intensive
@@ -81,13 +88,13 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     removeContentLengthHeader: true,
   })
 
-  // 7. Register CORS plugin
+  // 8. Register CORS plugin
   await fastify.register(cors, {
     credentials: true,
     origin: env.NODE_ENV === 'production' ? env.FRONTEND_URL : 'http://localhost:5173',
   })
 
-  // 8. Register Rate Limiting
+  // 9. Register Rate Limiting
   // Global rate limit: 100 requests per 15 minutes per IP
   // Protects against DDoS and brute force attacks
   await fastify.register(rateLimit, {
@@ -102,7 +109,14 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     }),
   })
 
-  // 9. Register routes (HTTP adapters)
+  // 10. Register routes (HTTP adapters)
+
+  // Metrics endpoint (Prometheus format)
+  fastify.get('/metrics', async (_request: FastifyRequest, reply: FastifyReply) => {
+    const metrics = await metricsService.getMetrics()
+    reply.header('Content-Type', metricsService.getContentType())
+    return reply.send(metrics)
+  })
 
   // Authentication routes
   await registerAuthRoutes(fastify, {
@@ -129,7 +143,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     updateTeamUseCase: container.updateTeamUseCase,
   })
 
-  // 9. Health check endpoint
+  // 11. Health check endpoint
   fastify.get('/api/health', () => {
     return {
       environment: env.NODE_ENV,
@@ -140,13 +154,14 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     }
   })
 
-  // 10. API info endpoint
+  // 12. API info endpoint
   fastify.get('/api', () => {
     return {
       description: 'Football team statistics platform API',
       endpoints: {
         auth: '/api/auth/*',
         health: '/api/health',
+        metrics: '/metrics',
         teams: '/api/teams',
         users: '/api/users',
       },
@@ -155,7 +170,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     }
   })
 
-  // 11. 404 handler
+  // 13. 404 handler
   fastify.setNotFoundHandler((request: FastifyRequest, reply: FastifyReply) => {
     return reply.code(404).send({
       error: {
@@ -166,7 +181,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     })
   })
 
-  // 12. Global error handler
+  // 14. Global error handler
   fastify.setErrorHandler((error: FastifyError, _request: FastifyRequest, reply: FastifyReply) => {
     fastify.log.error(error)
 
