@@ -1,5 +1,5 @@
 import * as promClient from 'prom-client'
-import { type Counter, collectDefaultMetrics, type Histogram, Registry } from 'prom-client'
+import { type Counter, collectDefaultMetrics, type Gauge, type Histogram, Registry } from 'prom-client'
 
 /**
  * Service for managing Prometheus metrics
@@ -19,8 +19,8 @@ export class MetricsService {
   private readonly dbQueryErrors: Counter
 
   // Business metrics
-  private readonly usersTotal: Counter
-  private readonly teamsTotal: Counter
+  private readonly usersTotal: Gauge
+  private readonly teamsTotal: Gauge
   private readonly loginsTotal: Counter
 
   constructor() {
@@ -76,16 +76,15 @@ export class MetricsService {
     })
 
     // Business metrics
-    this.usersTotal = new promClient.Counter({
+    this.usersTotal = new promClient.Gauge({
       name: 'users_total',
-      help: 'Total number of users created',
-      labelNames: ['role'],
+      help: 'Total number of users in the system',
       registers: [this.registry],
     })
 
-    this.teamsTotal = new promClient.Counter({
+    this.teamsTotal = new promClient.Gauge({
       name: 'teams_total',
-      help: 'Total number of teams created',
+      help: 'Total number of teams in the system',
       registers: [this.registry],
     })
 
@@ -146,18 +145,20 @@ export class MetricsService {
   recordDbError(operation: string, table: string, errorType: string): void {
     // biome-ignore lint/style/useNamingConvention: Prometheus label names use snake_case
     this.dbQueryErrors.inc({ operation, table, error_type: errorType })
-  } /**
-   * Record user creation
-   */
-  recordUserCreated(role: string): void {
-    this.usersTotal.inc({ role })
   }
 
   /**
-   * Record team creation
+   * Set total number of users
    */
-  recordTeamCreated(): void {
-    this.teamsTotal.inc()
+  setUsersTotal(count: number): void {
+    this.usersTotal.set(count)
+  }
+
+  /**
+   * Set total number of teams
+   */
+  setTeamsTotal(count: number): void {
+    this.teamsTotal.set(count)
   }
 
   /**

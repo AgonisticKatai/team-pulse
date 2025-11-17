@@ -38,6 +38,12 @@ export async function metricsOnResponse(request: FastifyRequest, reply: FastifyR
   // Record metrics
   metricsService.recordHttpRequest(method, route, statusCode, durationSeconds)
 
+  // Record errors (4xx and 5xx status codes)
+  if (statusCode >= 400) {
+    const errorType = statusCode >= 500 ? 'server_error' : 'client_error'
+    metricsService.recordHttpError(method, route, errorType)
+  }
+
   // Clean up WeakMap
   requestStartTimes.delete(request)
 }

@@ -4,6 +4,7 @@ import type { ValidationError } from '../../domain/errors/ValidationError.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
 import { Err, Ok, type Result } from '../../domain/types/index.js'
 import { Pagination } from '../../domain/value-objects/index.js'
+import { metricsService } from '../../infrastructure/monitoring/MetricsService.js'
 
 /**
  * List Teams Use Case
@@ -41,6 +42,9 @@ export class ListTeamsUseCase {
     }
 
     const { teams, total } = findTeamResult.value
+
+    // Update teams_total metric
+    metricsService.setTeamsTotal(total)
 
     // Create Pagination Value Object with validation
     const paginationResult = Pagination.create({ page, limit, total })

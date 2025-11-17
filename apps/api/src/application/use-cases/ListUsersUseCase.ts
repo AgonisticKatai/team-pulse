@@ -4,6 +4,7 @@ import type { ValidationError } from '../../domain/errors/ValidationError.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import { Err, Ok, type Result } from '../../domain/types/index.js'
 import { Pagination } from '../../domain/value-objects/index.js'
+import { metricsService } from '../../infrastructure/monitoring/MetricsService.js'
 
 /**
  * List Users Use Case
@@ -52,6 +53,9 @@ export class ListUsersUseCase {
     }
 
     const { users, total } = findUserResult.value
+
+    // Update users_total metric
+    metricsService.setUsersTotal(total)
 
     // Create Pagination Value Object with validation
     const paginationResult = Pagination.create({ page, limit, total })

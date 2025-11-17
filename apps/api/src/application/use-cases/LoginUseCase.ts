@@ -4,6 +4,7 @@ import type { IRefreshTokenRepository } from '../../domain/repositories/IRefresh
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import type { IPasswordHasher } from '../../domain/services/IPasswordHasher.js'
 import { Err, Ok, type Result } from '../../domain/types/index.js'
+import { metricsService } from '../../infrastructure/monitoring/MetricsService.js'
 import type { TokenFactory } from '../factories/TokenFactory.js'
 
 /**
@@ -105,6 +106,8 @@ export class LoginUseCase {
     if (!accessTokenResult.ok) {
       return Err(accessTokenResult.error)
     }
+
+    metricsService.recordLogin(findUserResult.value.role.getValue())
 
     return Ok({
       accessToken: accessTokenResult.value,
