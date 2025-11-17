@@ -1,20 +1,13 @@
 {
+  "version": "7",
   "dialect": "postgresql",
   "entries": [
     {
-      "breakpoints": true,
       "idx": 0,
-      "tag": "0000_easy_madame_hydra",
       "version": "7",
-      "when": 1761657238188
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1763204641095,
-      "tag": "0001_messy_mother_askani",
+      "when": 1763381775258,
+      "tag": "0000_productive_ultimates",
       "breakpoints": true
     }
-  ],
-  "version": "7"
+  ]
 }
