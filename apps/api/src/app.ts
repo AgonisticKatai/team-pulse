@@ -1,3 +1,4 @@
+import compress from '@fastify/compress'
 import cors from '@fastify/cors'
 import rateLimit from '@fastify/rate-limit'
 import Fastify, { type FastifyError, type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify'
@@ -19,13 +20,14 @@ import { createLoggerConfig } from './infrastructure/logging/logger-config.js'
  * 3. Create dependency injection container
  * 4. Configure Fastify with structured logging
  * 5. Add correlation ID middleware
- * 6. Configure CORS
- * 7. Configure rate limiting
- * 8. Register routes (HTTP adapters)
- * 9. Setup health check endpoint
- * 10. Setup API info endpoint
- * 11. Setup 404 handler
- * 12. Setup global error handler
+ * 6. Configure HTTP compression
+ * 7. Configure CORS
+ * 8. Configure rate limiting
+ * 9. Register routes (HTTP adapters)
+ * 10. Setup health check endpoint
+ * 11. Setup API info endpoint
+ * 12. Setup 404 handler
+ * 13. Setup global error handler
  *
  * The application follows Hexagonal Architecture:
  * - Domain: Business logic (entities, repository interfaces)
@@ -64,13 +66,28 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
   // Testing it ensures we catch similar issues before they reach production.
   //
   // The middleware is async for proper Fastify lifecycle handling with pino-pretty.
-  fastify.addHook('onRequest', correlationIdMiddleware) // 6. Register CORS plugin
+  fastify.addHook('onRequest', correlationIdMiddleware)
+
+  // 6. Register HTTP Compression
+  // Compresses responses using gzip, deflate, or brotli based on Accept-Encoding header
+  // Only compresses responses larger than 1KB for efficiency
+  // Brotli provides best compression but more CPU intensive
+  // Gzip is widely supported and good balance
+  await fastify.register(compress, {
+    global: true,
+    threshold: 1024, // Only compress responses > 1KB
+    encodings: ['br', 'gzip', 'deflate'], // Priority order: brotli > gzip > deflate
+    // Don't compress already compressed formats
+    removeContentLengthHeader: true,
+  })
+
+  // 7. Register CORS plugin
   await fastify.register(cors, {
     credentials: true,
     origin: env.NODE_ENV === 'production' ? env.FRONTEND_URL : 'http://localhost:5173',
   })
 
-  // 7. Register Rate Limiting
+  // 8. Register Rate Limiting
   // Global rate limit: 100 requests per 15 minutes per IP
   // Protects against DDoS and brute force attacks
   await fastify.register(rateLimit, {
@@ -85,7 +102,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     }),
   })
 
-  // 8. Register routes (HTTP adapters)
+  // 9. Register routes (HTTP adapters)
 
   // Authentication routes
   await registerAuthRoutes(fastify, {
