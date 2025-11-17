@@ -74,12 +74,10 @@ export function correlationIdMiddleware(request: FastifyRequest, reply: FastifyR
     requestId: request.id, // Fastify's built-in request ID
   }
 
-  // Store context in AsyncLocalStorage for the duration of this request
-  // All async operations within this request will have access to this context
-  requestContextStorage.run(context, () => {
-    // This empty callback is intentional - the context remains active
-    // for the entire request lifecycle through AsyncLocalStorage
-  })
+  // Use enterWith() to set context for the current async execution chain
+  // This makes the context available for all subsequent async operations
+  // in this request without needing a callback wrapper
+  requestContextStorage.enterWith(context)
 
   // Attach to request object for direct access in handlers
   request.correlationId = correlationId
