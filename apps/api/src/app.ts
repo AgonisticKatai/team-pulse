@@ -51,22 +51,20 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     genReqId: () => crypto.randomUUID(),
   })
 
-  // 5. Register correlation ID middleware (for request tracing)
-  // Uses AsyncLocalStorage to store correlation ID, which is automatically
-  // injected into all logs via Pino mixin. This approach:
-  // - Avoids child logger deadlocks
-  // - Works seamlessly with pino-pretty
-  // - Requires no manual correlation ID passing
+  // 5. Register Correlation ID middleware (for distributed tracing)
   //
-  // In test environment, we skip this middleware because:
-  // - Tests don't need distributed tracing
-  // - Logger is set to 'silent' level anyway
-  // - Reduces test complexity
-  if (env.NODE_ENV !== 'test') {
-    fastify.addHook('onRequest', correlationIdMiddleware)
-  }
-
-  // 6. Register CORS plugin
+  // This middleware:
+  // - Extracts or generates a correlation ID for each request
+  // - Attaches it to request.correlationId
+  // - Adds X-Correlation-ID response header
+  // - Available in logs via request serializer
+  //
+  // CRITICAL: This middleware MUST be tested in all environments including test.
+  // We had production issues with timeouts when this was sync instead of async.
+  // Testing it ensures we catch similar issues before they reach production.
+  //
+  // The middleware is async for proper Fastify lifecycle handling with pino-pretty.
+  fastify.addHook('onRequest', correlationIdMiddleware) // 6. Register CORS plugin
   await fastify.register(cors, {
     credentials: true,
     origin: env.NODE_ENV === 'production' ? env.FRONTEND_URL : 'http://localhost:5173',

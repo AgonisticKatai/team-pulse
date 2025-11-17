@@ -1,83 +1,36 @@
 import type { FastifyBaseLogger } from 'fastify'
 import type { PinoLoggerOptions } from 'fastify/types/logger.js'
-import { getRequestContext } from './context.js'
 
 /**
  * Logger Configuration for Fastify/Pino
  *
- * Provides structured logging with:
- * - JSON format in production
- * - Pretty print in development (via external piping)
- * - Automatic correlation IDs via AsyncLocalStorage + mixin
- * - Standardized log levels
+ * Configures structured logging with environment-specific behavior:
+ * - Development: Pretty-printed logs with colorization
+ * - Production: JSON structured logs for aggregation
+ * - Test: Silent logger to avoid stdout pollution
  *
- * The correlation ID is automatically injected into ALL logs using:
- * 1. AsyncLocalStorage to store request context
- * 2. Pino mixin to read from storage and inject into logs
- *
- * This approach:
- * - Avoids child logger deadlocks with pino-pretty
- * - Eliminates manual correlation ID passing
- * - Works seamlessly across async operations
- * - Has minimal performance impact
+ * Correlation IDs are automatically included in request logs via the
+ * request serializer reading from request.correlationId.
  */
 
 /**
- * Create logger configuration based on environment
+ * Creates Pino logger configuration based on environment
  *
- * Development:
- * - JSON logs that can be piped to pino-pretty
- * - Automatic correlation IDs via mixin
- * - Human-readable when piped (e.g., pnpm dev | pino-pretty)
- *
- * Production:
- * - Structured JSON logs
- * - Machine-parseable
- * - Optimized for log aggregation (e.g., CloudWatch, Datadog)
- * - Automatic correlation IDs
- *
- * Test:
- * - Silent logs (no stdout pollution)
- * - Logger infrastructure enabled (required for Fastify lifecycle)
- * - No correlation IDs needed
+ * @param env - Application environment (development, production, test)
+ * @param logLevel - Minimum log level to output (trace, debug, info, warn, error, fatal)
+ * @returns Pino logger options or boolean (false disables logging)
  */
 export function createLoggerConfig(env: 'development' | 'production' | 'test', logLevel: string): PinoLoggerOptions | boolean {
-  // In test environment, use silent logger to avoid stdout pollution
-  // We CANNOT return false because:
-  // 1. Fastify's inject() method relies on logger infrastructure for request lifecycle
-  // 2. Plugins and hooks may call request.log.* methods
-  // 3. Returning false disables the entire logger, breaking internal Fastify mechanisms
+  // Test environment: silent logger to avoid polluting test output
+  // Cannot return false - Fastify's inject() and lifecycle depend on logger infrastructure
   if (env === 'test') {
     return {
-      level: 'silent', // Suppress output but keep logger functional
+      level: 'silent',
     }
   }
 
   const baseConfig: PinoLoggerOptions = {
     level: logLevel,
-    /**
-     * Mixin function - automatically called for every log
-     *
-     * This reads from AsyncLocalStorage and injects the correlation ID
-     * into every log message. The mixin runs for ALL logs, ensuring
-     * consistent correlation ID inclusion without manual intervention.
-     *
-     * Benefits:
-     * - Automatic: No need to pass correlationId manually
-     * - Safe: No child loggers = no deadlocks
-     * - Consistent: All logs include correlation ID when available
-     * - Clean: No cluttered code with manual correlation ID passing
-     */
-    mixin() {
-      const context = getRequestContext()
-      return context
-        ? {
-            correlationId: context.correlationId,
-            reqId: context.requestId,
-          }
-        : {}
-    },
-    // Serialize errors properly
     serializers: {
       err: (err: Error) => ({
         message: err.message,
@@ -89,6 +42,7 @@ export function createLoggerConfig(env: 'development' | 'production' | 'test', l
         id: req.id,
         method: req.method,
         url: req.url,
+        correlationId: req.correlationId, // Injected by correlation-id middleware
       }),
       res: (res) => ({
         statusCode: res.statusCode,
@@ -97,24 +51,23 @@ export function createLoggerConfig(env: 'development' | 'production' | 'test', l
   }
 
   if (env === 'development') {
-    // JSON logs in development - can be piped to pino-pretty for readability
-    // Example: pnpm dev | pino-pretty
-    //
-    // We don't use pino-pretty as a transport because:
-    // 1. It can cause issues with some setups
-    // 2. External piping is more flexible
-    // 3. You can choose when to use pretty printing
     return {
       ...baseConfig,
+      transport: {
+        target: 'pino-pretty',
+        options: {
+          colorize: true,
+          translateTime: 'HH:MM:ss',
+          ignore: 'pid,hostname',
+        },
+      },
     }
   }
 
-  // Production: JSON structured logs
+  // Production: structured JSON logs for log aggregation systems
   return {
     ...baseConfig,
-    // Include timestamp in ISO format
     timestamp: () => `,"time":"${new Date().toISOString()}"`,
-    // Add default fields for all logs
     base: {
       env: 'production',
       service: 'team-pulse-api',
