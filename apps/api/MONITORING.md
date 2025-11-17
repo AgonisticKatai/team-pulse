@@ -223,7 +223,7 @@ The API will expose metrics at `http://localhost:3001/metrics`
 - View targets (should show API as UP)
 - Test PromQL queries
 
-**Grafana:** http://localhost:3000
+**Grafana:** http://localhost:3002
 - **Credentials:** admin / admin
 - Add Prometheus data source: `http://prometheus:9090`
 - Create dashboards

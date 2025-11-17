@@ -126,9 +126,34 @@ validate-imports: ## Validate ESM imports have .js extensions
 	@packages/shared/scripts/validate-imports.sh
 
 # Build
-build: ## Build all apps for production
-	@echo "🏗️  Building for production..."
-	@pnpm exec turbo build
+build: ## Build all packages and apps
+	@pnpm run build
+
+# Monitoring commands
+.PHONY: monitoring-up monitoring-down monitoring-logs prometheus-logs grafana-logs metrics
+
+monitoring-up: ## Start Prometheus and Grafana
+	@docker compose up prometheus grafana -d
+
+monitoring-down: ## Stop Prometheus and Grafana
+	@docker compose stop prometheus grafana
+
+monitoring-logs: ## View all monitoring logs
+	@docker compose logs -f prometheus grafana
+
+prometheus-logs: ## View Prometheus logs
+	@docker compose logs -f prometheus
+
+grafana-logs: ## View Grafana logs
+	@docker compose logs -f grafana
+
+metrics: ## Check metrics endpoint
+	@echo "Fetching metrics from http://localhost:3001/metrics..."
+	@curl -s http://localhost:3001/metrics | head -n 50
+
+# Shortcuts
+dev: start
+install: setup
 
 # Quick commands
 dev: start ## Alias for 'start'
