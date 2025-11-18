@@ -602,9 +602,25 @@ Duration: 17.43s (parallel execution)
 
 ### Requirements
 
+**Local Development:**
 - Docker must be running
 - Testcontainers automatically manages container lifecycle
 - Containers are created on `beforeAll` and destroyed on `afterAll`
+
+**CI/CD (GitHub Actions):**
+- Docker is pre-installed on Ubuntu runners
+- Socket permissions are configured automatically (`.github/workflows/ci.yml`)
+- Test timeout increased to 15 minutes (first run downloads PostgreSQL image)
+- Each test suite creates isolated containers in parallel
+
+**Configuration:**
+```yaml
+# .github/workflows/ci.yml
+- name: Setup Docker for testcontainers
+  run: |
+    sudo chmod 666 /var/run/docker.sock  # Enable testcontainers access
+    docker --version
+```
 
 ## 🎨 Design System
 
@@ -620,6 +636,11 @@ Built with native CSS custom properties:
 - 🔄 Parallel task execution
 - 📦 Optimized for CI/CD
 - 🎯 Perfect Vercel integration
+
+**Build System:**
+- All builds use `pnpm exec turbo build` directly (no recursive loops)
+- Makefile commands call Turbo directly for consistency
+- CI/CD uses same commands as local development
 
 ## 📚 Additional Documentation
 

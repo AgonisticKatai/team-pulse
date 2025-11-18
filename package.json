@@ -36,7 +36,7 @@
   "packageManager": "pnpm@10.21.0",
   "private": true,
   "scripts": {
-    "build": "make build",
+    "build": "turbo build",
     "db:push": "make db-push",
     "db:reset": "make db-reset",
     "db:shell": "make db-shell",
