@@ -10,28 +10,12 @@ jobs:
   ci:
     name: CI Pipeline
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15  # Increased for testcontainers startup
 
     env:
-      DATABASE_URL: postgresql://test:test@localhost:5432/test
       NODE_ENV: test
       JWT_SECRET: test-jwt-secret-key-for-ci-minimum-32-characters-long
       JWT_REFRESH_SECRET: test-jwt-refresh-secret-key-for-ci-minimum-32-characters-long
-
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
 
     steps:
       - name: Checkout code
@@ -68,32 +52,14 @@ jobs:
       - name: Type check
         run: make type-check
 
-      - name: Wait for PostgreSQL
+      - name: Verify Docker is running
         run: |
-          until pg_isready -h localhost -p 5432 -U test; do
-            echo "Waiting for PostgreSQL to be ready..."
-            sleep 1
-          done
-          echo "PostgreSQL is ready!"
+          docker --version
+          docker ps
 
-      - name: Debug environment variables
-        run: |
-          echo "DATABASE_URL is set to: ${DATABASE_URL:0:20}..."
-          echo "NODE_ENV is set to: $NODE_ENV"
-          echo "JWT_SECRET is set: ${JWT_SECRET:+YES}"
-          echo "JWT_REFRESH_SECRET is set: ${JWT_REFRESH_SECRET:+YES}"
-
-      - name: Setup database schema
-        run: make db-push
-        env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/test
-          JWT_SECRET: test-jwt-secret-key-for-ci-minimum-32-characters-long
-          JWT_REFRESH_SECRET: test-jwt-refresh-secret-key-for-ci-minimum-32-characters-long
-
-      - name: Run tests
+      - name: Run tests (with testcontainers)
         run: make test
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/test
           NODE_ENV: test
           JWT_SECRET: test-jwt-secret-key-for-ci-minimum-32-characters-long
           JWT_REFRESH_SECRET: test-jwt-refresh-secret-key-for-ci-minimum-32-characters-long
