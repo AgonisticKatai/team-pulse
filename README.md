@@ -11,17 +11,29 @@ Modern football team statistics platform with real-time match tracking, admin da
 
 ## 🚀 Tech Stack
 
+### Core Stack
 - **Frontend**: React 19 + TypeScript + Vite 6
 - **Backend**: Fastify (local) / Vercel Serverless Functions (production)
-- **Database**: PostgreSQL (with Drizzle ORM)
+- **Database**: PostgreSQL (with Drizzle ORM + Connection Pooling)
 - **Authentication**: JWT with Refresh Tokens + bcrypt password hashing
-- **Authorization**: Role-based access control (RBAC)
+- **Authorization**: Role-based access control (RBAC) with PermissionService
 - **Styling**: CSS Custom Properties (native)
-- **Testing**: Vitest (56+ unit tests)
+- **Testing**: Vitest (99+ tests with Docker Test Containers)
 - **Tooling**: Biome (linting + formatting)
 - **Monorepo**: Turborepo + pnpm workspaces
-- **Deployment**: Vercel
 - **Architecture**: Hexagonal Architecture (Ports & Adapters)
+
+### DevOps & Observability
+- **Deployment**: Vercel + Docker (189MB optimized multi-stage image)
+- **Monitoring**: Prometheus + Grafana with custom dashboards
+- **Metrics**: HTTP, Database, and Business metrics collection
+- **Logging**: Structured logging with Pino + Correlation IDs for distributed tracing
+- **Containerization**: Docker Compose for dev (PostgreSQL + Prometheus + Grafana)
+
+### Security & Performance
+- **Security**: Helmet (CSP, XSS protection) + Rate Limiting + CORS
+- **Performance**: HTTP Compression (Brotli/Gzip) + Connection Pooling
+- **Database Optimization**: Indexed queries + Environment-based pool sizing (5/10/20)
 
 ## 📦 Project Structure
 
@@ -116,7 +128,10 @@ pnpm dev
 The development servers will be available at:
 - **Frontend**: `http://localhost:5173`
 - **API**: `http://localhost:3000`
+- **API Metrics**: `http://localhost:3000/metrics` (Prometheus format)
 - **Database**: `postgresql://teampulse:teampulse@localhost:5432/teampulse`
+- **Prometheus**: `http://localhost:9090` (metrics database)
+- **Grafana**: `http://localhost:3002` (dashboards, admin/admin)
 
 #### Quick Start Commands
 
@@ -178,6 +193,13 @@ make docker-run      # Run production container
 make docker-stop     # Stop production container
 make docker-clean    # Remove image + container
 make docker-size     # Show image size
+
+# Monitoring (Development)
+make monitoring-up   # Start Prometheus + Grafana
+make monitoring-down # Stop monitoring services
+make prometheus-logs # View Prometheus logs
+make grafana-logs    # View Grafana logs
+make metrics         # Check /metrics endpoint
 ```
 
 #### pnpm Scripts
@@ -265,9 +287,26 @@ Node.js Version: 25.x
 
 ### ✅ Implemented
 
+#### Core Features
 - [x] **Authentication & Authorization**: JWT-based auth with 3-tier RBAC (SUPER_ADMIN, ADMIN, USER)
 - [x] **User Management**: Create and list users with role-based permissions
 - [x] **Team Management**: CRUD operations with role-based access control
+- [x] **Permission System**: Fine-grained authorization with PermissionService
+
+#### DevOps & Observability
+- [x] **Prometheus Metrics**: HTTP, Database, and Business metrics collection
+- [x] **Grafana Dashboards**: Real-time monitoring and visualization
+- [x] **Structured Logging**: JSON logs with Pino + correlation IDs for distributed tracing
+- [x] **Health Checks**: `/api/health` endpoint for monitoring
+- [x] **Docker Production Build**: 189MB optimized multi-stage image
+- [x] **Test Containers**: Isolated PostgreSQL instances for parallel testing
+
+#### Security & Performance
+- [x] **Helmet Security Headers**: CSP, XSS protection, MIME sniffing prevention
+- [x] **Rate Limiting**: Global (100 req/15min) + Login (5 req/15min)
+- [x] **HTTP Compression**: Brotli, Gzip, Deflate with 1KB threshold
+- [x] **Connection Pooling**: Environment-based sizing (5/10/20 connections)
+- [x] **CORS Configuration**: Environment-aware origin validation
 
 ### 🚧 Coming Soon
 
@@ -276,6 +315,9 @@ Node.js Version: 25.x
 - [ ] Player statistics
 - [ ] Team analytics dashboard
 - [ ] Mobile-responsive design
+- [ ] API documentation (Swagger/OpenAPI)
+- [ ] Database query optimization (composite indexes, caching)
+- [ ] Frontend test coverage (hooks, components, integration tests)
 
 ## 🔒 Git Hooks & Code Quality
 
@@ -395,11 +437,31 @@ make db-seed
 4. Logout: POST /api/auth/logout
 ```
 
+### Permission System
+
+The application includes a comprehensive `PermissionService` for fine-grained authorization:
+
+```typescript
+// Available actions based on role
+- USER: view_teams, create_team, view_profile
+- ADMIN: + update_team, delete_team, create_user, list_users, admin_dashboard
+- SUPER_ADMIN: + manage_roles, system_settings, delete_user
+```
+
+**Usage in frontend:**
+```typescript
+const allowedActions = getAllowedActions(user)
+if (allowedActions.includes('admin_dashboard')) {
+  // Show admin dashboard
+}
+```
+
 ### Testing Coverage
 
-95+ tests covering authentication and authorization:
+99+ tests covering authentication, authorization, and core functionality:
 - Password utilities, JWT utilities, domain entities
-- Auth endpoints, RBAC protection
+- Auth endpoints, RBAC protection, permission checks
+- HTTP compression, correlation IDs, metrics
 - Run: `make test`
 
 ## 🧪 Test Containers - True Parallel Test Isolation
@@ -561,10 +623,49 @@ Built with native CSS custom properties:
 
 ## 📚 Additional Documentation
 
-- **[DEPLOYMENT.md](./DEPLOYMENT.md)**: Production deployment with Docker (multi-stage build, security, cloud providers)
-- **[MONITORING.md](./apps/api/MONITORING.md)**: Observability stack with Prometheus + Grafana
+- **[DEPLOYMENT.md](./DEPLOYMENT.md)**: Production deployment with Docker (multi-stage build, security, cloud providers, ~189MB image)
+- **[MONITORING.md](./apps/api/MONITORING.md)**: Observability stack with Prometheus + Grafana (metrics, dashboards, alerts)
+- **[LOGGING.md](./apps/api/LOGGING.md)**: Structured logging with Pino (correlation IDs, distributed tracing, best practices)
 - **[MIGRATIONS.md](./apps/api/MIGRATIONS.md)**: Database migrations guide
-- **[LOGGING.md](./apps/api/LOGGING.md)**: Structured logging with Pino
+
+## 📊 Monitoring & Observability
+
+### Metrics Endpoint
+
+The API exposes Prometheus-compatible metrics at `/metrics`:
+
+```bash
+# View metrics
+curl http://localhost:3000/metrics
+
+# Start monitoring stack
+make monitoring-up
+
+# Access dashboards
+open http://localhost:9090  # Prometheus
+open http://localhost:3002  # Grafana (admin/admin)
+```
+
+### Available Metrics
+
+- **HTTP Metrics**: Request duration, total requests, error rates (by method, route, status)
+- **Database Metrics**: Query duration, total queries, errors (by operation, table)
+- **Business Metrics**: Total users, total teams, login counts (by role)
+- **System Metrics**: CPU, memory, event loop lag, active handles (default Node.js metrics)
+
+### Correlation IDs
+
+Every request gets a unique correlation ID for distributed tracing:
+
+```bash
+# Client can provide correlation ID
+curl -H "X-Correlation-ID: abc-123" http://localhost:3000/api/teams
+
+# Or one is automatically generated (UUID)
+# Response includes: X-Correlation-ID header
+```
+
+All logs and metrics include the correlation ID for request tracking across services.
 
 ## 📄 License
 
