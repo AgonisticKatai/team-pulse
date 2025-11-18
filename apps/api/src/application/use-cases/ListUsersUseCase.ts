@@ -2,9 +2,9 @@ import type { UsersListResponseDTO } from '@team-pulse/shared'
 import type { RepositoryError } from '../../domain/errors/RepositoryError.js'
 import type { ValidationError } from '../../domain/errors/ValidationError.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
+import type { IMetricsService } from '../../domain/services/IMetricsService.js'
 import { Err, Ok, type Result } from '../../domain/types/index.js'
 import { Pagination } from '../../domain/value-objects/index.js'
-import { metricsService } from '../../infrastructure/monitoring/MetricsService.js'
 
 /**
  * List Users Use Case
@@ -29,14 +29,16 @@ import { metricsService } from '../../infrastructure/monitoring/MetricsService.j
  * Authorization is handled by middleware at the HTTP layer.
  */
 export class ListUsersUseCase {
+  private readonly metricsService: IMetricsService
   private readonly userRepository: IUserRepository
 
-  private constructor({ userRepository }: { userRepository: IUserRepository }) {
+  private constructor({ metricsService, userRepository }: { metricsService: IMetricsService; userRepository: IUserRepository }) {
+    this.metricsService = metricsService
     this.userRepository = userRepository
   }
 
-  static create({ userRepository }: { userRepository: IUserRepository }): ListUsersUseCase {
-    return new ListUsersUseCase({ userRepository })
+  static create({ metricsService, userRepository }: { metricsService: IMetricsService; userRepository: IUserRepository }): ListUsersUseCase {
+    return new ListUsersUseCase({ metricsService, userRepository })
   }
 
   async execute({
@@ -55,7 +57,7 @@ export class ListUsersUseCase {
     const { users, total } = findUserResult.value
 
     // Update users_total metric
-    metricsService.setUsersTotal(total)
+    this.metricsService.setUsersTotal({ count: total })
 
     // Create Pagination Value Object with validation
     const paginationResult = Pagination.create({ page, limit, total })

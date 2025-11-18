@@ -12,12 +12,14 @@ import { UpdateTeamUseCase } from '../../application/use-cases/UpdateTeamUseCase
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
+import type { IMetricsService } from '../../domain/services/IMetricsService.js'
 import type { IPasswordHasher } from '../../domain/services/IPasswordHasher.js'
 import { BcryptPasswordHasher } from '../auth/BcryptPasswordHasher.js'
 import { createDatabase, type Database } from '../database/connection.js'
 import { DrizzleRefreshTokenRepository } from '../database/repositories/DrizzleRefreshTokenRepository.js'
 import { DrizzleTeamRepository } from '../database/repositories/DrizzleTeamRepository.js'
 import { DrizzleUserRepository } from '../database/repositories/DrizzleUserRepository.js'
+import { MetricsService } from '../monitoring/MetricsService.js'
 import type { Env } from './env.js'
 
 /**
@@ -45,11 +47,12 @@ import type { Env } from './env.js'
 export class Container {
   // Infrastructure
   private _database: Database
-  private _teamRepository?: ITeamRepository
-  private _userRepository?: IUserRepository
-  private _refreshTokenRepository?: IRefreshTokenRepository
-  private _tokenFactory?: TokenFactory
+  private _metricsService?: IMetricsService
   private _passwordHasher?: IPasswordHasher
+  private _refreshTokenRepository?: IRefreshTokenRepository
+  private _teamRepository?: ITeamRepository
+  private _tokenFactory?: TokenFactory
+  private _userRepository?: IUserRepository
 
   // Team Use Cases
   private _createTeamUseCase?: CreateTeamUseCase
@@ -122,6 +125,16 @@ export class Container {
   }
 
   /**
+   * Metrics Service (singleton)
+   */
+  get metricsService(): IMetricsService {
+    if (!this._metricsService) {
+      this._metricsService = new MetricsService()
+    }
+    return this._metricsService
+  }
+
+  /**
    * Password Hasher (singleton)
    */
   get passwordHasher(): IPasswordHasher {
@@ -156,7 +169,7 @@ export class Container {
    */
   get listTeamsUseCase(): ListTeamsUseCase {
     if (!this._listTeamsUseCase) {
-      this._listTeamsUseCase = ListTeamsUseCase.create({ teamRepository: this.teamRepository })
+      this._listTeamsUseCase = ListTeamsUseCase.create({ metricsService: this.metricsService, teamRepository: this.teamRepository })
     }
     return this._listTeamsUseCase
   }
@@ -187,10 +200,11 @@ export class Container {
   get loginUseCase(): LoginUseCase {
     if (!this._loginUseCase) {
       this._loginUseCase = LoginUseCase.create({
-        tokenFactory: this.tokenFactory,
-        refreshTokenRepository: this.refreshTokenRepository,
-        userRepository: this.userRepository,
+        metricsService: this.metricsService,
         passwordHasher: this.passwordHasher,
+        refreshTokenRepository: this.refreshTokenRepository,
+        tokenFactory: this.tokenFactory,
+        userRepository: this.userRepository,
       })
     }
     return this._loginUseCase
@@ -240,7 +254,7 @@ export class Container {
    */
   get listUsersUseCase(): ListUsersUseCase {
     if (!this._listUsersUseCase) {
-      this._listUsersUseCase = ListUsersUseCase.create({ userRepository: this.userRepository })
+      this._listUsersUseCase = ListUsersUseCase.create({ metricsService: this.metricsService, userRepository: this.userRepository })
     }
     return this._listUsersUseCase
   }

@@ -1,12 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
+import type { IMetricsService } from '../../domain/services/IMetricsService.js'
 import { Ok } from '../../domain/types/Result.js'
 import { buildExistingTeam, buildTeam, buildTeamWithoutFoundedYear, expectSuccess, TEST_CONSTANTS } from '../../infrastructure/testing/index.js'
 import { ListTeamsUseCase } from './ListTeamsUseCase.js'
 
 describe('ListTeamsUseCase', () => {
   let listTeamsUseCase: ListTeamsUseCase
+  let metricsService: IMetricsService
   let teamRepository: ITeamRepository
 
   // Mock team data
@@ -37,8 +39,22 @@ describe('ListTeamsUseCase', () => {
       save: vi.fn(),
     }
 
+    // Mock metrics service
+    metricsService = {
+      getContentType: vi.fn(),
+      getMetrics: vi.fn(),
+      recordDbError: vi.fn(),
+      recordDbQuery: vi.fn(),
+      recordHttpError: vi.fn(),
+      recordHttpRequest: vi.fn(),
+      recordLogin: vi.fn(),
+      reset: vi.fn(),
+      setTeamsTotal: vi.fn(),
+      setUsersTotal: vi.fn(),
+    }
+
     // Create use case instance
-    listTeamsUseCase = ListTeamsUseCase.create({ teamRepository })
+    listTeamsUseCase = ListTeamsUseCase.create({ metricsService, teamRepository })
   })
 
   describe('execute', () => {

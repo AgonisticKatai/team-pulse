@@ -1,11 +1,12 @@
 import * as promClient from 'prom-client'
 import { type Counter, collectDefaultMetrics, type Gauge, type Histogram, Registry } from 'prom-client'
+import type { IMetricsService } from '../../domain/services/IMetricsService.js'
 
 /**
  * Service for managing Prometheus metrics
  * Provides HTTP, database, and business metrics
  */
-export class MetricsService {
+export class MetricsService implements IMetricsService {
   private readonly registry: Registry
 
   // HTTP metrics
@@ -113,7 +114,17 @@ export class MetricsService {
   /**
    * Record HTTP request metrics
    */
-  recordHttpRequest(method: string, route: string, statusCode: number, durationSeconds: number): void {
+  recordHttpRequest({
+    durationSeconds,
+    method,
+    route,
+    statusCode,
+  }: {
+    durationSeconds: number
+    method: string
+    route: string
+    statusCode: number
+  }): void {
     this.httpRequestDuration.observe(
       // biome-ignore lint/style/useNamingConvention: Prometheus label names use snake_case
       { method, route, status_code: statusCode },
@@ -126,7 +137,7 @@ export class MetricsService {
   /**
    * Record HTTP request error
    */
-  recordHttpError(method: string, route: string, errorType: string): void {
+  recordHttpError({ errorType, method, route }: { errorType: string; method: string; route: string }): void {
     // biome-ignore lint/style/useNamingConvention: Prometheus label names use snake_case
     this.httpRequestErrors.inc({ method, route, error_type: errorType })
   }
@@ -134,7 +145,7 @@ export class MetricsService {
   /**
    * Record database query metrics
    */
-  recordDbQuery(operation: string, table: string, durationSeconds: number): void {
+  recordDbQuery({ durationSeconds, operation, table }: { durationSeconds: number; operation: string; table: string }): void {
     this.dbQueryDuration.observe({ operation, table }, durationSeconds)
     this.dbQueryTotal.inc({ operation, table })
   }
@@ -142,7 +153,7 @@ export class MetricsService {
   /**
    * Record database query error
    */
-  recordDbError(operation: string, table: string, errorType: string): void {
+  recordDbError({ errorType, operation, table }: { errorType: string; operation: string; table: string }): void {
     // biome-ignore lint/style/useNamingConvention: Prometheus label names use snake_case
     this.dbQueryErrors.inc({ operation, table, error_type: errorType })
   }
@@ -150,21 +161,21 @@ export class MetricsService {
   /**
    * Set total number of users
    */
-  setUsersTotal(count: number): void {
+  setUsersTotal({ count }: { count: number }): void {
     this.usersTotal.set(count)
   }
 
   /**
    * Set total number of teams
    */
-  setTeamsTotal(count: number): void {
+  setTeamsTotal({ count }: { count: number }): void {
     this.teamsTotal.set(count)
   }
 
   /**
    * Record successful login
    */
-  recordLogin(role: string): void {
+  recordLogin({ role }: { role: string }): void {
     this.loginsTotal.inc({ role })
   }
 

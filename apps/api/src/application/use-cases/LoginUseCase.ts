@@ -2,9 +2,9 @@ import type { LoginDTO, LoginResponseDTO } from '@team-pulse/shared'
 import { type NotFoundError, type RepositoryError, ValidationError } from '../../domain/errors/index.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
+import type { IMetricsService } from '../../domain/services/IMetricsService.js'
 import type { IPasswordHasher } from '../../domain/services/IPasswordHasher.js'
 import { Err, Ok, type Result } from '../../domain/types/index.js'
-import { metricsService } from '../../infrastructure/monitoring/MetricsService.js'
 import type { TokenFactory } from '../factories/TokenFactory.js'
 
 /**
@@ -26,40 +26,46 @@ import type { TokenFactory } from '../factories/TokenFactory.js'
  * It's PURE business logic.
  */
 export class LoginUseCase {
-  private readonly tokenFactory: TokenFactory
-  private readonly refreshTokenRepository: IRefreshTokenRepository
-  private readonly userRepository: IUserRepository
+  private readonly metricsService: IMetricsService
   private readonly passwordHasher: IPasswordHasher
+  private readonly refreshTokenRepository: IRefreshTokenRepository
+  private readonly tokenFactory: TokenFactory
+  private readonly userRepository: IUserRepository
 
   private constructor({
-    tokenFactory,
-    refreshTokenRepository,
-    userRepository,
+    metricsService,
     passwordHasher,
+    refreshTokenRepository,
+    tokenFactory,
+    userRepository,
   }: {
-    tokenFactory: TokenFactory
-    refreshTokenRepository: IRefreshTokenRepository
-    userRepository: IUserRepository
+    metricsService: IMetricsService
     passwordHasher: IPasswordHasher
+    refreshTokenRepository: IRefreshTokenRepository
+    tokenFactory: TokenFactory
+    userRepository: IUserRepository
   }) {
-    this.tokenFactory = tokenFactory
-    this.refreshTokenRepository = refreshTokenRepository
-    this.userRepository = userRepository
+    this.metricsService = metricsService
     this.passwordHasher = passwordHasher
+    this.refreshTokenRepository = refreshTokenRepository
+    this.tokenFactory = tokenFactory
+    this.userRepository = userRepository
   }
 
   static create({
-    tokenFactory,
-    refreshTokenRepository,
-    userRepository,
+    metricsService,
     passwordHasher,
+    refreshTokenRepository,
+    tokenFactory,
+    userRepository,
   }: {
-    tokenFactory: TokenFactory
-    refreshTokenRepository: IRefreshTokenRepository
-    userRepository: IUserRepository
+    metricsService: IMetricsService
     passwordHasher: IPasswordHasher
+    refreshTokenRepository: IRefreshTokenRepository
+    tokenFactory: TokenFactory
+    userRepository: IUserRepository
   }): LoginUseCase {
-    return new LoginUseCase({ tokenFactory, refreshTokenRepository, userRepository, passwordHasher })
+    return new LoginUseCase({ metricsService, passwordHasher, refreshTokenRepository, tokenFactory, userRepository })
   }
 
   async execute(dto: LoginDTO): Promise<Result<LoginResponseDTO, NotFoundError | RepositoryError | ValidationError>> {
@@ -107,7 +113,7 @@ export class LoginUseCase {
       return Err(accessTokenResult.error)
     }
 
-    metricsService.recordLogin(findUserResult.value.role.getValue())
+    this.metricsService.recordLogin({ role: findUserResult.value.role.getValue() })
 
     return Ok({
       accessToken: accessTokenResult.value,

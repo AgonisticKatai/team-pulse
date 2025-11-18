@@ -4,6 +4,7 @@ import { RepositoryError, ValidationError } from '../../domain/errors/index.js'
 import { RefreshToken } from '../../domain/models/RefreshToken.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
+import type { IMetricsService } from '../../domain/services/IMetricsService.js'
 import type { IPasswordHasher } from '../../domain/services/IPasswordHasher.js'
 import { Err, Ok } from '../../domain/types/Result.js'
 import {
@@ -20,10 +21,11 @@ import { LoginUseCase } from './LoginUseCase.js'
 
 describe('LoginUseCase', () => {
   let loginUseCase: LoginUseCase
-  let userRepository: IUserRepository
+  let metricsService: IMetricsService
+  let passwordHasher: IPasswordHasher
   let refreshTokenRepository: IRefreshTokenRepository
   let tokenFactory: TokenFactory
-  let passwordHasher: IPasswordHasher
+  let userRepository: IUserRepository
 
   // Mock user data
   const mockUser = buildUser()
@@ -77,8 +79,22 @@ describe('LoginUseCase', () => {
       verify: vi.fn(() => Promise.resolve(Ok(true))),
     }
 
+    // Mock metrics service
+    metricsService = {
+      getContentType: vi.fn(),
+      getMetrics: vi.fn(),
+      recordDbError: vi.fn(),
+      recordDbQuery: vi.fn(),
+      recordHttpError: vi.fn(),
+      recordHttpRequest: vi.fn(),
+      recordLogin: vi.fn(),
+      reset: vi.fn(),
+      setTeamsTotal: vi.fn(),
+      setUsersTotal: vi.fn(),
+    }
+
     // Create use case instance
-    loginUseCase = LoginUseCase.create({ tokenFactory, refreshTokenRepository, userRepository, passwordHasher })
+    loginUseCase = LoginUseCase.create({ metricsService, passwordHasher, refreshTokenRepository, tokenFactory, userRepository })
   })
 
   describe('execute', () => {

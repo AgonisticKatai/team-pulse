@@ -2,9 +2,9 @@ import type { TeamsListResponseDTO } from '@team-pulse/shared'
 import type { RepositoryError } from '../../domain/errors/RepositoryError.js'
 import type { ValidationError } from '../../domain/errors/ValidationError.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
+import type { IMetricsService } from '../../domain/services/IMetricsService.js'
 import { Err, Ok, type Result } from '../../domain/types/index.js'
 import { Pagination } from '../../domain/value-objects/index.js'
-import { metricsService } from '../../infrastructure/monitoring/MetricsService.js'
 
 /**
  * List Teams Use Case
@@ -18,14 +18,16 @@ import { metricsService } from '../../infrastructure/monitoring/MetricsService.j
  * - Maintain domain invariants
  */
 export class ListTeamsUseCase {
+  private readonly metricsService: IMetricsService
   private readonly teamRepository: ITeamRepository
 
-  private constructor({ teamRepository }: { teamRepository: ITeamRepository }) {
+  private constructor({ metricsService, teamRepository }: { metricsService: IMetricsService; teamRepository: ITeamRepository }) {
+    this.metricsService = metricsService
     this.teamRepository = teamRepository
   }
 
-  static create({ teamRepository }: { teamRepository: ITeamRepository }): ListTeamsUseCase {
-    return new ListTeamsUseCase({ teamRepository })
+  static create({ metricsService, teamRepository }: { metricsService: IMetricsService; teamRepository: ITeamRepository }): ListTeamsUseCase {
+    return new ListTeamsUseCase({ metricsService, teamRepository })
   }
 
   async execute({
@@ -44,7 +46,7 @@ export class ListTeamsUseCase {
     const { teams, total } = findTeamResult.value
 
     // Update teams_total metric
-    metricsService.setTeamsTotal(total)
+    this.metricsService.setTeamsTotal({ count: total })
 
     // Create Pagination Value Object with validation
     const paginationResult = Pagination.create({ page, limit, total })
