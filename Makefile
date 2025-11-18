@@ -151,6 +151,35 @@ metrics: ## Check metrics endpoint
 	@echo "Fetching metrics from http://localhost:3001/metrics..."
 	@curl -s http://localhost:3001/metrics | head -n 50
 
+# Docker production build commands
+.PHONY: docker-build docker-run docker-stop docker-clean docker-size
+
+docker-build: ## Build production Docker image
+	@echo "🐳 Building production Docker image..."
+	@docker build -t team-pulse-api:latest -f apps/api/Dockerfile .
+
+docker-run: ## Run production Docker container
+	@echo "🚀 Running production Docker container..."
+	@docker run -d --name team-pulse-api \
+		-p 3000:3000 \
+		--env-file apps/api/.env \
+		team-pulse-api:latest
+
+docker-stop: ## Stop production Docker container
+	@echo "🛑 Stopping production Docker container..."
+	@docker stop team-pulse-api || true
+	@docker rm team-pulse-api || true
+
+docker-clean: ## Remove Docker image and container
+	@echo "🧹 Cleaning Docker resources..."
+	@docker stop team-pulse-api || true
+	@docker rm team-pulse-api || true
+	@docker rmi team-pulse-api:latest || true
+
+docker-size: ## Show Docker image size
+	@echo "📊 Docker image size:"
+	@docker images team-pulse-api:latest
+
 # Shortcuts
 dev: start
 install: setup

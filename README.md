@@ -171,6 +171,13 @@ make type-check      # Run TypeScript type checking
 
 # Build
 make build           # Build all apps for production
+
+# Production Docker
+make docker-build    # Build production Docker image (189MB)
+make docker-run      # Run production container
+make docker-stop     # Stop production container
+make docker-clean    # Remove image + container
+make docker-size     # Show image size
 ```
 
 #### pnpm Scripts
@@ -194,10 +201,18 @@ pnpm format          # Format code
 pnpm type-check      # TypeScript type checking
 
 # Docker
+# Docker
 pnpm docker:up       # Start PostgreSQL
 pnpm docker:down     # Stop PostgreSQL
 pnpm docker:logs     # Show PostgreSQL logs
 pnpm docker:ps       # Show running containers
+
+# Production Docker
+pnpm docker:build    # Build production image
+pnpm docker:run      # Run production container
+pnpm docker:stop     # Stop production container
+pnpm docker:size     # Show image size
+```
 
 # Database
 pnpm db:push         # Push schema changes to database
@@ -544,6 +559,14 @@ Built with native CSS custom properties:
 - 📦 Optimized for CI/CD
 - 🎯 Perfect Vercel integration
 
+## 📚 Additional Documentation
+
+- **[DEPLOYMENT.md](./DEPLOYMENT.md)**: Production deployment with Docker (multi-stage build, security, cloud providers)
+- **[MONITORING.md](./apps/api/MONITORING.md)**: Observability stack with Prometheus + Grafana
+- **[MIGRATIONS.md](./apps/api/MIGRATIONS.md)**: Database migrations guide
+- **[LOGGING.md](./apps/api/LOGGING.md)**: Structured logging with Pino
+
 ## 📄 License
 
 MIT
+```

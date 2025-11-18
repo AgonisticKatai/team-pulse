@@ -1,5 +1,6 @@
 import compress from '@fastify/compress'
 import cors from '@fastify/cors'
+import helmet from '@fastify/helmet'
 import rateLimit from '@fastify/rate-limit'
 import Fastify, { type FastifyError, type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify'
 import { type Container, createContainer } from './infrastructure/config/container.js'
@@ -22,14 +23,16 @@ import { metricsService } from './infrastructure/monitoring/MetricsService.js'
  * 3. Create dependency injection container
  * 4. Configure Fastify with structured logging
  * 5. Add correlation ID middleware
- * 6. Configure HTTP compression
- * 7. Configure CORS
- * 8. Configure rate limiting
- * 9. Register routes (HTTP adapters)
- * 10. Setup health check endpoint
- * 11. Setup API info endpoint
- * 12. Setup 404 handler
- * 13. Setup global error handler
+ * 6. Configure security headers (Helmet)
+ * 7. Configure metrics hooks (Prometheus)
+ * 8. Configure HTTP compression
+ * 9. Configure CORS
+ * 10. Configure rate limiting
+ * 11. Register routes (HTTP adapters)
+ * 12. Setup health check endpoint
+ * 13. Setup API info endpoint
+ * 14. Setup 404 handler
+ * 15. Setup global error handler
  *
  * The application follows Hexagonal Architecture:
  * - Domain: Business logic (entities, repository interfaces)
@@ -70,12 +73,31 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
   // The middleware is async for proper Fastify lifecycle handling with pino-pretty.
   fastify.addHook('onRequest', correlationIdMiddleware)
 
-  // 6. Register Metrics hooks (for Prometheus)
+  // 6. Register Security Headers (Helmet)
+  // Adds security headers to protect against common vulnerabilities:
+  // - XSS (Cross-Site Scripting)
+  // - Clickjacking
+  // - MIME sniffing
+  // - Content Security Policy
+  await fastify.register(helmet, {
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+      },
+    },
+  })
+
+  // 7. Register Metrics hooks (for Prometheus)
   // Uses onRequest to capture start time and onResponse to record metrics
   // This is the recommended Fastify pattern for metrics collection
   // onResponse hook fires after response is sent, ideal for statistics
   fastify.addHook('onRequest', metricsOnRequest)
-  fastify.addHook('onResponse', metricsOnResponse) // 7. Register HTTP Compression
+  fastify.addHook('onResponse', metricsOnResponse)
+
+  // 8. Register HTTP Compression
   // Compresses responses using gzip, deflate, or brotli based on Accept-Encoding header
   // Only compresses responses larger than 1KB for efficiency
   // Brotli provides best compression but more CPU intensive
@@ -88,13 +110,13 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     removeContentLengthHeader: true,
   })
 
-  // 8. Register CORS plugin
+  // 9. Register CORS plugin
   await fastify.register(cors, {
     credentials: true,
     origin: env.NODE_ENV === 'production' ? env.FRONTEND_URL : 'http://localhost:5173',
   })
 
-  // 9. Register Rate Limiting
+  // 10. Register Rate Limiting
   // Global rate limit: 100 requests per 15 minutes per IP
   // Protects against DDoS and brute force attacks
   await fastify.register(rateLimit, {
@@ -109,7 +131,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     }),
   })
 
-  // 10. Register routes (HTTP adapters)
+  // 11. Register routes (HTTP adapters)
 
   // Metrics endpoint (Prometheus format)
   fastify.get('/metrics', async (_request: FastifyRequest, reply: FastifyReply) => {
