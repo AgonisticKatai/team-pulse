@@ -1,28 +1,14 @@
 import type { FastifyInstance } from 'fastify'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import { buildApp } from './app.js'
 import type { Container } from './infrastructure/config/container.js'
-import { setupTestContainer } from './infrastructure/testing/test-containers.js'
+import { setupTestEnvironment } from './infrastructure/testing/test-helpers.js'
 
 describe('Fastify App', () => {
   let app: FastifyInstance
   let container: Container
-  let cleanup: () => Promise<void>
 
-  beforeAll(async () => {
-    process.env.NODE_ENV = 'test'
-    process.env.JWT_SECRET = 'test-jwt-secret-key-min-32-chars-long'
-    process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-min-32-chars-long'
-
-    // Setup test container for database
-    const testContainer = await setupTestContainer()
-    process.env.DATABASE_URL = testContainer.container.getConnectionUri()
-    cleanup = testContainer.cleanup
-  }, 120_000)
-
-  afterAll(async () => {
-    await cleanup()
-  })
+  setupTestEnvironment()
 
   afterEach(async () => {
     if (app) {

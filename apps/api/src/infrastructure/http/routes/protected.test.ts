@@ -1,36 +1,28 @@
 import { sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { buildApp } from '../../../app.js'
 import { User } from '../../../domain/models/User.js'
 import { hashPassword } from '../../auth/password-utils.js'
 import type { Container } from '../../config/container.js'
 import type { Database } from '../../database/connection.js'
 import { expectSuccess } from '../../testing/result-helpers.js'
-import { setupTestContainer } from '../../testing/test-containers.js'
+import { setupTestEnvironment } from '../../testing/test-helpers.js'
 
 describe('Protected Routes and RBAC', () => {
   let app: FastifyInstance
   let container: Container
   let db: Database
-  let cleanup: () => Promise<void>
   let superAdminToken: string
   let adminToken: string
   let userToken: string
 
-  beforeAll(async () => {
-    process.env.NODE_ENV = 'test'
-    process.env.JWT_SECRET = 'test-jwt-secret-key-min-32-chars-long'
-    process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-min-32-chars-long'
+  const { getDatabase } = setupTestEnvironment()
 
-    // Setup isolated PostgreSQL container for this test suite
-    const result = await setupTestContainer()
-    db = result.db
-    cleanup = result.cleanup
-
-    // Set DATABASE_URL to use the test container
-    process.env.DATABASE_URL = result.container.getConnectionUri()
-  }, 120_000) // 2 minute timeout for container startup
+  beforeAll(() => {
+    // Get database instance for test isolation
+    db = getDatabase()
+  })
 
   beforeEach(async () => {
     // Build app with test container database
@@ -106,13 +98,6 @@ describe('Protected Routes and RBAC', () => {
     }
     if (app) {
       await app.close()
-    }
-  })
-
-  afterAll(async () => {
-    // Stop the test container
-    if (cleanup) {
-      await cleanup()
     }
   })
 

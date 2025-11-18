@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto'
 import type { FastifyInstance } from 'fastify'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { buildApp } from '../../../app.js'
-import { setupTestContainer } from '../../../infrastructure/testing/test-containers.js'
+import { setupTestEnvironment } from '../../../infrastructure/testing/test-helpers.js'
 
 /**
  * Integration tests for correlation ID middleware
@@ -23,21 +23,8 @@ import { setupTestContainer } from '../../../infrastructure/testing/test-contain
  */
 describe('Correlation ID Middleware - Critical Integration Tests', () => {
   let app: FastifyInstance
-  let cleanup: () => Promise<void>
 
-  beforeAll(async () => {
-    // Set test environment
-    process.env.NODE_ENV = 'test'
-    process.env.JWT_SECRET = 'test-jwt-secret-key-min-32-chars-long'
-    process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-min-32-chars-long'
-
-    // Setup isolated PostgreSQL container for this test suite
-    const result = await setupTestContainer()
-    cleanup = result.cleanup
-
-    // Set DATABASE_URL to use the test container
-    process.env.DATABASE_URL = result.container.getConnectionUri()
-  }, 120_000) // 2 minute timeout for container startup
+  setupTestEnvironment()
 
   beforeEach(async () => {
     // Build app with test container database and ALL middleware enabled
@@ -48,10 +35,6 @@ describe('Correlation ID Middleware - Critical Integration Tests', () => {
 
   afterEach(async () => {
     await app.close()
-  })
-
-  afterAll(async () => {
-    await cleanup()
   })
 
   it('should not cause timeouts - validates async hook implementation', async () => {
