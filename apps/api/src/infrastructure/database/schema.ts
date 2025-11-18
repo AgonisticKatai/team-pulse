@@ -21,7 +21,12 @@ export const teams = pgTable(
       .notNull()
       .$defaultFn(() => new Date()),
   },
-  (table) => [index('teams_name_idx').on(table.name)],
+  (table) => [
+    // Single column indexes
+    index('teams_name_idx').on(table.name),
+    // Indexes for pagination and sorting
+    index('teams_created_at_idx').on(table.createdAt.desc()),
+  ],
 )
 
 /**
@@ -44,7 +49,14 @@ export const users = pgTable(
       .notNull()
       .$defaultFn(() => new Date()),
   },
-  (table) => [index('users_role_idx').on(table.role)],
+  (table) => [
+    // Single column indexes
+    index('users_role_idx').on(table.role),
+    // Composite indexes for common query patterns
+    index('users_role_created_at_idx').on(table.role, table.createdAt.desc()),
+    // Indexes for pagination and sorting
+    index('users_created_at_idx').on(table.createdAt.desc()),
+  ],
 )
 
 /**
@@ -66,7 +78,14 @@ export const refreshTokens = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
   },
-  (table) => [index('refresh_tokens_user_id_idx').on(table.userId), index('refresh_tokens_expires_at_idx').on(table.expiresAt)],
+  (table) => [
+    // Single column indexes
+    index('refresh_tokens_user_id_idx').on(table.userId),
+    index('refresh_tokens_expires_at_idx').on(table.expiresAt),
+    // Composite indexes for common query patterns
+    // Optimizes: Finding valid tokens for a user & cleanup of expired tokens by user
+    index('refresh_tokens_user_id_expires_at_idx').on(table.userId, table.expiresAt),
+  ],
 )
 
 /**
