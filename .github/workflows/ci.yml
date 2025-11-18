@@ -23,10 +23,19 @@ jobs:
 
       - name: Setup Docker for testcontainers
         run: |
+          # Verify Docker is available
+          docker --version
+          docker info
+
           # Give testcontainers access to Docker socket
           sudo chmod 666 /var/run/docker.sock
-          docker --version
-          docker ps
+
+          # Verify socket permissions
+          ls -la /var/run/docker.sock
+
+          # Test Docker works
+          docker run --rm hello-world
+          docker ps -a
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -65,6 +74,9 @@ jobs:
           NODE_ENV: test
           JWT_SECRET: test-jwt-secret-key-for-ci-minimum-32-characters-long
           JWT_REFRESH_SECRET: test-jwt-refresh-secret-key-for-ci-minimum-32-characters-long
+          # Testcontainers configuration for CI
+          TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: /var/run/docker.sock
+          TESTCONTAINERS_RYUK_DISABLED: false
 
       - name: Build
         run: make build

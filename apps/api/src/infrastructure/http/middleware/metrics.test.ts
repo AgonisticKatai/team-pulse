@@ -1,12 +1,24 @@
-import { beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { buildApp } from '../../../app.js'
 import type { Container } from '../../config/container.js'
+import { setupTestContainer } from '../../testing/test-containers.js'
 
 describe('Metrics Middleware', () => {
-  beforeAll(() => {
+  let cleanup: () => Promise<void>
+
+  beforeAll(async () => {
     process.env.NODE_ENV = 'test'
     process.env.JWT_SECRET = 'test-jwt-secret-key-min-32-chars-long'
     process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-min-32-chars-long'
+
+    // Setup test container for database
+    const container = await setupTestContainer()
+    process.env.DATABASE_URL = container.container.getConnectionUri()
+    cleanup = container.cleanup
+  }, 120_000)
+
+  afterAll(async () => {
+    await cleanup()
   })
 
   it('should expose /metrics endpoint', async () => {
