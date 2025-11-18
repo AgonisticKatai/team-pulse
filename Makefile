@@ -127,7 +127,8 @@ validate-imports: ## Validate ESM imports have .js extensions
 
 # Build
 build: ## Build all packages and apps
-	@pnpm run build
+	@echo "🏗️  Building all packages and apps..."
+	@pnpm exec turbo build
 
 # Monitoring commands
 .PHONY: monitoring-up monitoring-down monitoring-logs prometheus-logs grafana-logs metrics
