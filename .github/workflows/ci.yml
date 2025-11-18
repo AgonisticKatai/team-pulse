@@ -21,6 +21,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup Docker for testcontainers
+        run: |
+          # Give testcontainers access to Docker socket
+          sudo chmod 666 /var/run/docker.sock
+          docker --version
+          docker ps
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -51,11 +58,6 @@ jobs:
 
       - name: Type check
         run: make type-check
-
-      - name: Verify Docker is running
-        run: |
-          docker --version
-          docker ps
 
       - name: Run tests (with testcontainers)
         run: make test
