@@ -3,7 +3,7 @@ import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { RefreshToken } from '../../../domain/models/RefreshToken.js'
 import { User } from '../../../domain/models/User.js'
 import { hashPassword } from '../../auth/password-utils.js'
-import { assertDefined, expectSuccess, TEST_CONSTANTS } from '../../testing/index.js'
+import { expectSingle, expectSuccess, TEST_CONSTANTS } from '../../testing/index.js'
 import { setupTestEnvironment } from '../../testing/test-helpers.js'
 import type { Database } from '../connection.js'
 import { DrizzleRefreshTokenRepository } from './DrizzleRefreshTokenRepository.js'
@@ -229,11 +229,8 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
       const result = await repository.findByUserId({ userId: 'user-1' })
 
       // Assert
-      const tokens = expectSuccess(result)
-      expect(tokens).toHaveLength(1)
-      const [firstToken] = tokens
-      assertDefined(firstToken)
-      expect(firstToken.userId.getValue()).toBe('user-1')
+      const token = expectSingle(result)
+      expect(token.userId.getValue()).toBe('user-1')
     })
   })
 

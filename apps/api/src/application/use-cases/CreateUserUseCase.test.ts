@@ -178,9 +178,9 @@ describe('CreateUserUseCase', () => {
     describe('error cases', () => {
       it('should return DuplicatedError when email already exists', async () => {
         // Arrange
-        const existingUser = buildExistingUser({ email: 'existing@example.com' })
+        const existingUser = buildExistingUser({ email: TEST_CONSTANTS.emails.existing })
 
-        const dto = buildCreateUserDTO({ email: 'existing@example.com' })
+        const dto = buildCreateUserDTO({ email: TEST_CONSTANTS.emails.existing })
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(existingUser))
 
@@ -191,14 +191,14 @@ describe('CreateUserUseCase', () => {
         const error = expectErrorType({ errorType: DuplicatedError, result })
         expect(error).toBeInstanceOf(DuplicatedError)
         expect(error.message).toContain('already exists')
-        expect(error.message).toContain('existing@example.com')
+        expect(error.message).toContain(TEST_CONSTANTS.emails.existing)
       })
 
       it('should not hash password when email already exists', async () => {
         // Arrange
-        const existingUser = buildExistingUser({ email: 'existing@example.com' })
+        const existingUser = buildExistingUser({ email: TEST_CONSTANTS.emails.existing })
 
-        const dto = buildCreateUserDTO({ email: 'existing@example.com' })
+        const dto = buildCreateUserDTO({ email: TEST_CONSTANTS.emails.existing })
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(existingUser))
 

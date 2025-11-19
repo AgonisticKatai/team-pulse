@@ -41,11 +41,13 @@ export const TEST_CONSTANTS = {
   // Email Test Data
   emails: {
     empty: '',
+    existing: 'existing@example.com', // For duplicate email tests
     lowercase: 'test@example.com',
     noAt: 'notanemail.com',
     noDomain: 'user@',
     noExtension: 'user@domain',
     noLocal: '@example.com',
+    nonexistent: 'nonexistent@example.com', // For user not found tests
     tooLong: `${'a'.repeat(250)}@example.com`,
     uppercase: 'TEST@EXAMPLE.COM',
     valid: 'test@example.com',

@@ -254,7 +254,7 @@ describe('LoginUseCase', () => {
     describe('error cases', () => {
       it('should return ValidationError when user does not exist', async () => {
         // Arrange
-        const loginDTO = buildLoginDTO({ email: 'nonexistent@example.com' })
+        const loginDTO = buildLoginDTO({ email: TEST_CONSTANTS.emails.nonexistent })
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(null))
 
@@ -268,7 +268,7 @@ describe('LoginUseCase', () => {
 
       it('should not verify password when user does not exist', async () => {
         // Arrange
-        const loginDTO = buildLoginDTO({ email: 'nonexistent@example.com' })
+        const loginDTO = buildLoginDTO({ email: TEST_CONSTANTS.emails.nonexistent })
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(null))
 
