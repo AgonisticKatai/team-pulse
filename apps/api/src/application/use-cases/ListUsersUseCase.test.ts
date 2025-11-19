@@ -1,7 +1,7 @@
+import { Ok } from '@team-pulse/shared'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import type { IMetricsService } from '../../domain/services/IMetricsService.js'
-import { Ok } from '../../domain/types/Result.js'
 import { buildAdminUser, buildSuperAdminUser, buildUser, expectError, expectSuccess, TEST_CONSTANTS } from '../../infrastructure/testing/index.js'
 import { ListUsersUseCase } from './ListUsersUseCase.js'
 

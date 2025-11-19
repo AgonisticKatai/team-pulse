@@ -1,5 +1,5 @@
+import { Ok, type Result } from '@team-pulse/shared'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
-import { Ok, type Result } from '../../domain/types/index.js'
 
 /**
  * Logout Use Case

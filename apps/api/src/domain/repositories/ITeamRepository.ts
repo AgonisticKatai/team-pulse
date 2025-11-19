@@ -1,6 +1,6 @@
+import type { Result } from '@team-pulse/shared'
 import type { RepositoryError } from '../errors/index.js'
 import type { Team } from '../models/Team.js'
-import type { Result } from '../types/index.js'
 
 /**
  * Team Repository Interface (PORT)

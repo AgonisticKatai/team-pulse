@@ -1,8 +1,7 @@
+import { Err, Ok } from '@team-pulse/shared'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-
 import { NotFoundError, RepositoryError } from '../../domain/errors/index.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
-import { Err, Ok } from '../../domain/types/Result.js'
 import { buildTeam, expectError, expectErrorType, expectSuccess, TEST_CONSTANTS } from '../../infrastructure/testing/index.js'
 import { DeleteTeamUseCase } from './DeleteTeamUseCase.js'
 

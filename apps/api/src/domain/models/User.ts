@@ -1,6 +1,6 @@
 import type { UserResponseDTO } from '@team-pulse/shared'
+import { Err, Ok, type Result } from '@team-pulse/shared'
 import { ValidationError } from '../errors/index.js'
-import { Err, Ok, type Result } from '../types/index.js'
 import { Email, EntityId, Role, UserRole } from '../value-objects/index.js'
 import type { CreateUserData, UpdateUserData, UserConstructorProps, UserData, UserProps } from './User.types.js'
 

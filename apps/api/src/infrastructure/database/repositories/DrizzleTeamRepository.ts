@@ -1,9 +1,9 @@
+import { collect, Err, Ok, type Result } from '@team-pulse/shared'
 import { eq, sql } from 'drizzle-orm'
 import { RepositoryError } from '../../../domain/errors/index.js'
 import type { ValidationError } from '../../../domain/errors/ValidationError.js'
 import { Team } from '../../../domain/models/Team.js'
 import type { ITeamRepository } from '../../../domain/repositories/ITeamRepository.js'
-import { collect, Err, Ok, type Result } from '../../../domain/types/index.js'
 import type { Database } from '../connection.js'
 import { teams as teamsSchema } from '../schema.js'
 

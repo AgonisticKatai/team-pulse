@@ -1,5 +1,5 @@
+import type { Result } from '@team-pulse/shared'
 import type { RepositoryError } from '../errors/RepositoryError.js'
-import type { Result } from '../types/Result.js'
 
 /**
  * Password Hasher Interface (DOMAIN SERVICE)

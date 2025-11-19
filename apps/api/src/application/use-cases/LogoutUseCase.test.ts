@@ -1,6 +1,6 @@
+import { Ok } from '@team-pulse/shared'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
-import { Ok } from '../../domain/types/Result.js'
 import { expectSuccess, TEST_CONSTANTS } from '../../infrastructure/testing/index.js'
 import { LogoutUseCase } from './LogoutUseCase.js'
 

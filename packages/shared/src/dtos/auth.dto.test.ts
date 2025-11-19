@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { expectZodError } from '../test-utils.js'
+import { expectZodError } from '../testing/test-utils.js'
 import { CreateUserDTOSchema, LoginDTOSchema, RefreshTokenDTOSchema } from './auth.dto.js'
 
 describe('Auth DTOs', () => {

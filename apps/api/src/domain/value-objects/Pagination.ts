@@ -1,6 +1,6 @@
 import type { PaginationMetadata } from '@team-pulse/shared'
+import { Err, Ok, type Result } from '@team-pulse/shared'
 import { ValidationError } from '../errors/ValidationError.js'
-import { Err, Ok, type Result } from '../types/Result.js'
 
 /**
  * Pagination Value Object (DOMAIN MODEL)

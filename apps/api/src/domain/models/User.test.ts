@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { expectError, expectSuccess } from '../../infrastructure/testing/result-helpers.js'
+import { expectError, expectSuccess } from '../../infrastructure/testing/index.js'
 import { ValidationError } from '../errors/index.js'
 import { Email, EntityId, Role, UserRole } from '../value-objects/index.js'
 import { User } from './User.js'

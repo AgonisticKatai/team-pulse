@@ -1,6 +1,6 @@
 import type { TeamResponseDTO } from '@team-pulse/shared'
+import { Err, Ok, type Result } from '@team-pulse/shared'
 import type { ValidationError } from '../errors/index.js'
-import { Err, Ok, type Result } from '../types/index.js'
 import { City, EntityId, FoundedYear, TeamName } from '../value-objects/index.js'
 import type { TeamFactoryInput, TeamUpdateInput, TeamValueObjects } from './Team.types.js'
 

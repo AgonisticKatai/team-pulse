@@ -1,9 +1,9 @@
 import type { TeamsListResponseDTO } from '@team-pulse/shared'
+import { Err, Ok, type Result } from '@team-pulse/shared'
 import type { RepositoryError } from '../../domain/errors/RepositoryError.js'
 import type { ValidationError } from '../../domain/errors/ValidationError.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
 import type { IMetricsService } from '../../domain/services/IMetricsService.js'
-import { Err, Ok, type Result } from '../../domain/types/index.js'
 import { Pagination } from '../../domain/value-objects/index.js'
 
 /**

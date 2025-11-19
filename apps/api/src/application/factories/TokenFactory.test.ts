@@ -1,7 +1,9 @@
+import { Ok } from '@team-pulse/shared'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { ValidationError } from '../../domain/errors/index.js'
-import { Ok } from '../../domain/types/Result.js'
-import { expectError, expectSuccess, TEST_CONSTANTS, TEST_ENV } from '../../infrastructure/testing/index.js'
+import { expectError, expectSuccess } from '../../infrastructure/testing/index.js'
+import { TEST_CONSTANTS } from '../../infrastructure/testing/test-constants.js'
+import { TEST_ENV } from '../../infrastructure/testing/test-env.js'
 import { TokenFactory } from './TokenFactory.js'
 
 describe('TokenFactory', () => {

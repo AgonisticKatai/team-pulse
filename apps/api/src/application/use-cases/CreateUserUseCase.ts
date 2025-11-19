@@ -1,10 +1,10 @@
 import { randomUUID } from 'node:crypto'
 import type { CreateUserDTO, UserResponseDTO } from '@team-pulse/shared'
+import { Err, Ok, type Result } from '@team-pulse/shared'
 import { DuplicatedError, type RepositoryError, type ValidationError } from '../../domain/errors/index.js'
 import { User } from '../../domain/models/User.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import type { IPasswordHasher } from '../../domain/services/IPasswordHasher.js'
-import { Err, Ok, type Result } from '../../domain/types/index.js'
 
 /**
  * Create User Use Case

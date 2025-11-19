@@ -1,7 +1,7 @@
+import { Err, Ok, type Result } from '@team-pulse/shared'
 import bcrypt from 'bcryptjs'
 import { RepositoryError } from '../../domain/errors/RepositoryError.js'
 import type { IPasswordHasher } from '../../domain/services/IPasswordHasher.js'
-import { Err, Ok, type Result } from '../../domain/types/Result.js'
 
 /**
  * Bcrypt Password Hasher Implementation (INFRASTRUCTURE ADAPTER)

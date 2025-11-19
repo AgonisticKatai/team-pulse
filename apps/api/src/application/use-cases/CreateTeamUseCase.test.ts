@@ -1,16 +1,15 @@
-import { expectMockCallArg } from '@team-pulse/shared/test-utils'
+import { Err, Ok } from '@team-pulse/shared'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-
 import { DuplicatedError, RepositoryError, ValidationError } from '../../domain/errors/index.js'
 import { Team } from '../../domain/models/Team.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
-import { Err, Ok } from '../../domain/types/index.js'
 import {
   buildCreateTeamDTO,
   buildExistingTeam,
   buildTeam,
   buildTeamWithoutFoundedYear,
   expectError,
+  expectMockCallArg,
   expectSuccess,
   TEST_CONSTANTS,
 } from '../../infrastructure/testing/index.js'

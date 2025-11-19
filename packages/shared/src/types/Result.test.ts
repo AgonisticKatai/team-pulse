@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { expectError, expectSuccess } from '../../infrastructure/testing/result-helpers.js'
+import { expectError, expectSuccess } from '../testing/index.js'
 import { Err, flatMap, isError, isOk, map, Ok, type Result, unwrap, unwrapOr } from './Result.js'
 
 describe('Result Type', () => {

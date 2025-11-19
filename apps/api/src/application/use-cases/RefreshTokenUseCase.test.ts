@@ -1,8 +1,8 @@
+import { Err, Ok } from '@team-pulse/shared'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NotFoundError, RepositoryError, ValidationError } from '../../domain/errors/index.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
-import { Err, Ok } from '../../domain/types/Result.js'
 import {
   buildAdminUser,
   buildExpiredRefreshToken,

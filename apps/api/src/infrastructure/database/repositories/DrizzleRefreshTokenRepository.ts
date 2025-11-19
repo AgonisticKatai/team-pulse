@@ -1,9 +1,9 @@
+import { collect, Err, Ok, type Result } from '@team-pulse/shared'
 import { eq, lt } from 'drizzle-orm'
 import { RepositoryError } from '../../../domain/errors/RepositoryError.js'
 import type { ValidationError } from '../../../domain/errors/ValidationError.js'
 import { RefreshToken } from '../../../domain/models/RefreshToken.js'
 import type { IRefreshTokenRepository } from '../../../domain/repositories/IRefreshTokenRepository.js'
-import { collect, Err, Ok, type Result } from '../../../domain/types/Result.js'
 import type { Database } from '../connection.js'
 import { refreshTokens as refreshTokensSchema } from '../schema.js'
 

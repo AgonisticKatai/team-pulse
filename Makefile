@@ -130,6 +130,37 @@ build: ## Build all packages and apps
 	@echo "🏗️  Building all packages and apps..."
 	@pnpm exec turbo build
 
+# MCP Servers
+.PHONY: mcp-build mcp-dev mcp-clean mcp-add mcp-list mcp-remove
+
+mcp-build: ## Build all MCP servers
+	@echo "🔧 Building MCP servers..."
+	@pnpm --filter "@team-pulse/mcp-*" build
+
+mcp-dev: ## Build MCP servers in watch mode
+	@echo "🔧 Building MCP servers in watch mode..."
+	@pnpm --filter "@team-pulse/mcp-*" dev
+
+mcp-clean: ## Clean MCP server build artifacts
+	@echo "🧹 Cleaning MCP server build artifacts..."
+	@pnpm --filter "@team-pulse/mcp-*" clean
+
+mcp-add: ## Add MCPs to Claude CLI (run after mcp-build)
+	@echo "➕ Adding MCPs to Claude CLI..."
+	@claude mcp add --transport stdio team-pulse-database -- node packages/mcp-database/dist/index.js
+	@claude mcp add --transport stdio team-pulse-testing -- node packages/mcp-testing/dist/index.js
+	@echo "✅ MCPs added! Run 'make mcp-list' to verify"
+
+mcp-list: ## List configured MCP servers in Claude CLI
+	@echo "📋 Configured MCP servers:"
+	@claude mcp list
+
+mcp-remove: ## Remove MCPs from Claude CLI
+	@echo "➖ Removing MCPs from Claude CLI..."
+	@claude mcp remove team-pulse-database
+	@claude mcp remove team-pulse-testing
+	@echo "✅ MCPs removed!"
+
 # Monitoring commands
 .PHONY: monitoring-up monitoring-down monitoring-logs prometheus-logs grafana-logs metrics
 

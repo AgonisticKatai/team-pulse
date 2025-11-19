@@ -1,6 +1,6 @@
+import type { Result } from '@team-pulse/shared'
 import type { RepositoryError } from '../errors/RepositoryError.js'
 import type { RefreshToken } from '../models/RefreshToken.js'
-import type { Result } from '../types/Result.js'
 
 /**
  * RefreshToken Repository Interface (PORT)

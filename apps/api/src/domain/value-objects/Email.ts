@@ -1,6 +1,6 @@
+import type { Result } from '@team-pulse/shared'
+import { Err, Ok } from '@team-pulse/shared'
 import { ValidationError } from '../errors/index.js'
-import type { Result } from '../types/Result.js'
-import { Err, Ok } from '../types/Result.js'
 
 /**
  * Email Value Object

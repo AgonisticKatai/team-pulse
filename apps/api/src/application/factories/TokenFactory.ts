@@ -1,9 +1,8 @@
 import { randomUUID } from 'node:crypto'
-import type { UserRole } from '@team-pulse/shared'
+import { Err, Ok, type Result, type UserRole } from '@team-pulse/shared'
 import jwt from 'jsonwebtoken'
 import { ValidationError } from '../../domain/errors/index.js'
 import { RefreshToken } from '../../domain/models/RefreshToken.js'
-import { Err, Ok, type Result } from '../../domain/types/index.js'
 import type { Env } from '../../infrastructure/config/env.js'
 
 /**

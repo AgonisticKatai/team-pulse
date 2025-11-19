@@ -1,10 +1,10 @@
 import type { LoginDTO, LoginResponseDTO } from '@team-pulse/shared'
+import { Err, Ok, type Result } from '@team-pulse/shared'
 import { type NotFoundError, type RepositoryError, ValidationError } from '../../domain/errors/index.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import type { IMetricsService } from '../../domain/services/IMetricsService.js'
 import type { IPasswordHasher } from '../../domain/services/IPasswordHasher.js'
-import { Err, Ok, type Result } from '../../domain/types/index.js'
 import type { TokenFactory } from '../factories/TokenFactory.js'
 
 /**

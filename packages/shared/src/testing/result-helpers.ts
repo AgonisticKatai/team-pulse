@@ -1,5 +1,5 @@
 import { expect } from 'vitest'
-import type { Result } from '../../domain/types/index.js'
+import type { Result } from '../types/Result.js'
 
 /**
  * Test helper to assert a Result is successful and extract the value type-safely

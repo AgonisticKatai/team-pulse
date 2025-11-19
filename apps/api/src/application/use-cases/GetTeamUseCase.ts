@@ -1,7 +1,7 @@
 import type { TeamResponseDTO } from '@team-pulse/shared'
+import { Err, Ok, type Result } from '@team-pulse/shared'
 import { NotFoundError, type RepositoryError } from '../../domain/errors/index.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
-import { Err, Ok, type Result } from '../../domain/types/index.js'
 
 /**
  * Get Team Use Case

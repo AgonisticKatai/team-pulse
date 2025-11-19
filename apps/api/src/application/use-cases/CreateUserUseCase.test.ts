@@ -1,10 +1,10 @@
-import { expectMockCallArg } from '@team-pulse/shared/test-utils'
+import { Err, Ok } from '@team-pulse/shared'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { expectMockCallArg } from '../../../../../packages/shared/dist/testing/test-utils.js'
 import { DuplicatedError, RepositoryError } from '../../domain/errors/index.js'
 import { User } from '../../domain/models/User.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import type { IPasswordHasher } from '../../domain/services/IPasswordHasher.js'
-import { Err, Ok } from '../../domain/types/Result.js'
 import {
   buildAdminUser,
   buildCreateUserDTO,

@@ -1,10 +1,10 @@
 import type { UserRole } from '@team-pulse/shared'
+import { collect, Err, Ok, type Result } from '@team-pulse/shared'
 import { eq, sql } from 'drizzle-orm'
 import { RepositoryError } from '../../../domain/errors/RepositoryError.js'
 import type { ValidationError } from '../../../domain/errors/ValidationError.js'
 import { User } from '../../../domain/models/User.js'
 import type { IUserRepository } from '../../../domain/repositories/IUserRepository.js'
-import { collect, Err, Ok, type Result } from '../../../domain/types/Result.js'
 import type { Database } from '../connection.js'
 import { users as usersSchema } from '../schema.js'
 

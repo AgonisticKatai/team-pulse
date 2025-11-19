@@ -1,5 +1,5 @@
+import { Err, Ok, type Result } from '@team-pulse/shared'
 import { ValidationError } from '../errors/index.js'
-import { Err, Ok, type Result } from '../types/index.js'
 import { EntityId } from '../value-objects/index.js'
 import type { RefreshTokenFactoryInput, RefreshTokenValueObjects } from './RefreshToken.types.js'
 

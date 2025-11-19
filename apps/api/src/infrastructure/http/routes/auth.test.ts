@@ -6,7 +6,7 @@ import { User } from '../../../domain/models/User.js'
 import { hashPassword } from '../../auth/password-utils.js'
 import type { Container } from '../../config/container.js'
 import type { Database } from '../../database/connection.js'
-import { expectSuccess } from '../../testing/result-helpers.js'
+import { expectSuccess } from '../../testing/index.js'
 import { setupTestEnvironment } from '../../testing/test-helpers.js'
 
 describe('Authentication Endpoints', () => {

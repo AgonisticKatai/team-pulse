@@ -1,12 +1,12 @@
-import { expectMockCallArg } from '@team-pulse/shared/test-utils'
+import { Err, Ok } from '@team-pulse/shared'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { expectMockCallArg } from '../../../../../packages/shared/dist/testing/test-utils.js'
 import { RepositoryError, ValidationError } from '../../domain/errors/index.js'
 import { RefreshToken } from '../../domain/models/RefreshToken.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import type { IMetricsService } from '../../domain/services/IMetricsService.js'
 import type { IPasswordHasher } from '../../domain/services/IPasswordHasher.js'
-import { Err, Ok } from '../../domain/types/Result.js'
 import {
   buildAdminUser,
   buildLoginDTO,
