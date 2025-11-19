@@ -14,6 +14,7 @@ export enum UserRole {
 
 /**
  * Role hierarchy levels (higher = more permissions)
+ * Used for permission checks
  */
 const ROLE_LEVELS: Record<UserRole, number> = {
   [UserRole.SuperAdmin]: 3,
