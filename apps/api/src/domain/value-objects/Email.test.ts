@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { expectError, expectSuccess } from '../../infrastructure/testing/result-helpers.js'
+import { expectError, expectSuccess, TEST_CONSTANTS } from '../../infrastructure/testing/index.js'
 import { ValidationError } from '../errors/index.js'
 import { Email } from './Email.js'
 
@@ -7,7 +7,7 @@ describe('Email Value Object', () => {
   describe('create', () => {
     it('should create valid email', () => {
       // Arrange
-      const emailString = 'test@example.com'
+      const emailString = TEST_CONSTANTS.emails.valid
 
       // Act
       const email = expectSuccess(Email.create({ value: emailString }))
@@ -19,7 +19,7 @@ describe('Email Value Object', () => {
 
     it('should normalize email to lowercase', () => {
       // Arrange
-      const emailString = 'Test@EXAMPLE.COM'
+      const emailString = TEST_CONSTANTS.emails.uppercase
 
       // Act
       const email = expectSuccess(Email.create({ value: emailString }))
@@ -31,7 +31,7 @@ describe('Email Value Object', () => {
 
     it('should trim whitespace', () => {
       // Arrange
-      const emailString = '  test@example.com  '
+      const emailString = TEST_CONSTANTS.emails.withSpaces
 
       // Act
       const email = expectSuccess(Email.create({ value: emailString }))
@@ -44,11 +44,11 @@ describe('Email Value Object', () => {
     it('should accept various valid email formats', () => {
       // Arrange
       const validEmails = [
-        'simple@example.com',
-        'user.name@example.com',
-        'user+tag@example.co.uk',
-        'user_name@example-domain.com',
-        'user123@test123.com',
+        TEST_CONSTANTS.emails.valid,
+        TEST_CONSTANTS.emails.withDot,
+        TEST_CONSTANTS.emails.withPlus,
+        TEST_CONSTANTS.emails.withUnderscore,
+        TEST_CONSTANTS.emails.withNumbers,
       ]
 
       // Act & Assert
@@ -60,7 +60,7 @@ describe('Email Value Object', () => {
 
     it('should fail with empty string', () => {
       // Arrange
-      const emailString = ''
+      const emailString = TEST_CONSTANTS.emails.empty
 
       // Act
       const error = expectError(Email.create({ value: emailString }))
@@ -72,7 +72,7 @@ describe('Email Value Object', () => {
 
     it('should fail with whitespace only', () => {
       // Arrange
-      const emailString = '   '
+      const emailString = TEST_CONSTANTS.emails.whitespaceOnly
 
       // Act
       const error = expectError(Email.create({ value: emailString }))
@@ -84,7 +84,7 @@ describe('Email Value Object', () => {
 
     it('should fail with invalid format - no @', () => {
       // Arrange
-      const emailString = 'notanemail.com'
+      const emailString = TEST_CONSTANTS.emails.noAt
 
       // Act
       const error = expectError(Email.create({ value: emailString }))
@@ -96,7 +96,7 @@ describe('Email Value Object', () => {
 
     it('should fail with invalid format - no domain', () => {
       // Arrange
-      const emailString = 'user@'
+      const emailString = TEST_CONSTANTS.emails.noDomain
 
       // Act
       const error = expectError(Email.create({ value: emailString }))
@@ -108,7 +108,7 @@ describe('Email Value Object', () => {
 
     it('should fail with invalid format - no local part', () => {
       // Arrange
-      const emailString = '@example.com'
+      const emailString = TEST_CONSTANTS.emails.noLocal
 
       // Act
       const error = expectError(Email.create({ value: emailString }))
@@ -120,7 +120,7 @@ describe('Email Value Object', () => {
 
     it('should fail with invalid format - no extension', () => {
       // Arrange
-      const emailString = 'user@domain'
+      const emailString = TEST_CONSTANTS.emails.noExtension
 
       // Act
       const error = expectError(Email.create({ value: emailString }))
@@ -132,8 +132,7 @@ describe('Email Value Object', () => {
 
     it('should fail with email exceeding 255 characters', () => {
       // Arrange
-      const localPart = 'a'.repeat(250)
-      const emailString = `${localPart}@example.com` // > 255 chars
+      const emailString = TEST_CONSTANTS.emails.tooLong
 
       // Act
       const error = expectError(Email.create({ value: emailString }))
@@ -145,9 +144,7 @@ describe('Email Value Object', () => {
 
     it('should accept email with exactly 255 characters', () => {
       // Arrange
-      // Create email with exactly 255 chars: 243 + '@' + 'example.com' = 255
-      const localPart = 'a'.repeat(243)
-      const emailString = `${localPart}@example.com`
+      const emailString = TEST_CONSTANTS.emails.validExactly255
 
       // Act
       const email = expectSuccess(Email.create({ value: emailString }))
@@ -161,7 +158,7 @@ describe('Email Value Object', () => {
   describe('getValue', () => {
     it('should return the email value', () => {
       // Arrange
-      const email = expectSuccess(Email.create({ value: 'test@example.com' }))
+      const email = expectSuccess(Email.create({ value: TEST_CONSTANTS.emails.valid }))
 
       // Act
       const value = email.getValue()
@@ -174,7 +171,7 @@ describe('Email Value Object', () => {
   describe('getDomain', () => {
     it('should return domain part', () => {
       // Arrange
-      const email = expectSuccess(Email.create({ value: 'user@example.com' }))
+      const email = expectSuccess(Email.create({ value: TEST_CONSTANTS.emails.valid }))
 
       // Act
       const domain = email.getDomain()
@@ -185,7 +182,7 @@ describe('Email Value Object', () => {
 
     it('should handle subdomain', () => {
       // Arrange
-      const email = expectSuccess(Email.create({ value: 'user@mail.example.com' }))
+      const email = expectSuccess(Email.create({ value: TEST_CONSTANTS.emails.withSubdomain }))
 
       // Act
       const domain = email.getDomain()
@@ -198,32 +195,32 @@ describe('Email Value Object', () => {
   describe('getLocalPart', () => {
     it('should return local part', () => {
       // Arrange
-      const email = expectSuccess(Email.create({ value: 'username@example.com' }))
+      const email = expectSuccess(Email.create({ value: TEST_CONSTANTS.emails.valid }))
 
       // Act
       const localPart = email.getLocalPart()
 
       // Assert
-      expect(localPart).toBe('username')
+      expect(localPart).toBe('test')
     })
 
     it('should handle complex local part', () => {
       // Arrange
-      const email = expectSuccess(Email.create({ value: 'user.name+tag@example.com' }))
+      const email = expectSuccess(Email.create({ value: TEST_CONSTANTS.emails.withPlus }))
 
       // Act
       const localPart = email.getLocalPart()
 
       // Assert
-      expect(localPart).toBe('user.name+tag')
+      expect(localPart).toBe('user+tag')
     })
   })
 
   describe('equals', () => {
     it('should return true for same email', () => {
       // Arrange
-      const email1 = expectSuccess(Email.create({ value: 'test@example.com' }))
-      const email2 = expectSuccess(Email.create({ value: 'test@example.com' }))
+      const email1 = expectSuccess(Email.create({ value: TEST_CONSTANTS.emails.valid }))
+      const email2 = expectSuccess(Email.create({ value: TEST_CONSTANTS.emails.valid }))
 
       // Act
       const isEqual = email1.equals({ other: email2 })
@@ -234,8 +231,8 @@ describe('Email Value Object', () => {
 
     it('should return true for same email with different casing', () => {
       // Arrange
-      const email1 = expectSuccess(Email.create({ value: 'test@example.com' }))
-      const email2 = expectSuccess(Email.create({ value: 'TEST@EXAMPLE.COM' }))
+      const email1 = expectSuccess(Email.create({ value: TEST_CONSTANTS.emails.valid }))
+      const email2 = expectSuccess(Email.create({ value: TEST_CONSTANTS.emails.uppercase }))
 
       // Act
       const isEqual = email1.equals({ other: email2 })
@@ -246,8 +243,8 @@ describe('Email Value Object', () => {
 
     it('should return false for different emails', () => {
       // Arrange
-      const email1 = expectSuccess(Email.create({ value: 'test1@example.com' }))
-      const email2 = expectSuccess(Email.create({ value: 'test2@example.com' }))
+      const email1 = expectSuccess(Email.create({ value: TEST_CONSTANTS.emails.valid }))
+      const email2 = expectSuccess(Email.create({ value: TEST_CONSTANTS.emails.withDot }))
 
       // Act
       const isEqual = email1.equals({ other: email2 })
@@ -260,7 +257,7 @@ describe('Email Value Object', () => {
   describe('toString', () => {
     it('should return string representation', () => {
       // Arrange
-      const email = expectSuccess(Email.create({ value: 'test@example.com' }))
+      const email = expectSuccess(Email.create({ value: TEST_CONSTANTS.emails.valid }))
 
       // Act
       const str = email.toString()
@@ -273,7 +270,7 @@ describe('Email Value Object', () => {
   describe('toJSON', () => {
     it('should return JSON-safe value', () => {
       // Arrange
-      const email = expectSuccess(Email.create({ value: 'test@example.com' }))
+      const email = expectSuccess(Email.create({ value: TEST_CONSTANTS.emails.valid }))
 
       // Act
       const json = email.toJSON()
@@ -284,7 +281,7 @@ describe('Email Value Object', () => {
 
     it('should work with JSON.stringify', () => {
       // Arrange
-      const email = expectSuccess(Email.create({ value: 'test@example.com' }))
+      const email = expectSuccess(Email.create({ value: TEST_CONSTANTS.emails.valid }))
       const obj = { email }
 
       // Act
@@ -298,7 +295,7 @@ describe('Email Value Object', () => {
   describe('Immutability', () => {
     it('should be immutable', () => {
       // Arrange
-      const email = expectSuccess(Email.create({ value: 'test@example.com' }))
+      const email = expectSuccess(Email.create({ value: TEST_CONSTANTS.emails.valid }))
 
       // Act & Assert
       // TypeScript should prevent modification of the value property

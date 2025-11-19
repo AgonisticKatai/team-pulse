@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { ValidationError } from '../../domain/errors/index.js'
 import { Ok } from '../../domain/types/Result.js'
-import { TEST_CONSTANTS, TEST_ENV } from '../../infrastructure/testing/index.js'
+import { expectError, expectSuccess, TEST_CONSTANTS, TEST_ENV } from '../../infrastructure/testing/index.js'
 import { TokenFactory } from './TokenFactory.js'
 
 describe('TokenFactory', () => {
@@ -19,11 +19,7 @@ describe('TokenFactory', () => {
       })
 
       // Assert
-      expect(result.ok).toBe(true)
-
-      if (!result.ok) return
-
-      const refreshToken = result.value
+      const refreshToken = expectSuccess(result)
 
       // Verify domain entity properties
       expect(refreshToken.id.getValue()).toBeDefined()
@@ -46,13 +42,11 @@ describe('TokenFactory', () => {
       const result2 = tokenFactory.createRefreshToken({ userId: TEST_CONSTANTS.users.johnDoe.id })
 
       // Assert
-      expect(result1.ok).toBe(true)
-      expect(result2.ok).toBe(true)
+      const token1 = expectSuccess(result1)
+      const token2 = expectSuccess(result2)
 
-      if (!(result1.ok && result2.ok)) return
-
-      expect(result1.value.id.getValue()).not.toBe(result2.value.id.getValue())
-      expect(result1.value.token).not.toBe(result2.value.token)
+      expect(token1.id.getValue()).not.toBe(token2.id.getValue())
+      expect(token1.token).not.toBe(token2.token)
     })
 
     it('should create verifiable refresh token JWT', () => {
@@ -61,11 +55,7 @@ describe('TokenFactory', () => {
 
       // Act
       const createResult = tokenFactory.createRefreshToken({ userId })
-      expect(createResult.ok).toBe(true)
-
-      if (!createResult.ok) return
-
-      const refreshToken = createResult.value
+      const refreshToken = expectSuccess(createResult)
 
       // Verify the JWT
       const verifyResult = tokenFactory.verifyRefreshToken({
@@ -73,12 +63,9 @@ describe('TokenFactory', () => {
       })
 
       // Assert
-      expect(verifyResult.ok).toBe(true)
-
-      if (!verifyResult.ok) return
-
-      expect(verifyResult.value.userId).toBe(userId)
-      expect(verifyResult.value.tokenId).toBe(refreshToken.id.getValue())
+      const payload = expectSuccess(verifyResult)
+      expect(payload.userId).toBe(userId)
+      expect(payload.tokenId).toBe(refreshToken.id.getValue())
     })
   })
 
@@ -92,11 +79,7 @@ describe('TokenFactory', () => {
       })
 
       // Assert
-      expect(result.ok).toBe(true)
-
-      if (!result.ok) return
-
-      const token = result.value
+      const token = expectSuccess(result)
       expect(typeof token).toBe('string')
       expect(token.split('.')).toHaveLength(3) // JWT has 3 parts
     })
@@ -111,23 +94,18 @@ describe('TokenFactory', () => {
 
       // Act
       const createResult = tokenFactory.createAccessToken(payload)
-      expect(createResult.ok).toBe(true)
-
-      if (!createResult.ok) return
+      const token = expectSuccess(createResult)
 
       // Verify the JWT
       const verifyResult = tokenFactory.verifyAccessToken({
-        token: createResult.value,
+        token,
       })
 
       // Assert
-      expect(verifyResult.ok).toBe(true)
-
-      if (!verifyResult.ok) return
-
-      expect(verifyResult.value.email).toBe(payload.email)
-      expect(verifyResult.value.role).toBe(payload.role)
-      expect(verifyResult.value.userId).toBe(payload.userId)
+      const verifiedPayload = expectSuccess(verifyResult)
+      expect(verifiedPayload.email).toBe(payload.email)
+      expect(verifiedPayload.role).toBe(payload.role)
+      expect(verifiedPayload.userId).toBe(payload.userId)
     })
   })
 
@@ -140,16 +118,15 @@ describe('TokenFactory', () => {
         userId: TEST_CONSTANTS.users.johnDoe.id,
       })
 
-      expect(createResult.ok).toBe(true)
-      if (!createResult.ok) return
+      const token = expectSuccess(createResult)
 
       // Act
       const verifyResult = tokenFactory.verifyAccessToken({
-        token: createResult.value,
+        token,
       })
 
       // Assert
-      expect(verifyResult.ok).toBe(true)
+      expectSuccess(verifyResult)
     })
 
     it('should reject invalid access token', () => {
@@ -159,12 +136,9 @@ describe('TokenFactory', () => {
       })
 
       // Assert
-      expect(result.ok).toBe(false)
-
-      if (result.ok) return
-
-      expect(result.error).toBeInstanceOf(ValidationError)
-      expect(result.error.field).toBe('accessToken')
+      const error = expectError(result)
+      expect(error).toBeInstanceOf(ValidationError)
+      expect(error.field).toBe('accessToken')
     })
   })
 
@@ -175,16 +149,15 @@ describe('TokenFactory', () => {
         userId: TEST_CONSTANTS.users.johnDoe.id,
       })
 
-      expect(createResult.ok).toBe(true)
-      if (!createResult.ok) return
+      const refreshToken = expectSuccess(createResult)
 
       // Act
       const verifyResult = tokenFactory.verifyRefreshToken({
-        token: createResult.value.token,
+        token: refreshToken.token,
       })
 
       // Assert
-      expect(verifyResult.ok).toBe(true)
+      expectSuccess(verifyResult)
     })
 
     it('should reject invalid refresh token', () => {
@@ -194,12 +167,9 @@ describe('TokenFactory', () => {
       })
 
       // Assert
-      expect(result.ok).toBe(false)
-
-      if (result.ok) return
-
-      expect(result.error).toBeInstanceOf(ValidationError)
-      expect(result.error.field).toBe('refreshToken')
+      const error = expectError(result)
+      expect(error).toBeInstanceOf(ValidationError)
+      expect(error.field).toBe('refreshToken')
     })
   })
 
@@ -214,11 +184,11 @@ describe('TokenFactory', () => {
 
       expect(createResult).toEqual(Ok(expect.any(String)))
 
-      if (!createResult.ok) return
+      const token = expectSuccess(createResult)
 
       // Verify token
       const verifyResult = tokenFactory.verifyAccessToken({
-        token: createResult.value,
+        token,
       })
 
       expect(verifyResult).toEqual(
@@ -240,10 +210,7 @@ describe('TokenFactory', () => {
         userId: TEST_CONSTANTS.users.superAdminUser.id,
       })
 
-      expect(createResult.ok).toBe(true)
-      if (!createResult.ok) return
-
-      const refreshToken = createResult.value
+      const refreshToken = expectSuccess(createResult)
 
       // Verify refresh token JWT
       const verifyResult = tokenFactory.verifyRefreshToken({
@@ -268,20 +235,16 @@ describe('TokenFactory', () => {
         userId: TEST_CONSTANTS.users.johnDoe.id,
       })
 
-      expect(createResult.ok).toBe(true)
-      if (!createResult.ok) return
+      const refreshToken = expectSuccess(createResult)
 
       // Try to verify refresh token as access token (should fail)
       const verifyResult = tokenFactory.verifyAccessToken({
-        token: createResult.value.token,
+        token: refreshToken.token,
       })
 
-      expect(verifyResult.ok).toBe(false)
-
-      if (verifyResult.ok) return
-
-      expect(verifyResult.error).toBeInstanceOf(ValidationError)
-      expect(verifyResult.error.field).toBe('accessToken')
+      const error = expectError(verifyResult)
+      expect(error).toBeInstanceOf(ValidationError)
+      expect(error.field).toBe('accessToken')
     })
 
     it('should not allow using access token as refresh token', () => {
@@ -292,20 +255,16 @@ describe('TokenFactory', () => {
         userId: TEST_CONSTANTS.users.johnDoe.id,
       })
 
-      expect(createResult.ok).toBe(true)
-      if (!createResult.ok) return
+      const accessToken = expectSuccess(createResult)
 
       // Try to verify access token as refresh token (should fail)
       const verifyResult = tokenFactory.verifyRefreshToken({
-        token: createResult.value,
+        token: accessToken,
       })
 
-      expect(verifyResult.ok).toBe(false)
-
-      if (verifyResult.ok) return
-
-      expect(verifyResult.error).toBeInstanceOf(ValidationError)
-      expect(verifyResult.error.field).toBe('refreshToken')
+      const error = expectError(verifyResult)
+      expect(error).toBeInstanceOf(ValidationError)
+      expect(error.field).toBe('refreshToken')
     })
   })
 })

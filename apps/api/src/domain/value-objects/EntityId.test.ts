@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { expectError, expectSuccess } from '../../infrastructure/testing/result-helpers.js'
+import { expectError, expectSuccess, TEST_CONSTANTS } from '../../infrastructure/testing/index.js'
 import { ValidationError } from '../errors/index.js'
 import { EntityId } from './EntityId.js'
 
@@ -7,30 +7,37 @@ describe('EntityId Value Object', () => {
   describe('create', () => {
     it('should create valid entity id', () => {
       // Arrange
-      const id = 'user-123'
+      const id = TEST_CONSTANTS.ids.user123
 
       // Act
       const entityId = expectSuccess(EntityId.create({ value: id }))
 
       // Assert
       expect(entityId).toBeDefined()
-      expect(entityId.getValue()).toBe('user-123')
+      expect(entityId.getValue()).toBe(TEST_CONSTANTS.ids.user123)
     })
 
     it('should trim whitespace', () => {
       // Arrange
-      const id = '  user-123  '
+      const id = `  ${TEST_CONSTANTS.ids.user123}  `
 
       // Act
       const entityId = expectSuccess(EntityId.create({ value: id }))
 
       // Assert
-      expect(entityId.getValue()).toBe('user-123')
+      expect(entityId.getValue()).toBe(TEST_CONSTANTS.ids.user123)
     })
 
     it('should accept alphanumeric with underscores and hyphens', () => {
       // Arrange
-      const validIds = ['user123', 'user_123', 'user-123', 'User-123_ABC', '123', 'a1b2c3']
+      const validIds = [
+        'user123',
+        TEST_CONSTANTS.ids.withUnderscore,
+        TEST_CONSTANTS.ids.user123,
+        'User-123_ABC',
+        '123',
+        TEST_CONSTANTS.ids.alphanumeric,
+      ]
 
       // Act & Assert
       for (const id of validIds) {
@@ -41,7 +48,7 @@ describe('EntityId Value Object', () => {
 
     it('should fail with empty string', () => {
       // Arrange
-      const id = ''
+      const id = TEST_CONSTANTS.ids.empty
 
       // Act
       const error = expectError(EntityId.create({ value: id }))
@@ -53,7 +60,7 @@ describe('EntityId Value Object', () => {
 
     it('should fail with whitespace only', () => {
       // Arrange
-      const id = '   '
+      const id = TEST_CONSTANTS.ids.whitespaceOnly
 
       // Act
       const error = expectError(EntityId.create({ value: id }))
@@ -65,7 +72,7 @@ describe('EntityId Value Object', () => {
 
     it('should fail with invalid characters - spaces', () => {
       // Arrange
-      const id = 'user 123'
+      const id = TEST_CONSTANTS.ids.withSpaces
 
       // Act
       const error = expectError(EntityId.create({ value: id }))
@@ -77,7 +84,7 @@ describe('EntityId Value Object', () => {
 
     it('should fail with invalid characters - special chars', () => {
       // Arrange
-      const id = 'user@123'
+      const id = TEST_CONSTANTS.ids.withAt
 
       // Act
       const error = expectError(EntityId.create({ value: id }))
@@ -89,7 +96,7 @@ describe('EntityId Value Object', () => {
 
     it('should fail with invalid characters - dots', () => {
       // Arrange
-      const id = 'user.123'
+      const id = TEST_CONSTANTS.ids.withDots
 
       // Act
       const error = expectError(EntityId.create({ value: id }))
@@ -103,21 +110,21 @@ describe('EntityId Value Object', () => {
   describe('getValue', () => {
     it('should return the entity id value', () => {
       // Arrange
-      const entityId = expectSuccess(EntityId.create({ value: 'user-123' }))
+      const entityId = expectSuccess(EntityId.create({ value: TEST_CONSTANTS.ids.user123 }))
 
       // Act
       const value = entityId.getValue()
 
       // Assert
-      expect(value).toBe('user-123')
+      expect(value).toBe(TEST_CONSTANTS.ids.user123)
     })
   })
 
   describe('equals', () => {
     it('should return true for same id', () => {
       // Arrange
-      const id1 = expectSuccess(EntityId.create({ value: 'user-123' }))
-      const id2 = expectSuccess(EntityId.create({ value: 'user-123' }))
+      const id1 = expectSuccess(EntityId.create({ value: TEST_CONSTANTS.ids.user123 }))
+      const id2 = expectSuccess(EntityId.create({ value: TEST_CONSTANTS.ids.user123 }))
 
       // Act
       const isEqual = id1.equals({ other: id2 })
@@ -128,8 +135,8 @@ describe('EntityId Value Object', () => {
 
     it('should return false for different ids', () => {
       // Arrange
-      const id1 = expectSuccess(EntityId.create({ value: 'user-123' }))
-      const id2 = expectSuccess(EntityId.create({ value: 'user-456' }))
+      const id1 = expectSuccess(EntityId.create({ value: TEST_CONSTANTS.ids.user123 }))
+      const id2 = expectSuccess(EntityId.create({ value: TEST_CONSTANTS.ids.user456 }))
 
       // Act
       const isEqual = id1.equals({ other: id2 })
@@ -140,8 +147,8 @@ describe('EntityId Value Object', () => {
 
     it('should be case sensitive', () => {
       // Arrange
-      const id1 = expectSuccess(EntityId.create({ value: 'User-123' }))
-      const id2 = expectSuccess(EntityId.create({ value: 'user-123' }))
+      const id1 = expectSuccess(EntityId.create({ value: TEST_CONSTANTS.ids.withUpperCase }))
+      const id2 = expectSuccess(EntityId.create({ value: TEST_CONSTANTS.ids.user123 }))
 
       // Act
       const isEqual = id1.equals({ other: id2 })
@@ -154,49 +161,49 @@ describe('EntityId Value Object', () => {
   describe('toString', () => {
     it('should return string representation', () => {
       // Arrange
-      const entityId = expectSuccess(EntityId.create({ value: 'user-123' }))
+      const entityId = expectSuccess(EntityId.create({ value: TEST_CONSTANTS.ids.user123 }))
 
       // Act
       const str = entityId.toString()
 
       // Assert
-      expect(str).toBe('user-123')
+      expect(str).toBe(TEST_CONSTANTS.ids.user123)
     })
   })
 
   describe('toJSON', () => {
     it('should return JSON-safe value', () => {
       // Arrange
-      const entityId = expectSuccess(EntityId.create({ value: 'user-123' }))
+      const entityId = expectSuccess(EntityId.create({ value: TEST_CONSTANTS.ids.user123 }))
 
       // Act
       const json = entityId.toJSON()
 
       // Assert
-      expect(json).toBe('user-123')
+      expect(json).toBe(TEST_CONSTANTS.ids.user123)
     })
 
     it('should work with JSON.stringify', () => {
       // Arrange
-      const entityId = expectSuccess(EntityId.create({ value: 'user-123' }))
+      const entityId = expectSuccess(EntityId.create({ value: TEST_CONSTANTS.ids.user123 }))
       const obj = { id: entityId }
 
       // Act
       const jsonString = JSON.stringify(obj)
 
       // Assert
-      expect(jsonString).toBe('{"id":"user-123"}')
+      expect(jsonString).toBe(`{"id":"${TEST_CONSTANTS.ids.user123}"}`)
     })
   })
 
   describe('Immutability', () => {
     it('should be immutable', () => {
       // Arrange
-      const entityId = expectSuccess(EntityId.create({ value: 'user-123' }))
+      const entityId = expectSuccess(EntityId.create({ value: TEST_CONSTANTS.ids.user123 }))
 
       // Act & Assert
-      expect(entityId.getValue()).toBe('user-123')
-      expect(entityId.getValue()).toBe('user-123') // Still the same
+      expect(entityId.getValue()).toBe(TEST_CONSTANTS.ids.user123)
+      expect(entityId.getValue()).toBe(TEST_CONSTANTS.ids.user123) // Still the same
     })
   })
 })

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { expectError, expectSuccess } from '../../infrastructure/testing/index.js'
 import { Pagination } from './Pagination.js'
 
 describe('Pagination Value Object', () => {
@@ -9,10 +10,7 @@ describe('Pagination Value Object', () => {
         const result = Pagination.create({ page: 1, limit: 10, total: 100 })
 
         // Assert
-        expect(result.ok).toBe(true)
-        if (!result.ok) return
-
-        const pagination = result.value
+        const pagination = expectSuccess(result)
         expect(pagination.page).toBe(1)
         expect(pagination.limit).toBe(10)
         expect(pagination.total).toBe(100)
@@ -24,10 +22,8 @@ describe('Pagination Value Object', () => {
         const result = Pagination.create({ page: 1, limit: 10, total: 50 })
 
         // Assert
-        expect(result.ok).toBe(true)
-        if (!result.ok) return
-
-        expect(result.value.page).toBe(1)
+        const pagination = expectSuccess(result)
+        expect(pagination.page).toBe(1)
       })
 
       it('should create pagination with limit 1 (minimum)', () => {
@@ -35,11 +31,9 @@ describe('Pagination Value Object', () => {
         const result = Pagination.create({ page: 1, limit: 1, total: 10 })
 
         // Assert
-        expect(result.ok).toBe(true)
-        if (!result.ok) return
-
-        expect(result.value.limit).toBe(1)
-        expect(result.value.totalPages).toBe(10)
+        const pagination = expectSuccess(result)
+        expect(pagination.limit).toBe(1)
+        expect(pagination.totalPages).toBe(10)
       })
 
       it('should create pagination with limit 100 (maximum)', () => {
@@ -47,11 +41,9 @@ describe('Pagination Value Object', () => {
         const result = Pagination.create({ page: 1, limit: 100, total: 500 })
 
         // Assert
-        expect(result.ok).toBe(true)
-        if (!result.ok) return
-
-        expect(result.value.limit).toBe(100)
-        expect(result.value.totalPages).toBe(5)
+        const pagination = expectSuccess(result)
+        expect(pagination.limit).toBe(100)
+        expect(pagination.totalPages).toBe(5)
       })
 
       it('should create pagination with total 0', () => {
@@ -59,11 +51,9 @@ describe('Pagination Value Object', () => {
         const result = Pagination.create({ page: 1, limit: 10, total: 0 })
 
         // Assert
-        expect(result.ok).toBe(true)
-        if (!result.ok) return
-
-        expect(result.value.total).toBe(0)
-        expect(result.value.totalPages).toBe(0)
+        const pagination = expectSuccess(result)
+        expect(pagination.total).toBe(0)
+        expect(pagination.totalPages).toBe(0)
       })
 
       it('should calculate totalPages correctly when total is perfectly divisible', () => {
@@ -71,10 +61,8 @@ describe('Pagination Value Object', () => {
         const result = Pagination.create({ page: 1, limit: 10, total: 100 })
 
         // Assert
-        expect(result.ok).toBe(true)
-        if (!result.ok) return
-
-        expect(result.value.totalPages).toBe(10)
+        const pagination = expectSuccess(result)
+        expect(pagination.totalPages).toBe(10)
       })
 
       it('should calculate totalPages correctly when total is not perfectly divisible', () => {
@@ -82,10 +70,8 @@ describe('Pagination Value Object', () => {
         const result = Pagination.create({ page: 1, limit: 10, total: 95 })
 
         // Assert
-        expect(result.ok).toBe(true)
-        if (!result.ok) return
-
-        expect(result.value.totalPages).toBe(10) // ceil(95/10) = 10
+        const pagination = expectSuccess(result)
+        expect(pagination.totalPages).toBe(10) // ceil(95/10) = 10
       })
 
       it('should calculate totalPages as 1 when total is less than limit', () => {
@@ -93,10 +79,8 @@ describe('Pagination Value Object', () => {
         const result = Pagination.create({ page: 1, limit: 10, total: 5 })
 
         // Assert
-        expect(result.ok).toBe(true)
-        if (!result.ok) return
-
-        expect(result.value.totalPages).toBe(1)
+        const pagination = expectSuccess(result)
+        expect(pagination.totalPages).toBe(1)
       })
     })
 
@@ -106,10 +90,8 @@ describe('Pagination Value Object', () => {
         const result = Pagination.create({ page: 0, limit: 10, total: 100 })
 
         // Assert
-        expect(result.ok).toBe(false)
-        if (result.ok) return
-
-        expect(result.error.message).toContain('Page must be at least 1')
+        const error = expectError(result)
+        expect(error.message).toContain('Page must be at least 1')
       })
 
       it('should reject negative page', () => {
@@ -117,10 +99,8 @@ describe('Pagination Value Object', () => {
         const result = Pagination.create({ page: -1, limit: 10, total: 100 })
 
         // Assert
-        expect(result.ok).toBe(false)
-        if (result.ok) return
-
-        expect(result.error.message).toContain('Page must be at least 1')
+        const error = expectError(result)
+        expect(error.message).toContain('Page must be at least 1')
       })
 
       it('should reject non-integer page', () => {
@@ -128,10 +108,8 @@ describe('Pagination Value Object', () => {
         const result = Pagination.create({ page: 1.5, limit: 10, total: 100 })
 
         // Assert
-        expect(result.ok).toBe(false)
-        if (result.ok) return
-
-        expect(result.error.message).toContain('Page must be an integer')
+        const error = expectError(result)
+        expect(error.message).toContain('Page must be an integer')
       })
     })
 
@@ -141,10 +119,8 @@ describe('Pagination Value Object', () => {
         const result = Pagination.create({ page: 1, limit: 0, total: 100 })
 
         // Assert
-        expect(result.ok).toBe(false)
-        if (result.ok) return
-
-        expect(result.error.message).toContain('Limit must be at least 1')
+        const error = expectError(result)
+        expect(error.message).toContain('Limit must be at least 1')
       })
 
       it('should reject negative limit', () => {
@@ -152,10 +128,8 @@ describe('Pagination Value Object', () => {
         const result = Pagination.create({ page: 1, limit: -10, total: 100 })
 
         // Assert
-        expect(result.ok).toBe(false)
-        if (result.ok) return
-
-        expect(result.error.message).toContain('Limit must be at least 1')
+        const error = expectError(result)
+        expect(error.message).toContain('Limit must be at least 1')
       })
 
       it('should reject limit greater than 100', () => {
@@ -163,10 +137,8 @@ describe('Pagination Value Object', () => {
         const result = Pagination.create({ page: 1, limit: 101, total: 1000 })
 
         // Assert
-        expect(result.ok).toBe(false)
-        if (result.ok) return
-
-        expect(result.error.message).toContain('Limit cannot exceed 100')
+        const error = expectError(result)
+        expect(error.message).toContain('Limit cannot exceed 100')
       })
 
       it('should reject non-integer limit', () => {
@@ -174,10 +146,8 @@ describe('Pagination Value Object', () => {
         const result = Pagination.create({ page: 1, limit: 10.5, total: 100 })
 
         // Assert
-        expect(result.ok).toBe(false)
-        if (result.ok) return
-
-        expect(result.error.message).toContain('Limit must be an integer')
+        const error = expectError(result)
+        expect(error.message).toContain('Limit must be an integer')
       })
     })
 
@@ -187,10 +157,8 @@ describe('Pagination Value Object', () => {
         const result = Pagination.create({ page: 1, limit: 10, total: -1 })
 
         // Assert
-        expect(result.ok).toBe(false)
-        if (result.ok) return
-
-        expect(result.error.message).toContain('Total must be at least 0')
+        const error = expectError(result)
+        expect(error.message).toContain('Total must be at least 0')
       })
 
       it('should reject non-integer total', () => {
@@ -198,10 +166,8 @@ describe('Pagination Value Object', () => {
         const result = Pagination.create({ page: 1, limit: 10, total: 100.5 })
 
         // Assert
-        expect(result.ok).toBe(false)
-        if (result.ok) return
-
-        expect(result.error.message).toContain('Total must be an integer')
+        const error = expectError(result)
+        expect(error.message).toContain('Total must be an integer')
       })
     })
   })
@@ -210,11 +176,10 @@ describe('Pagination Value Object', () => {
     it('should convert to DTO with all fields', () => {
       // Arrange
       const result = Pagination.create({ page: 2, limit: 20, total: 100 })
-      expect(result.ok).toBe(true)
-      if (!result.ok) return
+      const pagination = expectSuccess(result)
 
       // Act
-      const dto = result.value.toDTO()
+      const dto = pagination.toDTO()
 
       // Assert
       expect(dto).toEqual({
@@ -228,11 +193,10 @@ describe('Pagination Value Object', () => {
     it('should convert to DTO with zero total', () => {
       // Arrange
       const result = Pagination.create({ page: 1, limit: 10, total: 0 })
-      expect(result.ok).toBe(true)
-      if (!result.ok) return
+      const pagination = expectSuccess(result)
 
       // Act
-      const dto = result.value.toDTO()
+      const dto = pagination.toDTO()
 
       // Assert
       expect(dto).toEqual({
@@ -248,41 +212,37 @@ describe('Pagination Value Object', () => {
     it('should return true when current page is less than total pages', () => {
       // Arrange
       const result = Pagination.create({ page: 1, limit: 10, total: 100 })
-      expect(result.ok).toBe(true)
-      if (!result.ok) return
+      const pagination = expectSuccess(result)
 
       // Act & Assert
-      expect(result.value.hasNextPage()).toBe(true)
+      expect(pagination.hasNextPage()).toBe(true)
     })
 
     it('should return false when on last page', () => {
       // Arrange
       const result = Pagination.create({ page: 10, limit: 10, total: 100 })
-      expect(result.ok).toBe(true)
-      if (!result.ok) return
+      const pagination = expectSuccess(result)
 
       // Act & Assert
-      expect(result.value.hasNextPage()).toBe(false)
+      expect(pagination.hasNextPage()).toBe(false)
     })
 
     it('should return false when total is 0', () => {
       // Arrange
       const result = Pagination.create({ page: 1, limit: 10, total: 0 })
-      expect(result.ok).toBe(true)
-      if (!result.ok) return
+      const pagination = expectSuccess(result)
 
       // Act & Assert
-      expect(result.value.hasNextPage()).toBe(false)
+      expect(pagination.hasNextPage()).toBe(false)
     })
 
     it('should return false when on single page', () => {
       // Arrange
       const result = Pagination.create({ page: 1, limit: 10, total: 5 })
-      expect(result.ok).toBe(true)
-      if (!result.ok) return
+      const pagination = expectSuccess(result)
 
       // Act & Assert
-      expect(result.value.hasNextPage()).toBe(false)
+      expect(pagination.hasNextPage()).toBe(false)
     })
   })
 
@@ -290,31 +250,28 @@ describe('Pagination Value Object', () => {
     it('should return false on first page', () => {
       // Arrange
       const result = Pagination.create({ page: 1, limit: 10, total: 100 })
-      expect(result.ok).toBe(true)
-      if (!result.ok) return
+      const pagination = expectSuccess(result)
 
       // Act & Assert
-      expect(result.value.hasPreviousPage()).toBe(false)
+      expect(pagination.hasPreviousPage()).toBe(false)
     })
 
     it('should return true when on second page', () => {
       // Arrange
       const result = Pagination.create({ page: 2, limit: 10, total: 100 })
-      expect(result.ok).toBe(true)
-      if (!result.ok) return
+      const pagination = expectSuccess(result)
 
       // Act & Assert
-      expect(result.value.hasPreviousPage()).toBe(true)
+      expect(pagination.hasPreviousPage()).toBe(true)
     })
 
     it('should return true when on last page', () => {
       // Arrange
       const result = Pagination.create({ page: 10, limit: 10, total: 100 })
-      expect(result.ok).toBe(true)
-      if (!result.ok) return
+      const pagination = expectSuccess(result)
 
       // Act & Assert
-      expect(result.value.hasPreviousPage()).toBe(true)
+      expect(pagination.hasPreviousPage()).toBe(true)
     })
   })
 
@@ -323,44 +280,44 @@ describe('Pagination Value Object', () => {
       // Arrange
       const result1 = Pagination.create({ page: 1, limit: 10, total: 100 })
       const result2 = Pagination.create({ page: 1, limit: 10, total: 100 })
-      expect(result1.ok && result2.ok).toBe(true)
-      if (!(result1.ok && result2.ok)) return
+      const pagination1 = expectSuccess(result1)
+      const pagination2 = expectSuccess(result2)
 
       // Act & Assert
-      expect(result1.value.equals(result2.value)).toBe(true)
+      expect(pagination1.equals(pagination2)).toBe(true)
     })
 
     it('should return false for different page', () => {
       // Arrange
       const result1 = Pagination.create({ page: 1, limit: 10, total: 100 })
       const result2 = Pagination.create({ page: 2, limit: 10, total: 100 })
-      expect(result1.ok && result2.ok).toBe(true)
-      if (!(result1.ok && result2.ok)) return
+      const pagination1 = expectSuccess(result1)
+      const pagination2 = expectSuccess(result2)
 
       // Act & Assert
-      expect(result1.value.equals(result2.value)).toBe(false)
+      expect(pagination1.equals(pagination2)).toBe(false)
     })
 
     it('should return false for different limit', () => {
       // Arrange
       const result1 = Pagination.create({ page: 1, limit: 10, total: 100 })
       const result2 = Pagination.create({ page: 1, limit: 20, total: 100 })
-      expect(result1.ok && result2.ok).toBe(true)
-      if (!(result1.ok && result2.ok)) return
+      const pagination1 = expectSuccess(result1)
+      const pagination2 = expectSuccess(result2)
 
       // Act & Assert
-      expect(result1.value.equals(result2.value)).toBe(false)
+      expect(pagination1.equals(pagination2)).toBe(false)
     })
 
     it('should return false for different total', () => {
       // Arrange
       const result1 = Pagination.create({ page: 1, limit: 10, total: 100 })
       const result2 = Pagination.create({ page: 1, limit: 10, total: 200 })
-      expect(result1.ok && result2.ok).toBe(true)
-      if (!(result1.ok && result2.ok)) return
+      const pagination1 = expectSuccess(result1)
+      const pagination2 = expectSuccess(result2)
 
       // Act & Assert
-      expect(result1.value.equals(result2.value)).toBe(false)
+      expect(pagination1.equals(pagination2)).toBe(false)
     })
   })
 
@@ -368,11 +325,10 @@ describe('Pagination Value Object', () => {
     it('should return string representation', () => {
       // Arrange
       const result = Pagination.create({ page: 2, limit: 20, total: 100 })
-      expect(result.ok).toBe(true)
-      if (!result.ok) return
+      const pagination = expectSuccess(result)
 
       // Act
-      const str = result.value.toString()
+      const str = pagination.toString()
 
       // Assert
       expect(str).toBe('Pagination(page=2, limit=20, total=100, totalPages=5)')
@@ -383,10 +339,7 @@ describe('Pagination Value Object', () => {
     it('should have readonly fields (enforced at compile-time)', () => {
       // Arrange
       const result = Pagination.create({ page: 1, limit: 10, total: 100 })
-      expect(result.ok).toBe(true)
-      if (!result.ok) return
-
-      const pagination = result.value
+      const pagination = expectSuccess(result)
 
       // Assert - Verify fields are accessible
       expect(pagination.page).toBe(1)
@@ -406,10 +359,8 @@ describe('Pagination Value Object', () => {
       const result = Pagination.create({ page: 1, limit: 100, total: 1000000 })
 
       // Assert
-      expect(result.ok).toBe(true)
-      if (!result.ok) return
-
-      expect(result.value.totalPages).toBe(10000)
+      const pagination = expectSuccess(result)
+      expect(pagination.totalPages).toBe(10000)
     })
 
     it('should handle total equal to limit', () => {
@@ -417,10 +368,8 @@ describe('Pagination Value Object', () => {
       const result = Pagination.create({ page: 1, limit: 10, total: 10 })
 
       // Assert
-      expect(result.ok).toBe(true)
-      if (!result.ok) return
-
-      expect(result.value.totalPages).toBe(1)
+      const pagination = expectSuccess(result)
+      expect(pagination.totalPages).toBe(1)
     })
 
     it('should handle total one more than limit', () => {
@@ -428,10 +377,8 @@ describe('Pagination Value Object', () => {
       const result = Pagination.create({ page: 1, limit: 10, total: 11 })
 
       // Assert
-      expect(result.ok).toBe(true)
-      if (!result.ok) return
-
-      expect(result.value.totalPages).toBe(2)
+      const pagination = expectSuccess(result)
+      expect(pagination.totalPages).toBe(2)
     })
   })
 })

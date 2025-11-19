@@ -38,6 +38,75 @@ export const TEST_CONSTANTS = {
     wrongPassword: 'WrongPassword123',
   },
 
+  // Email Test Data
+  emails: {
+    empty: '',
+    lowercase: 'test@example.com',
+    noAt: 'notanemail.com',
+    noDomain: 'user@',
+    noExtension: 'user@domain',
+    noLocal: '@example.com',
+    tooLong: `${'a'.repeat(250)}@example.com`,
+    uppercase: 'TEST@EXAMPLE.COM',
+    valid: 'test@example.com',
+    validExactly255: `${'a'.repeat(243)}@example.com`, // 243 + '@' + 'example.com' = 255
+    whitespaceOnly: '   ',
+    withDot: 'user.name@example.com',
+    withNumbers: 'user123@test123.com',
+    withPlus: 'user+tag@example.co.uk',
+    withSpaces: '  test@example.com  ',
+    withSubdomain: 'user@mail.example.com',
+    withUnderscore: 'user_name@example-domain.com',
+  },
+
+  // EntityId Test Data
+  ids: {
+    alphanumeric: 'a1b2c3',
+    empty: '',
+    user123: 'user-123',
+    user456: 'user-456',
+    whitespaceOnly: '   ',
+    withAt: 'user@123', // invalid
+    withDots: 'user.123', // invalid
+    withSpaces: 'user 123', // invalid
+    withUnderscore: 'user_123',
+    withUpperCase: 'User-123',
+  },
+
+  // Password Test Data
+  passwords: {
+    different: 'DifferentPassword456!',
+    initial: 'InitialPassword123!',
+    lowercase: 'testpassword123!',
+    test: 'TestPassword123!',
+    updated: 'UpdatedPassword456!',
+    wrong: 'WrongPassword456!',
+  },
+
+  // Refresh Token Test Data
+  refreshTokens: {
+    initial: 'initial-token',
+    test: 'test-refresh-token-123',
+    unique: 'unique-token-123',
+    updated: 'updated-token',
+    user1Token: 'user1-token',
+    user2Token: 'user2-token',
+  },
+
+  // Test Emails (for integration tests)
+  testEmails: {
+    initial: 'initial@test.com',
+    updated: 'updated@test.com',
+    user1: 'user1@test.com',
+    user2: 'user2@test.com',
+  },
+
+  // Test User IDs
+  testUserIds: {
+    testUser1: 'test-user-1',
+    testUser2: 'test-user-2',
+  },
+
   // TeamName Test Data
   teamNames: {
     arsenal: 'Arsenal',

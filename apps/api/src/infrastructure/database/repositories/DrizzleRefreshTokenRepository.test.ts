@@ -3,7 +3,7 @@ import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { RefreshToken } from '../../../domain/models/RefreshToken.js'
 import { User } from '../../../domain/models/User.js'
 import { hashPassword } from '../../auth/password-utils.js'
-import { assertDefined, expectSuccess } from '../../testing/index.js'
+import { assertDefined, expectSuccess, TEST_CONSTANTS } from '../../testing/index.js'
 import { setupTestEnvironment } from '../../testing/test-helpers.js'
 import type { Database } from '../connection.js'
 import { DrizzleRefreshTokenRepository } from './DrizzleRefreshTokenRepository.js'
@@ -35,39 +35,37 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
     const userResult = User.create({
       email,
       id: userId,
-      passwordHash: await hashPassword('Test123!'),
+      passwordHash: await hashPassword(TEST_CONSTANTS.passwords.test),
       role: 'USER',
     })
 
-    if (!userResult.ok) throw new Error('Failed to create test user')
-
-    const saveResult = await userRepository.save({ user: userResult.value })
-    if (!saveResult.ok) throw new Error('Failed to save test user')
+    const user = expectSuccess(userResult)
+    expectSuccess(await userRepository.save({ user }))
   }
 
   describe('save', () => {
     it('should insert a new refresh token successfully', async () => {
       // Arrange
-      await createTestUser('user-1', 'user1@test.com')
+      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
 
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
 
       const tokenResult = RefreshToken.create({
         expiresAt,
         id: 'token-1',
-        token: 'test-refresh-token-123',
+        token: TEST_CONSTANTS.refreshTokens.test,
         userId: 'user-1',
       })
 
-      if (!tokenResult.ok) return
+      const token = expectSuccess(tokenResult)
 
       // Act
-      const result = await repository.save({ refreshToken: tokenResult.value })
+      const result = await repository.save({ refreshToken: token })
 
       // Assert
       const savedToken = expectSuccess(result)
       expect(savedToken.id.getValue()).toBe('token-1')
-      expect(savedToken.token).toBe('test-refresh-token-123')
+      expect(savedToken.token).toBe(TEST_CONSTANTS.refreshTokens.test)
       expect(savedToken.userId.getValue()).toBe('user-1')
       expect(savedToken.expiresAt).toBeInstanceOf(Date)
       expect(savedToken.createdAt).toBeInstanceOf(Date)
@@ -75,20 +73,20 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
 
     it('should update an existing refresh token (upsert)', async () => {
       // Arrange
-      await createTestUser('user-1', 'user1@test.com')
+      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
 
       const initialExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
       const tokenResult = RefreshToken.create({
         expiresAt: initialExpiresAt,
         id: 'token-1',
-        token: 'initial-token',
+        token: TEST_CONSTANTS.refreshTokens.initial,
         userId: 'user-1',
       })
 
-      if (!tokenResult.ok) return
+      const token = expectSuccess(tokenResult)
 
-      await repository.save({ refreshToken: tokenResult.value })
+      await repository.save({ refreshToken: token })
 
       // Create updated token with same ID
       const newExpiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) // 14 days from now
@@ -96,18 +94,18 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
       const updatedTokenResult = RefreshToken.create({
         expiresAt: newExpiresAt,
         id: 'token-1', // Same ID
-        token: 'updated-token',
+        token: TEST_CONSTANTS.refreshTokens.updated,
         userId: 'user-1',
       })
 
-      if (!updatedTokenResult.ok) return
+      const updatedToken = expectSuccess(updatedTokenResult)
 
       // Act - Save again (upsert)
-      const result = await repository.save({ refreshToken: updatedTokenResult.value })
+      const result = await repository.save({ refreshToken: updatedToken })
 
       // Assert
       const savedToken = expectSuccess(result)
-      expect(savedToken.token).toBe('updated-token')
+      expect(savedToken.token).toBe(TEST_CONSTANTS.refreshTokens.updated)
 
       // Verify only one token exists
       const tokensForUser = expectSuccess(await repository.findByUserId({ userId: 'user-1' }))
@@ -118,29 +116,29 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
   describe('findByToken', () => {
     it('should find a refresh token by token string when it exists', async () => {
       // Arrange
-      await createTestUser('user-1', 'user1@test.com')
+      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
 
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
       const tokenResult = RefreshToken.create({
         expiresAt,
         id: 'token-1',
-        token: 'unique-token-123',
+        token: TEST_CONSTANTS.refreshTokens.unique,
         userId: 'user-1',
       })
 
-      if (!tokenResult.ok) return
+      const token = expectSuccess(tokenResult)
 
-      await repository.save({ refreshToken: tokenResult.value })
+      await repository.save({ refreshToken: token })
 
       // Act
-      const result = await repository.findByToken({ token: 'unique-token-123' })
+      const result = await repository.findByToken({ token: TEST_CONSTANTS.refreshTokens.unique })
 
       // Assert
       const foundToken = expectSuccess(result)
       expect(foundToken).not.toBeNull()
       expect(foundToken?.id.getValue()).toBe('token-1')
-      expect(foundToken?.token).toBe('unique-token-123')
+      expect(foundToken?.token).toBe(TEST_CONSTANTS.refreshTokens.unique)
       expect(foundToken?.userId.getValue()).toBe('user-1')
     })
 
@@ -157,7 +155,7 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
   describe('findByUserId', () => {
     it('should return empty array when user has no tokens', async () => {
       // Arrange
-      await createTestUser('user-1', 'user1@test.com')
+      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
 
       // Act
       const result = await repository.findByUserId({ userId: 'user-1' })
@@ -169,7 +167,7 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
 
     it('should find all refresh tokens for a user', async () => {
       // Arrange
-      await createTestUser('user-1', 'user1@test.com')
+      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
 
       // Create 3 tokens for the same user
       for (let i = 1; i <= 3; i++) {
@@ -182,9 +180,9 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
           userId: 'user-1',
         })
 
-        if (!tokenResult.ok) return
+        const token = expectSuccess(tokenResult)
 
-        await repository.save({ refreshToken: tokenResult.value })
+        await repository.save({ refreshToken: token })
       }
 
       // Act
@@ -200,8 +198,8 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
 
     it('should only return tokens for specified user', async () => {
       // Arrange
-      await createTestUser('user-1', 'user1@test.com')
-      await createTestUser('user-2', 'user2@test.com')
+      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
+      await createTestUser('user-2', TEST_CONSTANTS.testEmails.user2)
 
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
@@ -209,7 +207,7 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
       const token1Result = RefreshToken.create({
         expiresAt,
         id: 'token-1',
-        token: 'user1-token',
+        token: TEST_CONSTANTS.refreshTokens.user1Token,
         userId: 'user-1',
       })
 
@@ -217,14 +215,15 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
       const token2Result = RefreshToken.create({
         expiresAt,
         id: 'token-2',
-        token: 'user2-token',
+        token: TEST_CONSTANTS.refreshTokens.user2Token,
         userId: 'user-2',
       })
 
-      if (!(token1Result.ok && token2Result.ok)) return
+      const token1 = expectSuccess(token1Result)
+      const token2 = expectSuccess(token2Result)
 
-      await repository.save({ refreshToken: token1Result.value })
-      await repository.save({ refreshToken: token2Result.value })
+      await repository.save({ refreshToken: token1 })
+      await repository.save({ refreshToken: token2 })
 
       // Act
       const result = await repository.findByUserId({ userId: 'user-1' })
@@ -241,7 +240,7 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
   describe('deleteByToken', () => {
     it('should delete a refresh token by token string', async () => {
       // Arrange
-      await createTestUser('user-1', 'user1@test.com')
+      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
 
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
@@ -280,7 +279,7 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
   describe('deleteByUserId', () => {
     it('should delete all refresh tokens for a user', async () => {
       // Arrange
-      await createTestUser('user-1', 'user1@test.com')
+      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
 
       // Create 3 tokens for the user
       for (let i = 1; i <= 3; i++) {
@@ -293,9 +292,9 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
           userId: 'user-1',
         })
 
-        if (!tokenResult.ok) return
+        const token = expectSuccess(tokenResult)
 
-        await repository.save({ refreshToken: tokenResult.value })
+        await repository.save({ refreshToken: token })
       }
 
       // Act
@@ -311,7 +310,7 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
 
     it('should return 0 when user has no tokens', async () => {
       // Arrange
-      await createTestUser('user-1', 'user1@test.com')
+      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
 
       // Act
       const result = await repository.deleteByUserId({ userId: 'user-1' })
@@ -322,8 +321,8 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
 
     it('should only delete tokens for specified user', async () => {
       // Arrange
-      await createTestUser('user-1', 'user1@test.com')
-      await createTestUser('user-2', 'user2@test.com')
+      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
+      await createTestUser('user-2', TEST_CONSTANTS.testEmails.user2)
 
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
@@ -331,7 +330,7 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
       const token1Result = RefreshToken.create({
         expiresAt,
         id: 'token-1',
-        token: 'user1-token',
+        token: TEST_CONSTANTS.refreshTokens.user1Token,
         userId: 'user-1',
       })
 
@@ -339,14 +338,15 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
       const token2Result = RefreshToken.create({
         expiresAt,
         id: 'token-2',
-        token: 'user2-token',
+        token: TEST_CONSTANTS.refreshTokens.user2Token,
         userId: 'user-2',
       })
 
-      if (!(token1Result.ok && token2Result.ok)) return
+      const token1 = expectSuccess(token1Result)
+      const token2 = expectSuccess(token2Result)
 
-      await repository.save({ refreshToken: token1Result.value })
-      await repository.save({ refreshToken: token2Result.value })
+      await repository.save({ refreshToken: token1 })
+      await repository.save({ refreshToken: token2 })
 
       // Act - Delete only user-1 tokens
       const result = await repository.deleteByUserId({ userId: 'user-1' })
@@ -363,7 +363,7 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
   describe('deleteExpired', () => {
     it('should delete expired tokens', async () => {
       // Arrange
-      await createTestUser('user-1', 'user1@test.com')
+      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
 
       const pastDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // 7 days ago (expired)
       const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now (valid)
@@ -384,10 +384,11 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
         userId: 'user-1',
       })
 
-      if (!(expiredTokenResult.ok && validTokenResult.ok)) return
+      const expiredToken = expectSuccess(expiredTokenResult)
+      const validToken = expectSuccess(validTokenResult)
 
-      await repository.save({ refreshToken: expiredTokenResult.value })
-      await repository.save({ refreshToken: validTokenResult.value })
+      await repository.save({ refreshToken: expiredToken })
+      await repository.save({ refreshToken: validToken })
 
       // Act
       const result = await repository.deleteExpired()
@@ -396,18 +397,18 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
       expect(expectSuccess(result)).toBe(1)
 
       // Verify expired token was deleted
-      const expiredToken = expectSuccess(await repository.findByToken({ token: 'expired-token' }))
-      expect(expiredToken).toBeNull()
+      const foundExpiredToken = expectSuccess(await repository.findByToken({ token: 'expired-token' }))
+      expect(foundExpiredToken).toBeNull()
 
       // Verify valid token still exists
-      const validToken = expectSuccess(await repository.findByToken({ token: 'valid-token' }))
-      expect(validToken).not.toBeNull()
+      const foundValidToken = expectSuccess(await repository.findByToken({ token: 'valid-token' }))
+      expect(foundValidToken).not.toBeNull()
     })
 
     it('should delete multiple expired tokens', async () => {
       // Arrange
-      await createTestUser('user-1', 'user1@test.com')
-      await createTestUser('user-2', 'user2@test.com')
+      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
+      await createTestUser('user-2', TEST_CONSTANTS.testEmails.user2)
 
       const pastDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // 7 days ago (expired)
 
@@ -420,9 +421,9 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
           userId: i <= 2 ? 'user-1' : 'user-2',
         })
 
-        if (!tokenResult.ok) return
+        const token = expectSuccess(tokenResult)
 
-        await repository.save({ refreshToken: tokenResult.value })
+        await repository.save({ refreshToken: token })
       }
 
       // Act
@@ -440,7 +441,7 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
 
     it('should return 0 when no tokens are expired', async () => {
       // Arrange
-      await createTestUser('user-1', 'user1@test.com')
+      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
 
       const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now (valid)
 
@@ -451,9 +452,9 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
         userId: 'user-1',
       })
 
-      if (!tokenResult.ok) return
+      const token = expectSuccess(tokenResult)
 
-      await repository.save({ refreshToken: tokenResult.value })
+      await repository.save({ refreshToken: token })
 
       // Act
       const result = await repository.deleteExpired()
@@ -478,7 +479,7 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
   describe('edge cases', () => {
     it('should handle tokens with near-expiry dates', async () => {
       // Arrange
-      await createTestUser('user-1', 'user1@test.com')
+      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
 
       // Token that expires in 1 second
       const nearExpiryDate = new Date(Date.now() + 1000)
@@ -490,10 +491,10 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
         userId: 'user-1',
       })
 
-      if (!tokenResult.ok) return
+      const token = expectSuccess(tokenResult)
 
       // Act
-      await repository.save({ refreshToken: tokenResult.value })
+      await repository.save({ refreshToken: token })
 
       // Assert - Token should still be findable before expiry
       const foundToken = expectSuccess(await repository.findByToken({ token: 'near-expiry-token' }))
@@ -502,7 +503,7 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
 
     it('should handle timestamps correctly', async () => {
       // Arrange
-      await createTestUser('user-1', 'user1@test.com')
+      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
 
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
@@ -513,10 +514,10 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
         userId: 'user-1',
       })
 
-      if (!tokenResult.ok) return
+      const token = expectSuccess(tokenResult)
 
       // Act
-      await repository.save({ refreshToken: tokenResult.value })
+      await repository.save({ refreshToken: token })
 
       // Assert
       const foundToken = expectSuccess(await repository.findByToken({ token: 'test-token' }))

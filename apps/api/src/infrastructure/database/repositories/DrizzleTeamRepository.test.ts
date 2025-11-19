@@ -32,10 +32,10 @@ describe('DrizzleTeamRepository - Integration Tests', () => {
         name: TEST_CONSTANTS.teams.realMadrid.name,
       })
 
-      if (!teamResult.ok) return
+      const team = expectSuccess(teamResult)
 
       // Act
-      const result = await repository.save({ team: teamResult.value })
+      const result = await repository.save({ team })
 
       // Assert
       const savedTeam = expectSuccess(result)
@@ -56,9 +56,9 @@ describe('DrizzleTeamRepository - Integration Tests', () => {
         name: TEST_CONSTANTS.teams.realMadrid.name,
       })
 
-      if (!teamResult.ok) return
+      const team = expectSuccess(teamResult)
 
-      await repository.save({ team: teamResult.value })
+      await repository.save({ team })
 
       // Create updated team with same ID
       const updatedTeamResult = Team.create({
@@ -68,10 +68,10 @@ describe('DrizzleTeamRepository - Integration Tests', () => {
         name: 'Updated Name',
       })
 
-      if (!updatedTeamResult.ok) return
+      const updatedTeam = expectSuccess(updatedTeamResult)
 
       // Act - Save again (upsert)
-      const result = await repository.save({ team: updatedTeamResult.value })
+      const result = await repository.save({ team: updatedTeam })
 
       // Assert
       const savedTeam = expectSuccess(result)
@@ -93,10 +93,10 @@ describe('DrizzleTeamRepository - Integration Tests', () => {
         name: TEST_CONSTANTS.teams.realMadrid.name,
       })
 
-      if (!teamResult.ok) return
+      const team = expectSuccess(teamResult)
 
       // Act
-      const result = await repository.save({ team: teamResult.value })
+      const result = await repository.save({ team })
 
       // Assert
       const savedTeam = expectSuccess(result)
@@ -114,9 +114,9 @@ describe('DrizzleTeamRepository - Integration Tests', () => {
         name: TEST_CONSTANTS.teams.realMadrid.name,
       })
 
-      if (!teamResult.ok) return
+      const team = expectSuccess(teamResult)
 
-      await repository.save({ team: teamResult.value })
+      await repository.save({ team })
 
       // Act
       const result = await repository.findById({ id: TEST_CONSTANTS.teams.realMadrid.id })
@@ -148,9 +148,9 @@ describe('DrizzleTeamRepository - Integration Tests', () => {
         name: TEST_CONSTANTS.teams.realMadrid.name,
       })
 
-      if (!teamResult.ok) return
+      const team = expectSuccess(teamResult)
 
-      await repository.save({ team: teamResult.value })
+      await repository.save({ team })
 
       // Act
       const result = await repository.findByName({ name: TEST_CONSTANTS.teams.realMadrid.name })
@@ -180,9 +180,9 @@ describe('DrizzleTeamRepository - Integration Tests', () => {
         name: TEST_CONSTANTS.teams.realMadrid.name,
       })
 
-      if (!teamResult.ok) return
+      const team = expectSuccess(teamResult)
 
-      await repository.save({ team: teamResult.value })
+      await repository.save({ team })
 
       // Act - Search with different case
       const result = await repository.findByName({ name: TEST_CONSTANTS.teams.realMadrid.name.toLowerCase() })
@@ -203,9 +203,9 @@ describe('DrizzleTeamRepository - Integration Tests', () => {
         name: TEST_CONSTANTS.teams.realMadrid.name,
       })
 
-      if (!teamResult.ok) return
+      const team = expectSuccess(teamResult)
 
-      await repository.save({ team: teamResult.value })
+      await repository.save({ team })
 
       // Act
       const result = await repository.existsByName({ name: TEST_CONSTANTS.teams.realMadrid.name })
@@ -231,9 +231,9 @@ describe('DrizzleTeamRepository - Integration Tests', () => {
         name: TEST_CONSTANTS.teams.realMadrid.name,
       })
 
-      if (!teamResult.ok) return
+      const team = expectSuccess(teamResult)
 
-      await repository.save({ team: teamResult.value })
+      await repository.save({ team })
 
       // Act - Search with different case
       const result = await repository.existsByName({ name: TEST_CONSTANTS.teams.realMadrid.name.toLowerCase() })
@@ -276,11 +276,13 @@ describe('DrizzleTeamRepository - Integration Tests', () => {
         name: 'Liverpool FC',
       })
 
-      if (!(team1Result.ok && team2Result.ok && team3Result.ok)) return
+      const team1 = expectSuccess(team1Result)
+      const team2 = expectSuccess(team2Result)
+      const team3 = expectSuccess(team3Result)
 
-      await repository.save({ team: team1Result.value })
-      await repository.save({ team: team2Result.value })
-      await repository.save({ team: team3Result.value })
+      await repository.save({ team: team1 })
+      await repository.save({ team: team2 })
+      await repository.save({ team: team3 })
 
       // Act
       const result = await repository.findAll()
@@ -302,9 +304,9 @@ describe('DrizzleTeamRepository - Integration Tests', () => {
           name: `Team ${i}`,
         })
 
-        if (!teamResult.ok) return
+        const team = expectSuccess(teamResult)
 
-        await repository.save({ team: teamResult.value })
+        await repository.save({ team })
       }
     })
 
@@ -372,9 +374,9 @@ describe('DrizzleTeamRepository - Integration Tests', () => {
         name: TEST_CONSTANTS.teams.realMadrid.name,
       })
 
-      if (!teamResult.ok) return
+      const team = expectSuccess(teamResult)
 
-      await repository.save({ team: teamResult.value })
+      await repository.save({ team })
 
       // Act
       const result = await repository.delete({ id: TEST_CONSTANTS.teams.realMadrid.id })
@@ -472,18 +474,19 @@ describe('DrizzleTeamRepository - Integration Tests', () => {
         name: 'New Team',
       })
 
-      if (!(oldTeamResult.ok && newTeamResult.ok)) return
+      const oldTeam = expectSuccess(oldTeamResult)
+      const newTeam = expectSuccess(newTeamResult)
 
       // Act
-      await repository.save({ team: oldTeamResult.value })
-      await repository.save({ team: newTeamResult.value })
+      await repository.save({ team: oldTeam })
+      await repository.save({ team: newTeam })
 
       // Assert
-      const oldTeam = expectSuccess(await repository.findById({ id: 'old-team' }))
-      const newTeam = expectSuccess(await repository.findById({ id: 'new-team' }))
+      const foundOldTeam = expectSuccess(await repository.findById({ id: 'old-team' }))
+      const foundNewTeam = expectSuccess(await repository.findById({ id: 'new-team' }))
 
-      expect(oldTeam?.foundedYear?.getValue()).toBe(1857)
-      expect(newTeam?.foundedYear?.getValue()).toBe(2023)
+      expect(foundOldTeam?.foundedYear?.getValue()).toBe(1857)
+      expect(foundNewTeam?.foundedYear?.getValue()).toBe(2023)
     })
   })
 })
