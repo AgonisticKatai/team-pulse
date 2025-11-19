@@ -4,14 +4,14 @@ import { DomainError } from './DomainError.js'
 import { NotFoundError } from './NotFoundError.js'
 
 describe('NotFoundError', () => {
-  describe('constructor', () => {
+  describe('create factory method', () => {
     it('should create not found error with entityName and identifier', () => {
       // Arrange
       const entityName = 'Team'
       const identifier = TEST_CONSTANTS.teams.fcBarcelona.id
 
       // Act
-      const error = new NotFoundError({ entityName, identifier })
+      const error = NotFoundError.create({ entityName, identifier })
 
       // Assert
       expect(error).toBeDefined()
@@ -26,7 +26,7 @@ describe('NotFoundError', () => {
       const identifier = TEST_CONSTANTS.users.johnDoe.id
 
       // Act
-      const error = new NotFoundError({ entityName, identifier })
+      const error = NotFoundError.create({ entityName, identifier })
 
       // Assert
       expect(error).toBeDefined()
@@ -41,7 +41,7 @@ describe('NotFoundError', () => {
       const identifier = 12345
 
       // Act
-      const error = new NotFoundError({ entityName, identifier })
+      const error = NotFoundError.create({ entityName, identifier })
 
       // Assert
       expect(error).toBeDefined()
@@ -55,7 +55,7 @@ describe('NotFoundError', () => {
       const identifier = TEST_CONSTANTS.teams.fcBarcelona.id
 
       // Act
-      const error = new NotFoundError({ identifier })
+      const error = NotFoundError.create({ identifier })
 
       // Assert
       expect(error).toBeDefined()
@@ -69,7 +69,7 @@ describe('NotFoundError', () => {
       const entityName = 'Team'
 
       // Act
-      const error = new NotFoundError({ entityName })
+      const error = NotFoundError.create({ entityName })
 
       // Assert
       expect(error).toBeDefined()
@@ -80,7 +80,7 @@ describe('NotFoundError', () => {
 
     it('should create not found error with empty parameters', () => {
       // Arrange & Act
-      const error = new NotFoundError({})
+      const error = NotFoundError.create({})
 
       // Assert
       expect(error).toBeDefined()
@@ -97,7 +97,7 @@ describe('NotFoundError', () => {
       const identifier = TEST_CONSTANTS.teams.fcBarcelona.id
 
       // Act
-      const error = new NotFoundError({ entityName, identifier })
+      const error = NotFoundError.create({ entityName, identifier })
 
       // Assert
       expect(error.code).toBe('NOT_FOUND')
@@ -109,7 +109,7 @@ describe('NotFoundError', () => {
       const identifier = TEST_CONSTANTS.teams.fcBarcelona.id
 
       // Act
-      const error = new NotFoundError({ entityName, identifier })
+      const error = NotFoundError.create({ entityName, identifier })
 
       // Assert
       expect(error.isOperational).toBe(true)
@@ -121,7 +121,7 @@ describe('NotFoundError', () => {
       const identifier = TEST_CONSTANTS.teams.fcBarcelona.id
 
       // Act
-      const error = new NotFoundError({ entityName, identifier })
+      const error = NotFoundError.create({ entityName, identifier })
 
       // Assert
       expect(error.name).toBe('NotFoundError')
@@ -133,7 +133,7 @@ describe('NotFoundError', () => {
       const identifier = TEST_CONSTANTS.teams.fcBarcelona.id
 
       // Act
-      const error = new NotFoundError({ entityName, identifier })
+      const error = NotFoundError.create({ entityName, identifier })
 
       // Assert
       expect(error.stack).toBeDefined()
@@ -146,7 +146,7 @@ describe('NotFoundError', () => {
       const identifier = TEST_CONSTANTS.teams.fcBarcelona.id
 
       // Act
-      const error = new NotFoundError({ entityName, identifier })
+      const error = NotFoundError.create({ entityName, identifier })
 
       // Assert
       expect(error.entityName).toBe(entityName)
@@ -158,7 +158,7 @@ describe('NotFoundError', () => {
       const identifier = TEST_CONSTANTS.teams.fcBarcelona.id
 
       // Act
-      const error = new NotFoundError({ entityName, identifier })
+      const error = NotFoundError.create({ entityName, identifier })
 
       // Assert
       expect(error.identifier).toBe(identifier)
@@ -299,7 +299,7 @@ describe('NotFoundError', () => {
       // Act & Assert
       expect(() => {
         throw NotFoundError.create({ entityName, identifier })
-      }).toThrow(NotFoundError)
+      }).toThrow('not found')
     })
 
     it('should be catchable as NotFoundError', () => {

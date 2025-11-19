@@ -4,14 +4,14 @@ import { DomainError } from './DomainError.js'
 import { DuplicatedError } from './DuplicatedError.js'
 
 describe('DuplicatedError', () => {
-  describe('constructor', () => {
+  describe('create factory method', () => {
     it('should create duplicated error with entityName and identifier', () => {
       // Arrange
       const entityName = 'Team'
       const identifier = TEST_CONSTANTS.teams.fcBarcelona.id
 
       // Act
-      const error = new DuplicatedError({ entityName, identifier })
+      const error = DuplicatedError.create({ entityName, identifier })
 
       // Assert
       expect(error).toBeDefined()
@@ -26,7 +26,7 @@ describe('DuplicatedError', () => {
       const identifier = TEST_CONSTANTS.users.johnDoe.id
 
       // Act
-      const error = new DuplicatedError({ entityName, identifier })
+      const error = DuplicatedError.create({ entityName, identifier })
 
       // Assert
       expect(error).toBeDefined()
@@ -41,7 +41,7 @@ describe('DuplicatedError', () => {
       const identifier = 12345
 
       // Act
-      const error = new DuplicatedError({ entityName, identifier })
+      const error = DuplicatedError.create({ entityName, identifier })
 
       // Assert
       expect(error).toBeDefined()
@@ -55,7 +55,7 @@ describe('DuplicatedError', () => {
       const identifier = TEST_CONSTANTS.teams.fcBarcelona.id
 
       // Act
-      const error = new DuplicatedError({ identifier })
+      const error = DuplicatedError.create({ identifier })
 
       // Assert
       expect(error).toBeDefined()
@@ -69,7 +69,7 @@ describe('DuplicatedError', () => {
       const entityName = 'Team'
 
       // Act
-      const error = new DuplicatedError({ entityName })
+      const error = DuplicatedError.create({ entityName })
 
       // Assert
       expect(error).toBeDefined()
@@ -80,7 +80,7 @@ describe('DuplicatedError', () => {
 
     it('should create duplicated error with empty parameters', () => {
       // Arrange & Act
-      const error = new DuplicatedError({})
+      const error = DuplicatedError.create({})
 
       // Assert
       expect(error).toBeDefined()
@@ -97,7 +97,7 @@ describe('DuplicatedError', () => {
       const identifier = TEST_CONSTANTS.teams.fcBarcelona.id
 
       // Act
-      const error = new DuplicatedError({ entityName, identifier })
+      const error = DuplicatedError.create({ entityName, identifier })
 
       // Assert
       expect(error.code).toBe('DUPLICATED')
@@ -109,7 +109,7 @@ describe('DuplicatedError', () => {
       const identifier = TEST_CONSTANTS.teams.fcBarcelona.id
 
       // Act
-      const error = new DuplicatedError({ entityName, identifier })
+      const error = DuplicatedError.create({ entityName, identifier })
 
       // Assert
       expect(error.isOperational).toBe(true)
@@ -121,7 +121,7 @@ describe('DuplicatedError', () => {
       const identifier = TEST_CONSTANTS.teams.fcBarcelona.id
 
       // Act
-      const error = new DuplicatedError({ entityName, identifier })
+      const error = DuplicatedError.create({ entityName, identifier })
 
       // Assert
       expect(error.name).toBe('DuplicatedError')
@@ -133,7 +133,7 @@ describe('DuplicatedError', () => {
       const identifier = TEST_CONSTANTS.teams.fcBarcelona.id
 
       // Act
-      const error = new DuplicatedError({ entityName, identifier })
+      const error = DuplicatedError.create({ entityName, identifier })
 
       // Assert
       expect(error.stack).toBeDefined()
@@ -146,7 +146,7 @@ describe('DuplicatedError', () => {
       const identifier = TEST_CONSTANTS.teams.fcBarcelona.id
 
       // Act
-      const error = new DuplicatedError({ entityName, identifier })
+      const error = DuplicatedError.create({ entityName, identifier })
 
       // Assert
       expect(error.entityName).toBe(entityName)
@@ -158,7 +158,7 @@ describe('DuplicatedError', () => {
       const identifier = TEST_CONSTANTS.teams.fcBarcelona.id
 
       // Act
-      const error = new DuplicatedError({ entityName, identifier })
+      const error = DuplicatedError.create({ entityName, identifier })
 
       // Assert
       expect(error.identifier).toBe(identifier)
@@ -299,7 +299,7 @@ describe('DuplicatedError', () => {
       // Act & Assert
       expect(() => {
         throw DuplicatedError.create({ entityName, identifier })
-      }).toThrow(DuplicatedError)
+      }).toThrow('already exists')
     })
 
     it('should be catchable as DuplicatedError', () => {

@@ -17,7 +17,7 @@ export class DuplicatedError extends DomainError {
   public readonly entityName?: string
   public readonly identifier?: string | number
 
-  constructor({ entityName, identifier }: { entityName?: string; identifier?: string | number }) {
+  private constructor({ entityName, identifier }: { entityName?: string; identifier?: string | number }) {
     super(`${entityName} with identifier "${identifier}" already exists`)
     this.entityName = entityName
     this.identifier = identifier

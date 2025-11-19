@@ -4,13 +4,13 @@ import { DomainError } from './DomainError.js'
 import { ValidationError } from './ValidationError.js'
 
 describe('ValidationError', () => {
-  describe('constructor', () => {
+  describe('create factory method', () => {
     it('should create validation error with message only', () => {
       // Arrange
       const message = 'Email address is required'
 
       // Act
-      const error = new ValidationError(message)
+      const error = ValidationError.create({ message })
 
       // Assert
       expect(error).toBeDefined()
@@ -25,7 +25,7 @@ describe('ValidationError', () => {
       const field = 'email'
 
       // Act
-      const error = new ValidationError(message, field)
+      const error = ValidationError.create({ field, message })
 
       // Assert
       expect(error).toBeDefined()
@@ -38,10 +38,10 @@ describe('ValidationError', () => {
       // Arrange
       const message = 'Email address is required'
       const field = 'email'
-      const details = { minLength: 5, maxLength: 255 }
+      const details = { maxLength: 255, minLength: 5 }
 
       // Act
-      const error = new ValidationError(message, field, details)
+      const error = ValidationError.create({ details, field, message })
 
       // Assert
       expect(error).toBeDefined()
@@ -57,7 +57,7 @@ describe('ValidationError', () => {
       const message = 'Email address is required'
 
       // Act
-      const error = new ValidationError(message)
+      const error = ValidationError.create({ message })
 
       // Assert
       expect(error.code).toBe('VALIDATION_ERROR')
@@ -68,7 +68,7 @@ describe('ValidationError', () => {
       const message = 'Email address is required'
 
       // Act
-      const error = new ValidationError(message)
+      const error = ValidationError.create({ message })
 
       // Assert
       expect(error.isOperational).toBe(true)
@@ -79,7 +79,7 @@ describe('ValidationError', () => {
       const message = 'Email address is required'
 
       // Act
-      const error = new ValidationError(message)
+      const error = ValidationError.create({ message })
 
       // Assert
       expect(error.name).toBe('ValidationError')
@@ -90,7 +90,7 @@ describe('ValidationError', () => {
       const message = 'Email address is required'
 
       // Act
-      const error = new ValidationError(message)
+      const error = ValidationError.create({ message })
 
       // Assert
       expect(error.stack).toBeDefined()
@@ -271,7 +271,7 @@ describe('ValidationError', () => {
       const message = 'Email address is required'
 
       // Act
-      const error = new ValidationError(message)
+      const error = ValidationError.create({ message })
 
       // Assert
       expect(error).toBeInstanceOf(DomainError)
@@ -282,7 +282,7 @@ describe('ValidationError', () => {
       const message = 'Email address is required'
 
       // Act
-      const error = new ValidationError(message)
+      const error = ValidationError.create({ message })
 
       // Assert
       expect(error).toBeInstanceOf(Error)
@@ -293,7 +293,7 @@ describe('ValidationError', () => {
       const message = 'Email address is required'
 
       // Act
-      const error = new ValidationError(message)
+      const error = ValidationError.create({ message })
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
@@ -307,8 +307,8 @@ describe('ValidationError', () => {
 
       // Act & Assert
       expect(() => {
-        throw new ValidationError(message)
-      }).toThrow(ValidationError)
+        throw ValidationError.create({ message })
+      }).toThrow(message)
     })
 
     it('should be catchable as ValidationError', () => {
@@ -319,7 +319,7 @@ describe('ValidationError', () => {
 
       // Act
       try {
-        throw new ValidationError(message, field)
+        throw ValidationError.create({ field, message })
       } catch (error) {
         caughtError = error as ValidationError
       }
@@ -337,7 +337,7 @@ describe('ValidationError', () => {
 
       // Act
       try {
-        throw new ValidationError(message)
+        throw ValidationError.create({ message })
       } catch (error) {
         caughtError = error as DomainError
       }
@@ -355,7 +355,7 @@ describe('ValidationError', () => {
 
       // Act
       try {
-        throw new ValidationError(message)
+        throw ValidationError.create({ message })
       } catch (error) {
         caughtError = error as Error
       }
@@ -369,7 +369,7 @@ describe('ValidationError', () => {
   describe('Immutability', () => {
     it('should have readonly code property', () => {
       // Arrange
-      const error = new ValidationError('Email address is required')
+      const error = ValidationError.create({ message: 'Email address is required' })
 
       // Act & Assert
       expect(error.code).toBe('VALIDATION_ERROR')
@@ -378,7 +378,7 @@ describe('ValidationError', () => {
 
     it('should have readonly isOperational property', () => {
       // Arrange
-      const error = new ValidationError('Email address is required')
+      const error = ValidationError.create({ message: 'Email address is required' })
 
       // Act & Assert
       expect(error.isOperational).toBe(true)
@@ -387,7 +387,7 @@ describe('ValidationError', () => {
 
     it('should have readonly field property', () => {
       // Arrange
-      const error = new ValidationError('Email address is required', 'email')
+      const error = ValidationError.create({ field: 'email', message: 'Email address is required' })
 
       // Act & Assert
       expect(error.field).toBe('email')
@@ -397,7 +397,7 @@ describe('ValidationError', () => {
     it('should have readonly details property', () => {
       // Arrange
       const details = { minLength: 5 }
-      const error = new ValidationError('Email address is required', 'email', details)
+      const error = ValidationError.create({ details, field: 'email', message: 'Email address is required' })
 
       // Act & Assert
       expect(error.details).toEqual(details)
@@ -411,7 +411,7 @@ describe('ValidationError', () => {
       const message = TEST_CONSTANTS.emails.empty
 
       // Act
-      const error = new ValidationError(message)
+      const error = ValidationError.create({ message })
 
       // Assert
       expect(error).toBeDefined()
@@ -424,7 +424,7 @@ describe('ValidationError', () => {
       const field = TEST_CONSTANTS.emails.empty
 
       // Act
-      const error = new ValidationError(message, field)
+      const error = ValidationError.create({ field, message })
 
       // Assert
       expect(error).toBeDefined()
@@ -438,7 +438,7 @@ describe('ValidationError', () => {
       const details = {}
 
       // Act
-      const error = new ValidationError(message, field, details)
+      const error = ValidationError.create({ details, field, message })
 
       // Assert
       expect(error).toBeDefined()
@@ -459,7 +459,7 @@ describe('ValidationError', () => {
       }
 
       // Act
-      const error = new ValidationError(message, field, details)
+      const error = ValidationError.create({ details, field, message })
 
       // Assert
       expect(error).toBeDefined()
@@ -471,7 +471,7 @@ describe('ValidationError', () => {
       const message = 'a'.repeat(1000)
 
       // Act
-      const error = new ValidationError(message)
+      const error = ValidationError.create({ message })
 
       // Assert
       expect(error).toBeDefined()
@@ -484,7 +484,7 @@ describe('ValidationError', () => {
       const message = 'Email @domain.com is invalid! <script>alert("xss")</script>'
 
       // Act
-      const error = new ValidationError(message)
+      const error = ValidationError.create({ message })
 
       // Assert
       expect(error).toBeDefined()
@@ -497,7 +497,7 @@ describe('ValidationError', () => {
       const field = 'user.email[0].address'
 
       // Act
-      const error = new ValidationError(message, field)
+      const error = ValidationError.create({ field, message })
 
       // Assert
       expect(error).toBeDefined()

@@ -98,7 +98,10 @@ export const TEST_CONSTANTS = {
 
   // Test Emails (for integration tests)
   testEmails: {
+    first: 'first@example.com',
     initial: 'initial@test.com',
+    second: 'second@example.com',
+    third: 'third@example.com',
     updated: 'updated@test.com',
     user1: 'user1@test.com',
     user2: 'user2@test.com',
