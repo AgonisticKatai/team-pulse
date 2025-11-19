@@ -57,6 +57,7 @@ export const TEST_CONSTANTS = {
     fcBarcelona: {
       city: 'Barcelona',
       foundedYear: 1899,
+      id: 'team-fc-barcelona',
       name: 'FC Barcelona',
     },
     realMadrid: {
