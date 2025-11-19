@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { User } from '../domain/models/User.js'
-import { hashPassword } from '../infrastructure/auth/password-utils.js'
+import { BcryptPasswordHasher } from '../infrastructure/auth/BcryptPasswordHasher.js'
 import { validateEnv } from '../infrastructure/config/env.js'
 import { createDatabase } from '../infrastructure/database/connection.js'
 import { DrizzleUserRepository } from '../infrastructure/database/repositories/DrizzleUserRepository.js'
@@ -57,13 +57,18 @@ async function seedSuperAdmin() {
     console.log(`👤 Creating SUPER_ADMIN user with email: ${email}`)
 
     // 5. Hash password
-    const passwordHash = await hashPassword(password)
+    const passwordHasher = BcryptPasswordHasher.create()
+    const passwordHash = await passwordHasher.hash({ password })
+
+    if (!passwordHash.ok) {
+      throw new Error(`Failed to hash password: ${passwordHash.error.message}`)
+    }
 
     // 6. Create user entity
     const userResult = User.create({
       email,
       id: randomUUID(),
-      passwordHash,
+      passwordHash: passwordHash.value,
       role: 'SUPER_ADMIN',
     })
 

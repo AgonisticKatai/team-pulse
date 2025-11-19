@@ -3,7 +3,7 @@ import type { FastifyInstance } from 'fastify'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { buildApp } from '../../../app.js'
 import { User } from '../../../domain/models/User.js'
-import { hashPassword } from '../../auth/password-utils.js'
+import { BcryptPasswordHasher } from '../../auth/BcryptPasswordHasher.js'
 import type { Container } from '../../config/container.js'
 import type { Database } from '../../database/connection.js'
 import { expectSuccess } from '../../testing/index.js'
@@ -17,12 +17,14 @@ describe('Authentication Endpoints', () => {
   let testAdminPassword: string
   let testUserEmail: string
   let testAdminEmail: string
+  let passwordHasher: BcryptPasswordHasher
 
   const { getDatabase } = setupTestEnvironment()
 
   beforeAll(() => {
     // Get database instance for test isolation
     db = getDatabase()
+    passwordHasher = BcryptPasswordHasher.create({ saltRounds: 4 }) // Low rounds for fast tests
   })
 
   beforeEach(async () => {
@@ -40,8 +42,8 @@ describe('Authentication Endpoints', () => {
     testUserPassword = 'UserPassword123!'
     testAdminPassword = 'AdminPassword123!'
 
-    const userPasswordHash = await hashPassword(testUserPassword)
-    const adminPasswordHash = await hashPassword(testAdminPassword)
+    const userPasswordHash = expectSuccess(await passwordHasher.hash({ password: testUserPassword }))
+    const adminPasswordHash = expectSuccess(await passwordHasher.hash({ password: testAdminPassword }))
 
     const testUser = expectSuccess(
       User.create({

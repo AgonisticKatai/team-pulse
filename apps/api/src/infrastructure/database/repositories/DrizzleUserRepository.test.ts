@@ -1,7 +1,7 @@
 import { eq, sql } from 'drizzle-orm'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { User } from '../../../domain/models/User.js'
-import { hashPassword } from '../../auth/password-utils.js'
+import { BcryptPasswordHasher } from '../../auth/BcryptPasswordHasher.js'
 import { expectError, expectSuccess, TEST_CONSTANTS } from '../../testing/index.js'
 import { setupTestEnvironment } from '../../testing/test-helpers.js'
 import type { Database } from '../connection.js'
@@ -11,12 +11,14 @@ import { DrizzleUserRepository } from './DrizzleUserRepository.js'
 describe('DrizzleUserRepository - Integration Tests', () => {
   let repository: DrizzleUserRepository
   let db: Database
+  let passwordHasher: BcryptPasswordHasher
 
   const { getDatabase } = setupTestEnvironment()
 
   beforeAll(() => {
     db = getDatabase()
     repository = DrizzleUserRepository.create({ db })
+    passwordHasher = BcryptPasswordHasher.create({ saltRounds: 4 }) // Low rounds for fast tests
   })
 
   beforeEach(async () => {
@@ -35,7 +37,7 @@ describe('DrizzleUserRepository - Integration Tests', () => {
       const userResult = User.create({
         email: TEST_CONSTANTS.users.johnDoe.email,
         id: TEST_CONSTANTS.users.johnDoe.id,
-        passwordHash: await hashPassword(TEST_CONSTANTS.users.johnDoe.password),
+        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.users.johnDoe.password })),
         role: 'USER',
       })
       const user = expectSuccess(userResult)
@@ -55,7 +57,7 @@ describe('DrizzleUserRepository - Integration Tests', () => {
       const initialUserResult = User.create({
         email: TEST_CONSTANTS.testEmails.initial,
         id: TEST_CONSTANTS.testUserIds.testUser1,
-        passwordHash: await hashPassword(TEST_CONSTANTS.passwords.initial),
+        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.initial })),
         role: 'USER',
       })
       const initialUser = expectSuccess(initialUserResult)
@@ -67,7 +69,7 @@ describe('DrizzleUserRepository - Integration Tests', () => {
         createdAt: initialUser.createdAt,
         email: TEST_CONSTANTS.testEmails.updated,
         id: TEST_CONSTANTS.testUserIds.testUser1, // Same ID
-        passwordHash: await hashPassword(TEST_CONSTANTS.passwords.updated),
+        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.updated })),
         role: 'ADMIN', // Changed role
         updatedAt: new Date(),
       })
@@ -109,7 +111,7 @@ describe('DrizzleUserRepository - Integration Tests', () => {
       const userResult = User.create({
         email: TEST_CONSTANTS.users.johnDoe.email,
         id: TEST_CONSTANTS.users.johnDoe.id,
-        passwordHash: await hashPassword(TEST_CONSTANTS.users.johnDoe.password),
+        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.users.johnDoe.password })),
         role: 'USER',
       })
       const user = expectSuccess(userResult)
@@ -142,7 +144,7 @@ describe('DrizzleUserRepository - Integration Tests', () => {
       const userResult = User.create({
         email: 'Test@Example.com',
         id: TEST_CONSTANTS.testUserIds.testUser1,
-        passwordHash: await hashPassword(TEST_CONSTANTS.passwords.test),
+        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
         role: 'USER',
       })
       const user = expectSuccess(userResult)
@@ -172,7 +174,7 @@ describe('DrizzleUserRepository - Integration Tests', () => {
       const userResult = User.create({
         email: 'lowercase@test.com',
         id: TEST_CONSTANTS.testUserIds.testUser1,
-        passwordHash: await hashPassword(TEST_CONSTANTS.passwords.test),
+        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
         role: 'USER',
       })
       const user = expectSuccess(userResult)
@@ -195,7 +197,7 @@ describe('DrizzleUserRepository - Integration Tests', () => {
       const userResult = User.create({
         email: 'exists@test.com',
         id: TEST_CONSTANTS.testUserIds.testUser1,
-        passwordHash: await hashPassword(TEST_CONSTANTS.passwords.test),
+        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
         role: 'USER',
       })
       const user = expectSuccess(userResult)
@@ -222,7 +224,7 @@ describe('DrizzleUserRepository - Integration Tests', () => {
       const userResult = User.create({
         email: 'CaseSensitive@Test.com',
         id: TEST_CONSTANTS.testUserIds.testUser1,
-        passwordHash: await hashPassword(TEST_CONSTANTS.passwords.test),
+        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
         role: 'USER',
       })
       const user = expectSuccess(userResult)
@@ -252,19 +254,19 @@ describe('DrizzleUserRepository - Integration Tests', () => {
       const user1Result = User.create({
         email: TEST_CONSTANTS.testEmails.user1,
         id: 'user-1',
-        passwordHash: await hashPassword(TEST_CONSTANTS.passwords.test),
+        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
         role: 'USER',
       })
       const user2Result = User.create({
         email: TEST_CONSTANTS.testEmails.user2,
         id: 'user-2',
-        passwordHash: await hashPassword(TEST_CONSTANTS.passwords.test),
+        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
         role: 'ADMIN',
       })
       const user3Result = User.create({
         email: 'user3@test.com',
         id: 'user-3',
-        passwordHash: await hashPassword(TEST_CONSTANTS.passwords.test),
+        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
         role: 'SUPER_ADMIN',
       })
 
@@ -295,7 +297,7 @@ describe('DrizzleUserRepository - Integration Tests', () => {
         const userResult = User.create({
           email: `user${i}@test.com`,
           id: `user-${i}`,
-          passwordHash: await hashPassword(TEST_CONSTANTS.passwords.test),
+          passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
           role: 'USER',
         })
         const user = expectSuccess(userResult)
@@ -361,7 +363,7 @@ describe('DrizzleUserRepository - Integration Tests', () => {
       const userResult = User.create({
         email: 'todelete@test.com',
         id: 'delete-user-1',
-        passwordHash: await hashPassword(TEST_CONSTANTS.passwords.test),
+        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
         role: 'USER',
       })
       const user = expectSuccess(userResult)
@@ -399,7 +401,7 @@ describe('DrizzleUserRepository - Integration Tests', () => {
       const userResult = User.create({
         email: 'cascade@test.com',
         id: 'cascade-user-1',
-        passwordHash: await hashPassword(TEST_CONSTANTS.passwords.test),
+        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
         role: 'USER',
       })
       const user = expectSuccess(userResult)
@@ -443,7 +445,7 @@ describe('DrizzleUserRepository - Integration Tests', () => {
         const userResult = User.create({
           email: `count${i}@test.com`,
           id: `count-user-${i}`,
-          passwordHash: await hashPassword(TEST_CONSTANTS.passwords.test),
+          passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
           role: 'USER',
         })
         const user = expectSuccess(userResult)
@@ -463,13 +465,13 @@ describe('DrizzleUserRepository - Integration Tests', () => {
       const user1Result = User.create({
         email: 'count1@test.com',
         id: 'count-user-1',
-        passwordHash: await hashPassword(TEST_CONSTANTS.passwords.test),
+        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
         role: 'USER',
       })
       const user2Result = User.create({
         email: 'count2@test.com',
         id: 'count-user-2',
-        passwordHash: await hashPassword(TEST_CONSTANTS.passwords.test),
+        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
         role: 'USER',
       })
 
@@ -501,7 +503,7 @@ describe('DrizzleUserRepository - Integration Tests', () => {
         const userResult = User.create({
           email: `${role.toLowerCase()}@test.com`,
           id: `${role.toLowerCase()}-user`,
-          passwordHash: await hashPassword(TEST_CONSTANTS.passwords.test),
+          passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
           role,
         })
         const user = expectSuccess(userResult)
@@ -527,7 +529,7 @@ describe('DrizzleUserRepository - Integration Tests', () => {
         createdAt,
         email: 'timestamp@test.com',
         id: 'timestamp-user',
-        passwordHash: await hashPassword(TEST_CONSTANTS.passwords.test),
+        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
         role: 'USER',
       })
       const user = expectSuccess(userResult)

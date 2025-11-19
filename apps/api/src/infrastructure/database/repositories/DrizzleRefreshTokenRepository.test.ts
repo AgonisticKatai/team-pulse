@@ -2,7 +2,7 @@ import { sql } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { RefreshToken } from '../../../domain/models/RefreshToken.js'
 import { User } from '../../../domain/models/User.js'
-import { hashPassword } from '../../auth/password-utils.js'
+import { BcryptPasswordHasher } from '../../auth/BcryptPasswordHasher.js'
 import { expectSingle, expectSuccess, TEST_CONSTANTS } from '../../testing/index.js'
 import { setupTestEnvironment } from '../../testing/test-helpers.js'
 import type { Database } from '../connection.js'
@@ -13,6 +13,7 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
   let repository: DrizzleRefreshTokenRepository
   let userRepository: DrizzleUserRepository
   let db: Database
+  let passwordHasher: BcryptPasswordHasher
 
   const { getDatabase } = setupTestEnvironment()
 
@@ -20,6 +21,7 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
     db = getDatabase()
     repository = DrizzleRefreshTokenRepository.create({ db })
     userRepository = DrizzleUserRepository.create({ db })
+    passwordHasher = BcryptPasswordHasher.create({ saltRounds: 4 }) // Low rounds for fast tests
   })
 
   beforeEach(async () => {
@@ -35,7 +37,7 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
     const userResult = User.create({
       email,
       id: userId,
-      passwordHash: await hashPassword(TEST_CONSTANTS.passwords.test),
+      passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
       role: 'USER',
     })
 

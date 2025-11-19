@@ -3,7 +3,7 @@ import type { FastifyInstance } from 'fastify'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { buildApp } from '../../../app.js'
 import { User } from '../../../domain/models/User.js'
-import { hashPassword } from '../../auth/password-utils.js'
+import { BcryptPasswordHasher } from '../../auth/BcryptPasswordHasher.js'
 import type { Container } from '../../config/container.js'
 import type { Database } from '../../database/connection.js'
 import { expectSuccess } from '../../testing/index.js'
@@ -16,12 +16,14 @@ describe('Protected Routes and RBAC', () => {
   let superAdminToken: string
   let adminToken: string
   let userToken: string
+  let passwordHasher: BcryptPasswordHasher
 
   const { getDatabase } = setupTestEnvironment()
 
   beforeAll(() => {
     // Get database instance for test isolation
     db = getDatabase()
+    passwordHasher = BcryptPasswordHasher.create({ saltRounds: 4 }) // Low rounds for fast tests
   })
 
   beforeEach(async () => {
@@ -42,7 +44,7 @@ describe('Protected Routes and RBAC', () => {
       User.create({
         email: superAdminEmail,
         id: 'super-admin',
-        passwordHash: await hashPassword('SuperAdmin123!'),
+        passwordHash: expectSuccess(await passwordHasher.hash({ password: 'SuperAdmin123!' })),
         role: 'SUPER_ADMIN',
       }),
     )
@@ -51,7 +53,7 @@ describe('Protected Routes and RBAC', () => {
       User.create({
         email: adminEmail,
         id: 'admin',
-        passwordHash: await hashPassword('Admin123!'),
+        passwordHash: expectSuccess(await passwordHasher.hash({ password: 'Admin123!' })),
         role: 'ADMIN',
       }),
     )
@@ -60,7 +62,7 @@ describe('Protected Routes and RBAC', () => {
       User.create({
         email: userEmail,
         id: 'user',
-        passwordHash: await hashPassword('User123!'),
+        passwordHash: expectSuccess(await passwordHasher.hash({ password: 'User123!' })),
         role: 'USER',
       }),
     )
