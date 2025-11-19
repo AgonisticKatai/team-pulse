@@ -123,7 +123,7 @@ describe('UpdateTeamUseCase', () => {
         const result = await updateTeamUseCase.execute(TEST_CONSTANTS.mockUuid, dto)
 
         // Assert
-        expect(result.ok).toBe(true)
+        expectSuccess(result)
       })
     })
 

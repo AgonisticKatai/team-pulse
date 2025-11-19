@@ -65,6 +65,7 @@ export const TEST_CONSTANTS = {
   ids: {
     alphanumeric: 'a1b2c3',
     empty: '',
+    team123: 'team-123',
     user123: 'user-123',
     user456: 'user-456',
     whitespaceOnly: '   ',

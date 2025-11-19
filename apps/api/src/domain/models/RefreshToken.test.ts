@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { expectError, expectSuccess } from '../../infrastructure/testing/result-helpers.js'
+import { expectError, expectSuccess, TEST_CONSTANTS } from '../../infrastructure/testing/index.js'
 import { ValidationError } from '../errors/index.js'
 import { EntityId } from '../value-objects/index.js'
 import { RefreshToken } from './RefreshToken.js'
@@ -24,7 +24,7 @@ describe('RefreshToken Domain Entity', () => {
         expiresAt,
         id: 'token-123',
         token: 'refresh-token-string',
-        userId: 'user-123',
+        userId: TEST_CONSTANTS.users.johnDoe.id,
       })
 
       // Assert
@@ -47,7 +47,7 @@ describe('RefreshToken Domain Entity', () => {
         expiresAt,
         id: 'token-123',
         token: '',
-        userId: 'user-123',
+        userId: TEST_CONSTANTS.users.johnDoe.id,
       })
 
       // Assert
@@ -81,7 +81,7 @@ describe('RefreshToken Domain Entity', () => {
         expiresAt,
         id: '',
         token: 'refresh-token',
-        userId: 'user-123',
+        userId: TEST_CONSTANTS.users.johnDoe.id,
       })
 
       // Assert
@@ -98,7 +98,7 @@ describe('RefreshToken Domain Entity', () => {
         expiresAt,
         id: 'token-123',
         token: 'refresh-token',
-        userId: 'user-123',
+        userId: TEST_CONSTANTS.users.johnDoe.id,
       })
 
       // Assert
@@ -119,7 +119,7 @@ describe('RefreshToken Domain Entity', () => {
         expiresAt,
         id: 'token-123',
         token: 'refresh-token',
-        userId: 'user-123',
+        userId: TEST_CONSTANTS.users.johnDoe.id,
       })
 
       // Assert
@@ -137,7 +137,7 @@ describe('RefreshToken Domain Entity', () => {
         expiresAt,
         id: 'token-123',
         token: 'refresh-token',
-        userId: 'user-123',
+        userId: TEST_CONSTANTS.users.johnDoe.id,
       })
 
       const after = new Date()
@@ -183,7 +183,7 @@ describe('RefreshToken Domain Entity', () => {
         expiresAt,
         id: 'token-123',
         token: 'refresh-token',
-        userId: 'user-123',
+        userId: TEST_CONSTANTS.users.johnDoe.id,
       })
 
       // Assert
@@ -199,7 +199,7 @@ describe('RefreshToken Domain Entity', () => {
         expiresAt,
         id: 'token-123',
         token: 'refresh-token',
-        userId: 'user-123',
+        userId: TEST_CONSTANTS.users.johnDoe.id,
       })
 
       // Assert
@@ -217,7 +217,7 @@ describe('RefreshToken Domain Entity', () => {
         expiresAt,
         id: 'token-123',
         token: 'refresh-token',
-        userId: 'user-123',
+        userId: TEST_CONSTANTS.users.johnDoe.id,
       })
 
       // Assert
@@ -234,7 +234,7 @@ describe('RefreshToken Domain Entity', () => {
           expiresAt,
           id: 'token-123',
           token: 'refresh-token',
-          userId: 'user-123',
+          userId: TEST_CONSTANTS.users.johnDoe.id,
         }),
       )
 
@@ -248,14 +248,14 @@ describe('RefreshToken Domain Entity', () => {
         expiresAt: new Date(Date.now() - 1000),
         id: 'token-1',
         token: 'expired-token',
-        userId: 'user-123',
+        userId: TEST_CONSTANTS.users.johnDoe.id,
       })
 
       const validToken = createRefreshToken({
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         id: 'token-2',
         token: 'valid-token',
-        userId: 'user-123',
+        userId: TEST_CONSTANTS.users.johnDoe.id,
       })
 
       // Assert
@@ -274,7 +274,7 @@ describe('RefreshToken Domain Entity', () => {
         expiresAt,
         id: 'token-123',
         token: 'refresh-token-string',
-        userId: 'user-123',
+        userId: TEST_CONSTANTS.users.johnDoe.id,
       })
 
       const obj = token.toObject()
@@ -296,7 +296,7 @@ describe('RefreshToken Domain Entity', () => {
         expiresAt,
         id: 'token-123',
         token: 'secret-refresh-token',
-        userId: 'user-123',
+        userId: TEST_CONSTANTS.users.johnDoe.id,
       })
 
       const obj = token.toObject()

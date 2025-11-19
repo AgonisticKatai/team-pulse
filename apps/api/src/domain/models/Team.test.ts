@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { expectError, expectSuccess } from '../../infrastructure/testing/result-helpers.js'
+import { expectError, expectSuccess, TEST_CONSTANTS } from '../../infrastructure/testing/index.js'
 import { ValidationError } from '../errors/index.js'
 import { City, EntityId, FoundedYear, TeamName } from '../value-objects/index.js'
 import { Team } from './Team.js'
@@ -12,7 +12,7 @@ describe('Team Domain Entity', () => {
         Team.create({
           city: 'Madrid',
           foundedYear: 1902,
-          id: 'team-123',
+          id: TEST_CONSTANTS.ids.team123,
           name: 'Real Madrid',
         }),
       )
@@ -67,7 +67,7 @@ describe('Team Domain Entity', () => {
       const error = expectError(
         Team.create({
           city: 'Madrid',
-          id: 'team-123',
+          id: TEST_CONSTANTS.ids.team123,
           name: '',
         }),
       )
@@ -82,7 +82,7 @@ describe('Team Domain Entity', () => {
       const error = expectError(
         Team.create({
           city: 'Madrid',
-          id: 'team-123',
+          id: TEST_CONSTANTS.ids.team123,
           name: 'a'.repeat(101),
         }),
       )
@@ -97,7 +97,7 @@ describe('Team Domain Entity', () => {
       const error = expectError(
         Team.create({
           city: '',
-          id: 'team-123',
+          id: TEST_CONSTANTS.ids.team123,
           name: 'Real Madrid',
         }),
       )
@@ -112,7 +112,7 @@ describe('Team Domain Entity', () => {
       const error = expectError(
         Team.create({
           city: 'a'.repeat(101),
-          id: 'team-123',
+          id: TEST_CONSTANTS.ids.team123,
           name: 'Real Madrid',
         }),
       )
@@ -128,7 +128,7 @@ describe('Team Domain Entity', () => {
         Team.create({
           city: 'Madrid',
           foundedYear: 1799,
-          id: 'team-123',
+          id: TEST_CONSTANTS.ids.team123,
           name: 'Real Madrid',
         }),
       )
@@ -144,7 +144,7 @@ describe('Team Domain Entity', () => {
         Team.create({
           city: 'Madrid',
           foundedYear: new Date().getFullYear() + 1,
-          id: 'team-123',
+          id: TEST_CONSTANTS.ids.team123,
           name: 'Real Madrid',
         }),
       )
@@ -182,7 +182,7 @@ describe('Team Domain Entity', () => {
           city: 'Madrid',
           createdAt,
           foundedYear: 1902,
-          id: 'team-123',
+          id: TEST_CONSTANTS.ids.team123,
           name: 'Real Madrid',
           updatedAt,
         }),
@@ -202,7 +202,7 @@ describe('Team Domain Entity', () => {
       const team = expectSuccess(
         Team.create({
           city: 'Madrid',
-          id: 'team-123',
+          id: TEST_CONSTANTS.ids.team123,
           name: 'Real Madrid',
         }),
       )
@@ -253,7 +253,7 @@ describe('Team Domain Entity', () => {
         Team.create({
           city: 'Madrid',
           foundedYear: 1902,
-          id: 'team-123',
+          id: TEST_CONSTANTS.ids.team123,
           name: 'Old Name',
         }),
       )
@@ -272,7 +272,7 @@ describe('Team Domain Entity', () => {
       const team = expectSuccess(
         Team.create({
           city: 'Old City',
-          id: 'team-123',
+          id: TEST_CONSTANTS.ids.team123,
           name: 'Real Madrid',
         }),
       )
@@ -290,7 +290,7 @@ describe('Team Domain Entity', () => {
         Team.create({
           city: 'Madrid',
           foundedYear: 1900,
-          id: 'team-123',
+          id: TEST_CONSTANTS.ids.team123,
           name: 'Real Madrid',
         }),
       )
@@ -308,7 +308,7 @@ describe('Team Domain Entity', () => {
         Team.create({
           city: 'Madrid',
           foundedYear: 1902,
-          id: 'team-123',
+          id: TEST_CONSTANTS.ids.team123,
           name: 'Real Madrid',
         }),
       )
@@ -325,7 +325,7 @@ describe('Team Domain Entity', () => {
       const team = expectSuccess(
         Team.create({
           city: 'Old City',
-          id: 'team-123',
+          id: TEST_CONSTANTS.ids.team123,
           name: 'Old Name',
         }),
       )
@@ -350,7 +350,7 @@ describe('Team Domain Entity', () => {
       const team = expectSuccess(
         Team.create({
           city: 'Madrid',
-          id: 'team-123',
+          id: TEST_CONSTANTS.ids.team123,
           name: 'Real Madrid',
         }),
       )
@@ -369,7 +369,7 @@ describe('Team Domain Entity', () => {
         Team.create({
           city: 'Madrid',
           createdAt: new Date('2025-01-01T00:00:00Z'),
-          id: 'team-123',
+          id: TEST_CONSTANTS.ids.team123,
           name: 'Old Name',
         }),
       )
@@ -389,7 +389,7 @@ describe('Team Domain Entity', () => {
         Team.create({
           city: 'Madrid',
           foundedYear: 1902,
-          id: 'team-123',
+          id: TEST_CONSTANTS.ids.team123,
           name: 'Real Madrid',
         }),
       )
@@ -402,7 +402,7 @@ describe('Team Domain Entity', () => {
         city: 'Madrid',
         createdAt: team.createdAt,
         foundedYear: 1902,
-        id: 'team-123',
+        id: TEST_CONSTANTS.ids.team123,
         name: 'Real Madrid',
         updatedAt: team.updatedAt,
       })
@@ -413,7 +413,7 @@ describe('Team Domain Entity', () => {
       const team = expectSuccess(
         Team.create({
           city: 'Madrid',
-          id: 'team-123',
+          id: TEST_CONSTANTS.ids.team123,
           name: 'Real Madrid',
         }),
       )
@@ -434,7 +434,7 @@ describe('Team Domain Entity', () => {
           city: 'Madrid',
           createdAt: new Date('2025-01-01T00:00:00Z'),
           foundedYear: 1902,
-          id: 'team-123',
+          id: TEST_CONSTANTS.ids.team123,
           name: 'Real Madrid',
           updatedAt: new Date('2025-01-02T00:00:00Z'),
         }),
@@ -448,7 +448,7 @@ describe('Team Domain Entity', () => {
         city: 'Madrid',
         createdAt: '2025-01-01T00:00:00.000Z',
         foundedYear: 1902,
-        id: 'team-123',
+        id: TEST_CONSTANTS.ids.team123,
         name: 'Real Madrid',
         updatedAt: '2025-01-02T00:00:00.000Z',
       })
@@ -459,7 +459,7 @@ describe('Team Domain Entity', () => {
       const team = expectSuccess(
         Team.create({
           city: 'Madrid',
-          id: 'team-123',
+          id: TEST_CONSTANTS.ids.team123,
           name: 'Real Madrid',
         }),
       )
