@@ -85,3 +85,73 @@ export function expectErrorType<E extends Error>({ result, errorType }: { result
   expect(error).toBeInstanceOf(errorType)
   return error as E
 }
+
+/**
+ * Test helper to assert a Result contains an array with exactly one element
+ *
+ * This helper combines expectSuccess, length assertion, and element extraction
+ * into a single, type-safe operation. Perfect for repository queries that should
+ * return a single result.
+ *
+ * @example
+ * // Before:
+ * const tokens = expectSuccess(result)
+ * expect(tokens).toHaveLength(1)
+ * const [firstToken] = tokens
+ * assertDefined(firstToken)
+ * expect(firstToken.userId).toBe('user-1')
+ *
+ * // After:
+ * const token = expectSingle(result)
+ * expect(token.userId).toBe('user-1')
+ */
+export function expectSingle<T, E>(result: Result<T[], E>): T {
+  const array = expectSuccess(result)
+  expect(array).toHaveLength(1)
+  const [first] = array
+  expect(first).toBeDefined()
+  return first as T
+}
+
+/**
+ * Test helper to assert a Result contains a non-empty array and return the first element
+ *
+ * This helper extracts the first element of an array result with proper type safety.
+ * Use this when you need to assert properties of the first item in a list.
+ *
+ * @example
+ * // Before:
+ * const teams = expectSuccess(result)
+ * expect(teams[0]?.name).toBe('FC Barcelona')
+ *
+ * // After:
+ * const teams = expectSuccess(result)
+ * const firstTeam = expectFirst(teams)
+ * expect(firstTeam.name).toBe('FC Barcelona')
+ */
+export function expectFirst<T>(array: T[]): T {
+  expect(array.length).toBeGreaterThan(0)
+  const [first] = array
+  expect(first).toBeDefined()
+  return first as T
+}
+
+/**
+ * Test helper to assert a Result contains an array of specific length
+ *
+ * This helper combines expectSuccess with a length assertion, returning the
+ * type-safe array for further assertions.
+ *
+ * @example
+ * // Before:
+ * const teams = expectSuccess(result)
+ * expect(teams).toHaveLength(3)
+ *
+ * // After:
+ * const teams = expectArrayOfLength(result, 3)
+ */
+export function expectArrayOfLength<T, E>(result: Result<T[], E>, length: number): T[] {
+  const array = expectSuccess(result)
+  expect(array).toHaveLength(length)
+  return array
+}
