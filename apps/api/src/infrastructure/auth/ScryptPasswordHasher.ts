@@ -129,7 +129,6 @@ export class ScryptPasswordHasher implements IPasswordHasher {
     try {
       // Split hash into salt and hash components
       const parts = hash.split(':')
-
       if (parts.length !== 2 || !parts[0] || !parts[1]) {
         return Ok(false)
       }

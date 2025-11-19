@@ -3,7 +3,7 @@ import type { FastifyInstance } from 'fastify'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { buildApp } from '../../../app.js'
 import { User } from '../../../domain/models/User.js'
-import { BcryptPasswordHasher } from '../../auth/BcryptPasswordHasher.js'
+import { ScryptPasswordHasher } from '../../auth/ScryptPasswordHasher.js'
 import type { Container } from '../../config/container.js'
 import type { Database } from '../../database/connection.js'
 import { expectSuccess } from '../../testing/index.js'
@@ -17,14 +17,14 @@ describe('Authentication Endpoints', () => {
   let testAdminPassword: string
   let testUserEmail: string
   let testAdminEmail: string
-  let passwordHasher: BcryptPasswordHasher
+  let passwordHasher: ScryptPasswordHasher
 
   const { getDatabase } = setupTestEnvironment()
 
   beforeAll(() => {
     // Get database instance for test isolation
     db = getDatabase()
-    passwordHasher = BcryptPasswordHasher.create({ saltRounds: 4 }) // Low rounds for fast tests
+    passwordHasher = ScryptPasswordHasher.create({ cost: 1024 }) // Low cost for fast tests
   })
 
   beforeEach(async () => {

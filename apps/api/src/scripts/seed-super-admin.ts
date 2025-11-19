@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { User } from '../domain/models/User.js'
-import { BcryptPasswordHasher } from '../infrastructure/auth/BcryptPasswordHasher.js'
+import { ScryptPasswordHasher } from '../infrastructure/auth/ScryptPasswordHasher.js'
 import { validateEnv } from '../infrastructure/config/env.js'
 import { createDatabase } from '../infrastructure/database/connection.js'
 import { DrizzleUserRepository } from '../infrastructure/database/repositories/DrizzleUserRepository.js'
@@ -57,7 +57,7 @@ async function seedSuperAdmin() {
     console.log(`👤 Creating SUPER_ADMIN user with email: ${email}`)
 
     // 5. Hash password
-    const passwordHasher = BcryptPasswordHasher.create()
+    const passwordHasher = ScryptPasswordHasher.create()
     const passwordHash = await passwordHasher.hash({ password })
 
     if (!passwordHash.ok) {

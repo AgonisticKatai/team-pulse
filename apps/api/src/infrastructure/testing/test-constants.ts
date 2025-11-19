@@ -79,10 +79,16 @@ export const TEST_CONSTANTS = {
   // Password Test Data
   passwords: {
     different: 'DifferentPassword456!',
+    empty: '',
     initial: 'InitialPassword123!',
+    long: 'a'.repeat(1000),
     lowercase: 'testpassword123!',
+    short: 'ab',
+    special: 'P@ssw0rd!#$%^&*()_+-=[]{}|;:,.<>?',
     test: 'TestPassword123!',
+    unicode: 'パスワード123',
     updated: 'UpdatedPassword456!',
+    withNullBytes: 'test\x00password',
     wrong: 'WrongPassword456!',
   },
 

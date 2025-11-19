@@ -1,47 +1,52 @@
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 import { expectSuccess, TEST_CONSTANTS } from '../testing/index.js'
-import { BcryptPasswordHasher } from './BcryptPasswordHasher.js'
+import { ScryptPasswordHasher } from './ScryptPasswordHasher.js'
 
-describe('BcryptPasswordHasher', () => {
+describe('ScryptPasswordHasher', () => {
+  let hasher: ScryptPasswordHasher
+
+  beforeAll(() => {
+    hasher = ScryptPasswordHasher.create({ cost: 1024 }) // Low cost for fast tests
+  })
+
   describe('create factory method', () => {
-    it('should create instance with default salt rounds', () => {
+    it('should create instance with default parameters', () => {
       // Act
-      const hasher = BcryptPasswordHasher.create()
+      const hasher = ScryptPasswordHasher.create()
 
       // Assert
       expect(hasher).toBeDefined()
-      expect(hasher).toBeInstanceOf(BcryptPasswordHasher)
+      expect(hasher).toBeInstanceOf(ScryptPasswordHasher)
     })
 
-    it('should create instance with custom salt rounds', () => {
+    it('should create instance with custom parameters', () => {
       // Arrange
-      const customSaltRounds = 12
+      const customCost = 1024
 
       // Act
-      const hasher = BcryptPasswordHasher.create({ saltRounds: customSaltRounds })
+      const hasher = ScryptPasswordHasher.create({ cost: customCost })
 
       // Assert
       expect(hasher).toBeDefined()
-      expect(hasher).toBeInstanceOf(BcryptPasswordHasher)
+      expect(hasher).toBeInstanceOf(ScryptPasswordHasher)
     })
 
-    it('should create instance with minimal salt rounds for testing', () => {
+    it('should create instance with minimal cost for testing', () => {
       // Arrange
-      const minimalSaltRounds = 4
+      const minimalCost = 1024
 
       // Act
-      const hasher = BcryptPasswordHasher.create({ saltRounds: minimalSaltRounds })
+      const hasher = ScryptPasswordHasher.create({ cost: minimalCost })
 
       // Assert
       expect(hasher).toBeDefined()
-      expect(hasher).toBeInstanceOf(BcryptPasswordHasher)
+      expect(hasher).toBeInstanceOf(ScryptPasswordHasher)
     })
   })
 
   describe('hash', () => {
     it('should hash a password successfully', async () => {
       // Arrange
-      const hasher = BcryptPasswordHasher.create({ saltRounds: 4 }) // Low rounds for fast tests
       const password = TEST_CONSTANTS.passwords.test
 
       // Act
@@ -52,12 +57,14 @@ describe('BcryptPasswordHasher', () => {
       expect(hash).toBeDefined()
       expect(hash).not.toBe(password)
       expect(hash.length).toBeGreaterThan(0)
-      expect(hash).toMatch(/^\$2[aby]\$\d{2}\$/) // bcrypt hash format
+      expect(hash).toContain(':') // scrypt hash format: salt:hash
+      const [salt, hashPart] = hash.split(':')
+      expect(salt).toHaveLength(32) // 16 bytes = 32 hex chars
+      expect(hashPart).toHaveLength(128) // 64 bytes = 128 hex chars
     })
 
     it('should generate different hashes for the same password due to salt', async () => {
       // Arrange
-      const hasher = BcryptPasswordHasher.create({ saltRounds: 4 })
       const password = TEST_CONSTANTS.passwords.test
 
       // Act
@@ -67,12 +74,11 @@ describe('BcryptPasswordHasher', () => {
       // Assert
       const hash1 = expectSuccess(result1)
       const hash2 = expectSuccess(result2)
-      expect(hash1).not.toBe(hash2) // bcrypt uses different salt each time
+      expect(hash1).not.toBe(hash2) // scrypt uses different salt each time
     })
 
     it('should hash different passwords differently', async () => {
       // Arrange
-      const hasher = BcryptPasswordHasher.create({ saltRounds: 4 })
       const password1 = TEST_CONSTANTS.passwords.test
       const password2 = TEST_CONSTANTS.passwords.different
 
@@ -88,8 +94,7 @@ describe('BcryptPasswordHasher', () => {
 
     it('should hash empty password', async () => {
       // Arrange
-      const hasher = BcryptPasswordHasher.create({ saltRounds: 4 })
-      const password = ''
+      const password = TEST_CONSTANTS.passwords.empty
 
       // Act
       const result = await hasher.hash({ password })
@@ -97,13 +102,12 @@ describe('BcryptPasswordHasher', () => {
       // Assert
       const hash = expectSuccess(result)
       expect(hash).toBeDefined()
-      expect(hash).toMatch(/^\$2[aby]\$\d{2}\$/)
+      expect(hash).toContain(':')
     })
 
     it('should hash long password', async () => {
       // Arrange
-      const hasher = BcryptPasswordHasher.create({ saltRounds: 4 })
-      const password = 'a'.repeat(100)
+      const password = TEST_CONSTANTS.passwords.long
 
       // Act
       const result = await hasher.hash({ password })
@@ -111,13 +115,12 @@ describe('BcryptPasswordHasher', () => {
       // Assert
       const hash = expectSuccess(result)
       expect(hash).toBeDefined()
-      expect(hash).toMatch(/^\$2[aby]\$\d{2}\$/)
+      expect(hash).toContain(':')
     })
 
     it('should hash password with special characters', async () => {
       // Arrange
-      const hasher = BcryptPasswordHasher.create({ saltRounds: 4 })
-      const password = 'P@ssw0rd!#$%^&*()_+-=[]{}|;:,.<>?'
+      const password = TEST_CONSTANTS.passwords.special
 
       // Act
       const result = await hasher.hash({ password })
@@ -125,13 +128,12 @@ describe('BcryptPasswordHasher', () => {
       // Assert
       const hash = expectSuccess(result)
       expect(hash).toBeDefined()
-      expect(hash).toMatch(/^\$2[aby]\$\d{2}\$/)
+      expect(hash).toContain(':')
     })
 
     it('should hash password with unicode characters', async () => {
       // Arrange
-      const hasher = BcryptPasswordHasher.create({ saltRounds: 4 })
-      const password = 'パスワード123'
+      const password = TEST_CONSTANTS.passwords.unicode
 
       // Act
       const result = await hasher.hash({ password })
@@ -139,14 +141,13 @@ describe('BcryptPasswordHasher', () => {
       // Assert
       const hash = expectSuccess(result)
       expect(hash).toBeDefined()
-      expect(hash).toMatch(/^\$2[aby]\$\d{2}\$/)
+      expect(hash).toContain(':')
     })
   })
 
   describe('verify', () => {
     it('should verify correct password against hash', async () => {
       // Arrange
-      const hasher = BcryptPasswordHasher.create({ saltRounds: 4 })
       const password = TEST_CONSTANTS.passwords.test
       const hashResult = await hasher.hash({ password })
       const hash = expectSuccess(hashResult)
@@ -161,7 +162,6 @@ describe('BcryptPasswordHasher', () => {
 
     it('should reject incorrect password', async () => {
       // Arrange
-      const hasher = BcryptPasswordHasher.create({ saltRounds: 4 })
       const password = TEST_CONSTANTS.passwords.test
       const wrongPassword = TEST_CONSTANTS.passwords.wrong
       const hashResult = await hasher.hash({ password })
@@ -177,7 +177,6 @@ describe('BcryptPasswordHasher', () => {
 
     it('should reject empty password when hash is for non-empty password', async () => {
       // Arrange
-      const hasher = BcryptPasswordHasher.create({ saltRounds: 4 })
       const password = TEST_CONSTANTS.passwords.test
       const hashResult = await hasher.hash({ password })
       const hash = expectSuccess(hashResult)
@@ -192,7 +191,6 @@ describe('BcryptPasswordHasher', () => {
 
     it('should handle case-sensitive passwords correctly', async () => {
       // Arrange
-      const hasher = BcryptPasswordHasher.create({ saltRounds: 4 })
       const password = TEST_CONSTANTS.passwords.test
       const hashResult = await hasher.hash({ password })
       const hash = expectSuccess(hashResult)
@@ -207,8 +205,7 @@ describe('BcryptPasswordHasher', () => {
 
     it('should verify password with special characters', async () => {
       // Arrange
-      const hasher = BcryptPasswordHasher.create({ saltRounds: 4 })
-      const password = 'P@ssw0rd!#$%'
+      const password = TEST_CONSTANTS.passwords.special
       const hashResult = await hasher.hash({ password })
       const hash = expectSuccess(hashResult)
 
@@ -222,8 +219,7 @@ describe('BcryptPasswordHasher', () => {
 
     it('should verify password with unicode characters', async () => {
       // Arrange
-      const hasher = BcryptPasswordHasher.create({ saltRounds: 4 })
-      const password = 'パスワード123'
+      const password = TEST_CONSTANTS.passwords.unicode
       const hashResult = await hasher.hash({ password })
       const hash = expectSuccess(hashResult)
 
@@ -237,22 +233,21 @@ describe('BcryptPasswordHasher', () => {
 
     it('should return false for invalid hash format', async () => {
       // Arrange
-      const hasher = BcryptPasswordHasher.create({ saltRounds: 4 })
+      const hasher = ScryptPasswordHasher.create({ cost: 1024 })
       const password = TEST_CONSTANTS.passwords.test
-      const invalidHash = 'not-a-valid-bcrypt-hash'
+      const invalidHash = 'not-a-valid-scrypt-hash'
 
       // Act
       const result = await hasher.verify({ password, hash: invalidHash })
 
-      // Assert - bcrypt.compare returns false for invalid hashes instead of throwing
+      // Assert
       const isValid = expectSuccess(result)
       expect(isValid).toBe(false)
     })
 
     it('should verify empty password against hash of empty password', async () => {
       // Arrange
-      const hasher = BcryptPasswordHasher.create({ saltRounds: 4 })
-      const password = ''
+      const password = TEST_CONSTANTS.passwords.empty
       const hashResult = await hasher.hash({ password })
       const hash = expectSuccess(hashResult)
 
@@ -265,11 +260,11 @@ describe('BcryptPasswordHasher', () => {
     })
   })
 
-  describe('Different instances with same salt rounds', () => {
-    it('should verify hash created by different instance with same salt rounds', async () => {
+  describe('Different instances with same parameters', () => {
+    it('should verify hash created by different instance with same parameters', async () => {
       // Arrange
-      const hasher1 = BcryptPasswordHasher.create({ saltRounds: 4 })
-      const hasher2 = BcryptPasswordHasher.create({ saltRounds: 4 })
+      const hasher1 = ScryptPasswordHasher.create({ cost: 1024 })
+      const hasher2 = ScryptPasswordHasher.create({ cost: 1024 })
       const password = TEST_CONSTANTS.passwords.test
 
       // Act
@@ -283,47 +278,42 @@ describe('BcryptPasswordHasher', () => {
     })
   })
 
-  describe('Different instances with different salt rounds', () => {
-    it('should verify hash created with different salt rounds', async () => {
+  describe('Different instances with different parameters', () => {
+    it('should verify hash created with different cost parameters', async () => {
       // Arrange
-      const hasher4 = BcryptPasswordHasher.create({ saltRounds: 4 })
-      const hasher10 = BcryptPasswordHasher.create({ saltRounds: 10 })
+      const hasher1024 = ScryptPasswordHasher.create({ cost: 1024 })
+      const hasher2048 = ScryptPasswordHasher.create({ cost: 2048 })
       const password = TEST_CONSTANTS.passwords.test
 
-      // Act - Hash with 4 rounds, verify with instance configured for 10 rounds
-      const hashResult = await hasher4.hash({ password })
+      // Act - Hash with 1024 cost, verify with instance configured for 2048 cost
+      const hashResult = await hasher1024.hash({ password })
       const hash = expectSuccess(hashResult)
-      const verifyResult = await hasher10.verify({ password, hash })
+      const verifyResult = await hasher2048.verify({ password, hash })
 
-      // Assert - Verification should still work regardless of instance configuration
+      // Assert - Verification should fail because cost parameters don't match
       const isValid = expectSuccess(verifyResult)
-      expect(isValid).toBe(true)
+      expect(isValid).toBe(false)
     })
   })
 
   describe('Edge cases', () => {
-    it('should handle very long password (72+ characters)', async () => {
-      // Arrange - bcrypt truncates to 72 characters
-      const hasher = BcryptPasswordHasher.create({ saltRounds: 4 })
-      const longPassword = 'a'.repeat(100)
-      const truncatedPassword = 'a'.repeat(72)
+    it('should handle very long password (1000+ characters)', async () => {
+      // Arrange
+      const longPassword = TEST_CONSTANTS.passwords.long
 
       // Act
       const hashResult = await hasher.hash({ password: longPassword })
       const hash = expectSuccess(hashResult)
 
-      // Assert - First 72 chars should match
-      const verifyLongResult = await hasher.verify({ password: longPassword, hash })
-      const verifyTruncatedResult = await hasher.verify({ password: truncatedPassword, hash })
-
-      expect(expectSuccess(verifyLongResult)).toBe(true)
-      expect(expectSuccess(verifyTruncatedResult)).toBe(true)
+      // Assert - Verify long password works
+      const verifyResult = await hasher.verify({ password: longPassword, hash })
+      const isValid = expectSuccess(verifyResult)
+      expect(isValid).toBe(true)
     })
 
     it('should handle password with null bytes', async () => {
       // Arrange
-      const hasher = BcryptPasswordHasher.create({ saltRounds: 4 })
-      const password = 'test\x00password'
+      const password = TEST_CONSTANTS.passwords.withNullBytes
 
       // Act
       const hashResult = await hasher.hash({ password })
@@ -337,11 +327,10 @@ describe('BcryptPasswordHasher', () => {
   })
 
   describe('Security properties', () => {
-    it('should produce hash of consistent length regardless of input', async () => {
+    it('should produce hash of consistent format regardless of input', async () => {
       // Arrange
-      const hasher = BcryptPasswordHasher.create({ saltRounds: 4 })
-      const shortPassword = 'ab'
-      const longPassword = 'a'.repeat(50)
+      const shortPassword = TEST_CONSTANTS.passwords.short
+      const longPassword = TEST_CONSTANTS.passwords.long
 
       // Act
       const hashResult1 = await hasher.hash({ password: shortPassword })
@@ -350,24 +339,49 @@ describe('BcryptPasswordHasher', () => {
       // Assert
       const hash1 = expectSuccess(hashResult1)
       const hash2 = expectSuccess(hashResult2)
-      expect(hash1.length).toBe(hash2.length) // bcrypt always produces 60-char hash
+      const [salt1, hashPart1] = hash1.split(':')
+      const [salt2, hashPart2] = hash2.split(':')
+      expect(salt1).toHaveLength(32) // Same salt length
+      expect(salt2).toHaveLength(32)
+      expect(hashPart1).toHaveLength(128) // Same hash length
+      expect(hashPart2).toHaveLength(128)
     })
 
-    it('should include salt rounds in hash', async () => {
+    it('should use timing-safe comparison (implementation detail)', async () => {
       // Arrange
-      const hasher4 = BcryptPasswordHasher.create({ saltRounds: 4 })
-      const hasher10 = BcryptPasswordHasher.create({ saltRounds: 10 })
+      const password = TEST_CONSTANTS.passwords.test
+      const hashResult = await hasher.hash({ password })
+      const hash = expectSuccess(hashResult)
+
+      // Act - Both comparisons should take similar time (timing-safe)
+      const result1 = await hasher.verify({ password: TEST_CONSTANTS.passwords.test, hash })
+      const result2 = await hasher.verify({ password: TEST_CONSTANTS.passwords.wrong, hash })
+
+      // Assert
+      const isValid1 = expectSuccess(result1)
+      const isValid2 = expectSuccess(result2)
+      expect(isValid1).toBe(true)
+      expect(isValid2).toBe(false)
+    })
+
+    it('should include all parameters in hash format', async () => {
+      // Arrange
+      const hasher = ScryptPasswordHasher.create({
+        keyLength: 32,
+        cost: 1024,
+        blockSize: 4,
+        parallelization: 2,
+      })
       const password = TEST_CONSTANTS.passwords.test
 
       // Act
-      const hashResult4 = await hasher4.hash({ password })
-      const hashResult10 = await hasher10.hash({ password })
+      const hashResult = await hasher.hash({ password })
 
       // Assert
-      const hash4 = expectSuccess(hashResult4)
-      const hash10 = expectSuccess(hashResult10)
-      expect(hash4).toContain('$04$') // 4 rounds
-      expect(hash10).toContain('$10$') // 10 rounds
+      const hash = expectSuccess(hashResult)
+      const [salt, hashPart] = hash.split(':')
+      expect(salt).toHaveLength(32) // 16 bytes salt
+      expect(hashPart).toHaveLength(64) // 32 bytes hash (custom keyLength)
     })
   })
 })

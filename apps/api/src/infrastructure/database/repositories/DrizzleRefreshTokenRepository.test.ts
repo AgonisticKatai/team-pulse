@@ -2,7 +2,7 @@ import { sql } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { RefreshToken } from '../../../domain/models/RefreshToken.js'
 import { User } from '../../../domain/models/User.js'
-import { BcryptPasswordHasher } from '../../auth/BcryptPasswordHasher.js'
+import { ScryptPasswordHasher } from '../../auth/ScryptPasswordHasher.js'
 import { expectSingle, expectSuccess, TEST_CONSTANTS } from '../../testing/index.js'
 import { setupTestEnvironment } from '../../testing/test-helpers.js'
 import type { Database } from '../connection.js'
@@ -13,7 +13,7 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
   let repository: DrizzleRefreshTokenRepository
   let userRepository: DrizzleUserRepository
   let db: Database
-  let passwordHasher: BcryptPasswordHasher
+  let passwordHasher: ScryptPasswordHasher
 
   const { getDatabase } = setupTestEnvironment()
 
@@ -21,7 +21,7 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
     db = getDatabase()
     repository = DrizzleRefreshTokenRepository.create({ db })
     userRepository = DrizzleUserRepository.create({ db })
-    passwordHasher = BcryptPasswordHasher.create({ saltRounds: 4 }) // Low rounds for fast tests
+    passwordHasher = ScryptPasswordHasher.create({ cost: 1024 }) // Low cost for fast tests
   })
 
   beforeEach(async () => {

@@ -14,7 +14,7 @@ import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import type { IMetricsService } from '../../domain/services/IMetricsService.js'
 import type { IPasswordHasher } from '../../domain/services/IPasswordHasher.js'
-import { BcryptPasswordHasher } from '../auth/BcryptPasswordHasher.js'
+import { ScryptPasswordHasher } from '../auth/ScryptPasswordHasher.js'
 import { createDatabase, type Database } from '../database/connection.js'
 import { DrizzleRefreshTokenRepository } from '../database/repositories/DrizzleRefreshTokenRepository.js'
 import { DrizzleTeamRepository } from '../database/repositories/DrizzleTeamRepository.js'
@@ -139,7 +139,7 @@ export class Container {
    */
   get passwordHasher(): IPasswordHasher {
     if (!this._passwordHasher) {
-      this._passwordHasher = BcryptPasswordHasher.create()
+      this._passwordHasher = ScryptPasswordHasher.create()
     }
     return this._passwordHasher
   }

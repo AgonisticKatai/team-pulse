@@ -1,7 +1,7 @@
 import { eq, sql } from 'drizzle-orm'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { User } from '../../../domain/models/User.js'
-import { BcryptPasswordHasher } from '../../auth/BcryptPasswordHasher.js'
+import { ScryptPasswordHasher } from '../../auth/ScryptPasswordHasher.js'
 import { expectError, expectSuccess, TEST_CONSTANTS } from '../../testing/index.js'
 import { setupTestEnvironment } from '../../testing/test-helpers.js'
 import type { Database } from '../connection.js'
@@ -11,14 +11,14 @@ import { DrizzleUserRepository } from './DrizzleUserRepository.js'
 describe('DrizzleUserRepository - Integration Tests', () => {
   let repository: DrizzleUserRepository
   let db: Database
-  let passwordHasher: BcryptPasswordHasher
+  let passwordHasher: ScryptPasswordHasher
 
   const { getDatabase } = setupTestEnvironment()
 
   beforeAll(() => {
     db = getDatabase()
     repository = DrizzleUserRepository.create({ db })
-    passwordHasher = BcryptPasswordHasher.create({ saltRounds: 4 }) // Low rounds for fast tests
+    passwordHasher = ScryptPasswordHasher.create({ cost: 1024 }) // Low cost for fast tests
   })
 
   beforeEach(async () => {

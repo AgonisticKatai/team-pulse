@@ -9,24 +9,12 @@ catalogs:
     '@types/node':
       specifier: ^24.10.0
       version: 24.10.1
-    '@vitest/coverage-v8':
-      specifier: ^4.0.8
-      version: 4.0.10
-    '@vitest/ui':
-      specifier: ^4.0.8
-      version: 4.0.10
     drizzle-orm:
       specifier: ^0.44.7
       version: 0.44.7
     typescript:
       specifier: ^5.9.3
       version: 5.9.3
-    vitest:
-      specifier: ^4.0.8
-      version: 4.0.10
-    zod:
-      specifier: ^4.1.12
-      version: 4.1.12
 
 importers:
 
@@ -89,9 +77,6 @@ importers:
       '@team-pulse/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      bcryptjs:
-        specifier: ^3.0.3
-        version: 3.0.3
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.44.7(@opentelemetry/api@1.9.0)(postgres@3.4.7)
@@ -1463,10 +1448,6 @@ packages:
 
   bcrypt-pbkdf@1.0.2:
     resolution: {integrity: sha512-qeFIXtP4MSoi6NLqO12WfqARWWuCKi2Rn/9hJLEmtB5yTNr9DqFWkJRCf2qShWzPeAMRnOgCrq0sg/KLv5ES9w==}
-
-  bcryptjs@3.0.3:
-    resolution: {integrity: sha512-GlF5wPWnSa/X5LKM1o0wz0suXIINz1iHRLvTS+sLyi7XPbe5ycmYI3DlZqVGZZtDgl4DmasFg7gOB3JYbphV5g==}
-    hasBin: true
 
   bindings@1.5.0:
     resolution: {integrity: sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ==}
@@ -4756,8 +4737,6 @@ snapshots:
   bcrypt-pbkdf@1.0.2:
     dependencies:
       tweetnacl: 0.14.5
-
-  bcryptjs@3.0.3: {}
 
   bindings@1.5.0:
     dependencies:
