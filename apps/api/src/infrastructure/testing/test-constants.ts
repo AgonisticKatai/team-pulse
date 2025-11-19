@@ -38,6 +38,57 @@ export const TEST_CONSTANTS = {
     wrongPassword: 'WrongPassword123',
   },
 
+  // TeamName Test Data
+  teamNames: {
+    arsenal: 'Arsenal',
+    bayernMunchen: 'Bayern München',
+    empty: '',
+    exactly100Chars: 'a'.repeat(100),
+    exceeds100Chars: 'a'.repeat(101),
+    juventus: 'Juventus',
+    manchesterUnited: 'Manchester United',
+    parisSaintGermain: 'Paris Saint-Germain',
+    singleChar: 'A',
+    tottenham: 'Tottenham',
+    veryLong: 'a'.repeat(200),
+    whitespaceOnly: '   ',
+    withLeadingTrailingSpaces: '  Chelsea FC  ',
+    withNumbers: 'Team 123',
+  },
+
+  // City Test Data
+  cities: {
+    barcelona: 'Barcelona',
+    bilbao: 'Bilbao',
+    empty: '',
+    exactly100Chars: 'a'.repeat(100),
+    exceeds100Chars: 'a'.repeat(101),
+    madrid: 'Madrid',
+    newYork: 'New York',
+    saoPaulo: 'São Paulo',
+    saintEtienne: 'Saint-Étienne',
+    singleChar: 'A',
+    valencia: 'Valencia',
+    veryLong: 'a'.repeat(150),
+    whitespaceOnly: '   ',
+    withLeadingTrailingSpaces: '  London  ',
+  },
+
+  // FoundedYear Test Data
+  foundedYears: {
+    currentYear: new Date().getFullYear(),
+    exactly1800: 1800,
+    futureYear: new Date().getFullYear() + 1,
+    negative: -100,
+    tooOld: 1799,
+    year1899: 1899,
+    year1900: 1900,
+    year1902: 1902,
+    year2000: 2000,
+    year2020: 2020,
+    zero: 0,
+  },
+
   // Mock Dates
   mockDate: new Date('2025-01-01T00:00:00Z'),
   mockDateIso: '2025-01-01T00:00:00.000Z',
