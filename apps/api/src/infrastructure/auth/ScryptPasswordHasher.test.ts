@@ -57,10 +57,14 @@ describe('ScryptPasswordHasher', () => {
       expect(hash).toBeDefined()
       expect(hash).not.toBe(password)
       expect(hash.length).toBeGreaterThan(0)
-      expect(hash).toContain(':') // scrypt hash format: salt:hash
-      const [salt, hashPart] = hash.split(':')
-      expect(salt).toHaveLength(32) // 16 bytes = 32 hex chars
-      expect(hashPart).toHaveLength(128) // 64 bytes = 128 hex chars
+      expect(hash).toContain(':') // scrypt hash format: cost:blockSize:parallelization:salt:hash
+      const parts = hash.split(':')
+      expect(parts).toHaveLength(5) // cost, blockSize, parallelization, salt, hash
+      expect(parts[0]).toBe('1024') // cost
+      expect(parts[1]).toBe('8') // blockSize
+      expect(parts[2]).toBe('1') // parallelization
+      expect(parts[3]).toHaveLength(32) // salt: 16 bytes = 32 hex chars
+      expect(parts[4]).toHaveLength(128) // hash: 64 bytes = 128 hex chars
     })
 
     it('should generate different hashes for the same password due to salt', async () => {
@@ -290,9 +294,9 @@ describe('ScryptPasswordHasher', () => {
       const hash = expectSuccess(hashResult)
       const verifyResult = await hasher2048.verify({ password, hash })
 
-      // Assert - Verification should fail because cost parameters don't match
+      // Assert - Verification should succeed because parameters are stored in hash
       const isValid = expectSuccess(verifyResult)
-      expect(isValid).toBe(false)
+      expect(isValid).toBe(true)
     })
   })
 
@@ -339,12 +343,14 @@ describe('ScryptPasswordHasher', () => {
       // Assert
       const hash1 = expectSuccess(hashResult1)
       const hash2 = expectSuccess(hashResult2)
-      const [salt1, hashPart1] = hash1.split(':')
-      const [salt2, hashPart2] = hash2.split(':')
-      expect(salt1).toHaveLength(32) // Same salt length
-      expect(salt2).toHaveLength(32)
-      expect(hashPart1).toHaveLength(128) // Same hash length
-      expect(hashPart2).toHaveLength(128)
+      const parts1 = hash1.split(':')
+      const parts2 = hash2.split(':')
+      expect(parts1).toHaveLength(5)
+      expect(parts2).toHaveLength(5)
+      expect(parts1[3]).toHaveLength(32) // Same salt length
+      expect(parts2[3]).toHaveLength(32)
+      expect(parts1[4]).toHaveLength(128) // Same hash length
+      expect(parts2[4]).toHaveLength(128)
     })
 
     it('should use timing-safe comparison (implementation detail)', async () => {
@@ -379,9 +385,13 @@ describe('ScryptPasswordHasher', () => {
 
       // Assert
       const hash = expectSuccess(hashResult)
-      const [salt, hashPart] = hash.split(':')
-      expect(salt).toHaveLength(32) // 16 bytes salt
-      expect(hashPart).toHaveLength(64) // 32 bytes hash (custom keyLength)
+      const parts = hash.split(':')
+      expect(parts).toHaveLength(5)
+      expect(parts[0]).toBe('1024') // cost
+      expect(parts[1]).toBe('4') // blockSize
+      expect(parts[2]).toBe('2') // parallelization
+      expect(parts[3]).toHaveLength(32) // salt: 16 bytes = 32 hex chars
+      expect(parts[4]).toHaveLength(64) // hash: 32 bytes = 64 hex chars (custom keyLength)
     })
   })
 })

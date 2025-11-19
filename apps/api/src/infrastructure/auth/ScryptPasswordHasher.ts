@@ -17,7 +17,10 @@ import type { IPasswordHasher } from '../../domain/services/IPasswordHasher.js'
  * - Recommended by security experts for password hashing
  * - Better resistance against parallel attacks than bcrypt
  *
- * Hash Format: salt:hash
+ * Hash Format: cost:blockSize:parallelization:salt:hash
+ * - Cost: CPU/memory cost parameter (N)
+ * - BlockSize: Block size parameter (r)
+ * - Parallelization: Parallelization parameter (p)
  * - Salt: 16 bytes (32 hex chars)
  * - Hash: 64 bytes (128 hex chars) derived using scrypt
  */
@@ -82,7 +85,7 @@ export class ScryptPasswordHasher implements IPasswordHasher {
    * Hash a plain text password using scrypt
    *
    * Returns Result to handle potential hashing failures gracefully
-   * Format: salt:hash (both in hex)
+   * Format: cost:blockSize:parallelization:salt:hash (all in hex/decimal)
    */
   async hash({ password }: { password: string }): Promise<Result<string, RepositoryError>> {
     try {
@@ -105,8 +108,8 @@ export class ScryptPasswordHasher implements IPasswordHasher {
         }
       })
 
-      // Return salt and hash as hex strings separated by colon
-      const hash = `${salt.toString('hex')}:${derivedKey.toString('hex')}`
+      // Return cost, blockSize, parallelization, salt and hash separated by colons
+      const hash = `${this.cost}:${this.blockSize}:${this.parallelization}:${salt.toString('hex')}:${derivedKey.toString('hex')}`
       return Ok(hash)
     } catch (error) {
       return Err(
@@ -123,28 +126,37 @@ export class ScryptPasswordHasher implements IPasswordHasher {
    * Verify a plain text password against a scrypt hash
    *
    * Returns Result to handle potential verification failures gracefully
-   * Expects hash format: salt:hash (both in hex)
+   * Expects hash format: cost:blockSize:parallelization:salt:hash
    */
   async verify({ password, hash }: { password: string; hash: string }): Promise<Result<boolean, RepositoryError>> {
     try {
-      // Split hash into salt and hash components
+      // Split hash into components
       const parts = hash.split(':')
-      if (parts.length !== 2 || !parts[0] || !parts[1]) {
+      if (parts.length !== 5 || !parts[0] || !parts[1] || !parts[2] || !parts[3] || !parts[4]) {
         return Ok(false)
       }
 
-      const [saltHex, hashHex] = parts
+      const [costStr, blockSizeStr, parallelizationStr, saltHex, hashHex] = parts
+      const cost = Number.parseInt(costStr, 10)
+      const blockSize = Number.parseInt(blockSizeStr, 10)
+      const parallelization = Number.parseInt(parallelizationStr, 10)
+
+      // Validate parsed parameters
+      if (Number.isNaN(cost) || Number.isNaN(blockSize) || Number.isNaN(parallelization)) {
+        return Ok(false)
+      }
+
       const salt = Buffer.from(saltHex, 'hex')
       const storedHash = Buffer.from(hashHex, 'hex')
 
-      // Derive key using the same salt
+      // Derive key using the parameters from the hash
       const derivedKey = await new Promise<Buffer>((resolve, reject) => {
         try {
           const key = scryptSync(password, salt, this.keyLength, {
-            N: this.cost,
-            r: this.blockSize,
-            p: this.parallelization,
-            maxmem: 128 * this.cost * this.blockSize * 2,
+            N: cost,
+            r: blockSize,
+            p: parallelization,
+            maxmem: 128 * cost * blockSize * 2,
           })
           resolve(key)
         } catch (err) {
