@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/AgonisticKatai/team-pulse/actions/workflows/ci.yml/badge.svg)](https://github.com/AgonisticKatai/team-pulse/actions/workflows/ci.yml)
 [![Deploy](https://github.com/AgonisticKatai/team-pulse/actions/workflows/deploy.yml/badge.svg)](https://github.com/AgonisticKatai/team-pulse/actions/workflows/deploy.yml)
+[![codecov](https://codecov.io/gh/AgonisticKatai/team-pulse/branch/main/graph/badge.svg)](https://codecov.io/gh/AgonisticKatai/team-pulse)
 
 Modern football team statistics platform with real-time match tracking, admin dashboard and analytics.
 

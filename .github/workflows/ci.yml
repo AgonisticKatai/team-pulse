@@ -68,8 +68,8 @@ jobs:
       - name: Type check
         run: make type-check
 
-      - name: Run tests (with testcontainers)
-        run: make test
+      - name: Run tests with coverage (with testcontainers)
+        run: make test-coverage
         env:
           NODE_ENV: test
           JWT_SECRET: test-jwt-secret-key-for-ci-minimum-32-characters-long
@@ -78,14 +78,26 @@ jobs:
           TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: /var/run/docker.sock
           TESTCONTAINERS_RYUK_DISABLED: false
 
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: |
+            ./apps/api/coverage/coverage-final.json,
+            ./apps/web/coverage/coverage-final.json,
+            ./packages/shared/coverage/coverage-final.json
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
       - name: Build
         run: make build
 
-      - name: Upload coverage
+      - name: Upload coverage artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage
+          name: coverage-reports
           path: |
             apps/*/coverage
             packages/*/coverage
