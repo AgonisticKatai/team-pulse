@@ -146,6 +146,68 @@ const value = expectDefined(result)
 // value is guaranteed to be defined (not null or undefined)
 ```
 
+### expectSingle
+
+Use `expectSingle` when you expect a Result to contain an array with exactly one element.
+
+```typescript
+// ❌ ANTI-PATTERN: Manual array checking
+const tokens = expectSuccess(result)
+expect(tokens).toHaveLength(1)
+const [firstToken] = tokens
+assertDefined(firstToken)
+expect(firstToken.userId.getValue()).toBe('user-1')
+
+// ✅ CORRECT: Using expectSingle
+const token = expectSingle(result)
+expect(token.userId.getValue()).toBe('user-1')
+```
+
+**Benefits:**
+- Combines success assertion, length check, and element extraction
+- Perfect for repository queries that return a single result
+- Type-safe with no need for optional chaining
+- Cleaner, more concise tests
+
+### expectFirst
+
+Use `expectFirst` to extract the first element of an array with type safety.
+
+```typescript
+// ❌ ANTI-PATTERN: Optional chaining
+const teams = expectSuccess(result)
+expect(teams[0]?.name).toBe('FC Barcelona')
+
+// ✅ CORRECT: Using expectFirst
+const teams = expectSuccess(result)
+const firstTeam = expectFirst(teams)
+expect(firstTeam.name).toBe('FC Barcelona')
+```
+
+**Benefits:**
+- Asserts array is non-empty
+- Extracts first element with type safety
+- No need for optional chaining (`?.`)
+- Clearer test intent
+
+### expectArrayOfLength
+
+Use `expectArrayOfLength` to combine success assertion with length check.
+
+```typescript
+// ❌ ANTI-PATTERN: Separate assertions
+const teams = expectSuccess(result)
+expect(teams).toHaveLength(3)
+
+// ✅ CORRECT: Using expectArrayOfLength
+const teams = expectArrayOfLength(result, 3)
+```
+
+**Benefits:**
+- Combines two common assertions into one
+- More concise
+- Returns type-safe array for further assertions
+
 ## TEST_CONSTANTS
 
 All test data must be defined in `test-constants.ts` and organized by domain.
