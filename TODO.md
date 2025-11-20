@@ -9,7 +9,7 @@ Este archivo registra mejoras pendientes y tech debt identificado durante el des
 ### 📦 API - Tests Faltantes (Archivos Críticos)
 
 **Infrastructure/Config:**
-- [ ] `apps/api/src/infrastructure/config/env.ts` - Validación de variables de entorno (CRÍTICO para seguridad)
+- [x] `apps/api/src/infrastructure/config/env.ts` - Validación de variables de entorno (CRÍTICO para seguridad) - ✅ 26 tests (2025-11-20)
 
 **Infrastructure/Monitoring:**
 - [ ] `apps/api/src/infrastructure/monitoring/MetricsService.ts` - Servicio de métricas de Prometheus
