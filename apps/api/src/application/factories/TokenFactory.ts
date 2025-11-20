@@ -1,10 +1,10 @@
 import { randomUUID } from 'node:crypto'
+import type { IEnvironment } from '@domain/config/IEnvironment.js'
+import { ValidationError } from '@domain/errors/index.js'
+import { RefreshToken } from '@domain/models/RefreshToken.js'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
 import type { UserRole } from '@team-pulse/shared/types'
 import jwt from 'jsonwebtoken'
-import type { IEnvironment } from '../../domain/config/IEnvironment.js'
-import { ValidationError } from '../../domain/errors/index.js'
-import { RefreshToken } from '../../domain/models/RefreshToken.js'
 
 /**
  * Token Factory

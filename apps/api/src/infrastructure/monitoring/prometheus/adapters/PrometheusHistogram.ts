@@ -1,5 +1,5 @@
+import type { IHistogram } from '@domain/services/metrics/IHistogram.js'
 import type * as promClient from 'prom-client'
-import type { IHistogram } from '../../../../domain/services/metrics/IHistogram.js'
 
 /**
  * Prometheus Histogram Adapter

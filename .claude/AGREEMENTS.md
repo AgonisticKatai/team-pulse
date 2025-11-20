@@ -14,6 +14,8 @@ This document captures ALL architectural patterns used consistently in the API. 
 4. [Testing Patterns](#4-testing-patterns)
 5. [Type System Patterns](#5-type-system-patterns)
 6. [Hexagonal Architecture](#6-hexagonal-architecture)
+   - [6.1 Ports & Adapters Pattern](#61-ports--adapters-pattern)
+   - [6.2 Path Aliases - Architecture-Aligned Imports](#62-path-aliases---architecture-aligned-imports)
 7. [Mandatory Agreements Summary](#7-mandatory-agreements-summary)
 
 ---
@@ -1521,6 +1523,115 @@ toDTO(): any {
 **Applied in:**
 - `domain/models/User.ts` (lines 190-214)
 - `domain/models/Team.ts` (lines 150-182)
+
+---
+
+## 6.2 Path Aliases - Architecture-Aligned Imports
+
+**Pattern Name:** Layer-Based Path Aliases
+
+**Why:**
+- Eliminates deep relative imports (`../../../../domain/...`)
+- Makes architectural layers immediately visible in imports
+- Self-documenting code: imports show layer dependencies
+- Easier refactoring: imports don't break when moving files
+- Enforces architectural boundaries through clear naming
+
+**Configuration:**
+
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@domain/*": ["./src/domain/*"],
+      "@application/*": ["./src/application/*"],
+      "@infrastructure/*": ["./src/infrastructure/*"]
+    }
+  }
+}
+
+// vitest.config.ts
+import { fileURLToPath } from 'node:url'
+import { defineConfig } from 'vitest/config'
+
+export default defineConfig({
+  resolve: {
+    alias: {
+      '@domain': fileURLToPath(new URL('./src/domain', import.meta.url)),
+      '@application': fileURLToPath(new URL('./src/application', import.meta.url)),
+      '@infrastructure': fileURLToPath(new URL('./src/infrastructure', import.meta.url)),
+    },
+  },
+  // ... rest of config
+})
+```
+
+**Real Code Examples:**
+
+✅ **Correct:**
+```typescript
+// Before (deep relative imports)
+import type { IHistogram } from '../../../../domain/services/metrics/IHistogram.js'
+import type { TokenFactory } from '../../../application/factories/TokenFactory.js'
+import { ValidationError } from '../../domain/errors/index.js'
+
+// After (architecture-aligned aliases)
+import type { IHistogram } from '@domain/services/metrics/IHistogram.js'
+import type { TokenFactory } from '@application/factories/TokenFactory.js'
+import { ValidationError } from '@domain/errors/index.js'
+```
+
+**Benefits Demonstrated:**
+```typescript
+// Infrastructure/Prometheus/adapters/PrometheusHistogram.ts
+// Biome sorts @domain imports FIRST - architecture visibility! ✨
+import type { IHistogram } from '@domain/services/metrics/IHistogram.js'
+import type * as promClient from 'prom-client'
+
+// Application/TokenFactory.ts
+// Clear that Application depends on Domain abstractions
+import type { IEnvironment } from '@domain/config/IEnvironment.js'
+import { ValidationError } from '@domain/errors/index.js'
+import { RefreshToken } from '@domain/models/RefreshToken.js'
+
+// Infrastructure/HTTP/routes/auth.ts
+// Clear layer boundaries: Application use cases, not Domain
+import type { LoginUseCase } from '@application/use-cases/LoginUseCase.js'
+import type { RefreshTokenUseCase } from '@application/use-cases/RefreshTokenUseCase.js'
+```
+
+**❌ DO NOT:**
+```typescript
+// Deep relative imports (hard to read, fragile)
+import type { User } from '../../../../domain/models/User.js'
+import type { IUserRepository } from '../../../domain/repositories/IUserRepository.js'
+
+// Single generic alias (loses architecture visibility)
+import type { User } from '@/domain/models/User.js'
+import type { LoginUseCase } from '@/application/use-cases/LoginUseCase.js'
+
+// Mixing styles
+import type { User } from '@domain/models/User.js'
+import { ValidationError } from '../../domain/errors/index.js' // ← inconsistent
+```
+
+**Import Sorting:**
+Biome automatically sorts imports with aliases first, making architectural dependencies highly visible:
+```typescript
+// Biome sorts: @domain → @application → @infrastructure → external → relative
+import type { IEnvironment } from '@domain/config/IEnvironment.js'        // 1. Domain
+import type { TokenFactory } from '@application/factories/TokenFactory.js' // 2. Application
+import { LoginDTOSchema } from '@team-pulse/shared/dtos'                   // 3. External
+import type { FastifyInstance } from 'fastify'                             // 4. External
+import { requireAuth } from '../middleware/auth.js'                        // 5. Relative (same layer)
+```
+
+**Applied in:**
+- All TypeScript files in `apps/api/src/`
+- Configuration: `apps/api/tsconfig.json` (lines 9-13)
+- Test configuration: `apps/api/vitest.config.ts` (lines 5-11)
 
 ---
 

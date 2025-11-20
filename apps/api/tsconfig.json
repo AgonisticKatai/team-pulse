@@ -1,10 +1,16 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "declaration": true,
     "declarationMap": true,
     "module": "NodeNext",
     "moduleResolution": "nodenext",
     "outDir": "./dist",
+    "paths": {
+      "@domain/*": ["./src/domain/*"],
+      "@application/*": ["./src/application/*"],
+      "@infrastructure/*": ["./src/infrastructure/*"]
+    },
     "rootDir": "./src",
     "sourceMap": true
   },
