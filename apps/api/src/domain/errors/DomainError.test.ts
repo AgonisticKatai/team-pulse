@@ -255,11 +255,7 @@ describe('DomainError', () => {
 
       // Act
       try {
-        try {
-          throw TestDomainError.create({ message })
-        } catch (error) {
-          throw error
-        }
+        throw TestDomainError.create({ message })
       } catch (error) {
         caughtError = error as DomainError
       }

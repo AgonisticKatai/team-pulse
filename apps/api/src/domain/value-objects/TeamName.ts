@@ -7,7 +7,7 @@ import { ValidationError } from '../errors/index.js'
  * Immutable and self-validating
  */
 export class TeamName {
-  private static readonly MAX_LENGTH = 100
+  protected static readonly MAX_LENGTH = 100
 
   private readonly value: string
 
@@ -18,7 +18,7 @@ export class TeamName {
   /**
    * Validate if team name is not empty
    */
-  private static validateNotEmpty({ value }: { value: string }): Result<string, ValidationError> {
+  protected static validateNotEmpty({ value }: { value: string }): Result<string, ValidationError> {
     if (!value || value.trim().length === 0) {
       return Err(ValidationError.forField({ field: 'name', message: 'Team name cannot be empty' }))
     }
@@ -28,7 +28,7 @@ export class TeamName {
   /**
    * Validate team name length
    */
-  private static validateLength({ value }: { value: string }): Result<string, ValidationError> {
+  protected static validateLength({ value }: { value: string }): Result<string, ValidationError> {
     if (value.length > TeamName.MAX_LENGTH) {
       return Err(
         ValidationError.forField({

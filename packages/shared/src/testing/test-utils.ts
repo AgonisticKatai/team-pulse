@@ -67,3 +67,31 @@ export function expectMockCallArg<T>(mockFn: { mock: { calls: unknown[][] } }, c
 
   return arg as T
 }
+
+/**
+ * Type-safe helper to get the invocation order of a mock function call
+ *
+ * This helper properly handles TypeScript's `noUncheckedIndexedAccess` config
+ * by explicitly checking that the invocation order exists before returning it.
+ *
+ * @param mockFn - The mocked function (typically from vi.mocked())
+ * @param callIndex - The index of the call to check (0-based, defaults to 0)
+ * @returns The invocation order number
+ *
+ * @example
+ * ```typescript
+ * // Verify that findById is called before delete (most common case - first call)
+ * const findByIdOrder = expectMockInvocationOrder(vi.mocked(repository.findById))
+ * const deleteOrder = expectMockInvocationOrder(vi.mocked(repository.delete))
+ * expect(findByIdOrder).toBeLessThan(deleteOrder)
+ *
+ * // Check second call's invocation order
+ * const secondCallOrder = expectMockInvocationOrder(vi.mocked(someFunction), 1)
+ * ```
+ */
+export function expectMockInvocationOrder(mockFn: { mock: { invocationCallOrder: number[] } }, callIndex = 0): number {
+  const order = mockFn.mock.invocationCallOrder[callIndex]
+  expect(order).toBeDefined()
+
+  return order as number
+}

@@ -1,114 +1,56 @@
-import * as promClient from 'prom-client'
-import { type Counter, collectDefaultMetrics, type Gauge, type Histogram, Registry } from 'prom-client'
 import type { IMetricsService } from '../../domain/services/IMetricsService.js'
+import type { IMetricsFactory } from '../../domain/services/metrics/IMetricsFactory.js'
+import type { MetricsCollection } from '../../domain/services/metrics/MetricsCollection.js'
 
 /**
- * Service for managing Prometheus metrics
+ * Service for managing application metrics
  * Provides HTTP, database, and business metrics
+ *
+ * This service is COMPLETELY DECOUPLED from any specific metrics library.
+ * It depends only on domain abstractions (IMetricRegistry, IHistogram, ICounter, IGauge).
+ *
+ * The metrics implementation (Prometheus, DataDog, StatsD, etc.) is injected
+ * via the IMetricsFactory in the factory method.
+ *
+ * Architecture: Hexagonal Architecture (Ports & Adapters)
+ * - Domain Layer: Interfaces (IMetricsService, IMetricsFactory, MetricsCollection)
+ * - Infrastructure Layer: This service + specific factories (PrometheusMetricsFactory, etc.)
+ *
+ * To switch metrics providers:
+ * 1. Create new factory (e.g., DataDogMetricsFactory implements IMetricsFactory)
+ * 2. Update container to use DataDogMetricsFactory instead of PrometheusMetricsFactory
+ * 3. MetricsService code DOES NOT CHANGE
  */
 export class MetricsService implements IMetricsService {
-  private readonly registry: Registry
+  private readonly metrics: MetricsCollection
 
-  // HTTP metrics
-  private readonly httpRequestDuration: Histogram
-  private readonly httpRequestTotal: Counter
-  private readonly httpRequestErrors: Counter
-
-  // Database metrics
-  private readonly dbQueryDuration: Histogram
-  private readonly dbQueryTotal: Counter
-  private readonly dbQueryErrors: Counter
-
-  // Business metrics
-  private readonly usersTotal: Gauge
-  private readonly teamsTotal: Gauge
-  private readonly loginsTotal: Counter
-
-  constructor() {
-    this.registry = new Registry()
-
-    // Collect default metrics (memory, CPU, etc.)
-    collectDefaultMetrics({ register: this.registry })
-
-    // HTTP metrics
-    this.httpRequestDuration = new promClient.Histogram({
-      name: 'http_request_duration_seconds',
-      help: 'Duration of HTTP requests in seconds',
-      labelNames: ['method', 'route', 'status_code'],
-      buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5],
-      registers: [this.registry],
-    })
-
-    this.httpRequestTotal = new promClient.Counter({
-      name: 'http_requests_total',
-      help: 'Total number of HTTP requests',
-      labelNames: ['method', 'route', 'status_code'],
-      registers: [this.registry],
-    })
-
-    this.httpRequestErrors = new promClient.Counter({
-      name: 'http_request_errors_total',
-      help: 'Total number of HTTP request errors',
-      labelNames: ['method', 'route', 'error_type'],
-      registers: [this.registry],
-    })
-
-    // Database metrics
-    this.dbQueryDuration = new promClient.Histogram({
-      name: 'db_query_duration_seconds',
-      help: 'Duration of database queries in seconds',
-      labelNames: ['operation', 'table'],
-      buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1],
-      registers: [this.registry],
-    })
-
-    this.dbQueryTotal = new promClient.Counter({
-      name: 'db_queries_total',
-      help: 'Total number of database queries',
-      labelNames: ['operation', 'table'],
-      registers: [this.registry],
-    })
-
-    this.dbQueryErrors = new promClient.Counter({
-      name: 'db_query_errors_total',
-      help: 'Total number of database query errors',
-      labelNames: ['operation', 'table', 'error_type'],
-      registers: [this.registry],
-    })
-
-    // Business metrics
-    this.usersTotal = new promClient.Gauge({
-      name: 'users_total',
-      help: 'Total number of users in the system',
-      registers: [this.registry],
-    })
-
-    this.teamsTotal = new promClient.Gauge({
-      name: 'teams_total',
-      help: 'Total number of teams in the system',
-      registers: [this.registry],
-    })
-
-    this.loginsTotal = new promClient.Counter({
-      name: 'logins_total',
-      help: 'Total number of successful logins',
-      labelNames: ['role'],
-      registers: [this.registry],
-    })
+  private constructor({ metrics }: { metrics: MetricsCollection }) {
+    this.metrics = metrics
   }
 
   /**
-   * Get metrics in Prometheus format
+   * Factory method to create MetricsService with injected metrics
+   *
+   * @param metricsFactory - Factory that creates the metrics collection
+   * @returns Configured MetricsService instance
+   */
+  static create({ metricsFactory }: { metricsFactory: IMetricsFactory }): MetricsService {
+    const metrics = metricsFactory.createMetrics()
+    return new MetricsService({ metrics })
+  }
+
+  /**
+   * Get metrics in the registry's format
    */
   getMetrics(): Promise<string> {
-    return this.registry.metrics()
+    return this.metrics.registry.metrics()
   }
 
   /**
-   * Get content type for Prometheus metrics
+   * Get content type for metrics
    */
   getContentType(): string {
-    return this.registry.contentType
+    return this.metrics.registry.contentType()
   }
 
   /**
@@ -125,13 +67,10 @@ export class MetricsService implements IMetricsService {
     route: string
     statusCode: number
   }): void {
-    this.httpRequestDuration.observe(
-      // biome-ignore lint/style/useNamingConvention: Prometheus label names use snake_case
-      { method, route, status_code: statusCode },
-      durationSeconds,
-    )
     // biome-ignore lint/style/useNamingConvention: Prometheus label names use snake_case
-    this.httpRequestTotal.inc({ method, route, status_code: statusCode })
+    const labels = { method, route, status_code: statusCode }
+    this.metrics.httpRequestDuration.observe({ labels, value: durationSeconds })
+    this.metrics.httpRequestTotal.inc({ labels })
   }
 
   /**
@@ -139,15 +78,16 @@ export class MetricsService implements IMetricsService {
    */
   recordHttpError({ errorType, method, route }: { errorType: string; method: string; route: string }): void {
     // biome-ignore lint/style/useNamingConvention: Prometheus label names use snake_case
-    this.httpRequestErrors.inc({ method, route, error_type: errorType })
+    this.metrics.httpRequestErrors.inc({ labels: { method, route, error_type: errorType } })
   }
 
   /**
    * Record database query metrics
    */
   recordDbQuery({ durationSeconds, operation, table }: { durationSeconds: number; operation: string; table: string }): void {
-    this.dbQueryDuration.observe({ operation, table }, durationSeconds)
-    this.dbQueryTotal.inc({ operation, table })
+    const labels = { operation, table }
+    this.metrics.dbQueryDuration.observe({ labels, value: durationSeconds })
+    this.metrics.dbQueryTotal.inc({ labels })
   }
 
   /**
@@ -155,37 +95,34 @@ export class MetricsService implements IMetricsService {
    */
   recordDbError({ errorType, operation, table }: { errorType: string; operation: string; table: string }): void {
     // biome-ignore lint/style/useNamingConvention: Prometheus label names use snake_case
-    this.dbQueryErrors.inc({ operation, table, error_type: errorType })
+    this.metrics.dbQueryErrors.inc({ labels: { operation, table, error_type: errorType } })
   }
 
   /**
    * Set total number of users
    */
   setUsersTotal({ count }: { count: number }): void {
-    this.usersTotal.set(count)
+    this.metrics.usersTotal.set({ value: count })
   }
 
   /**
    * Set total number of teams
    */
   setTeamsTotal({ count }: { count: number }): void {
-    this.teamsTotal.set(count)
+    this.metrics.teamsTotal.set({ value: count })
   }
 
   /**
    * Record successful login
    */
   recordLogin({ role }: { role: string }): void {
-    this.loginsTotal.inc({ role })
+    this.metrics.loginsTotal.inc({ labels: { role } })
   }
 
   /**
    * Reset all metrics (useful for testing)
    */
   reset(): void {
-    this.registry.resetMetrics()
+    this.metrics.registry.resetMetrics()
   }
 }
-
-// Singleton instance
-export const metricsService = new MetricsService()

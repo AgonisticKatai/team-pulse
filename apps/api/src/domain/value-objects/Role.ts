@@ -36,7 +36,7 @@ export class Role {
   /**
    * Validate if role is not empty
    */
-  private static validateNotEmpty({ value }: { value: string }): Result<string, ValidationError> {
+  protected static validateNotEmpty({ value }: { value: string }): Result<string, ValidationError> {
     if (!value || value.trim().length === 0) {
       return Err(ValidationError.forField({ field: 'role', message: 'Role is required' }))
     }
@@ -46,7 +46,7 @@ export class Role {
   /**
    * Validate role value
    */
-  private static validateRole({ value }: { value: string }): Result<UserRole, ValidationError> {
+  protected static validateRole({ value }: { value: string }): Result<UserRole, ValidationError> {
     if (!Object.values(UserRole).includes(value as UserRole)) {
       return Err(
         ValidationError.forField({

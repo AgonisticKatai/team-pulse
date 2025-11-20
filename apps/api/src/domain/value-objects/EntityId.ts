@@ -8,7 +8,7 @@ import { ValidationError } from '../errors/index.js'
  * Represents a unique identifier for domain entities
  */
 export class EntityId {
-  private static readonly ID_REGEX = /^[a-zA-Z0-9_-]+$/
+  protected static readonly ID_REGEX = /^[a-zA-Z0-9_-]+$/
 
   private readonly value: string
 
@@ -19,7 +19,7 @@ export class EntityId {
   /**
    * Validate if entity ID is not empty
    */
-  private static validateNotEmpty({ value }: { value: string }): Result<string, ValidationError> {
+  protected static validateNotEmpty({ value }: { value: string }): Result<string, ValidationError> {
     if (!value || value.trim().length === 0) {
       return Err(ValidationError.forField({ field: 'id', message: 'Entity ID is required' }))
     }
@@ -29,7 +29,7 @@ export class EntityId {
   /**
    * Validate entity ID format
    */
-  private static validateFormat({ value }: { value: string }): Result<string, ValidationError> {
+  protected static validateFormat({ value }: { value: string }): Result<string, ValidationError> {
     if (!EntityId.ID_REGEX.test(value)) {
       return Err(ValidationError.forField({ field: 'id', message: 'Entity ID contains invalid characters' }))
     }

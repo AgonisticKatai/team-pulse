@@ -12,7 +12,10 @@ Este archivo registra mejoras pendientes y tech debt identificado durante el des
 - [x] `apps/api/src/infrastructure/config/env.ts` - Validación de variables de entorno (CRÍTICO para seguridad) - ✅ 26 tests (2025-11-20)
 
 **Infrastructure/Monitoring:**
-- [ ] `apps/api/src/infrastructure/monitoring/MetricsService.ts` - Servicio de métricas de Prometheus
+- [x] `apps/api/src/infrastructure/monitoring/MetricsService.ts` - Servicio de métricas de Prometheus - ✅ 33 tests + Factory pattern + DI + Hexagonal Architecture (2025-11-20)
+  - Creadas abstracciones en domain layer: IMetricRegistry, IHistogram, ICounter, IGauge
+  - Creados adaptadores de Prometheus en infrastructure layer
+  - Servicio completamente desacoplado de prom-client (solo en factory method)
 
 **Infrastructure/Auth:**
 - [ ] `apps/api/src/infrastructure/auth/BcryptPasswordHasher.ts` - Password hasher legacy (aunque ya está deprecated)
@@ -31,6 +34,36 @@ Este archivo registra mejoras pendientes y tech debt identificado durante el des
 ## 🟡 Media Prioridad
 
 ### 📦 API - Auditorías y Refactoring
+
+#### Centralizar nombres de métricas en constantes compartidas
+**Ubicación:** `apps/api/src/infrastructure/monitoring/`
+**Acción:** Los nombres de métricas (http_request_duration_seconds, http_requests_total, etc.) están hardcodeados en:
+- PrometheusMetricsFactory (creación de métricas)
+- MetricsService.test.ts (verificación en tests)
+**Solución:** Crear constantes compartidas para nombres de métricas que puedan ser usadas tanto por factory como por tests
+
+#### Revisar TEST_CONSTANTS para mejoras de tipado y estructura
+**Ubicación:** `apps/api/src/infrastructure/testing/test-constants.ts`
+**Acción:** Auditar estructura completa de TEST_CONSTANTS para:
+- Mejoras en tipado (usar tipos más específicos donde sea posible)
+- Organización y consistencia de la estructura
+- Identificar oportunidades de mejora en la arquitectura del archivo
+
+#### Analizar arquitectura de middleware de métricas
+**Ubicación:** `apps/api/src/infrastructure/http/middleware/metrics.ts`
+**Acción:** Evaluar si createMetricsOnRequest/createMetricsOnResponse deberían ser:
+- Clases con métodos en lugar de factory functions
+- Mantener pattern actual de factories
+**Razón:** Determinar el patrón más apropiado según arquitectura del proyecto
+
+#### Unificar convenciones de definición de tipos TypeScript
+**Ubicación:** Todo el proyecto (apps/api, packages/shared, etc.)
+**Acción:** Auditar y estandarizar dónde y cómo definimos tipos en TypeScript:
+- `type` vs `interface` - Cuándo usar cada uno
+- Tipos inline vs extraídos
+- Ubicación de definiciones de tipos (mismo archivo, archivos .types.ts, etc.)
+- Nomenclatura y convenciones de naming
+**Objetivo:** Establecer guía de estilo clara y consistente para definiciones de tipos en todo el monorepo
 
 #### Revisar implementación de ScryptPasswordHasher
 **Ubicación:** `apps/api/src/infrastructure/auth/ScryptPasswordHasher.ts`

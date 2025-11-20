@@ -49,7 +49,7 @@ export class Team {
   /**
    * Validate optional foundedYear
    */
-  private static validateOptionalFoundedYear({
+  protected static validateOptionalFoundedYear({
     foundedYear,
   }: {
     foundedYear: number | null | undefined

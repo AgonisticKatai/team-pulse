@@ -71,7 +71,7 @@ export class TokenFactory {
   /**
    * Handle JWT errors and convert to ValidationError
    */
-  private static handleJwtError({ error, field }: { error: unknown; field: string }): ValidationError {
+  protected static handleJwtError({ error, field }: { error: unknown; field: string }): ValidationError {
     const errorName = error instanceof Error ? error.name : 'UnknownError'
     const errorMessage = JWT_ERROR_TYPES[errorName]
 

@@ -26,10 +26,10 @@ import { ValidationError } from '../errors/ValidationError.js'
  * - Validation methods: Separate validateXXX() methods
  */
 export class Pagination {
-  private static readonly MIN_PAGE = 1
-  private static readonly MIN_LIMIT = 1
-  private static readonly MAX_LIMIT = 100
-  private static readonly MIN_TOTAL = 0
+  protected static readonly MIN_PAGE = 1
+  protected static readonly MIN_LIMIT = 1
+  protected static readonly MAX_LIMIT = 100
+  protected static readonly MIN_TOTAL = 0
 
   public readonly page: number
   public readonly limit: number
@@ -93,7 +93,7 @@ export class Pagination {
    * - Must be an integer
    * - Must be at least 1
    */
-  private static validatePage({ page }: { page: number }): Result<void, ValidationError> {
+  protected static validatePage({ page }: { page: number }): Result<void, ValidationError> {
     if (!Number.isInteger(page)) {
       return Err(ValidationError.forField({ field: 'page', message: 'Page must be an integer' }))
     }
@@ -113,7 +113,7 @@ export class Pagination {
    * - Must be at least 1
    * - Cannot exceed MAX_LIMIT (100)
    */
-  private static validateLimit({ limit }: { limit: number }): Result<void, ValidationError> {
+  protected static validateLimit({ limit }: { limit: number }): Result<void, ValidationError> {
     if (!Number.isInteger(limit)) {
       return Err(ValidationError.forField({ field: 'limit', message: 'Limit must be an integer' }))
     }
@@ -136,7 +136,7 @@ export class Pagination {
    * - Must be an integer
    * - Must be non-negative (>= 0)
    */
-  private static validateTotal({ total }: { total: number }): Result<void, ValidationError> {
+  protected static validateTotal({ total }: { total: number }): Result<void, ValidationError> {
     if (!Number.isInteger(total)) {
       return Err(ValidationError.forField({ field: 'total', message: 'Total must be an integer' }))
     }
@@ -155,7 +155,7 @@ export class Pagination {
    * - If total is 0, return 0 pages
    * - Otherwise, calculate: ceil(total / limit)
    */
-  private static calculateTotalPages({ total, limit }: { total: number; limit: number }): number {
+  protected static calculateTotalPages({ total, limit }: { total: number; limit: number }): number {
     if (total === 0) {
       return 0
     }

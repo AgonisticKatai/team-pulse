@@ -2,7 +2,14 @@ import { Err, Ok } from '@team-pulse/shared'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NotFoundError, RepositoryError } from '../../domain/errors/index.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
-import { buildTeam, expectError, expectErrorType, expectSuccess, TEST_CONSTANTS } from '../../infrastructure/testing/index.js'
+import {
+  buildTeam,
+  expectError,
+  expectErrorType,
+  expectMockInvocationOrder,
+  expectSuccess,
+  TEST_CONSTANTS,
+} from '../../infrastructure/testing/index.js'
 import { DeleteTeamUseCase } from './DeleteTeamUseCase.js'
 
 describe('DeleteTeamUseCase', () => {
@@ -81,9 +88,9 @@ describe('DeleteTeamUseCase', () => {
 
         // Assert
         // findById should be called before delete
-        const findByIdOrder = vi.mocked(teamRepository.findById).mock.invocationCallOrder[0]
-        const deleteOrder = vi.mocked(teamRepository.delete).mock.invocationCallOrder[0]
-        expect(findByIdOrder).toBeLessThan(deleteOrder!)
+        const findByIdOrder = expectMockInvocationOrder(vi.mocked(teamRepository.findById))
+        const deleteOrder = expectMockInvocationOrder(vi.mocked(teamRepository.delete))
+        expect(findByIdOrder).toBeLessThan(deleteOrder)
       })
     })
 

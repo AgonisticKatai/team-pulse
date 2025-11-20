@@ -8,7 +8,7 @@ import { ValidationError } from '../errors/index.js'
  * Represents the year a team was founded
  */
 export class FoundedYear {
-  private static readonly MIN_YEAR = 1800 // Football modern rules started ~1860s
+  protected static readonly MIN_YEAR = 1800 // Football modern rules started ~1860s
 
   private readonly value: number
 
@@ -19,7 +19,7 @@ export class FoundedYear {
   /**
    * Validate founded year is within valid range
    */
-  private static validateRange({ value }: { value: number }): Result<number, ValidationError> {
+  protected static validateRange({ value }: { value: number }): Result<number, ValidationError> {
     const currentYear = new Date().getFullYear()
 
     if (value < FoundedYear.MIN_YEAR || value > currentYear) {

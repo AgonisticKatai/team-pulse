@@ -49,7 +49,7 @@ export class User {
   /**
    * Validate password hash
    */
-  private static validatePasswordHash({ passwordHash }: { passwordHash: string }): Result<string, ValidationError> {
+  protected static validatePasswordHash({ passwordHash }: { passwordHash: string }): Result<string, ValidationError> {
     if (!passwordHash || passwordHash.trim().length === 0) {
       return Err(ValidationError.forField({ field: 'password', message: 'Password hash is required' }))
     }

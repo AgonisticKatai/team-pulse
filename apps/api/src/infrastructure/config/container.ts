@@ -20,6 +20,7 @@ import { DrizzleRefreshTokenRepository } from '../database/repositories/DrizzleR
 import { DrizzleTeamRepository } from '../database/repositories/DrizzleTeamRepository.js'
 import { DrizzleUserRepository } from '../database/repositories/DrizzleUserRepository.js'
 import { MetricsService } from '../monitoring/MetricsService.js'
+import { PrometheusMetricsFactory } from '../monitoring/prometheus/PrometheusMetricsFactory.js'
 import type { Env } from './env.js'
 
 /**
@@ -129,7 +130,8 @@ export class Container {
    */
   get metricsService(): IMetricsService {
     if (!this._metricsService) {
-      this._metricsService = new MetricsService()
+      const metricsFactory = PrometheusMetricsFactory.create()
+      this._metricsService = MetricsService.create({ metricsFactory })
     }
     return this._metricsService
   }

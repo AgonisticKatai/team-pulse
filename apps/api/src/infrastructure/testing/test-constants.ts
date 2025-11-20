@@ -297,4 +297,110 @@ export const TEST_CONSTANTS = {
       role: 'SUPER_ADMIN' as const,
     },
   },
+
+  // Metrics/Prometheus Test Data
+  metrics: {
+    prometheus: {
+      contentType: 'text/plain; version=0.0.4; charset=utf-8' as const,
+      testMetrics: {
+        counter: {
+          name: 'test_counter',
+          help: 'Test counter metric',
+        },
+        counterForReset: {
+          name: 'test_counter_reset',
+          help: 'Test counter for reset verification',
+        },
+        gauge: {
+          name: 'test_gauge',
+          help: 'Test gauge metric',
+        },
+        histogram: {
+          name: 'test_histogram',
+          help: 'Test histogram metric',
+          buckets: [0.1, 0.5, 1, 5, 10],
+        },
+      },
+      labels: {
+        method: 'GET' as const,
+        route: '/api/test' as const,
+        statusCode: 200,
+        errorType: 'ValidationError' as const,
+      },
+      values: {
+        duration: 0.123,
+        count: 42,
+        increment: 1,
+        decrement: 1,
+      },
+      http: {
+        methods: {
+          get: 'GET' as const,
+          post: 'POST' as const,
+          put: 'PUT' as const,
+        },
+        routes: {
+          users: '/api/users' as const,
+          teams: '/api/teams' as const,
+          test: '/api/test' as const,
+          login: '/api/auth/login' as const,
+          teamsById: '/api/teams/123' as const,
+          usersById: '/api/users/456' as const,
+        },
+        statusCodes: {
+          ok: 200,
+          created: 201,
+          badRequest: 400,
+          notFound: 404,
+          serverError: 500,
+        },
+        durations: {
+          fast: 0.01,
+          medium: 0.05,
+          slow: 0.1,
+          verySlow: 0.15,
+        },
+        errors: {
+          validation: 'ValidationError' as const,
+          authentication: 'AuthenticationError' as const,
+          notFound: 'NotFoundError' as const,
+        },
+      },
+      db: {
+        operations: {
+          select: 'SELECT' as const,
+          insert: 'INSERT' as const,
+          update: 'UPDATE' as const,
+          delete: 'DELETE' as const,
+        },
+        tables: {
+          users: 'users' as const,
+          teams: 'teams' as const,
+          refreshTokens: 'refresh_tokens' as const,
+          sessions: 'sessions' as const,
+        },
+        durations: {
+          fast: 0.01,
+          medium: 0.02,
+          slow: 0.03,
+        },
+        errors: {
+          uniqueConstraint: 'UniqueConstraintViolation' as const,
+          connectionTimeout: 'ConnectionTimeout' as const,
+          queryTimeout: 'QueryTimeout' as const,
+        },
+      },
+      business: {
+        counts: {
+          zero: 0,
+          small: 25,
+          medium: 50,
+          large: 100,
+          veryLarge: 150,
+          huge: 200,
+          massive: 250,
+        },
+      },
+    },
+  },
 } as const

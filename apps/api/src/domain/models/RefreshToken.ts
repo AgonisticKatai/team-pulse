@@ -45,7 +45,7 @@ export class RefreshToken {
   /**
    * Validate token is not empty
    */
-  private static validateToken({ token }: { token: string }): Result<string, ValidationError> {
+  protected static validateToken({ token }: { token: string }): Result<string, ValidationError> {
     if (!token || token.trim().length === 0) {
       return Err(ValidationError.forField({ field: 'token', message: 'Refresh token cannot be empty' }))
     }

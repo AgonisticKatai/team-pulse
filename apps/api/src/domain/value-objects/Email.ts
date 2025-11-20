@@ -7,8 +7,8 @@ import { ValidationError } from '../errors/index.js'
  * Immutable and self-validating
  */
 export class Email {
-  private static readonly EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  private static readonly MAX_LENGTH = 255
+  protected static readonly EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  protected static readonly MAX_LENGTH = 255
 
   private readonly value: string
 
@@ -19,7 +19,7 @@ export class Email {
   /**
    * Validate if email is not empty
    */
-  private static validateNotEmpty({ value }: { value: string }): Result<string, ValidationError> {
+  protected static validateNotEmpty({ value }: { value: string }): Result<string, ValidationError> {
     if (!value || value.trim().length === 0) {
       return Err(ValidationError.forField({ field: 'email', message: 'Email address is required' }))
     }
@@ -29,7 +29,7 @@ export class Email {
   /**
    * Validate email format
    */
-  private static validateFormat({ value }: { value: string }): Result<string, ValidationError> {
+  protected static validateFormat({ value }: { value: string }): Result<string, ValidationError> {
     if (!Email.EMAIL_REGEX.test(value)) {
       return Err(ValidationError.forField({ field: 'email', message: 'Email address format is invalid' }))
     }
@@ -39,7 +39,7 @@ export class Email {
   /**
    * Validate email length
    */
-  private static validateLength({ value }: { value: string }): Result<string, ValidationError> {
+  protected static validateLength({ value }: { value: string }): Result<string, ValidationError> {
     if (value.length > Email.MAX_LENGTH) {
       return Err(
         ValidationError.forField({

@@ -7,12 +7,11 @@ import { type Container, createContainer } from './infrastructure/config/contain
 import { type Env, validateEnv, validateProductionEnv } from './infrastructure/config/env.js'
 import { runMigrations } from './infrastructure/database/migrate.js'
 import { correlationIdMiddleware } from './infrastructure/http/middleware/correlation-id.js'
-import { metricsOnRequest, metricsOnResponse } from './infrastructure/http/middleware/metrics.js'
+import { createMetricsOnRequest, createMetricsOnResponse } from './infrastructure/http/middleware/metrics.js'
 import { registerAuthRoutes } from './infrastructure/http/routes/auth.js'
 import { registerTeamRoutes } from './infrastructure/http/routes/teams.js'
 import { registerUserRoutes } from './infrastructure/http/routes/users.js'
 import { createLoggerConfig } from './infrastructure/logging/logger-config.js'
-import { metricsService } from './infrastructure/monitoring/MetricsService.js'
 
 /**
  * Build and configure the Fastify application
@@ -94,8 +93,8 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
   // Uses onRequest to capture start time and onResponse to record metrics
   // This is the recommended Fastify pattern for metrics collection
   // onResponse hook fires after response is sent, ideal for statistics
-  fastify.addHook('onRequest', metricsOnRequest)
-  fastify.addHook('onResponse', metricsOnResponse)
+  fastify.addHook('onRequest', createMetricsOnRequest())
+  fastify.addHook('onResponse', createMetricsOnResponse({ metricsService: container.metricsService }))
 
   // 8. Register HTTP Compression
   // Compresses responses using gzip, deflate, or brotli based on Accept-Encoding header
@@ -135,8 +134,8 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
 
   // Metrics endpoint (Prometheus format)
   fastify.get('/metrics', async (_request: FastifyRequest, reply: FastifyReply) => {
-    const metrics = await metricsService.getMetrics()
-    reply.header('Content-Type', metricsService.getContentType())
+    const metrics = await container.metricsService.getMetrics()
+    reply.header('Content-Type', container.metricsService.getContentType())
     return reply.send(metrics)
   })
 
