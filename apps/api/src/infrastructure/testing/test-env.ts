@@ -1,3 +1,4 @@
+import type { IEnvironment } from '../../domain/config/IEnvironment.js'
 import type { Env } from '../config/env.js'
 
 /**
@@ -13,4 +14,21 @@ export const TEST_ENV: Env = {
   LOG_LEVEL: 'info',
   NODE_ENV: 'test',
   PORT: 3000,
+}
+
+/**
+ * Mock environment for Application layer tests (TokenFactory, etc.)
+ *
+ * This mock explicitly exposes only JWT secrets, making it clear that
+ * Application layer components don't need infrastructure details like
+ * DATABASE_URL, PORT, etc.
+ *
+ * Benefits:
+ * - Self-documenting: Shows exactly what Application layer needs
+ * - Verifies architecture: Application only depends on Domain (IEnvironment)
+ * - Reusable: Any Application component needing JWT config can use this
+ */
+export const TEST_TOKEN_ENV: IEnvironment = {
+  JWT_SECRET: TEST_ENV.JWT_SECRET,
+  JWT_REFRESH_SECRET: TEST_ENV.JWT_REFRESH_SECRET,
 }

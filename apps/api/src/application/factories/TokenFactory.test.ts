@@ -3,14 +3,14 @@ import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { ValidationError } from '../../domain/errors/index.js'
-import { TEST_ENV } from '../../infrastructure/testing/test-env.js'
+import { TEST_TOKEN_ENV } from '../../infrastructure/testing/test-env.js'
 import { TokenFactory } from './TokenFactory.js'
 
 describe('TokenFactory', () => {
   let tokenFactory: TokenFactory
 
   beforeEach(() => {
-    tokenFactory = TokenFactory.create({ env: TEST_ENV })
+    tokenFactory = TokenFactory.create({ env: TEST_TOKEN_ENV })
   })
 
   describe('createRefreshToken', () => {

@@ -2,9 +2,9 @@ import { randomUUID } from 'node:crypto'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
 import type { UserRole } from '@team-pulse/shared/types'
 import jwt from 'jsonwebtoken'
+import type { IEnvironment } from '../../domain/config/IEnvironment.js'
 import { ValidationError } from '../../domain/errors/index.js'
 import { RefreshToken } from '../../domain/models/RefreshToken.js'
-import type { Env } from '../../infrastructure/config/env.js'
 
 /**
  * Token Factory
@@ -98,7 +98,11 @@ export class TokenFactory {
   // All token operations require an instance with env injected
   // ============================================
 
-  private constructor(private readonly env: Env) {}
+  private readonly env: IEnvironment
+
+  private constructor({ env }: { env: IEnvironment }) {
+    this.env = env
+  }
 
   /**
    * Factory method to create TokenFactory instance
@@ -106,8 +110,8 @@ export class TokenFactory {
    * @param env - Environment configuration
    * @returns TokenFactory instance
    */
-  static create({ env }: { env: Env }): TokenFactory {
-    return new TokenFactory(env)
+  static create({ env }: { env: IEnvironment }): TokenFactory {
+    return new TokenFactory({ env })
   }
 
   /**
