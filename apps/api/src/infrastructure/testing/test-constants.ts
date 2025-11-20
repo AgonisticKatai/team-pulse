@@ -15,6 +15,62 @@ export const TEST_CONSTANTS = {
     newRefreshToken: 'new-refresh-token',
     validRefreshToken: 'valid-refresh-token',
   },
+
+  // Environment Variables Test Data
+  env: {
+    databaseUrls: {
+      development: 'postgresql://teampulse:teampulse@localhost:5432/teampulse',
+      invalid: 'not-a-database-url',
+      production: 'postgresql://prod:pass@db.example.com:5432/prod',
+      valid: 'postgresql://user:pass@localhost:5432/db',
+    },
+    frontendUrls: {
+      empty: '',
+      https: 'https://example.com',
+      invalid: 'not-a-url',
+      localhost: 'http://localhost:5173',
+      production: 'https://teampulse.com',
+    },
+    hosts: {
+      allInterfaces: '0.0.0.0',
+      localhost: '127.0.0.1',
+    },
+    jwtRefreshSecrets: {
+      exactly32: 'b'.repeat(32),
+      long: 'b'.repeat(64),
+      tooShort: 'tooshort',
+      valid: 'b'.repeat(32),
+    },
+    jwtSecrets: {
+      exactly32: 'a'.repeat(32),
+      long: 'a'.repeat(64),
+      tooShort: 'tooshort',
+      valid: 'a'.repeat(32),
+    },
+    logLevels: {
+      debug: 'debug' as const,
+      error: 'error' as const,
+      fatal: 'fatal' as const,
+      info: 'info' as const,
+      invalid: 'invalid-level',
+      trace: 'trace' as const,
+      warn: 'warn' as const,
+    },
+    nodeEnvs: {
+      development: 'development' as const,
+      invalid: 'invalid-env',
+      production: 'production' as const,
+      test: 'test' as const,
+    },
+    ports: {
+      default: '3000',
+      http: '80',
+      https: '443',
+      random: '8080',
+      zero: '0',
+    },
+  },
+
   // Error Messages
   errors: {
     databaseConnectionLost: 'Database connection lost',
