@@ -6,6 +6,34 @@ Este archivo registra mejoras pendientes y tech debt identificado durante el des
 
 ## 🔴 Alta Prioridad
 
+### 📦 API - Violaciones de Arquitectura Hexagonal
+
+#### Domain Layer importa desde Infrastructure (Testing)
+**Ubicación:** `apps/api/src/domain/`
+**Problema:** Los archivos de test en Domain importan helpers desde `infrastructure/testing/`
+**Archivos afectados:**
+- `domain/value-objects/*.test.ts` (City, Role, FoundedYear, Email, EntityId, Pagination, TeamName)
+- `domain/models/*.test.ts` (User, RefreshToken, Team)
+- `domain/errors/*.test.ts` (NotFoundError, RepositoryError, DuplicatedError, ValidationError)
+**Violación:** Domain no debe depender de Infrastructure según arquitectura hexagonal
+**Solución:**
+- **Opción 1 (recomendada):** Mover testing helpers a `packages/shared/src/testing/` y exportarlos desde `@team-pulse/shared`
+- **Opción 2:** Crear `domain/testing/test-helpers.ts` con helpers específicos de domain
+**Impacto:** CRÍTICO - Rompe la independencia del Domain layer
+
+#### Application Layer importa desde Infrastructure (Env)
+**Ubicación:** `apps/api/src/application/factories/TokenFactory.ts:6`
+**Problema:** TokenFactory importa tipo `Env` desde `infrastructure/config/env.ts`
+**Archivos afectados:**
+- `application/factories/TokenFactory.ts`
+- `application/factories/TokenFactory.test.ts`
+**Violación:** Application solo debe importar de Domain según arquitectura hexagonal
+**Solución:**
+- Crear interface `IEnvironment` en `domain/config/IEnvironment.ts`
+- Infrastructure implementa la interface con valores concretos
+- Application usa la interface abstracta, no la implementación
+**Impacto:** ALTO - Acopla Application layer con Infrastructure
+
 ### 📦 API - Tests Faltantes (Archivos Críticos)
 
 **Infrastructure/Config:**
@@ -145,6 +173,37 @@ Este archivo registra mejoras pendientes y tech debt identificado durante el des
 
 ---
 
+## ✨ Reconocimientos de Arquitectura
+
+### 📦 API - Implementación Correcta (Revisión 2025-11-20)
+
+**Naming Conventions - PERFECTO:**
+- ✅ Use Cases siguen patrón `{Action}{Entity}UseCase`
+- ✅ Repository Interfaces siguen patrón `I{Name}Repository`
+- ✅ Repository Implementations siguen patrón `{Implementation}{Entity}Repository`
+
+**DDD Patterns - EXCELENTE:**
+- ✅ Rich Entities con validación y comportamiento encapsulado (User, Team, RefreshToken)
+- ✅ Value Objects inmutables y auto-validantes (Email, EntityId, Role, TeamName, City, FoundedYear, Pagination)
+- ✅ Use Cases con single responsibility
+- ✅ Factory methods con constructores privados
+
+**Repository Pattern - CORRECTO:**
+- ✅ Interfaces definidas en Domain layer
+- ✅ Implementaciones en Infrastructure layer
+- ✅ Dependency injection correcta
+- ✅ Mapping entre domain entities y database rows
+
+**Hexagonal Architecture - PARCIALMENTE CORRECTO:**
+- ✅ Infrastructure depende de Domain (correcto)
+- ✅ Infrastructure implementa interfaces de Domain (correcto)
+- ❌ Domain tests dependen de Infrastructure (violación - ver sección Alta Prioridad)
+- ❌ Application importa de Infrastructure (TokenFactory - ver sección Alta Prioridad)
+
+**Calificación General:** 7.5/10
+
+---
+
 ## 📝 Notas
 
 - Este archivo debe actualizarse cada vez que se identifique tech debt en cualquier parte del monorepo
@@ -155,4 +214,5 @@ Este archivo registra mejoras pendientes y tech debt identificado durante el des
   3. Mantenibilidad
   4. Performance
 
+**Última revisión de arquitectura:** 2025-11-20
 **Última actualización:** 2025-11-20
