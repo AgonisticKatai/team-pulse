@@ -110,6 +110,17 @@ Este archivo registra mejoras pendientes y tech debt identificado durante el des
 - Actualizar comentarios si es necesario
 **Razón:** Evitar código duplicado y mantener single source of truth
 
+#### Evaluar solución más elegante para IEnvironment naming convention
+**Ubicación:** `apps/api/src/domain/config/IEnvironment.ts`
+**Problema actual:** Propiedades usan SCREAMING_SNAKE_CASE (JWT_SECRET, JWT_REFRESH_SECRET) para coincidir con env vars, pero Biome lint quiere camelCase
+**Solución temporal:** Usando `biome-ignore` con justificación (aplicado 2025-11-20)
+**Análisis pendiente:**
+- ¿Deberíamos usar camelCase en la interfaz (jwtSecret) y mapear en Infrastructure?
+- ¿Configurar Biome para permitir SCREAMING_SNAKE_CASE en interfaces de config?
+- ¿Es mejor mantener consistencia con env vars o con convenciones TypeScript?
+- Evaluar trade-offs: consistencia vs mapping explícito
+**Objetivo:** Determinar approach más correcto según mejores prácticas del proyecto
+
 #### Unificar convenciones de definición de tipos TypeScript
 **Ubicación:** Todo el proyecto (apps/api, packages/shared, etc.)
 **Acción:** Auditar y estandarizar dónde y cómo definimos tipos en TypeScript:
