@@ -49,6 +49,24 @@ Este archivo registra mejoras pendientes y tech debt identificado durante el des
 - Organización y consistencia de la estructura
 - Identificar oportunidades de mejora en la arquitectura del archivo
 
+#### Evaluar impacto de cambio private → protected en Value Objects y Entities
+**Ubicación:** `apps/api/src/domain/models/`, `apps/api/src/domain/value-objects/`
+**Contexto:** Cambiamos métodos y constantes `private static` a `protected static` para evitar falso positivo de Biome
+**Problema detectado:** Biome `noUnusedPrivateClassMembers` no detecta uso de métodos privados estáticos dentro de la misma clase
+**Solución aplicada:** Usar `protected` en lugar de `private` para métodos/constantes estáticos
+**Archivos afectados:**
+- Value Objects: EntityId, Email, TeamName, City, FoundedYear, Pagination, Role
+- Entities: User, Team, RefreshToken
+- Factory: TokenFactory
+**Debate:**
+- `protected` permite acceso en subclases (aunque actualmente no usamos herencia)
+- `private` sería más estricto pero causa falso positivo en Biome
+- Trade-off aceptable mientras no haya herencia
+**Acciones futuras:**
+1. Monitorear si Biome corrige este bug en futuras versiones
+2. Si se introduce herencia, reevaluar si `protected` es apropiado
+3. Considerar alternativas si el diseño cambia (inline validations, deshabilitar regla, etc.)
+
 #### Analizar arquitectura de middleware de métricas
 **Ubicación:** `apps/api/src/infrastructure/http/middleware/metrics.ts`
 **Acción:** Evaluar si createMetricsOnRequest/createMetricsOnResponse deberían ser:
