@@ -1,15 +1,22 @@
 /**
- * Testing Utilities
+ * Infrastructure Testing Utilities
  *
- * Centralized exports for all testing utilities, helpers, and builders
+ * Exports infrastructure-specific testing utilities:
+ * - Entity builders (buildUser, buildTeam, buildRefreshToken, etc.)
+ * - Test environment setup (TEST_ENV, setupTestEnvironment)
+ * - Test containers (setupTestContainer)
+ *
+ * For shared testing utilities, import from @team-pulse/shared:
+ * - Helpers: @team-pulse/shared/testing/helpers
+ * - Constants: @team-pulse/shared/testing/constants
+ * - DTO Builders: @team-pulse/shared/testing/dto-builders
  */
 
-// Re-export testing utilities from shared package
-export * from '@team-pulse/shared/testing'
-
-// Export domain-specific builders and constants
+// Entity builders (depend on domain models, so stay in infrastructure)
 export * from './auth-builders.js'
 export * from './team-builders.js'
-export * from './test-constants.js'
+// Infrastructure-specific test utilities
+export * from './test-containers.js'
 export * from './test-env.js'
+export * from './test-helpers.js'
 export * from './user-builders.js'

@@ -1,4 +1,4 @@
-import type { CreateTeamDTO, UpdateTeamDTO } from '@team-pulse/shared'
+import type { CreateTeamDTO, UpdateTeamDTO } from '@team-pulse/shared/dtos'
 import { type FormEvent, useState } from 'react'
 
 /**

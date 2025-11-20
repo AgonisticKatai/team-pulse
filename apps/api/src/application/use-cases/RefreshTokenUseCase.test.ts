@@ -1,4 +1,7 @@
-import { Err, Ok } from '@team-pulse/shared'
+import { Err, Ok } from '@team-pulse/shared/result'
+import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
+import { buildRefreshTokenDTO } from '@team-pulse/shared/testing/dto-builders'
+import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NotFoundError, RepositoryError, ValidationError } from '../../domain/errors/index.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
@@ -6,13 +9,9 @@ import type { IUserRepository } from '../../domain/repositories/IUserRepository.
 import {
   buildAdminUser,
   buildExpiredRefreshToken,
-  buildRefreshTokenDTO,
   buildSuperAdminUser,
   buildUser,
   buildValidRefreshToken,
-  expectErrorType,
-  expectSuccess,
-  TEST_CONSTANTS,
 } from '../../infrastructure/testing/index.js'
 import type { TokenFactory } from '../factories/TokenFactory.js'
 import { RefreshTokenUseCase } from './RefreshTokenUseCase.js'

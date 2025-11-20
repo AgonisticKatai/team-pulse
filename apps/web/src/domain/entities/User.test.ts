@@ -1,4 +1,4 @@
-import type { UserResponseDTO } from '@team-pulse/shared'
+import type { UserResponseDTO } from '@team-pulse/shared/dtos'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { ValidationError } from '../errors'
 import { Email, EntityId, Role, UserRole } from '../value-objects'

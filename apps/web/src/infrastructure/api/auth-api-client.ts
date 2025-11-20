@@ -11,7 +11,7 @@
  * and transforms responses to application-layer types.
  */
 
-import type { LoginDTO, LoginResponseDTO, RefreshTokenDTO, RefreshTokenResponseDTO, UserResponseDTO } from '@team-pulse/shared'
+import type { LoginDTO, LoginResponseDTO, RefreshTokenDTO, RefreshTokenResponseDTO, UserResponseDTO } from '@team-pulse/shared/dtos'
 import type { ApiClient } from './api-client'
 
 /**

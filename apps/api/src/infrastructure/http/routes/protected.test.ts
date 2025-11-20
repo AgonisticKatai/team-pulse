@@ -1,3 +1,4 @@
+import { expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -6,7 +7,6 @@ import { User } from '../../../domain/models/User.js'
 import { ScryptPasswordHasher } from '../../auth/ScryptPasswordHasher.js'
 import type { Container } from '../../config/container.js'
 import type { Database } from '../../database/connection.js'
-import { expectSuccess } from '../../testing/index.js'
 import { setupTestEnvironment } from '../../testing/test-helpers.js'
 
 describe('Protected Routes and RBAC', () => {

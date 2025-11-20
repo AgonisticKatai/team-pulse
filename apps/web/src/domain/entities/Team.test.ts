@@ -1,4 +1,4 @@
-import type { TeamResponseDTO } from '@team-pulse/shared'
+import type { TeamResponseDTO } from '@team-pulse/shared/dtos'
 import { describe, expect, it } from 'vitest'
 import { ValidationError } from '../errors'
 import { City, EntityId, FoundedYear, TeamName } from '../value-objects'

@@ -1,4 +1,4 @@
-import { Err, Ok, type Result } from '@team-pulse/shared'
+import { Err, Ok, type Result } from '@team-pulse/shared/result'
 import { NotFoundError, type RepositoryError } from '../../domain/errors/index.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
 

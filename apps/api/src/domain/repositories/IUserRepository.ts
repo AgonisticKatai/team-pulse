@@ -1,4 +1,4 @@
-import type { Result } from '@team-pulse/shared'
+import type { Result } from '@team-pulse/shared/result'
 import type { RepositoryError } from '../errors/RepositoryError.js'
 import type { User } from '../models/User.js'
 

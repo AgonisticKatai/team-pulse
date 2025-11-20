@@ -1,4 +1,4 @@
-import type { LoginResponseDTO } from '@team-pulse/shared'
+import type { LoginResponseDTO } from '@team-pulse/shared/dtos'
 import { ValidationError } from '../errors'
 import type { Result } from '../types/Result'
 import { Err, Ok } from '../types/Result'

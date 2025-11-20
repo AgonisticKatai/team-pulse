@@ -1,5 +1,5 @@
-import type { Result } from '@team-pulse/shared'
-import { Err, Ok } from '@team-pulse/shared'
+import type { Result } from '@team-pulse/shared/result'
+import { Err, Ok } from '@team-pulse/shared/result'
 import { ValidationError } from '../errors/index.js'
 
 /**

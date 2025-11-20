@@ -8,19 +8,6 @@ Este archivo registra mejoras pendientes y tech debt identificado durante el des
 
 ### 📦 API - Violaciones de Arquitectura Hexagonal
 
-#### Domain Layer importa desde Infrastructure (Testing)
-**Ubicación:** `apps/api/src/domain/`
-**Problema:** Los archivos de test en Domain importan helpers desde `infrastructure/testing/`
-**Archivos afectados:**
-- `domain/value-objects/*.test.ts` (City, Role, FoundedYear, Email, EntityId, Pagination, TeamName)
-- `domain/models/*.test.ts` (User, RefreshToken, Team)
-- `domain/errors/*.test.ts` (NotFoundError, RepositoryError, DuplicatedError, ValidationError)
-**Violación:** Domain no debe depender de Infrastructure según arquitectura hexagonal
-**Solución:**
-- **Opción 1 (recomendada):** Mover testing helpers a `packages/shared/src/testing/` y exportarlos desde `@team-pulse/shared`
-- **Opción 2:** Crear `domain/testing/test-helpers.ts` con helpers específicos de domain
-**Impacto:** CRÍTICO - Rompe la independencia del Domain layer
-
 #### Application Layer importa desde Infrastructure (Env)
 **Ubicación:** `apps/api/src/application/factories/TokenFactory.ts:6`
 **Problema:** TokenFactory importa tipo `Env` desde `infrastructure/config/env.ts`
@@ -102,6 +89,29 @@ Este archivo registra mejoras pendientes y tech debt identificado durante el des
 - Mantener pattern actual de factories
 **Razón:** Determinar el patrón más apropiado según arquitectura del proyecto
 
+#### Refactorizar middleware de autenticación para mayor elegancia y consistencia
+**Ubicación:** `apps/api/src/infrastructure/http/middleware/auth.ts`
+**Acción:** Revisar implementación completa del middleware de autenticación para:
+- Evaluar si la función `extractAndVerifyToken` puede hacerse más elegante
+- Verificar consistencia con patrones del proyecto (Result<T,E>, named parameters, etc.)
+- Considerar separación de responsabilidades (extracción de token vs verificación)
+- Analizar manejo de errores y si debería usar nuestros domain errors
+- Evaluar si debería inyectarse TokenFactory o JwtService como dependencia
+**Razón:** Asegurar que el middleware sigue los mismos estándares de calidad que el resto del código
+
+#### Limpiar funciones duplicadas de DTO builders en infrastructure/testing
+**Ubicación:** `apps/api/src/infrastructure/testing/auth-builders.ts`, `user-builders.ts`, `team-builders.ts`
+**Problema:** Tras mover DTO builders a `@team-pulse/shared/testing/dto-builders`, las funciones originales siguen en infrastructure/testing:
+- `buildLoginDTO()` y `buildRefreshTokenDTO()` en auth-builders.ts
+- `buildCreateUserDTO()` en user-builders.ts
+- `buildCreateTeamDTO()` en team-builders.ts
+**Impacto:** Cosmético - No causa problemas funcionales (nadie las usa desde infrastructure)
+**Solución:**
+- Eliminar las funciones de DTO builders de los archivos en infrastructure/testing
+- Mantener solo las funciones de entity builders (buildUser, buildTeam, buildRefreshToken, etc.)
+- Actualizar comentarios si es necesario
+**Razón:** Evitar código duplicado y mantener single source of truth
+
 #### Unificar convenciones de definición de tipos TypeScript
 **Ubicación:** Todo el proyecto (apps/api, packages/shared, etc.)
 **Acción:** Auditar y estandarizar dónde y cómo definimos tipos en TypeScript:
@@ -171,6 +181,25 @@ Este archivo registra mejoras pendientes y tech debt identificado durante el des
 - [x] Eliminar archivos legacy password-utils.ts y password-utils.test.ts
 - [x] **Resultado:** 704 tests pasando, migración completa exitosa
 
+### 📦 Shared - Refactorización de Testing Utilities con Subpath Exports (2025-11-20)
+- [x] **Problema resuelto:** Domain Layer importaba desde Infrastructure (violación crítica de arquitectura hexagonal)
+- [x] **Solución implementada:** Mover testing utilities a `@team-pulse/shared` con subpath exports organizados
+- [x] Reorganizar `packages/shared/src/testing/`:
+  - Crear `helpers.ts` combinando assertion, result y mock helpers
+  - Crear `constants.ts` con TEST_CONSTANTS
+  - Crear `dto-builders.ts` con builders de DTOs (buildCreateUserDTO, buildLoginDTO, buildCreateTeamDTO)
+- [x] Configurar subpath exports en `package.json`:
+  - `@team-pulse/shared/result` → Result<T,E>, Ok, Err, map, flatMap
+  - `@team-pulse/shared/dtos` → DTOs con Zod schemas
+  - `@team-pulse/shared/types` → Tipos compartidos
+  - `@team-pulse/shared/testing/helpers` → expectSuccess, expectError, expectZodError, etc.
+  - `@team-pulse/shared/testing/constants` → TEST_CONSTANTS
+  - `@team-pulse/shared/testing/dto-builders` → Builders de DTOs
+- [x] Eliminar barrel exports del index principal (solo documentación)
+- [x] Mantener entity builders en `infrastructure/testing` (buildUser, buildTeam, buildRefreshToken)
+- [x] Actualizar 100+ archivos con imports organizados
+- [x] **Resultado:** 793 tests pasando, 0 errores TypeScript, arquitectura hexagonal respetada
+
 ---
 
 ## ✨ Reconocimientos de Arquitectura
@@ -194,13 +223,14 @@ Este archivo registra mejoras pendientes y tech debt identificado durante el des
 - ✅ Dependency injection correcta
 - ✅ Mapping entre domain entities y database rows
 
-**Hexagonal Architecture - PARCIALMENTE CORRECTO:**
+**Hexagonal Architecture - EXCELENTE (Actualizado 2025-11-20):**
 - ✅ Infrastructure depende de Domain (correcto)
 - ✅ Infrastructure implementa interfaces de Domain (correcto)
-- ❌ Domain tests dependen de Infrastructure (violación - ver sección Alta Prioridad)
-- ❌ Application importa de Infrastructure (TokenFactory - ver sección Alta Prioridad)
+- ✅ Domain tests usan testing utilities de @team-pulse/shared (independiente de Infrastructure) ✅ RESUELTO
+- ✅ Testing utilities organizadas con subpath exports en shared package
+- ⚠️ Application importa de Infrastructure (TokenFactory - pendiente de refactorizar)
 
-**Calificación General:** 7.5/10
+**Calificación General:** 9/10 (subió de 7.5 tras resolver violación crítica del Domain layer)
 
 ---
 

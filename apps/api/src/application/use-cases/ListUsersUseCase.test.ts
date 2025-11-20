@@ -1,16 +1,10 @@
-import { Err, Ok } from '@team-pulse/shared'
+import { Err, Ok } from '@team-pulse/shared/result'
+import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
+import { expectError, expectFirst, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import type { IMetricsService } from '../../domain/services/IMetricsService.js'
-import {
-  buildAdminUser,
-  buildSuperAdminUser,
-  buildUser,
-  expectError,
-  expectFirst,
-  expectSuccess,
-  TEST_CONSTANTS,
-} from '../../infrastructure/testing/index.js'
+import { buildAdminUser, buildSuperAdminUser, buildUser } from '../../infrastructure/testing/index.js'
 import { ListUsersUseCase } from './ListUsersUseCase.js'
 
 describe('ListUsersUseCase', () => {

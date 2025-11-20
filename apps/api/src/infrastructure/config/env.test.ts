@@ -1,5 +1,5 @@
+import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { TEST_CONSTANTS } from '../testing/test-constants.js'
 import { type Env, validateEnv, validateProductionEnv } from './env.js'
 
 describe('validateEnv', () => {

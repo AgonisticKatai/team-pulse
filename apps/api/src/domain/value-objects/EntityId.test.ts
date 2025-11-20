@@ -1,5 +1,6 @@
+import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
+import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { describe, expect, it } from 'vitest'
-import { expectError, expectSuccess, TEST_CONSTANTS } from '../../infrastructure/testing/index.js'
 import { ValidationError } from '../errors/index.js'
 import { EntityId } from './EntityId.js'
 

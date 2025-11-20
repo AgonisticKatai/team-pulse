@@ -72,6 +72,19 @@
    - Implementations (Adapters) in `infrastructure/`
    - Use Cases orchestrate without knowing HTTP/DB details
 
+6. **NEVER ignore code smells - Apply Boy Scout Rule or document in TODO.md**
+   - **Minor improvements (fix immediately):**
+     - Unused imports
+     - Formatting inconsistencies
+     - Simple refactorings (rename, extract variable)
+     - Missing type annotations
+   - **Non-minor improvements (add to TODO.md):**
+     - Architecture changes
+     - Pattern inconsistencies across files
+     - Duplicated logic that needs careful refactoring
+     - Anything that needs analysis or discussion
+   - **NEVER pass by** - Either fix it now or document it. NO exceptions.
+
 ---
 
 ## 📚 REFERENCES
@@ -89,3 +102,9 @@
 - [ ] Does my constructor use private + factory pattern?
 - [ ] Am I respecting layer boundaries?
 - [ ] Did I read existing code before creating new files?
+
+## 🔍 QUICK CHECKLIST AFTER CODING
+
+- [ ] Did I fix minor issues I found? (Boy Scout Rule)
+- [ ] Did I document non-minor issues in TODO.md?
+- [ ] Did I leave the code cleaner than I found it?

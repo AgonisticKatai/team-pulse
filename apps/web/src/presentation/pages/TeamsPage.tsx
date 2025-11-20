@@ -1,4 +1,4 @@
-import type { CreateTeamDTO, TeamResponseDTO, UpdateTeamDTO } from '@team-pulse/shared'
+import type { CreateTeamDTO, TeamResponseDTO, UpdateTeamDTO } from '@team-pulse/shared/dtos'
 import { useState } from 'react'
 import { useAuth } from '../../application/hooks/use-auth'
 import { useCreateTeam, useDeleteTeam, useTeams, useUpdateTeam } from '../../application/hooks/use-teams'

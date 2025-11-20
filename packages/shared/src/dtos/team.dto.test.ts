@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { expectZodError } from '../testing/test-utils.js'
+import { expectZodError } from '../testing/helpers.js'
 import { CreateTeamDTOSchema, UpdateTeamDTOSchema } from './team.dto.js'
 
 describe('Team DTOs', () => {

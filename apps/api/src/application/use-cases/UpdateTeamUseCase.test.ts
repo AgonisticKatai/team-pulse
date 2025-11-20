@@ -1,9 +1,11 @@
-import type { UpdateTeamDTO } from '@team-pulse/shared'
-import { Err, Ok } from '@team-pulse/shared'
+import type { UpdateTeamDTO } from '@team-pulse/shared/dtos'
+import { Err, Ok } from '@team-pulse/shared/result'
+import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
+import { expectError, expectErrorType, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { DuplicatedError, NotFoundError, RepositoryError, ValidationError } from '../../domain/errors/index.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
-import { buildExistingTeam, buildTeam, expectError, expectErrorType, expectSuccess, TEST_CONSTANTS } from '../../infrastructure/testing/index.js'
+import { buildExistingTeam, buildTeam } from '../../infrastructure/testing/index.js'
 import { UpdateTeamUseCase } from './UpdateTeamUseCase.js'
 
 describe('UpdateTeamUseCase', () => {

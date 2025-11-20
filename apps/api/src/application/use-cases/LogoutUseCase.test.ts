@@ -1,7 +1,8 @@
-import { Ok } from '@team-pulse/shared'
+import { Ok } from '@team-pulse/shared/result'
+import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
+import { expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
-import { expectSuccess, TEST_CONSTANTS } from '../../infrastructure/testing/index.js'
 import { LogoutUseCase } from './LogoutUseCase.js'
 
 describe('LogoutUseCase', () => {

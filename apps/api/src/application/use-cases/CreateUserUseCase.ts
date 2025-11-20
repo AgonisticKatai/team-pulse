@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
-import type { CreateUserDTO, UserResponseDTO } from '@team-pulse/shared'
-import { Err, Ok, type Result } from '@team-pulse/shared'
+import type { CreateUserDTO, UserResponseDTO } from '@team-pulse/shared/dtos'
+import { Err, Ok, type Result } from '@team-pulse/shared/result'
 import { DuplicatedError, type RepositoryError, type ValidationError } from '../../domain/errors/index.js'
 import { User } from '../../domain/models/User.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'

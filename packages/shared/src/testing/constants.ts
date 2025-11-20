@@ -318,7 +318,7 @@ export const TEST_CONSTANTS = {
         histogram: {
           name: 'test_histogram',
           help: 'Test histogram metric',
-          buckets: [0.1, 0.5, 1, 5, 10],
+          buckets: [0.1, 0.5, 1, 5, 10] as const,
         },
       },
       labels: {

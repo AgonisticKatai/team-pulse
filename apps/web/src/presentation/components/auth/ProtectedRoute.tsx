@@ -21,7 +21,7 @@
  * ```
  */
 
-import type { UserRole } from '@team-pulse/shared'
+import type { UserRole } from '@team-pulse/shared/types'
 import type { ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../../../application/hooks/use-auth'

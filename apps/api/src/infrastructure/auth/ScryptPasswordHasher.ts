@@ -1,5 +1,5 @@
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto'
-import { Err, Ok, type Result } from '@team-pulse/shared'
+import { Err, Ok, type Result } from '@team-pulse/shared/result'
 import { RepositoryError } from '../../domain/errors/RepositoryError.js'
 import type { IPasswordHasher } from '../../domain/services/IPasswordHasher.js'
 

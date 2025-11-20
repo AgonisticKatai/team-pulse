@@ -2,6 +2,41 @@ import { expect } from 'vitest'
 import type { Result } from '../types/Result.js'
 
 /**
+ * Testing Helpers
+ *
+ * Centralized collection of all testing utilities for assertion and validation.
+ * These helpers provide type-safe operations for common testing patterns.
+ */
+
+// ============================================================================
+// ASSERTION HELPERS
+// ============================================================================
+
+/**
+ * Assert that a value is defined (not null or undefined) with TypeScript narrowing
+ *
+ * This helper provides type narrowing for TypeScript after checking that a value is defined.
+ * Useful when destructuring arrays where TypeScript can't infer the element exists.
+ *
+ * @example
+ * const tokens = expectSuccess(result)
+ * expect(tokens).toHaveLength(1)
+ * const [firstToken] = tokens
+ * assertDefined(firstToken) // TypeScript now knows firstToken is defined
+ * expect(firstToken.userId.getValue()).toBe('user-1')
+ *
+ * @param value - The value to check
+ * @param message - Optional custom error message
+ */
+export function assertDefined<T>(value: T, message?: string): asserts value is NonNullable<T> {
+  expect(value, message).toBeDefined()
+}
+
+// ============================================================================
+// RESULT HELPERS
+// ============================================================================
+
+/**
  * Test helper to assert a Result is successful and extract the value type-safely
  *
  * With the discriminated union Result type, TypeScript automatically narrows the type
@@ -161,4 +196,103 @@ export function expectArrayOfLength<T, E>(result: Result<T[], E>, length: number
   const array = expectSuccess(result)
   expect(array).toHaveLength(length)
   return array
+}
+
+// ============================================================================
+// MOCK HELPERS
+// ============================================================================
+
+/**
+ * Type-safe helper to get an argument from a mock function call
+ *
+ * This helper properly handles TypeScript's `noUncheckedIndexedAccess` config
+ * by explicitly checking that the call and argument exist before returning them.
+ *
+ * @param mockFn - The mocked function (typically from vi.mocked())
+ * @param callIndex - The index of the call to check (0-based, defaults to 0)
+ * @param argIndex - The index of the argument to retrieve (0-based, defaults to 0)
+ * @returns The argument value at the specified indices
+ *
+ * @example
+ * ```typescript
+ * // Get first argument of first call (most common case)
+ * const dto = expectMockCallArg<CreateUserDTO>(vi.mocked(useCase.execute))
+ * expect(dto.email).toBe('test@example.com')
+ *
+ * // Get second argument of first call
+ * const options = expectMockCallArg<Options>(vi.mocked(someFunction), 0, 1)
+ *
+ * // Get first argument of second call
+ * const secondCallArg = expectMockCallArg<Dto>(vi.mocked(someFunction), 1, 0)
+ * ```
+ */
+export function expectMockCallArg<T>(mockFn: { mock: { calls: unknown[][] } }, callIndex = 0, argIndex = 0): T {
+  const call = mockFn.mock.calls[callIndex]
+  expect(call).toBeDefined()
+
+  const arg = call?.[argIndex]
+  expect(arg).toBeDefined()
+
+  return arg as T
+}
+
+/**
+ * Type-safe helper to get the invocation order of a mock function call
+ *
+ * This helper properly handles TypeScript's `noUncheckedIndexedAccess` config
+ * by explicitly checking that the invocation order exists before returning it.
+ *
+ * @param mockFn - The mocked function (typically from vi.mocked())
+ * @param callIndex - The index of the call to check (0-based, defaults to 0)
+ * @returns The invocation order number
+ *
+ * @example
+ * ```typescript
+ * // Verify that findById is called before delete (most common case - first call)
+ * const findByIdOrder = expectMockInvocationOrder(vi.mocked(repository.findById))
+ * const deleteOrder = expectMockInvocationOrder(vi.mocked(repository.delete))
+ * expect(findByIdOrder).toBeLessThan(deleteOrder)
+ *
+ * // Check second call's invocation order
+ * const secondCallOrder = expectMockInvocationOrder(vi.mocked(someFunction), 1)
+ * ```
+ */
+export function expectMockInvocationOrder(mockFn: { mock: { invocationCallOrder: number[] } }, callIndex = 0): number {
+  const order = mockFn.mock.invocationCallOrder[callIndex]
+  expect(order).toBeDefined()
+
+  return order as number
+}
+
+// ============================================================================
+// ZOD VALIDATION HELPERS
+// ============================================================================
+
+/**
+ * Type-safe helper to validate Zod schema errors
+ *
+ * This helper properly handles TypeScript's `noUncheckedIndexedAccess` config
+ * by explicitly checking that issues array has elements before accessing them.
+ *
+ * @param result - The result from a Zod schema.safeParse() call
+ * @param expectedMessage - The expected error message from the first issue
+ *
+ * @example
+ * ```typescript
+ * const result = LoginDTOSchema.safeParse({ email: 'invalid' })
+ * expectZodError(result, 'Invalid email format')
+ * ```
+ */
+export function expectZodError(result: { success: boolean; error?: { issues: Array<{ message: string }> } }, expectedMessage: string): void {
+  expect(result.success).toBe(false)
+
+  if (!result.success && result.error) {
+    // Verify that Zod generated at least one issue
+    expect(result.error.issues.length).toBeGreaterThan(0)
+
+    // Get first issue (safe because we verified length > 0)
+    const firstIssue = result.error.issues[0]
+    expect(firstIssue).toBeDefined()
+    expect(firstIssue?.message).toBe(expectedMessage)
+  }
 }

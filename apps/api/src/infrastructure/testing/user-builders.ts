@@ -1,6 +1,6 @@
-import type { CreateUserDTO } from '@team-pulse/shared'
+import type { CreateUserDTO } from '@team-pulse/shared/dtos'
+import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { User } from '../../domain/models/User.js'
-import { TEST_CONSTANTS } from './test-constants.js'
 
 /**
  * Builder for CreateUserDTO test data

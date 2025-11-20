@@ -10,13 +10,29 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./testing": {
-      "import": "./dist/testing/index.js",
-      "types": "./dist/testing/index.d.ts"
+    "./result": {
+      "import": "./dist/types/Result.js",
+      "types": "./dist/types/Result.d.ts"
     },
-    "./test-utils": {
-      "import": "./dist/test-utils.js",
-      "types": "./dist/test-utils.d.ts"
+    "./dtos": {
+      "import": "./dist/dtos/index.js",
+      "types": "./dist/dtos/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./testing/helpers": {
+      "import": "./dist/testing/helpers.js",
+      "types": "./dist/testing/helpers.d.ts"
+    },
+    "./testing/constants": {
+      "import": "./dist/testing/constants.js",
+      "types": "./dist/testing/constants.d.ts"
+    },
+    "./testing/dto-builders": {
+      "import": "./dist/testing/dto-builders.js",
+      "types": "./dist/testing/dto-builders.d.ts"
     }
   },
   "files": [

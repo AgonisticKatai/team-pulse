@@ -1,6 +1,6 @@
-import type { LoginDTO, RefreshTokenDTO } from '@team-pulse/shared'
+import type { LoginDTO, RefreshTokenDTO } from '@team-pulse/shared/dtos'
+import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { RefreshToken } from '../../domain/models/RefreshToken.js'
-import { TEST_CONSTANTS } from './test-constants.js'
 
 /**
  * Builder for LoginDTO test data

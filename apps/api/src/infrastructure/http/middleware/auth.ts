@@ -1,4 +1,4 @@
-import type { UserRole } from '@team-pulse/shared'
+import type { UserRole } from '@team-pulse/shared/types'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import type { AccessTokenPayload, TokenFactory } from '../../../application/factories/TokenFactory.js'
 

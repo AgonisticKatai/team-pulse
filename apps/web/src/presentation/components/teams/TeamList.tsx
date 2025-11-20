@@ -1,4 +1,4 @@
-import type { TeamResponseDTO } from '@team-pulse/shared'
+import type { TeamResponseDTO } from '@team-pulse/shared/dtos'
 import { TeamCard } from './TeamCard'
 
 /**

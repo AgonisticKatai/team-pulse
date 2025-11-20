@@ -1,4 +1,4 @@
-import type { CreateUserDTO, UserResponseDTO } from '@team-pulse/shared'
+import type { CreateUserDTO, UserResponseDTO } from '@team-pulse/shared/dtos'
 import { User } from '../../domain/entities'
 import { DomainError, NotFoundError, ValidationError } from '../../domain/errors'
 import type { CreateUserData, IUserRepository } from '../../domain/repositories'

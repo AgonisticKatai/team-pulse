@@ -1,5 +1,5 @@
+import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { describe, expect, it } from 'vitest'
-import { expectError, expectSuccess } from '../../infrastructure/testing/index.js'
 import { Pagination } from './Pagination.js'
 
 describe('Pagination Value Object', () => {

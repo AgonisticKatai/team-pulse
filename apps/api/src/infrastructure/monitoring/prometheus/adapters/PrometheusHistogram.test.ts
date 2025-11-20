@@ -1,6 +1,6 @@
+import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { Histogram, Registry } from 'prom-client'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { TEST_CONSTANTS } from '../../../testing/test-constants.js'
 import { PrometheusHistogram } from './PrometheusHistogram.js'
 
 const { prometheus } = TEST_CONSTANTS.metrics

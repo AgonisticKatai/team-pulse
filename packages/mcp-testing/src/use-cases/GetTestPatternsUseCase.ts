@@ -1,4 +1,4 @@
-import { Ok, type Result } from '@team-pulse/shared'
+import { Ok, type Result } from '@team-pulse/shared/result'
 import type { ITestPatternProvider, TestPatternCategory } from '../domain/ITestPatternProvider.js'
 
 /**

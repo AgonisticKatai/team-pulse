@@ -1,4 +1,4 @@
-import { Ok, type Result } from '@team-pulse/shared'
+import { Ok, type Result } from '@team-pulse/shared/result'
 import type { ISchemaReader, SchemaSnapshot } from '../domain/ISchemaReader.js'
 
 export type SchemaFormat = 'full' | 'summary' | 'tables-only'

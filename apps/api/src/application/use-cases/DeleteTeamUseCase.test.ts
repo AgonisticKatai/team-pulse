@@ -1,15 +1,10 @@
-import { Err, Ok } from '@team-pulse/shared'
+import { Err, Ok } from '@team-pulse/shared/result'
+import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
+import { expectError, expectErrorType, expectMockInvocationOrder, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NotFoundError, RepositoryError } from '../../domain/errors/index.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
-import {
-  buildTeam,
-  expectError,
-  expectErrorType,
-  expectMockInvocationOrder,
-  expectSuccess,
-  TEST_CONSTANTS,
-} from '../../infrastructure/testing/index.js'
+import { buildTeam } from '../../infrastructure/testing/index.js'
 import { DeleteTeamUseCase } from './DeleteTeamUseCase.js'
 
 describe('DeleteTeamUseCase', () => {

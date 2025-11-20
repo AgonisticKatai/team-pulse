@@ -1,4 +1,4 @@
-import { LoginDTOSchema, RefreshTokenDTOSchema } from '@team-pulse/shared'
+import { LoginDTOSchema, RefreshTokenDTOSchema } from '@team-pulse/shared/dtos'
 import type { FastifyInstance } from 'fastify'
 import type { TokenFactory } from '../../../application/factories/TokenFactory.js'
 import type { LoginUseCase } from '../../../application/use-cases/LoginUseCase.js'

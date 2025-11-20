@@ -1,5 +1,5 @@
-import type { TeamResponseDTO, UpdateTeamDTO } from '@team-pulse/shared'
-import { Err, Ok, type Result } from '@team-pulse/shared'
+import type { TeamResponseDTO, UpdateTeamDTO } from '@team-pulse/shared/dtos'
+import { Err, Ok, type Result } from '@team-pulse/shared/result'
 import { DuplicatedError, NotFoundError, type RepositoryError, type ValidationError } from '../../domain/errors/index.js'
 import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
 

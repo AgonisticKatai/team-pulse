@@ -17,7 +17,7 @@
  * - Clean separation of concerns
  */
 
-import type { UserResponseDTO } from '@team-pulse/shared'
+import type { UserResponseDTO } from '@team-pulse/shared/dtos'
 import type { ReactNode } from 'react'
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
 import type { ApiClient } from '../../infrastructure/api/api-client'

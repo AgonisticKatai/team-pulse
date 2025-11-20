@@ -1,4 +1,4 @@
-import { Err, Ok, type Result } from '@team-pulse/shared'
+import { Err, Ok, type Result } from '@team-pulse/shared/result'
 import type { ISchemaReader } from '../domain/ISchemaReader.js'
 
 /**

@@ -1,21 +1,13 @@
-import { Err, Ok } from '@team-pulse/shared'
+import { Err, Ok } from '@team-pulse/shared/result'
+import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
+import { buildCreateUserDTO } from '@team-pulse/shared/testing/dto-builders'
+import { expectError, expectErrorType, expectMockCallArg, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { expectMockCallArg } from '../../../../../packages/shared/dist/testing/test-utils.js'
 import { DuplicatedError, RepositoryError } from '../../domain/errors/index.js'
 import { User } from '../../domain/models/User.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import type { IPasswordHasher } from '../../domain/services/IPasswordHasher.js'
-import {
-  buildAdminUser,
-  buildCreateUserDTO,
-  buildExistingUser,
-  buildSuperAdminUser,
-  buildUser,
-  expectError,
-  expectErrorType,
-  expectSuccess,
-  TEST_CONSTANTS,
-} from '../../infrastructure/testing/index.js'
+import { buildAdminUser, buildExistingUser, buildSuperAdminUser, buildUser } from '../../infrastructure/testing/index.js'
 import { CreateUserUseCase } from './CreateUserUseCase.js'
 
 // Mock external dependencies

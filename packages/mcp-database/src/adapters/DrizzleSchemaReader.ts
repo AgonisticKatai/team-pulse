@@ -1,6 +1,6 @@
 import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { Err, Ok, type Result } from '@team-pulse/shared'
+import { Err, Ok, type Result } from '@team-pulse/shared/result'
 import type { ISchemaReader, MigrationJournal, SchemaSnapshot, TableSchema } from '../domain/ISchemaReader.js'
 
 /**

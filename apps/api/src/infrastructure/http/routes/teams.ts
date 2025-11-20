@@ -1,4 +1,4 @@
-import { CreateTeamDTOSchema, PaginationQuerySchema, UpdateTeamDTOSchema } from '@team-pulse/shared'
+import { CreateTeamDTOSchema, PaginationQuerySchema, UpdateTeamDTOSchema } from '@team-pulse/shared/dtos'
 import type { FastifyInstance } from 'fastify'
 import type { TokenFactory } from '../../../application/factories/TokenFactory.js'
 import type { CreateTeamUseCase } from '../../../application/use-cases/CreateTeamUseCase.js'

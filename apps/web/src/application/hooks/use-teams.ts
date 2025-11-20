@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { CreateTeamDTO, TeamResponseDTO, TeamsListResponseDTO, UpdateTeamDTO } from '@team-pulse/shared'
+import type { CreateTeamDTO, TeamResponseDTO, TeamsListResponseDTO, UpdateTeamDTO } from '@team-pulse/shared/dtos'
 import type { ApiError } from '../../infrastructure/api/api-client'
 import type { TeamApiClient } from '../../infrastructure/api/team-api-client'
 

@@ -1,5 +1,5 @@
-import type { UserRole } from '@team-pulse/shared'
-import { collect, Err, Ok, type Result } from '@team-pulse/shared'
+import { collect, Err, Ok, type Result } from '@team-pulse/shared/result'
+import type { UserRole } from '@team-pulse/shared/types'
 import { eq, sql } from 'drizzle-orm'
 import { RepositoryError } from '../../../domain/errors/RepositoryError.js'
 import type { ValidationError } from '../../../domain/errors/ValidationError.js'

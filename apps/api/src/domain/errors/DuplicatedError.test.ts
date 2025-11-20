@@ -1,5 +1,5 @@
+import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { describe, expect, it } from 'vitest'
-import { TEST_CONSTANTS } from '../../infrastructure/testing/index.js'
 import { DomainError } from './DomainError.js'
 import { DuplicatedError } from './DuplicatedError.js'
 

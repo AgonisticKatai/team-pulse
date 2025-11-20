@@ -1,4 +1,4 @@
-import type { Result } from '@team-pulse/shared'
+import type { Result } from '@team-pulse/shared/result'
 
 /**
  * Command Execution Result

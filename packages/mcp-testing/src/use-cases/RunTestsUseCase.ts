@@ -1,4 +1,4 @@
-import { Ok, type Result } from '@team-pulse/shared'
+import { Ok, type Result } from '@team-pulse/shared/result'
 import type { ICommandExecutor } from '../domain/ICommandExecutor.js'
 
 export type PackageTarget = 'api' | 'web' | 'shared' | 'all'

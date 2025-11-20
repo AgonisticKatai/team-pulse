@@ -1,21 +1,15 @@
-import { Err, Ok } from '@team-pulse/shared'
+import { Err, Ok } from '@team-pulse/shared/result'
+import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
+import { buildLoginDTO } from '@team-pulse/shared/testing/dto-builders'
+import { expectErrorType, expectMockCallArg, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { expectMockCallArg } from '../../../../../packages/shared/dist/testing/test-utils.js'
 import { RepositoryError, ValidationError } from '../../domain/errors/index.js'
 import { RefreshToken } from '../../domain/models/RefreshToken.js'
 import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
 import type { IMetricsService } from '../../domain/services/IMetricsService.js'
 import type { IPasswordHasher } from '../../domain/services/IPasswordHasher.js'
-import {
-  buildAdminUser,
-  buildLoginDTO,
-  buildSuperAdminUser,
-  buildUser,
-  expectErrorType,
-  expectSuccess,
-  TEST_CONSTANTS,
-} from '../../infrastructure/testing/index.js'
+import { buildAdminUser, buildSuperAdminUser, buildUser } from '../../infrastructure/testing/index.js'
 import type { TokenFactory } from '../factories/TokenFactory.js'
 import { LoginUseCase } from './LoginUseCase.js'
 
