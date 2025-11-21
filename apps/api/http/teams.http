@@ -3,10 +3,9 @@
 #
 # Create/Update/Delete require ADMIN or SUPER_ADMIN role.
 # List/Get operations require any authenticated user.
+#
+# Environment variables are loaded from .vscode/settings.json
 ###############################################################################
-
-### Environment Variables
-@baseUrl = http://localhost:3000
 
 ###############################################################################
 # Prerequisites

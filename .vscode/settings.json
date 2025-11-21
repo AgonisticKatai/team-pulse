@@ -1,0 +1,23 @@
+{
+  // REST Client environment variables
+  "rest-client.environmentVariables": {
+    "$shared": {
+      // Shared variables across all environments
+      "userEmail": "user@test.com",
+      "userPassword": "UserPassword123!",
+      "adminEmail": "admin@test.com",
+      "adminPassword": "AdminPassword123!",
+      "superAdminEmail": "superadmin@test.com",
+      "superAdminPassword": "SuperAdminPassword123!"
+    },
+    "local": {
+      "baseUrl": "http://localhost:3000"
+    },
+    "staging": {
+      "baseUrl": "https://staging-api.teampulse.com"
+    },
+    "production": {
+      "baseUrl": "https://api.teampulse.com"
+    }
+  }
+}

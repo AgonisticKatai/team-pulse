@@ -2,10 +2,9 @@
 # Health Check & Monitoring Endpoints
 #
 # These endpoints don't require authentication.
+#
+# Environment variables are loaded from .vscode/settings.json
 ###############################################################################
-
-### Environment Variables
-@baseUrl = http://localhost:3000
 
 ###############################################################################
 # Health Checks

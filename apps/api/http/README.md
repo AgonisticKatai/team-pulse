@@ -33,16 +33,18 @@ http/
 
 ## 🚀 Cómo Usar
 
-### 1. Configurar Variables (Opcional)
+### 1. Seleccionar Entorno
 
-Cada archivo `.http` tiene variables al inicio que puedes editar:
-```http
-@baseUrl = http://localhost:3000
-@userEmail = user@test.com
-@userPassword = UserPassword123!
-```
+REST Client usa variables definidas en `.vscode/settings.json`. Para cambiar de entorno:
 
-Si quieres cambiar el puerto o las credenciales, edítalas directamente en cada archivo.
+1. Mira la barra de estado de VSCode (abajo)
+2. Click en el selector de entorno (dice "local", "staging", o "production")
+3. Selecciona el entorno que quieras usar
+
+**Entornos disponibles:**
+- `local` - Desarrollo local (http://localhost:3000)
+- `staging` - Servidor de staging (configúralo en settings.json)
+- `production` - Servidor de producción (configúralo en settings.json)
 
 ### 2. Ejecutar Requests
 
@@ -98,14 +100,16 @@ Si recibes error 401:
 
 ## 📝 Variables Disponibles
 
-Las variables se definen al inicio de cada archivo `.http` y se usan con `{{nombreVariable}}`:
+Las variables se definen en `.vscode/settings.json` bajo `rest-client.environmentVariables`:
 
-### Variables Configurables (definidas en cada archivo)
-- `{{baseUrl}}` - URL base de la API (default: http://localhost:3000)
-- `{{userEmail}}` - Email del usuario USER (solo en auth.http)
-- `{{adminEmail}}` - Email del usuario ADMIN (solo en auth.http)
-- `{{superAdminEmail}}` - Email del usuario SUPER_ADMIN (solo en auth.http)
-- Y sus respectivas passwords
+### Variables de Entorno (configuradas en settings.json)
+- `{{baseUrl}}` - URL base de la API (cambia según entorno seleccionado)
+- `{{userEmail}}` - Email del usuario USER (compartido entre entornos)
+- `{{userPassword}}` - Password del usuario USER
+- `{{adminEmail}}` - Email del usuario ADMIN
+- `{{adminPassword}}` - Password del usuario ADMIN
+- `{{superAdminEmail}}` - Email del usuario SUPER_ADMIN
+- `{{superAdminPassword}}` - Password del usuario SUPER_ADMIN
 
 ### Variables Automáticas (se guardan tras ejecutar requests)
 - `{{accessToken}}` - Token de autenticación (guardado tras login)
@@ -158,21 +162,50 @@ Las responses se muestran en un panel temporal. Para guardarlas:
 1. Click en el icono de guardar en el panel de response
 2. O copia manualmente el contenido
 
-### Variables Personalizadas
-Si necesitas usar valores diferentes (otra URL, otras credenciales):
-1. Copia el archivo `.http` que quieras personalizar (ej: `auth.http`)
-2. Renómbralo con sufijo `-custom` (ej: `auth-custom.http`)
-3. Modifica las variables al inicio del archivo
-4. Usa ese archivo personalizado
+### Personalizar Variables
 
-Los archivos `*-custom.http` están en `.gitignore` y no se commitean.
+Para cambiar URLs, credenciales u otros valores, edita `.vscode/settings.json`:
 
-### Múltiples Entornos
-Para trabajar con diferentes entornos (local, staging, production):
-1. Duplica los archivos `.http` con sufijos de entorno:
-   - `auth-staging.http` con `@baseUrl = https://staging.api.com`
-   - `auth-production.http` con `@baseUrl = https://api.com`
-2. Usa el archivo correspondiente según el entorno que necesites
+```json
+{
+  "rest-client.environmentVariables": {
+    "$shared": {
+      // Variables compartidas entre todos los entornos
+      "userEmail": "tu-usuario@test.com",
+      "userPassword": "TuPassword123!"
+    },
+    "local": {
+      "baseUrl": "http://localhost:3000"
+    },
+    "staging": {
+      "baseUrl": "https://tu-staging.com"
+    }
+  }
+}
+```
+
+**Estructura:**
+- `$shared` - Variables globales para todos los entornos
+- `local`, `staging`, `production` - Variables específicas de cada entorno
+- Las variables específicas sobrescriben las de `$shared`
+
+### Credenciales Personales
+
+Para credenciales sensibles que NO deben commitearse:
+
+1. Crea `.vscode/settings.local.json` (está en .gitignore)
+2. Sobrescribe solo las variables que necesites:
+```json
+{
+  "rest-client.environmentVariables": {
+    "production": {
+      "baseUrl": "https://api-real.com",
+      "adminPassword": "PasswordReal123!"
+    }
+  }
+}
+```
+3. VSCode mezclará automáticamente ambos settings
 
 ## 📚 Recursos
 

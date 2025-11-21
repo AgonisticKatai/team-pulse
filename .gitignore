@@ -26,7 +26,9 @@ npm-debug.log*
 pnpm-debug.log*
 
 # IDE
-.vscode/
+.vscode/*
+!.vscode/settings.json
+.vscode/settings.local.json
 .idea/
 *.swp
 *.swo

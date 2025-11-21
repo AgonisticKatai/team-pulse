@@ -3,10 +3,9 @@
 #
 # Requires ADMIN or SUPER_ADMIN role for all operations.
 # Make sure to login as admin/super_admin first.
+#
+# Environment variables are loaded from .vscode/settings.json
 ###############################################################################
-
-### Environment Variables
-@baseUrl = http://localhost:3000
 
 ###############################################################################
 # Prerequisites

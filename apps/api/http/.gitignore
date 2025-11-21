@@ -1,11 +1,11 @@
-# Ignore environment files with sensitive data (tokens, passwords, etc.)
-# If you need to customize variables, copy local.http to local-custom.http
-local-custom.http
-*.local.http
-
-# Ignore any files with actual tokens/credentials
+# Ignore custom HTTP files with sensitive data
+*-custom.http
+*-local.http
 *-tokens.http
 *-credentials.http
 
 # REST Client response cache (if enabled)
 .httpCache/
+
+# Note: Environment variables are now configured in ../../.vscode/settings.json
+# For personal overrides, use ../../.vscode/settings.local.json (already in gitignore)
