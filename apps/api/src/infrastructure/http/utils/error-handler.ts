@@ -2,7 +2,7 @@ import { DomainError } from '@domain/errors/DomainError.js'
 import { DuplicatedError } from '@domain/errors/DuplicatedError.js'
 import { NotFoundError } from '@domain/errors/NotFoundError.js'
 import { ValidationError } from '@domain/errors/ValidationError.js'
-import type { FastifyReply } from 'fastify'
+import type { FastifyError, FastifyReply } from 'fastify'
 import { ZodError } from 'zod'
 
 /**
@@ -12,6 +12,7 @@ import { ZodError } from 'zod'
  * This is the ONLY place that knows about HTTP status codes for errors
  *
  * Error Mapping:
+ * - FastifyError (schema validation) -> 400 Bad Request
  * - ZodError -> 400 Bad Request
  * - ValidationError (credentials/refreshToken) -> 401 Unauthorized
  * - ValidationError (other) -> 400 Bad Request
@@ -22,6 +23,19 @@ import { ZodError } from 'zod'
  * - Unknown -> 500 Internal Server Error
  */
 export function handleError({ error, reply }: { error: unknown; reply: FastifyReply }) {
+  // Fastify schema validation errors (from Ajv)
+  if (error && typeof error === 'object' && 'validation' in error) {
+    const fastifyError = error as FastifyError
+    return reply.code(400).send({
+      error: {
+        code: 'VALIDATION_ERROR',
+        details: fastifyError.validation,
+        message: fastifyError.message || 'Invalid request data',
+      },
+      success: false,
+    })
+  }
+
   // Zod validation errors
   if (error instanceof ZodError) {
     return reply.code(400).send({
