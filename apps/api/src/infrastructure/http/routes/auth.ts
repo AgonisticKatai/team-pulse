@@ -3,6 +3,7 @@ import type { LoginUseCase } from '@application/use-cases/LoginUseCase.js'
 import type { LogoutUseCase } from '@application/use-cases/LogoutUseCase.js'
 import type { RefreshTokenUseCase } from '@application/use-cases/RefreshTokenUseCase.js'
 import { requireAuth } from '@infrastructure/http/middleware/auth.js'
+import { getMeSchema, loginSchema, logoutSchema, refreshTokenSchema } from '@infrastructure/http/schemas/auth.js'
 import { handleError } from '@infrastructure/http/utils/error-handler.js'
 import { LoginDTOSchema, RefreshTokenDTOSchema } from '@team-pulse/shared/dtos'
 import type { FastifyInstance } from 'fastify'
@@ -41,6 +42,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
   fastify.post(
     '/api/auth/login',
     {
+      schema: loginSchema,
       config: {
         rateLimit: {
           max: 5,
@@ -76,7 +78,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
    * POST /api/auth/refresh
    * Get new access token using refresh token
    */
-  fastify.post('/api/auth/refresh', async (request, reply) => {
+  fastify.post('/api/auth/refresh', { schema: refreshTokenSchema }, async (request, reply) => {
     try {
       // Validate request body using Zod
       const dto = RefreshTokenDTOSchema.parse(request.body)
@@ -105,7 +107,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
    *
    * Requires authentication (access token in Authorization header)
    */
-  fastify.post('/api/auth/logout', { preHandler: requireAuth({ tokenFactory }) }, async (request, reply) => {
+  fastify.post('/api/auth/logout', { schema: logoutSchema, preHandler: requireAuth({ tokenFactory }) }, async (request, reply) => {
     try {
       // Validate request body using Zod
       const dto = RefreshTokenDTOSchema.parse(request.body)
@@ -126,7 +128,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
    *
    * Requires authentication (access token in Authorization header)
    */
-  fastify.get('/api/auth/me', { preHandler: requireAuth({ tokenFactory }) }, (request, reply) => {
+  fastify.get('/api/auth/me', { schema: getMeSchema, preHandler: requireAuth({ tokenFactory }) }, (request, reply) => {
     try {
       // User is available from requireAuth middleware
       const user = request.user

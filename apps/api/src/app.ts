@@ -2,8 +2,11 @@ import compress from '@fastify/compress'
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
 import rateLimit from '@fastify/rate-limit'
+import swagger from '@fastify/swagger'
+import swaggerUi from '@fastify/swagger-ui'
 import { type Container, createContainer } from '@infrastructure/config/container.js'
 import { type Env, validateEnv, validateProductionEnv } from '@infrastructure/config/env.js'
+import { swaggerOptions, swaggerUiOptions } from '@infrastructure/config/swagger.js'
 import { runMigrations } from '@infrastructure/database/migrate.js'
 import { correlationIdMiddleware } from '@infrastructure/http/middleware/correlation-id.js'
 import { createMetricsOnRequest, createMetricsOnResponse } from '@infrastructure/http/middleware/metrics.js'
@@ -27,11 +30,12 @@ import Fastify, { type FastifyError, type FastifyInstance, type FastifyReply, ty
  * 8. Configure HTTP compression
  * 9. Configure CORS
  * 10. Configure rate limiting
- * 11. Register routes (HTTP adapters)
- * 12. Setup health check endpoint
- * 13. Setup API info endpoint
- * 14. Setup 404 handler
- * 15. Setup global error handler
+ * 11. Configure Swagger/OpenAPI documentation
+ * 12. Register routes (HTTP adapters)
+ * 13. Setup health check endpoint
+ * 14. Setup API info endpoint
+ * 15. Setup 404 handler
+ * 16. Setup global error handler
  *
  * The application follows Hexagonal Architecture:
  * - Domain: Business logic (entities, repository interfaces)
@@ -130,7 +134,13 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     }),
   })
 
-  // 11. Register routes (HTTP adapters)
+  // 11. Register Swagger/OpenAPI documentation
+  // Provides interactive API documentation at /docs
+  // OpenAPI spec available at /docs/json
+  await fastify.register(swagger, swaggerOptions)
+  await fastify.register(swaggerUi, swaggerUiOptions)
+
+  // 12. Register routes (HTTP adapters)
 
   // Metrics endpoint (Prometheus format)
   fastify.get('/metrics', async (_request: FastifyRequest, reply: FastifyReply) => {
@@ -164,7 +174,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     updateTeamUseCase: container.updateTeamUseCase,
   })
 
-  // 11. Health check endpoint
+  // 13. Health check endpoint
   fastify.get('/api/health', () => {
     return {
       environment: env.NODE_ENV,
@@ -175,12 +185,13 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     }
   })
 
-  // 12. API info endpoint
+  // 14. API info endpoint
   fastify.get('/api', () => {
     return {
       description: 'Football team statistics platform API',
       endpoints: {
         auth: '/api/auth/*',
+        documentation: '/docs',
         health: '/api/health',
         metrics: '/metrics',
         teams: '/api/teams',
@@ -191,7 +202,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     }
   })
 
-  // 13. 404 handler
+  // 15. 404 handler
   fastify.setNotFoundHandler((request: FastifyRequest, reply: FastifyReply) => {
     return reply.code(404).send({
       error: {
@@ -202,7 +213,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     })
   })
 
-  // 14. Global error handler
+  // 16. Global error handler
   fastify.setErrorHandler((error: FastifyError, _request: FastifyRequest, reply: FastifyReply) => {
     fastify.log.error(error)
 

@@ -5,6 +5,7 @@ import type { GetTeamUseCase } from '@application/use-cases/GetTeamUseCase.js'
 import type { ListTeamsUseCase } from '@application/use-cases/ListTeamsUseCase.js'
 import type { UpdateTeamUseCase } from '@application/use-cases/UpdateTeamUseCase.js'
 import { requireAuth, requireRole } from '@infrastructure/http/middleware/auth.js'
+import { createTeamSchema, deleteTeamSchema, getTeamSchema, listTeamsSchema, updateTeamSchema } from '@infrastructure/http/schemas/teams.js'
 import { handleError } from '@infrastructure/http/utils/error-handler.js'
 import { CreateTeamDTOSchema, PaginationQuerySchema, UpdateTeamDTOSchema } from '@team-pulse/shared/dtos'
 import type { FastifyInstance } from 'fastify'
@@ -52,29 +53,33 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
    *
    * Requires: ADMIN or SUPER_ADMIN role
    */
-  fastify.post('/api/teams', { preHandler: [requireAuth({ tokenFactory }), requireRole(['ADMIN', 'SUPER_ADMIN'])] }, async (request, reply) => {
-    try {
-      // Validate request body using Zod
-      const dto = CreateTeamDTOSchema.parse(request.body)
+  fastify.post(
+    '/api/teams',
+    { schema: createTeamSchema, preHandler: [requireAuth({ tokenFactory }), requireRole(['ADMIN', 'SUPER_ADMIN'])] },
+    async (request, reply) => {
+      try {
+        // Validate request body using Zod
+        const dto = CreateTeamDTOSchema.parse(request.body)
 
-      // Execute use case - Returns Result<TeamResponseDTO, ValidationError>
-      const result = await createTeamUseCase.execute(dto)
+        // Execute use case - Returns Result<TeamResponseDTO, ValidationError>
+        const result = await createTeamUseCase.execute(dto)
 
-      // Handle use case error
-      if (!result.ok) {
-        return handleError({ error: result.error, reply })
+        // Handle use case error
+        if (!result.ok) {
+          return handleError({ error: result.error, reply })
+        }
+
+        // Return success response
+        return reply.code(201).send({
+          data: result.value,
+          success: true,
+        })
+      } catch (error) {
+        // Handle unexpected errors (Zod validation, etc.)
+        return handleError({ error, reply })
       }
-
-      // Return success response
-      return reply.code(201).send({
-        data: result.value,
-        success: true,
-      })
-    } catch (error) {
-      // Handle unexpected errors (Zod validation, etc.)
-      return handleError({ error, reply })
-    }
-  })
+    },
+  )
 
   /**
    * GET /api/teams
@@ -86,7 +91,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
    *
    * Requires: Authentication (any role)
    */
-  fastify.get('/api/teams', { preHandler: requireAuth({ tokenFactory }) }, async (request, reply) => {
+  fastify.get('/api/teams', { schema: listTeamsSchema, preHandler: requireAuth({ tokenFactory }) }, async (request, reply) => {
     try {
       // Parse and validate pagination query params
       const { page, limit } = PaginationQuerySchema.parse(request.query)
@@ -112,24 +117,28 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
    *
    * Requires: Authentication (any role)
    */
-  fastify.get<{ Params: { id: string } }>('/api/teams/:id', { preHandler: requireAuth({ tokenFactory }) }, async (request, reply) => {
-    try {
-      const { id } = request.params
+  fastify.get<{ Params: { id: string } }>(
+    '/api/teams/:id',
+    { schema: getTeamSchema, preHandler: requireAuth({ tokenFactory }) },
+    async (request, reply) => {
+      try {
+        const { id } = request.params
 
-      const result = await getTeamUseCase.execute(id)
+        const result = await getTeamUseCase.execute(id)
 
-      if (!result.ok) {
-        return handleError({ error: result.error, reply })
+        if (!result.ok) {
+          return handleError({ error: result.error, reply })
+        }
+
+        return reply.code(200).send({
+          data: result.value,
+          success: true,
+        })
+      } catch (error) {
+        return handleError({ error, reply })
       }
-
-      return reply.code(200).send({
-        data: result.value,
-        success: true,
-      })
-    } catch (error) {
-      return handleError({ error, reply })
-    }
-  })
+    },
+  )
 
   /**
    * PATCH /api/teams/:id
@@ -139,7 +148,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
    */
   fastify.patch<{ Params: { id: string } }>(
     '/api/teams/:id',
-    { preHandler: [requireAuth({ tokenFactory }), requireRole(['ADMIN', 'SUPER_ADMIN'])] },
+    { schema: updateTeamSchema, preHandler: [requireAuth({ tokenFactory }), requireRole(['ADMIN', 'SUPER_ADMIN'])] },
     async (request, reply) => {
       try {
         const { id } = request.params
@@ -174,7 +183,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
    */
   fastify.delete<{ Params: { id: string } }>(
     '/api/teams/:id',
-    { preHandler: [requireAuth({ tokenFactory }), requireRole(['ADMIN', 'SUPER_ADMIN'])] },
+    { schema: deleteTeamSchema, preHandler: [requireAuth({ tokenFactory }), requireRole(['ADMIN', 'SUPER_ADMIN'])] },
     async (request, reply) => {
       try {
         const { id } = request.params

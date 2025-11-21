@@ -2,6 +2,7 @@ import type { TokenFactory } from '@application/factories/TokenFactory.js'
 import type { CreateUserUseCase } from '@application/use-cases/CreateUserUseCase.js'
 import type { ListUsersUseCase } from '@application/use-cases/ListUsersUseCase.js'
 import { requireAuth, requireRole } from '@infrastructure/http/middleware/auth.js'
+import { createUserSchema, listUsersSchema } from '@infrastructure/http/schemas/users.js'
 import { handleError } from '@infrastructure/http/utils/error-handler.js'
 import { CreateUserDTOSchema, PaginationQuerySchema } from '@team-pulse/shared/dtos'
 import type { FastifyInstance } from 'fastify'
@@ -37,28 +38,32 @@ export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserR
    *
    * Requires: SUPER_ADMIN or ADMIN role
    */
-  fastify.post('/api/users', { preHandler: [requireAuth({ tokenFactory }), requireRole(['SUPER_ADMIN', 'ADMIN'])] }, async (request, reply) => {
-    try {
-      // Validate request body using Zod
-      const dto = CreateUserDTOSchema.parse(request.body)
+  fastify.post(
+    '/api/users',
+    { schema: createUserSchema, preHandler: [requireAuth({ tokenFactory }), requireRole(['SUPER_ADMIN', 'ADMIN'])] },
+    async (request, reply) => {
+      try {
+        // Validate request body using Zod
+        const dto = CreateUserDTOSchema.parse(request.body)
 
-      // Execute use case
-      const result = await createUserUseCase.execute(dto)
+        // Execute use case
+        const result = await createUserUseCase.execute(dto)
 
-      // Handle Result type
-      if (!result.ok) {
-        return handleError({ error: result.error, reply })
+        // Handle Result type
+        if (!result.ok) {
+          return handleError({ error: result.error, reply })
+        }
+
+        // Return success response
+        return reply.code(201).send({
+          data: result.value,
+          success: true,
+        })
+      } catch (error) {
+        return handleError({ error, reply })
       }
-
-      // Return success response
-      return reply.code(201).send({
-        data: result.value,
-        success: true,
-      })
-    } catch (error) {
-      return handleError({ error, reply })
-    }
-  })
+    },
+  )
 
   /**
    * GET /api/users
@@ -70,24 +75,28 @@ export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserR
    *
    * Requires: SUPER_ADMIN or ADMIN role
    */
-  fastify.get('/api/users', { preHandler: [requireAuth({ tokenFactory }), requireRole(['SUPER_ADMIN', 'ADMIN'])] }, async (request, reply) => {
-    try {
-      // Parse and validate pagination query params
-      const { page, limit } = PaginationQuerySchema.parse(request.query)
+  fastify.get(
+    '/api/users',
+    { schema: listUsersSchema, preHandler: [requireAuth({ tokenFactory }), requireRole(['SUPER_ADMIN', 'ADMIN'])] },
+    async (request, reply) => {
+      try {
+        // Parse and validate pagination query params
+        const { page, limit } = PaginationQuerySchema.parse(request.query)
 
-      const result = await listUsersUseCase.execute({ page, limit })
+        const result = await listUsersUseCase.execute({ page, limit })
 
-      // Handle Result type
-      if (!result.ok) {
-        return handleError({ error: result.error, reply })
+        // Handle Result type
+        if (!result.ok) {
+          return handleError({ error: result.error, reply })
+        }
+
+        return reply.code(200).send({
+          data: result.value,
+          success: true,
+        })
+      } catch (error) {
+        return handleError({ error, reply })
       }
-
-      return reply.code(200).send({
-        data: result.value,
-        success: true,
-      })
-    } catch (error) {
-      return handleError({ error, reply })
-    }
-  })
+    },
+  )
 }
