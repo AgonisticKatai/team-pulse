@@ -6,17 +6,18 @@ import { commonErrorResponses, createSuccessResponseSchema, paginationSchema } f
  */
 
 // Team schema
+// Note: Fields are not marked as required to allow flexibility in serialization
 const teamSchema = {
   type: 'object',
   properties: {
-    id: { type: 'string', format: 'uuid', example: '123e4567-e89b-12d3-a456-426614174000' },
+    id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
     name: { type: 'string', example: 'FC Barcelona', minLength: 1, maxLength: 100 },
     city: { type: 'string', example: 'Barcelona', minLength: 1, maxLength: 100 },
     foundedYear: { type: 'number', nullable: true, example: 1899, minimum: 1800 },
     createdAt: { type: 'string', format: 'date-time', example: '2024-01-01T00:00:00.000Z' },
     updatedAt: { type: 'string', format: 'date-time', example: '2024-01-01T00:00:00.000Z' },
   },
-  required: ['id', 'name', 'city', 'foundedYear', 'createdAt', 'updatedAt'],
+  additionalProperties: false,
 } as const
 
 // Create team request body schema
@@ -88,6 +89,7 @@ const paginationQuerySchema = {
 } as const
 
 // List teams response data schema
+// Note: Fields are not marked as required to allow flexibility in serialization
 const teamsListDataSchema = {
   type: 'object',
   properties: {
@@ -97,7 +99,7 @@ const teamsListDataSchema = {
     },
     pagination: paginationSchema,
   },
-  required: ['teams', 'pagination'],
+  additionalProperties: false,
 } as const
 
 // Team ID param schema

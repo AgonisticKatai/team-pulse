@@ -5,17 +5,30 @@ import { commonErrorResponses, createSuccessResponseSchema } from './common.js'
  * OpenAPI/JSON Schemas for Authentication Routes
  */
 
-// User schema (without password)
+// User schema for login response (without password)
+// Note: Fields are not marked as required to allow flexibility in serialization
 const userSchema = {
   type: 'object',
   properties: {
-    id: { type: 'string', format: 'uuid', example: '123e4567-e89b-12d3-a456-426614174000' },
+    id: { type: 'string', example: 'test-user' },
     email: { type: 'string', format: 'email', example: 'user@example.com' },
     role: { type: 'string', enum: ['SUPER_ADMIN', 'ADMIN', 'USER'], example: 'USER' },
     createdAt: { type: 'string', format: 'date-time', example: '2024-01-01T00:00:00.000Z' },
     updatedAt: { type: 'string', format: 'date-time', example: '2024-01-01T00:00:00.000Z' },
   },
-  required: ['id', 'email', 'role', 'createdAt', 'updatedAt'],
+  additionalProperties: false,
+} as const
+
+// Current user schema (from JWT token payload)
+// Note: Fields are not marked as required to allow flexibility in serialization
+const currentUserSchema = {
+  type: 'object',
+  properties: {
+    userId: { type: 'string', example: 'test-user' },
+    email: { type: 'string', format: 'email', example: 'user@example.com' },
+    role: { type: 'string', enum: ['SUPER_ADMIN', 'ADMIN', 'USER'], example: 'USER' },
+  },
+  additionalProperties: false,
 } as const
 
 // Login request body schema
@@ -29,6 +42,7 @@ const loginBodySchema = {
 } as const
 
 // Login response data schema
+// Note: Fields are not marked as required to allow flexibility in serialization
 const loginResponseDataSchema = {
   type: 'object',
   properties: {
@@ -36,7 +50,7 @@ const loginResponseDataSchema = {
     refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
     user: userSchema,
   },
-  required: ['accessToken', 'refreshToken', 'user'],
+  additionalProperties: false,
 } as const
 
 // Refresh token request body schema
@@ -49,13 +63,14 @@ const refreshTokenBodySchema = {
 } as const
 
 // Refresh token response data schema
+// Note: Fields are not marked as required to allow flexibility in serialization
 const refreshTokenResponseDataSchema = {
   type: 'object',
   properties: {
     accessToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
     refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
   },
-  required: ['accessToken', 'refreshToken'],
+  additionalProperties: false,
 } as const
 
 /**
@@ -121,7 +136,7 @@ export const getMeSchema: FastifySchema = {
   response: {
     200: {
       description: 'Current user information',
-      ...createSuccessResponseSchema(userSchema),
+      ...createSuccessResponseSchema(currentUserSchema),
     },
     ...commonErrorResponses,
   },

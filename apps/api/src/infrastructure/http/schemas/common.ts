@@ -33,6 +33,7 @@ export const successResponseSchema = {
 } as const
 
 // Pagination metadata schema
+// Note: Fields are not marked as required to allow flexibility in serialization
 export const paginationSchema = {
   type: 'object',
   properties: {
@@ -41,7 +42,7 @@ export const paginationSchema = {
     total: { type: 'number', example: 42, minimum: 0 },
     totalPages: { type: 'number', example: 5, minimum: 0 },
   },
-  required: ['page', 'limit', 'total', 'totalPages'],
+  additionalProperties: false,
 } as const
 
 // Security scheme for JWT Bearer token
@@ -189,7 +190,7 @@ export function createPaginatedResponseSchema(itemSchema: object) {
           },
           pagination: paginationSchema,
         },
-        required: ['items', 'pagination'],
+        additionalProperties: false,
       },
     },
     required: ['success', 'data'],

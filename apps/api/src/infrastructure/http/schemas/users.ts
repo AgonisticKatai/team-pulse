@@ -6,16 +6,17 @@ import { commonErrorResponses, createSuccessResponseSchema, paginationSchema } f
  */
 
 // User schema (without password)
+// Note: Fields are not marked as required to allow flexibility in serialization
 const userSchema = {
   type: 'object',
   properties: {
-    id: { type: 'string', format: 'uuid', example: '123e4567-e89b-12d3-a456-426614174000' },
+    id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
     email: { type: 'string', format: 'email', example: 'user@example.com' },
     role: { type: 'string', enum: ['SUPER_ADMIN', 'ADMIN', 'USER'], example: 'USER' },
     createdAt: { type: 'string', format: 'date-time', example: '2024-01-01T00:00:00.000Z' },
     updatedAt: { type: 'string', format: 'date-time', example: '2024-01-01T00:00:00.000Z' },
   },
-  required: ['id', 'email', 'role', 'createdAt', 'updatedAt'],
+  additionalProperties: false,
 } as const
 
 // Create user request body schema
@@ -55,6 +56,7 @@ const paginationQuerySchema = {
 } as const
 
 // List users response data schema
+// Note: Fields are not marked as required to allow flexibility in serialization
 const usersListDataSchema = {
   type: 'object',
   properties: {
@@ -64,7 +66,7 @@ const usersListDataSchema = {
     },
     pagination: paginationSchema,
   },
-  required: ['users', 'pagination'],
+  additionalProperties: false,
 } as const
 
 /**
