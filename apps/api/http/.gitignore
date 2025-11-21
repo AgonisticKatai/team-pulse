@@ -1,0 +1,11 @@
+# Ignore environment files with sensitive data (tokens, passwords, etc.)
+# If you need to customize variables, copy local.http to local-custom.http
+local-custom.http
+*.local.http
+
+# Ignore any files with actual tokens/credentials
+*-tokens.http
+*-credentials.http
+
+# REST Client response cache (if enabled)
+.httpCache/

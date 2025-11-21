@@ -1,0 +1,170 @@
+###############################################################################
+# Authentication Endpoints
+#
+# This file contains all authentication-related requests.
+# Make sure to run login first to populate the @accessToken variable.
+###############################################################################
+
+### Load environment variables
+< ./environments/local.http
+
+###############################################################################
+# Login Flows
+###############################################################################
+
+### Login as USER
+# @name loginUser
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{userEmail}}",
+  "password": "{{userPassword}}"
+}
+
+> {%
+  client.global.set("accessToken", response.body.data.accessToken);
+  client.global.set("refreshToken", response.body.data.refreshToken);
+  client.global.set("userId", response.body.data.user.id);
+%}
+
+###
+
+### Login as ADMIN
+# @name loginAdmin
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+
+> {%
+  client.global.set("accessToken", response.body.data.accessToken);
+  client.global.set("refreshToken", response.body.data.refreshToken);
+  client.global.set("userId", response.body.data.user.id);
+%}
+
+###
+
+### Login as SUPER_ADMIN
+# @name loginSuperAdmin
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{superAdminEmail}}",
+  "password": "{{superAdminPassword}}"
+}
+
+> {%
+  client.global.set("accessToken", response.body.data.accessToken);
+  client.global.set("refreshToken", response.body.data.refreshToken);
+  client.global.set("userId", response.body.data.user.id);
+%}
+
+###
+
+### Login - Invalid credentials (should fail)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "invalid@test.com",
+  "password": "WrongPassword123!"
+}
+
+###
+
+### Login - Missing email (should fail with validation error)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "password": "UserPassword123!"
+}
+
+###
+
+### Login - Invalid email format (should fail with validation error)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "not-an-email",
+  "password": "UserPassword123!"
+}
+
+###############################################################################
+# Token Operations
+###############################################################################
+
+### Get current user info (requires authentication)
+# Run a login request first to populate @accessToken
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{accessToken}}
+
+###
+
+### Refresh access token
+# @name refreshToken
+POST {{baseUrl}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+> {%
+  client.global.set("accessToken", response.body.data.accessToken);
+  client.global.set("refreshToken", response.body.data.refreshToken);
+%}
+
+###
+
+### Refresh token - Invalid token (should fail)
+POST {{baseUrl}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "invalid-token-xyz"
+}
+
+###
+
+### Logout (invalidate refresh token)
+POST {{baseUrl}}/api/auth/logout
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+###
+
+### Get current user - No token (should fail with 401)
+GET {{baseUrl}}/api/auth/me
+
+###
+
+### Get current user - Invalid token (should fail with 401)
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer invalid-token-xyz
+
+###############################################################################
+# Rate Limiting Tests
+###############################################################################
+
+### Test rate limiting on login endpoint
+# Login endpoint has rate limit: 5 attempts per 15 minutes
+# Run this multiple times quickly to trigger rate limiting
+
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "rate-limit-test@test.com",
+  "password": "TestPassword123!"
+}
