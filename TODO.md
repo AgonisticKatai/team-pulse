@@ -32,7 +32,7 @@ Este archivo registra mejoras pendientes y tech debt identificado durante el des
 
 **Infrastructure/Auth:**
 - [ ] `apps/api/src/infrastructure/auth/BcryptPasswordHasher.ts` - Password hasher legacy (aunque ya está deprecated)
-- [ ] `apps/api/src/infrastructure/http/middleware/auth.ts` - Middleware de autenticación JWT
+- [x] `apps/api/src/infrastructure/http/middleware/auth.ts` - Middleware de autenticación JWT - ✅ 21 tests + AuthService (2025-11-21)
 
 **Infrastructure/HTTP:**
 - [ ] `apps/api/src/infrastructure/http/utils/error-handler.ts` - Manejo global de errores
@@ -87,15 +87,17 @@ Este archivo registra mejoras pendientes y tech debt identificado durante el des
 - Mantener pattern actual de factories
 **Razón:** Determinar el patrón más apropiado según arquitectura del proyecto
 
-#### Refactorizar middleware de autenticación para mayor elegancia y consistencia
-**Ubicación:** `apps/api/src/infrastructure/http/middleware/auth.ts`
-**Acción:** Revisar implementación completa del middleware de autenticación para:
-- Evaluar si la función `extractAndVerifyToken` puede hacerse más elegante
-- Verificar consistencia con patrones del proyecto (Result<T,E>, named parameters, etc.)
-- Considerar separación de responsabilidades (extracción de token vs verificación)
-- Analizar manejo de errores y si debería usar nuestros domain errors
-- Evaluar si debería inyectarse TokenFactory o JwtService como dependencia
-**Razón:** Asegurar que el middleware sigue los mismos estándares de calidad que el resto del código
+#### ✅ Refactorizar middleware de autenticación - COMPLETADO (2025-11-21)
+**Ubicación:** `apps/api/src/infrastructure/http/middleware/auth.ts` + `AuthService.ts`
+**Solución implementada (TDD):**
+- ✅ Creado AuthService con factory pattern y constructor privado
+- ✅ Usa Result<T, E> para manejo de errores (Railway-Oriented Programming)
+- ✅ Parámetros nombrados en todos los métodos
+- ✅ Retorna ValidationError (domain errors) en lugar de throw
+- ✅ Separación de responsabilidades: AuthService (lógica) vs middleware (HTTP)
+- ✅ TokenFactory inyectado via DI
+- ✅ **21 tests comprehensivos** siguiendo AAA pattern
+**Resultado:** 100% consistente con patrones del proyecto
 
 #### Limpiar funciones duplicadas de DTO builders en infrastructure/testing
 **Ubicación:** `apps/api/src/infrastructure/testing/auth-builders.ts`, `user-builders.ts`, `team-builders.ts`

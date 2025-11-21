@@ -32,3 +32,16 @@ export const TEST_TOKEN_ENV: IEnvironment = {
   JWT_SECRET: TEST_ENV.JWT_SECRET,
   JWT_REFRESH_SECRET: TEST_ENV.JWT_REFRESH_SECRET,
 }
+
+/**
+ * Invalid token environment for testing JWT signature verification
+ *
+ * Uses wrong JWT secret to verify that tokens signed with different
+ * secrets are properly rejected by the authentication system.
+ *
+ * Use case: Testing that AuthService rejects tokens with invalid signatures
+ */
+export const TEST_INVALID_TOKEN_ENV: IEnvironment = {
+  JWT_SECRET: 'wrong-secret-at-least-32-chars-long-wrong',
+  JWT_REFRESH_SECRET: 'wrong-refresh-secret-at-least-32-chars',
+}
