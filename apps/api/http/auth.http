@@ -1,10 +1,12 @@
 ###############################################################################
 # Authentication Endpoints
 #
-# AUTOMATIC TOKEN PERSISTENCE:
+# SHARED VARIABLES:
+# Tokens are stored in _variables.http for cross-file access
 # 1. Execute any login request below (e.g., "Login as ADMIN")
-# 2. The token is automatically available for subsequent requests
-# 3. Use {{loginAsUser.response.body.data.accessToken}} or similar
+# 2. Copy the accessToken from the response
+# 3. Open _variables.http and paste it in @accessToken
+# 4. The token will be available in ALL .http files
 #
 # Environment variables are loaded from .vscode/settings.json
 ###############################################################################
@@ -14,7 +16,6 @@
 ###############################################################################
 
 ### Login as USER
-# @name loginAsUser
 POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
@@ -26,7 +27,6 @@ Content-Type: application/json
 ###
 
 ### Login as ADMIN
-# @name loginAsAdmin
 POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
@@ -38,7 +38,6 @@ Content-Type: application/json
 ###
 
 ### Login as SUPER_ADMIN
-# @name loginAsSuperAdmin
 POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
@@ -87,7 +86,7 @@ Content-Type: application/json
 # Execute a login request first (e.g., "Login as ADMIN")
 # Then the token is automatically available
 GET {{baseUrl}}/api/auth/me
-Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
+Authorization: Bearer {{accessToken}}
 
 ###
 

@@ -1,0 +1,22 @@
+###############################################################################
+# Shared Variables - TEMPLATE
+#
+# SETUP:
+# 1. Copy this file to _variables.http (it's in .gitignore)
+# 2. After login, paste your tokens here
+# 3. These variables will be available in ALL .http files
+#
+# IMPORTANT: _variables.http is in .gitignore to avoid committing tokens
+###############################################################################
+
+# PASTE YOUR ACCESS TOKEN HERE (after login)
+@accessToken =
+
+# PASTE REFRESH TOKEN HERE (optional, for token refresh)
+@refreshToken =
+
+# PASTE USER ID HERE (optional)
+@userId =
+
+# PASTE TEAM ID HERE (optional, for testing)
+@teamId =

@@ -3,6 +3,7 @@
 *-local.http
 *-tokens.http
 *-credentials.http
+_variables.http
 
 # REST Client response cache (if enabled)
 .httpCache/

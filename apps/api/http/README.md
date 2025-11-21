@@ -79,39 +79,42 @@ REST Client usa variables definidas en `.vscode/settings.json`. Para cambiar de 
 
 ## 🔑 Autenticación
 
-### Persistencia Automática de Tokens
+### Variables Compartidas (_variables.http)
 
-REST Client usa **named requests** para referenciar automáticamente respuestas de requests anteriores:
+Para compartir tokens y otros valores entre **todos** los archivos .http, usamos el archivo `_variables.http`:
 
+**Paso a paso:**
+1. Ejecuta un request de login en `auth.http` (ej: "Login as ADMIN")
+2. **Copia** el `accessToken` de la respuesta
+3. Abre `_variables.http` y **pega** el token en `@accessToken`
+4. ¡Listo! El token está disponible en **todos** los archivos .http
+
+**Ejemplo:**
+
+En `_variables.http`:
 ```http
-### Login as ADMIN
-# @name loginAsAdmin
-POST {{baseUrl}}/api/auth/login
-Content-Type: application/json
-
-{
-  "email": "{{adminEmail}}",
-  "password": "{{adminPassword}}"
-}
-
-### Usar el token automáticamente
-GET {{baseUrl}}/api/teams
-Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+@teamId = 123e4567-e89b-12d3-a456-426614174000
 ```
 
-**Cómo funciona:**
-1. Ejecuta un request de login (ej: "Login as ADMIN")
-2. El request está marcado con `# @name loginAsAdmin`
-3. Otros requests referencian el token con `{{loginAsAdmin.response.body.data.accessToken}}`
-4. ¡No necesitas copiar/pegar nada!
+En cualquier otro archivo (`auth.http`, `teams.http`, `users.http`):
+```http
+GET {{baseUrl}}/api/teams
+Authorization: Bearer {{accessToken}}
+```
 
-Después de login, todos los requests autenticados acceden automáticamente al token.
+**Ventajas:**
+- ✅ Funciona **entre archivos** (a diferencia de named requests)
+- ✅ Persiste durante toda la sesión
+- ✅ Un solo lugar para actualizar tokens
+- ✅ Archivo en `.gitignore` (no se commitea)
 
 ### Expiración de Tokens
 
 Si recibes error 401:
 1. Ejecuta "Refresh access token" en `auth.http`
-2. O vuelve a hacer login
+2. Copia el nuevo token de la respuesta
+3. Actualiza `@accessToken` en `_variables.http`
 
 ## 📝 Variables Disponibles
 
@@ -124,29 +127,14 @@ Si recibes error 401:
 - `{{superAdminEmail}}` - Email del usuario SUPER_ADMIN
 - `{{superAdminPassword}}` - Password del usuario SUPER_ADMIN
 
-### Variables Dinámicas (Named Requests)
+### Variables Compartidas (definidas en _variables.http)
 
-REST Client permite referenciar respuestas de requests anteriores usando named requests:
+Estas variables se definen en `_variables.http` y están disponibles en **todos** los archivos .http:
 
-**Tokens de autenticación:**
-- `{{loginAsUser.response.body.data.accessToken}}` - Token del usuario USER
-- `{{loginAsAdmin.response.body.data.accessToken}}` - Token del usuario ADMIN
-- `{{loginAsSuperAdmin.response.body.data.accessToken}}` - Token del usuario SUPER_ADMIN
-- `{{loginAsAdmin.response.body.data.refreshToken}}` - Refresh token
-
-**IDs de equipos:**
-- `{{createTeam.response.body.data.id}}` - ID del equipo creado (Real Madrid)
-- `{{createTestTeam.response.body.data.id}}` - ID del equipo de prueba
-
-**Cualquier dato de respuesta:**
-Puedes acceder a cualquier campo de la respuesta de un request nombrado:
-```http
-# @name myRequest
-POST {{baseUrl}}/api/endpoint
-
-### Luego úsalo
-GET {{baseUrl}}/api/other/{{myRequest.response.body.data.someField}}
-```
+- `{{accessToken}}` - Token de autenticación (lo pegas manualmente después del login)
+- `{{refreshToken}}` - Token para renovar acceso (opcional)
+- `{{userId}}` - ID del usuario autenticado (opcional)
+- `{{teamId}}` - ID de un equipo para testing (opcional)
 
 ## 🎯 Casos de Uso Comunes
 
