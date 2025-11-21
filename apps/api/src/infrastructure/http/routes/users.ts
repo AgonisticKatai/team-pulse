@@ -1,10 +1,10 @@
+import type { TokenFactory } from '@application/factories/TokenFactory.js'
+import type { CreateUserUseCase } from '@application/use-cases/CreateUserUseCase.js'
+import type { ListUsersUseCase } from '@application/use-cases/ListUsersUseCase.js'
+import { requireAuth, requireRole } from '@infrastructure/http/middleware/auth.js'
+import { handleError } from '@infrastructure/http/utils/error-handler.js'
 import { CreateUserDTOSchema, PaginationQuerySchema } from '@team-pulse/shared/dtos'
 import type { FastifyInstance } from 'fastify'
-import type { TokenFactory } from '../../../application/factories/TokenFactory.js'
-import type { CreateUserUseCase } from '../../../application/use-cases/CreateUserUseCase.js'
-import type { ListUsersUseCase } from '../../../application/use-cases/ListUsersUseCase.js'
-import { requireAuth, requireRole } from '../middleware/auth.js'
-import { handleError } from '../utils/error-handler.js'
 
 /**
  * User Management Routes (HTTP ADAPTER)

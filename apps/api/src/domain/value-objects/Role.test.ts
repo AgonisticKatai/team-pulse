@@ -1,7 +1,7 @@
+import { ValidationError } from '@domain/errors/ValidationError.js'
+import { Role, UserRole } from '@domain/value-objects/Role.js'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { describe, expect, it } from 'vitest'
-import { ValidationError } from '../errors/index.js'
-import { Role, UserRole } from './Role.js'
 
 describe('Role Value Object', () => {
   describe('create', () => {

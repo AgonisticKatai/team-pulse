@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto'
-import { User } from '../domain/models/User.js'
-import { ScryptPasswordHasher } from '../infrastructure/auth/ScryptPasswordHasher.js'
-import { validateEnv } from '../infrastructure/config/env.js'
-import { createDatabase } from '../infrastructure/database/connection.js'
-import { DrizzleUserRepository } from '../infrastructure/database/repositories/DrizzleUserRepository.js'
+import { User } from '@domain/models/User.js'
+import { ScryptPasswordHasher } from '@infrastructure/auth/ScryptPasswordHasher.js'
+import { validateEnv } from '@infrastructure/config/env.js'
+import { createDatabase } from '@infrastructure/database/connection.js'
+import { DrizzleUserRepository } from '@infrastructure/database/repositories/DrizzleUserRepository.js'
 
 /**
  * Seed script to create the initial SUPER_ADMIN user

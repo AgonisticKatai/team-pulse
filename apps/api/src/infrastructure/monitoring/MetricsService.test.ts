@@ -1,7 +1,7 @@
+import { MetricsService } from '@infrastructure/monitoring/MetricsService.js'
+import { PrometheusMetricsFactory } from '@infrastructure/monitoring/prometheus/PrometheusMetricsFactory.js'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { MetricsService } from './MetricsService.js'
-import { PrometheusMetricsFactory } from './prometheus/PrometheusMetricsFactory.js'
 
 const { prometheus } = TEST_CONSTANTS.metrics
 const { users } = TEST_CONSTANTS

@@ -1,9 +1,9 @@
+import { ValidationError } from '@domain/errors/ValidationError.js'
+import { RefreshToken } from '@domain/models/RefreshToken.js'
+import { EntityId } from '@domain/value-objects/EntityId.js'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { describe, expect, it } from 'vitest'
-import { ValidationError } from '../errors/index.js'
-import { EntityId } from '../value-objects/index.js'
-import { RefreshToken } from './RefreshToken.js'
 
 // Helper to create user from persistence and unwrap Result
 function createRefreshToken(data: Parameters<typeof RefreshToken.create>[0]): RefreshToken {

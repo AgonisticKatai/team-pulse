@@ -1,5 +1,5 @@
+import type { ICounter } from '@domain/services/metrics/ICounter.js'
 import type * as promClient from 'prom-client'
-import type { ICounter } from '../../../../domain/services/metrics/ICounter.js'
 
 /**
  * Prometheus Counter Adapter

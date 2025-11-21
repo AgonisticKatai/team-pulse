@@ -1,6 +1,6 @@
+import { ValidationError } from '@domain/errors/ValidationError.js'
 import type { PaginationMetadata } from '@team-pulse/shared/dtos'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
-import { ValidationError } from '../errors/ValidationError.js'
 
 /**
  * Pagination Value Object (DOMAIN MODEL)

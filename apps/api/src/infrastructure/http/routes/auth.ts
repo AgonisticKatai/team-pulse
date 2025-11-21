@@ -2,10 +2,10 @@ import type { TokenFactory } from '@application/factories/TokenFactory.js'
 import type { LoginUseCase } from '@application/use-cases/LoginUseCase.js'
 import type { LogoutUseCase } from '@application/use-cases/LogoutUseCase.js'
 import type { RefreshTokenUseCase } from '@application/use-cases/RefreshTokenUseCase.js'
+import { requireAuth } from '@infrastructure/http/middleware/auth.js'
+import { handleError } from '@infrastructure/http/utils/error-handler.js'
 import { LoginDTOSchema, RefreshTokenDTOSchema } from '@team-pulse/shared/dtos'
 import type { FastifyInstance } from 'fastify'
-import { requireAuth } from '../middleware/auth.js'
-import { handleError } from '../utils/error-handler.js'
 
 /**
  * Authentication Routes (HTTP ADAPTER)

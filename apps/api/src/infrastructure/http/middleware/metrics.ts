@@ -1,5 +1,5 @@
+import type { IMetricsService } from '@domain/services/IMetricsService.js'
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import type { IMetricsService } from '../../../domain/services/IMetricsService.js'
 
 // WeakMap to store request start times
 const requestStartTimes = new WeakMap<FastifyRequest, bigint>()

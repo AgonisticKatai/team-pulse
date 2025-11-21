@@ -1,7 +1,7 @@
+import { ValidationError } from '@domain/errors/ValidationError.js'
+import type { RefreshTokenFactoryInput, RefreshTokenValueObjects } from '@domain/models/RefreshToken.types.js'
+import { EntityId } from '@domain/value-objects/EntityId.js'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
-import { ValidationError } from '../errors/index.js'
-import { EntityId } from '../value-objects/index.js'
-import type { RefreshTokenFactoryInput, RefreshTokenValueObjects } from './RefreshToken.types.js'
 
 // Re-export public types
 export type { RefreshTokenFactoryInput, RefreshTokenValueObjects }

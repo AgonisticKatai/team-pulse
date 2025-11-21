@@ -1,11 +1,11 @@
+import type { IMetricsFactory } from '@domain/services/metrics/IMetricsFactory.js'
+import type { MetricsCollection } from '@domain/services/metrics/MetricsCollection.js'
+import { PrometheusCounter } from '@infrastructure/monitoring/prometheus/adapters/PrometheusCounter.js'
+import { PrometheusGauge } from '@infrastructure/monitoring/prometheus/adapters/PrometheusGauge.js'
+import { PrometheusHistogram } from '@infrastructure/monitoring/prometheus/adapters/PrometheusHistogram.js'
+import { PrometheusRegistry } from '@infrastructure/monitoring/prometheus/adapters/PrometheusRegistry.js'
 import * as promClient from 'prom-client'
 import { collectDefaultMetrics, Registry } from 'prom-client'
-import type { IMetricsFactory } from '../../../domain/services/metrics/IMetricsFactory.js'
-import type { MetricsCollection } from '../../../domain/services/metrics/MetricsCollection.js'
-import { PrometheusCounter } from './adapters/PrometheusCounter.js'
-import { PrometheusGauge } from './adapters/PrometheusGauge.js'
-import { PrometheusHistogram } from './adapters/PrometheusHistogram.js'
-import { PrometheusRegistry } from './adapters/PrometheusRegistry.js'
 
 type NativeMetrics = {
   httpRequestDuration: promClient.Histogram

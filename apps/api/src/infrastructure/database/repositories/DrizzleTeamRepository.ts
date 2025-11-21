@@ -1,11 +1,11 @@
+import { RepositoryError } from '@domain/errors/RepositoryError.js'
+import type { ValidationError } from '@domain/errors/ValidationError.js'
+import { Team } from '@domain/models/Team.js'
+import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
+import type { Database } from '@infrastructure/database/connection.js'
+import { teams as teamsSchema } from '@infrastructure/database/schema.js'
 import { collect, Err, Ok, type Result } from '@team-pulse/shared/result'
 import { eq, sql } from 'drizzle-orm'
-import { RepositoryError } from '../../../domain/errors/index.js'
-import type { ValidationError } from '../../../domain/errors/ValidationError.js'
-import { Team } from '../../../domain/models/Team.js'
-import type { ITeamRepository } from '../../../domain/repositories/ITeamRepository.js'
-import type { Database } from '../connection.js'
-import { teams as teamsSchema } from '../schema.js'
 
 /**
  * Drizzle Team Repository (ADAPTER)

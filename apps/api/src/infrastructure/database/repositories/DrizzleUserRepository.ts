@@ -1,12 +1,12 @@
+import { RepositoryError } from '@domain/errors/RepositoryError.js'
+import type { ValidationError } from '@domain/errors/ValidationError.js'
+import { User } from '@domain/models/User.js'
+import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
+import type { Database } from '@infrastructure/database/connection.js'
+import { users as usersSchema } from '@infrastructure/database/schema.js'
 import { collect, Err, Ok, type Result } from '@team-pulse/shared/result'
 import type { UserRole } from '@team-pulse/shared/types'
 import { eq, sql } from 'drizzle-orm'
-import { RepositoryError } from '../../../domain/errors/RepositoryError.js'
-import type { ValidationError } from '../../../domain/errors/ValidationError.js'
-import { User } from '../../../domain/models/User.js'
-import type { IUserRepository } from '../../../domain/repositories/IUserRepository.js'
-import type { Database } from '../connection.js'
-import { users as usersSchema } from '../schema.js'
 
 /**
  * Drizzle User Repository (ADAPTER)

@@ -1,11 +1,11 @@
+import { Team } from '@domain/models/Team.js'
+import type { Database } from '@infrastructure/database/connection.js'
+import { DrizzleTeamRepository } from '@infrastructure/database/repositories/DrizzleTeamRepository.js'
+import { setupTestEnvironment } from '@infrastructure/testing/test-helpers.js'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { sql } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { Team } from '../../../domain/models/Team.js'
-import { setupTestEnvironment } from '../../testing/test-helpers.js'
-import type { Database } from '../connection.js'
-import { DrizzleTeamRepository } from './DrizzleTeamRepository.js'
 
 describe('DrizzleTeamRepository - Integration Tests', () => {
   let repository: DrizzleTeamRepository

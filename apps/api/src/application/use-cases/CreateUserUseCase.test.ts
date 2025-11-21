@@ -1,14 +1,14 @@
+import { CreateUserUseCase } from '@application/use-cases/CreateUserUseCase.js'
+import { DuplicatedError, RepositoryError } from '@domain/errors/index.js'
+import { User } from '@domain/models/User.js'
+import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
+import type { IPasswordHasher } from '@domain/services/IPasswordHasher.js'
+import { buildAdminUser, buildExistingUser, buildSuperAdminUser, buildUser } from '@infrastructure/testing/index.js'
 import { Err, Ok } from '@team-pulse/shared/result'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { buildCreateUserDTO } from '@team-pulse/shared/testing/dto-builders'
 import { expectError, expectErrorType, expectMockCallArg, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { DuplicatedError, RepositoryError } from '../../domain/errors/index.js'
-import { User } from '../../domain/models/User.js'
-import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
-import type { IPasswordHasher } from '../../domain/services/IPasswordHasher.js'
-import { buildAdminUser, buildExistingUser, buildSuperAdminUser, buildUser } from '../../infrastructure/testing/index.js'
-import { CreateUserUseCase } from './CreateUserUseCase.js'
 
 // Mock external dependencies
 vi.mock('node:crypto', () => ({

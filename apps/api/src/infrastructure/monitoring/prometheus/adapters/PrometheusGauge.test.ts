@@ -1,7 +1,7 @@
+import { PrometheusGauge } from '@infrastructure/monitoring/prometheus/adapters/PrometheusGauge.js'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { Gauge, Registry } from 'prom-client'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { PrometheusGauge } from './PrometheusGauge.js'
 
 const { prometheus } = TEST_CONSTANTS.metrics
 

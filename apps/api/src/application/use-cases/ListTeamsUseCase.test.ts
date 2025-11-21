@@ -1,11 +1,11 @@
+import { ListTeamsUseCase } from '@application/use-cases/ListTeamsUseCase.js'
+import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
+import type { IMetricsService } from '@domain/services/IMetricsService.js'
+import { buildExistingTeam, buildTeam, buildTeamWithoutFoundedYear } from '@infrastructure/testing/index.js'
 import { Ok } from '@team-pulse/shared/result'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
-import type { IMetricsService } from '../../domain/services/IMetricsService.js'
-import { buildExistingTeam, buildTeam, buildTeamWithoutFoundedYear } from '../../infrastructure/testing/index.js'
-import { ListTeamsUseCase } from './ListTeamsUseCase.js'
 
 describe('ListTeamsUseCase', () => {
   let listTeamsUseCase: ListTeamsUseCase

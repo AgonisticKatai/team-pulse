@@ -1,5 +1,5 @@
+import { PrometheusMetricsFactory } from '@infrastructure/monitoring/prometheus/PrometheusMetricsFactory.js'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { PrometheusMetricsFactory } from './PrometheusMetricsFactory.js'
 
 describe('PrometheusMetricsFactory', () => {
   let factory: PrometheusMetricsFactory

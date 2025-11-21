@@ -1,6 +1,6 @@
-import type { IMetricsService } from '../../domain/services/IMetricsService.js'
-import type { IMetricsFactory } from '../../domain/services/metrics/IMetricsFactory.js'
-import type { MetricsCollection } from '../../domain/services/metrics/MetricsCollection.js'
+import type { IMetricsService } from '@domain/services/IMetricsService.js'
+import type { IMetricsFactory } from '@domain/services/metrics/IMetricsFactory.js'
+import type { MetricsCollection } from '@domain/services/metrics/MetricsCollection.js'
 
 /**
  * Service for managing application metrics

@@ -1,10 +1,10 @@
+import type { RepositoryError } from '@domain/errors/RepositoryError.js'
+import type { ValidationError } from '@domain/errors/ValidationError.js'
+import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
+import type { IMetricsService } from '@domain/services/IMetricsService.js'
+import { Pagination } from '@domain/value-objects/index.js'
 import type { UsersListResponseDTO } from '@team-pulse/shared/dtos'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
-import type { RepositoryError } from '../../domain/errors/RepositoryError.js'
-import type { ValidationError } from '../../domain/errors/ValidationError.js'
-import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
-import type { IMetricsService } from '../../domain/services/IMetricsService.js'
-import { Pagination } from '../../domain/value-objects/index.js'
 
 /**
  * List Users Use Case

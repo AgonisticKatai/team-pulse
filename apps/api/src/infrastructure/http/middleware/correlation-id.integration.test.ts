@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto'
+import { setupTestEnvironment } from '@infrastructure/testing/test-helpers.js'
 import type { FastifyInstance } from 'fastify'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { buildApp } from '../../../app.js'
-import { setupTestEnvironment } from '../../../infrastructure/testing/test-helpers.js'
 
 /**
  * Integration tests for correlation ID middleware

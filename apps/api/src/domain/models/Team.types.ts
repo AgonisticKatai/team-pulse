@@ -1,4 +1,7 @@
-import type { City, EntityId, FoundedYear, TeamName } from '../value-objects/index.js'
+import type { City } from '@domain/value-objects/City.js'
+import type { EntityId } from '@domain/value-objects/EntityId.js'
+import type { FoundedYear } from '@domain/value-objects/FoundedYear.js'
+import type { TeamName } from '@domain/value-objects/TeamName.js'
 
 /**
  * Team Factory Input

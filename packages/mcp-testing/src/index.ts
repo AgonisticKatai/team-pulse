@@ -60,7 +60,7 @@ class TestingMCPServer {
     this.setupHandlers()
   }
 
-  private setupHandlers() {
+  protected setupHandlers() {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: [
         {

@@ -1,9 +1,9 @@
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import * as schema from '@infrastructure/database/schema.js'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import postgres from 'postgres'
-import * as schema from './schema.js'
 
 // Get the directory of this file (works with both ESM and CommonJS)
 // biome-ignore lint: __filename is standard Node.js convention

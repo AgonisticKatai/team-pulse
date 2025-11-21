@@ -1,9 +1,12 @@
+import { ValidationError } from '@domain/errors/ValidationError.js'
+import { Team } from '@domain/models/Team.js'
+import { City } from '@domain/value-objects/City.js'
+import { EntityId } from '@domain/value-objects/EntityId.js'
+import { FoundedYear } from '@domain/value-objects/FoundedYear.js'
+import { TeamName } from '@domain/value-objects/TeamName.js'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { describe, expect, it } from 'vitest'
-import { ValidationError } from '../errors/index.js'
-import { City, EntityId, FoundedYear, TeamName } from '../value-objects/index.js'
-import { Team } from './Team.js'
 
 describe('Team Domain Entity', () => {
   describe('create', () => {

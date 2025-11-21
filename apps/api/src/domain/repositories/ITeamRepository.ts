@@ -1,6 +1,6 @@
+import type { RepositoryError } from '@domain/errors/index.js'
+import type { Team } from '@domain/models/Team.js'
 import type { Result } from '@team-pulse/shared/result'
-import type { RepositoryError } from '../errors/index.js'
-import type { Team } from '../models/Team.js'
 
 /**
  * Team Repository Interface (PORT)

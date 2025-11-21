@@ -13,10 +13,10 @@
  */
 
 // Entity builders (depend on domain models, so stay in infrastructure)
-export * from './auth-builders.js'
-export * from './team-builders.js'
+export * from '@infrastructure/testing/auth-builders.js'
+export * from '@infrastructure/testing/team-builders.js'
 // Infrastructure-specific test utilities
-export * from './test-containers.js'
-export * from './test-env.js'
-export * from './test-helpers.js'
-export * from './user-builders.js'
+export * from '@infrastructure/testing/test-containers.js'
+export * from '@infrastructure/testing/test-env.js'
+export * from '@infrastructure/testing/test-helpers.js'
+export * from '@infrastructure/testing/user-builders.js'

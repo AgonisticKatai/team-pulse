@@ -1,6 +1,6 @@
+import * as schema from '@infrastructure/database/schema.js'
 import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
-import * as schema from './schema.js'
 
 /**
  * Database connection factory

@@ -1,13 +1,13 @@
+import { User } from '@domain/models/User.js'
+import { ScryptPasswordHasher } from '@infrastructure/auth/ScryptPasswordHasher.js'
+import type { Container } from '@infrastructure/config/container.js'
+import type { Database } from '@infrastructure/database/connection.js'
+import { setupTestEnvironment } from '@infrastructure/testing/test-helpers.js'
 import { expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { buildApp } from '../../../app.js'
-import { User } from '../../../domain/models/User.js'
-import { ScryptPasswordHasher } from '../../auth/ScryptPasswordHasher.js'
-import type { Container } from '../../config/container.js'
-import type { Database } from '../../database/connection.js'
-import { setupTestEnvironment } from '../../testing/test-helpers.js'
 
 describe('Protected Routes and RBAC', () => {
   let app: FastifyInstance

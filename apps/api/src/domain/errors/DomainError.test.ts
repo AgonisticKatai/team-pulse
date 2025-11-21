@@ -1,5 +1,5 @@
+import { DomainError } from '@domain/errors/DomainError.js'
 import { describe, expect, it } from 'vitest'
-import { DomainError } from './DomainError.js'
 
 /**
  * Concrete implementation of DomainError for testing purposes

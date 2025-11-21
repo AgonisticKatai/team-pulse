@@ -1,5 +1,5 @@
+import type { IMetricRegistry } from '@domain/services/metrics/IMetricRegistry.js'
 import type * as promClient from 'prom-client'
-import type { IMetricRegistry } from '../../../../domain/services/metrics/IMetricRegistry.js'
 
 /**
  * Prometheus Registry Adapter

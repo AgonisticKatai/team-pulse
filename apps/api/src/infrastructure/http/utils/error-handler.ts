@@ -1,5 +1,8 @@
+import { DomainError } from '@domain/errors/DomainError.js'
+import { DuplicatedError } from '@domain/errors/DuplicatedError.js'
+import { NotFoundError } from '@domain/errors/NotFoundError.js'
+import { ValidationError } from '@domain/errors/ValidationError.js'
 import type { FastifyReply } from 'fastify'
-import { DomainError, DuplicatedError, NotFoundError, ValidationError } from '../../../domain/errors/index.js'
 
 /**
  * Centralized HTTP Error Handler

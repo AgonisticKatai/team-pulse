@@ -1,8 +1,11 @@
+import type { ValidationError } from '@domain/errors/ValidationError.js'
+import type { TeamFactoryInput, TeamUpdateInput, TeamValueObjects } from '@domain/models/Team.types.js'
+import { City } from '@domain/value-objects/City.js'
+import { EntityId } from '@domain/value-objects/EntityId.js'
+import { FoundedYear } from '@domain/value-objects/FoundedYear.js'
+import { TeamName } from '@domain/value-objects/TeamName.js'
 import type { TeamResponseDTO } from '@team-pulse/shared/dtos'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
-import type { ValidationError } from '../errors/index.js'
-import { City, EntityId, FoundedYear, TeamName } from '../value-objects/index.js'
-import type { TeamFactoryInput, TeamUpdateInput, TeamValueObjects } from './Team.types.js'
 
 // Re-export public types
 export type { TeamFactoryInput, TeamUpdateInput, TeamValueObjects }

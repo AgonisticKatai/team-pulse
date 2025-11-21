@@ -1,5 +1,5 @@
-import { DomainError } from './DomainError.js'
-import type { ForOperationProps, RepositoryErrorProps } from './RepositoryError.types.js'
+import { DomainError } from '@domain/errors/DomainError.js'
+import type { ForOperationProps, RepositoryErrorProps } from '@domain/errors/RepositoryError.types.js'
 
 // Re-export public types
 export type { ForOperationProps, RepositoryErrorProps }

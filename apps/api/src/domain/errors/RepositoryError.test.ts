@@ -1,7 +1,7 @@
+import { DomainError } from '@domain/errors/DomainError.js'
+import { RepositoryError } from '@domain/errors/RepositoryError.js'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { describe, expect, it } from 'vitest'
-import { DomainError } from './DomainError.js'
-import { RepositoryError } from './RepositoryError.js'
 
 describe('RepositoryError', () => {
   describe('create factory method', () => {

@@ -1,4 +1,4 @@
-import type { EntityId } from '../value-objects/index.js'
+import type { EntityId } from '@domain/value-objects/EntityId.js'
 
 /**
  * RefreshToken Factory Input

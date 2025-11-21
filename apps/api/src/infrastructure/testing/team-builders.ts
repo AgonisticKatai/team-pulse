@@ -1,6 +1,6 @@
+import { Team } from '@domain/models/Team.js'
 import type { CreateTeamDTO } from '@team-pulse/shared/dtos'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
-import { Team } from '../../domain/models/Team.js'
 
 /**
  * Builder for CreateTeamDTO test data

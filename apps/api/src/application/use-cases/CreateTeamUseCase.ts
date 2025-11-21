@@ -1,10 +1,9 @@
 import { randomUUID } from 'node:crypto'
+import { DuplicatedError, type RepositoryError, type ValidationError } from '@domain/errors/index.js'
+import { Team } from '@domain/models/Team.js'
+import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import type { CreateTeamDTO, TeamResponseDTO } from '@team-pulse/shared/dtos'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
-
-import { DuplicatedError, type RepositoryError, type ValidationError } from '../../domain/errors/index.js'
-import { Team } from '../../domain/models/Team.js'
-import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
 
 /**
  * Create Team Use Case

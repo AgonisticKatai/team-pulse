@@ -6,8 +6,8 @@
  * framework-agnostic.
  */
 
-export { DomainError } from './DomainError.js'
-export { DuplicatedError } from './DuplicatedError.js'
-export { NotFoundError } from './NotFoundError.js'
-export { RepositoryError } from './RepositoryError.js'
-export { ValidationError } from './ValidationError.js'
+export { DomainError } from '@domain/errors/DomainError.js'
+export { DuplicatedError } from '@domain/errors/DuplicatedError.js'
+export { NotFoundError } from '@domain/errors/NotFoundError.js'
+export { RepositoryError } from '@domain/errors/RepositoryError.js'
+export { ValidationError } from '@domain/errors/ValidationError.js'

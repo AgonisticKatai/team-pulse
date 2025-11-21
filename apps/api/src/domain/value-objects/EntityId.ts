@@ -1,6 +1,6 @@
+import { ValidationError } from '@domain/errors/ValidationError.js'
 import type { Result } from '@team-pulse/shared/result'
 import { Err, Ok } from '@team-pulse/shared/result'
-import { ValidationError } from '../errors/index.js'
 
 /**
  * EntityId Value Object

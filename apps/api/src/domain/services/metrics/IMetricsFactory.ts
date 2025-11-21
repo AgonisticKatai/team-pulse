@@ -1,4 +1,4 @@
-import type { MetricsCollection } from './MetricsCollection.js'
+import type { MetricsCollection } from '@domain/services/metrics/MetricsCollection.js'
 
 /**
  * Factory interface for creating metrics collections

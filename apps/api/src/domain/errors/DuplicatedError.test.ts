@@ -1,7 +1,7 @@
+import { DomainError } from '@domain/errors/DomainError.js'
+import { DuplicatedError } from '@domain/errors/DuplicatedError.js'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { describe, expect, it } from 'vitest'
-import { DomainError } from './DomainError.js'
-import { DuplicatedError } from './DuplicatedError.js'
 
 describe('DuplicatedError', () => {
   describe('create factory method', () => {

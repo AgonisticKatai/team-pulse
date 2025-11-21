@@ -1,7 +1,7 @@
+import { DomainError } from '@domain/errors/DomainError.js'
+import { NotFoundError } from '@domain/errors/NotFoundError.js'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { describe, expect, it } from 'vitest'
-import { DomainError } from './DomainError.js'
-import { NotFoundError } from './NotFoundError.js'
 
 describe('NotFoundError', () => {
   describe('create factory method', () => {

@@ -1,8 +1,8 @@
+import type { Container } from '@infrastructure/config/container.js'
+import { setupTestEnvironment } from '@infrastructure/testing/test-helpers.js'
 import type { FastifyInstance } from 'fastify'
 import { afterEach, describe, expect, it } from 'vitest'
 import { buildApp } from './app.js'
-import type { Container } from './infrastructure/config/container.js'
-import { setupTestEnvironment } from './infrastructure/testing/test-helpers.js'
 
 describe('Fastify App', () => {
   let app: FastifyInstance

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
+import { correlationIdMiddleware } from '@infrastructure/http/middleware/correlation-id.js'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { describe, expect, it, vi } from 'vitest'
-import { correlationIdMiddleware } from './correlation-id.js'
 
 describe('correlationIdMiddleware', () => {
   it('should generate a new correlation ID when not provided', async () => {

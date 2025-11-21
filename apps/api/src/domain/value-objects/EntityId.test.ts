@@ -1,8 +1,8 @@
+import { ValidationError } from '@domain/errors/ValidationError.js'
+import { EntityId } from '@domain/value-objects/EntityId.js'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { describe, expect, it } from 'vitest'
-import { ValidationError } from '../errors/index.js'
-import { EntityId } from './EntityId.js'
 
 describe('EntityId Value Object', () => {
   describe('create', () => {

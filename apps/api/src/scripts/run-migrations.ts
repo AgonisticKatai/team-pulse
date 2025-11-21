@@ -18,7 +18,7 @@
  * - Testing migrations before deployment
  */
 
-import { runMigrations } from '../infrastructure/database/migrate.js'
+import { runMigrations } from '@infrastructure/database/migrate.js'
 
 const DATABASE_URL = process.env.DATABASE_URL
 

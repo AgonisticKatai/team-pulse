@@ -1,6 +1,6 @@
+import type { RepositoryError } from '@domain/errors/RepositoryError.js'
+import type { User } from '@domain/models/User.js'
 import type { Result } from '@team-pulse/shared/result'
-import type { RepositoryError } from '../errors/RepositoryError.js'
-import type { User } from '../models/User.js'
 
 /**
  * User Repository Interface (PORT)

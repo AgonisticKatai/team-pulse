@@ -1,8 +1,8 @@
+import { ValidationError } from '@domain/errors/ValidationError.js'
+import { FoundedYear } from '@domain/value-objects/FoundedYear.js'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { describe, expect, it } from 'vitest'
-import { ValidationError } from '../errors/index.js'
-import { FoundedYear } from './FoundedYear.js'
 
 describe('FoundedYear Value Object', () => {
   describe('create', () => {

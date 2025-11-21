@@ -1,6 +1,6 @@
+import type { Database } from '@infrastructure/database/connection.js'
+import { setupTestContainer } from '@infrastructure/testing/test-containers.js'
 import { afterAll, beforeAll } from 'vitest'
-import type { Database } from '../database/connection.js'
-import { setupTestContainer } from './test-containers.js'
 
 /**
  * Test Environment Setup Helper

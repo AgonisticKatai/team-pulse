@@ -1,7 +1,7 @@
+import { ScryptPasswordHasher } from '@infrastructure/auth/ScryptPasswordHasher.js'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { ScryptPasswordHasher } from './ScryptPasswordHasher.js'
 
 describe('ScryptPasswordHasher', () => {
   let hasher: ScryptPasswordHasher

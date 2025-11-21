@@ -1,9 +1,9 @@
+import { LogoutUseCase } from '@application/use-cases/LogoutUseCase.js'
+import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository.js'
 import { Ok } from '@team-pulse/shared/result'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
-import { LogoutUseCase } from './LogoutUseCase.js'
 
 describe('LogoutUseCase', () => {
   let logoutUseCase: LogoutUseCase

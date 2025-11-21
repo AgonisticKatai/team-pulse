@@ -1,7 +1,7 @@
+import { DomainError } from '@domain/errors/DomainError.js'
+import { ValidationError } from '@domain/errors/ValidationError.js'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { describe, expect, it } from 'vitest'
-import { DomainError } from './DomainError.js'
-import { ValidationError } from './ValidationError.js'
 
 describe('ValidationError', () => {
   describe('create factory method', () => {

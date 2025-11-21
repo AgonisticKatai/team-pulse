@@ -1,11 +1,11 @@
+import { GetTeamUseCase } from '@application/use-cases/GetTeamUseCase.js'
+import { NotFoundError } from '@domain/errors/index.js'
+import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
+import { buildTeam } from '@infrastructure/testing/index.js'
 import { Ok } from '@team-pulse/shared/result'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { NotFoundError } from '../../domain/errors/index.js'
-import type { ITeamRepository } from '../../domain/repositories/ITeamRepository.js'
-import { buildTeam } from '../../infrastructure/testing/index.js'
-import { GetTeamUseCase } from './GetTeamUseCase.js'
 
 describe('GetTeamUseCase', () => {
   let getTeamUseCase: GetTeamUseCase

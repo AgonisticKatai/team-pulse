@@ -1,8 +1,10 @@
+import { ValidationError } from '@domain/errors/ValidationError.js'
+import { User } from '@domain/models/User.js'
+import { Email } from '@domain/value-objects/Email.js'
+import { EntityId } from '@domain/value-objects/EntityId.js'
+import { Role, UserRole } from '@domain/value-objects/Role.js'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { describe, expect, it } from 'vitest'
-import { ValidationError } from '../errors/index.js'
-import { Email, EntityId, Role, UserRole } from '../value-objects/index.js'
-import { User } from './User.js'
 
 describe('User Domain Entity', () => {
   describe('create', () => {

@@ -1,13 +1,13 @@
+import { User } from '@domain/models/User.js'
+import { ScryptPasswordHasher } from '@infrastructure/auth/ScryptPasswordHasher.js'
+import type { Database } from '@infrastructure/database/connection.js'
+import { DrizzleUserRepository } from '@infrastructure/database/repositories/DrizzleUserRepository.js'
+import { refreshTokens } from '@infrastructure/database/schema.js'
+import { setupTestEnvironment } from '@infrastructure/testing/test-helpers.js'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { eq, sql } from 'drizzle-orm'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { User } from '../../../domain/models/User.js'
-import { ScryptPasswordHasher } from '../../auth/ScryptPasswordHasher.js'
-import { setupTestEnvironment } from '../../testing/test-helpers.js'
-import type { Database } from '../connection.js'
-import { refreshTokens } from '../schema.js'
-import { DrizzleUserRepository } from './DrizzleUserRepository.js'
 
 describe('DrizzleUserRepository - Integration Tests', () => {
   let repository: DrizzleUserRepository

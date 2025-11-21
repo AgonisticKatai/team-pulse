@@ -1,7 +1,7 @@
+import { PrometheusCounter } from '@infrastructure/monitoring/prometheus/adapters/PrometheusCounter.js'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { Counter, Registry } from 'prom-client'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { PrometheusCounter } from './PrometheusCounter.js'
 
 const { prometheus } = TEST_CONSTANTS.metrics
 

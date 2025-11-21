@@ -1,13 +1,13 @@
+import type { TokenFactory } from '@application/factories/TokenFactory.js'
+import type { CreateTeamUseCase } from '@application/use-cases/CreateTeamUseCase.js'
+import type { DeleteTeamUseCase } from '@application/use-cases/DeleteTeamUseCase.js'
+import type { GetTeamUseCase } from '@application/use-cases/GetTeamUseCase.js'
+import type { ListTeamsUseCase } from '@application/use-cases/ListTeamsUseCase.js'
+import type { UpdateTeamUseCase } from '@application/use-cases/UpdateTeamUseCase.js'
+import { requireAuth, requireRole } from '@infrastructure/http/middleware/auth.js'
+import { handleError } from '@infrastructure/http/utils/error-handler.js'
 import { CreateTeamDTOSchema, PaginationQuerySchema, UpdateTeamDTOSchema } from '@team-pulse/shared/dtos'
 import type { FastifyInstance } from 'fastify'
-import type { TokenFactory } from '../../../application/factories/TokenFactory.js'
-import type { CreateTeamUseCase } from '../../../application/use-cases/CreateTeamUseCase.js'
-import type { DeleteTeamUseCase } from '../../../application/use-cases/DeleteTeamUseCase.js'
-import type { GetTeamUseCase } from '../../../application/use-cases/GetTeamUseCase.js'
-import type { ListTeamsUseCase } from '../../../application/use-cases/ListTeamsUseCase.js'
-import type { UpdateTeamUseCase } from '../../../application/use-cases/UpdateTeamUseCase.js'
-import { requireAuth, requireRole } from '../middleware/auth.js'
-import { handleError } from '../utils/error-handler.js'
 
 /**
  * Team Routes (HTTP ADAPTER)

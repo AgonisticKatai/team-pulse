@@ -1,5 +1,5 @@
+import type { IGauge } from '@domain/services/metrics/IGauge.js'
 import type * as promClient from 'prom-client'
-import type { IGauge } from '../../../../domain/services/metrics/IGauge.js'
 
 /**
  * Prometheus Gauge Adapter

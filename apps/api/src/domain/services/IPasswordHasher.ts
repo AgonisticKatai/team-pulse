@@ -1,5 +1,5 @@
+import type { RepositoryError } from '@domain/errors/RepositoryError.js'
 import type { Result } from '@team-pulse/shared/result'
-import type { RepositoryError } from '../errors/RepositoryError.js'
 
 /**
  * Password Hasher Interface (DOMAIN SERVICE)

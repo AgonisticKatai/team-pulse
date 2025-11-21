@@ -1,9 +1,9 @@
+import type { TokenFactory } from '@application/factories/TokenFactory.js'
+import { NotFoundError, type RepositoryError, ValidationError } from '@domain/errors/index.js'
+import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository.js'
+import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { RefreshTokenDTO, RefreshTokenResponseDTO } from '@team-pulse/shared/dtos'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
-import { NotFoundError, type RepositoryError, ValidationError } from '../../domain/errors/index.js'
-import type { IRefreshTokenRepository } from '../../domain/repositories/IRefreshTokenRepository.js'
-import type { IUserRepository } from '../../domain/repositories/IUserRepository.js'
-import type { TokenFactory } from '../factories/TokenFactory.js'
 
 /**
  * Refresh Token Use Case

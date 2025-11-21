@@ -1,7 +1,7 @@
-import type { ICounter } from './ICounter.js'
-import type { IGauge } from './IGauge.js'
-import type { IHistogram } from './IHistogram.js'
-import type { IMetricRegistry } from './IMetricRegistry.js'
+import type { ICounter } from '@domain/services/metrics/ICounter.js'
+import type { IGauge } from '@domain/services/metrics/IGauge.js'
+import type { IHistogram } from '@domain/services/metrics/IHistogram.js'
+import type { IMetricRegistry } from '@domain/services/metrics/IMetricRegistry.js'
 
 /**
  * Collection of all metrics used by the application

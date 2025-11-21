@@ -1,4 +1,6 @@
-import type { Email, EntityId, Role } from '../value-objects/index.js'
+import type { Email } from '@domain/value-objects/Email.js'
+import type { EntityId } from '@domain/value-objects/EntityId.js'
+import type { Role } from '@domain/value-objects/Role.js'
 
 /**
  * Base User properties with Value Objects

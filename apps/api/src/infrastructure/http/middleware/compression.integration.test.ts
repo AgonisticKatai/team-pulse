@@ -1,9 +1,9 @@
+import type { Database } from '@infrastructure/database/connection.js'
+import { setupTestEnvironment } from '@infrastructure/testing/test-helpers.js'
 import { sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { afterEach, beforeAll, describe, expect, it } from 'vitest'
 import { buildApp } from '../../../app.js'
-import type { Database } from '../../database/connection.js'
-import { setupTestEnvironment } from '../../testing/test-helpers.js'
 
 /**
  * HTTP Compression Integration Tests

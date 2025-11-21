@@ -1,4 +1,4 @@
-import { DomainError } from './DomainError.js'
+import { DomainError } from '@domain/errors/DomainError.js'
 
 /**
  * DuplicatedError Error

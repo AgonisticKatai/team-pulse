@@ -1,6 +1,6 @@
+import { Pagination } from '@domain/value-objects/Pagination.js'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { describe, expect, it } from 'vitest'
-import { Pagination } from './Pagination.js'
 
 describe('Pagination Value Object', () => {
   describe('create', () => {
