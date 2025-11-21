@@ -6,9 +6,9 @@
     "typescript": "catalog:"
   },
   "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+    "./errors": {
+      "import": "./dist/errors/index.js",
+      "types": "./dist/errors/index.d.ts"
     },
     "./result": {
       "import": "./dist/types/Result.js",
