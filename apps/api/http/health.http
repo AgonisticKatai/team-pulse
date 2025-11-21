@@ -4,8 +4,8 @@
 # These endpoints don't require authentication.
 ###############################################################################
 
-### Load environment variables
-< ./environments/local.http
+### Environment Variables
+@baseUrl = http://localhost:3000
 
 ###############################################################################
 # Health Checks

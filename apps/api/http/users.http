@@ -5,8 +5,8 @@
 # Make sure to login as admin/super_admin first.
 ###############################################################################
 
-### Load environment variables
-< ./environments/local.http
+### Environment Variables
+@baseUrl = http://localhost:3000
 
 ###############################################################################
 # Prerequisites

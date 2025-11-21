@@ -23,23 +23,26 @@ Esta carpeta contiene colecciones de requests HTTP para probar la API de TeamPul
 
 ```
 http/
-├── environments/
-│   └── local.http          # Variables de entorno (URLs, credenciales)
 ├── auth.http               # Autenticación (login, logout, refresh)
 ├── users.http              # Gestión de usuarios
 ├── teams.http              # Gestión de equipos (CRUD completo)
 ├── health.http             # Health checks y métricas
+├── .gitignore              # Ignora archivos sensibles
 └── README.md               # Esta guía
 ```
 
 ## 🚀 Cómo Usar
 
-### 1. Configurar Variables de Entorno
+### 1. Configurar Variables (Opcional)
 
-Edita `environments/local.http` si necesitas cambiar:
-- URL base del servidor
-- Credenciales de prueba
-- Otros valores por defecto
+Cada archivo `.http` tiene variables al inicio que puedes editar:
+```http
+@baseUrl = http://localhost:3000
+@userEmail = user@test.com
+@userPassword = UserPassword123!
+```
+
+Si quieres cambiar el puerto o las credenciales, edítalas directamente en cada archivo.
 
 ### 2. Ejecutar Requests
 
@@ -95,18 +98,19 @@ Si recibes error 401:
 
 ## 📝 Variables Disponibles
 
-Las variables se definen en `environments/local.http` y se usan con `{{nombreVariable}}`:
+Las variables se definen al inicio de cada archivo `.http` y se usan con `{{nombreVariable}}`:
 
-### Variables de Entorno
-- `{{baseUrl}}` - URL base de la API
-- `{{userEmail}}` - Email del usuario USER
-- `{{adminEmail}}` - Email del usuario ADMIN
-- `{{superAdminEmail}}` - Email del usuario SUPER_ADMIN
+### Variables Configurables (definidas en cada archivo)
+- `{{baseUrl}}` - URL base de la API (default: http://localhost:3000)
+- `{{userEmail}}` - Email del usuario USER (solo en auth.http)
+- `{{adminEmail}}` - Email del usuario ADMIN (solo en auth.http)
+- `{{superAdminEmail}}` - Email del usuario SUPER_ADMIN (solo en auth.http)
+- Y sus respectivas passwords
 
 ### Variables Automáticas (se guardan tras ejecutar requests)
-- `{{accessToken}}` - Token de autenticación
-- `{{refreshToken}}` - Token para renovar
-- `{{userId}}` - ID del usuario autenticado
+- `{{accessToken}}` - Token de autenticación (guardado tras login)
+- `{{refreshToken}}` - Token para renovar (guardado tras login)
+- `{{userId}}` - ID del usuario autenticado (guardado tras login)
 - `{{teamId}}` - ID del último equipo creado/consultado
 - `{{testTeamId}}` - ID del equipo de prueba (flujos de testing)
 
@@ -155,24 +159,20 @@ Las responses se muestran en un panel temporal. Para guardarlas:
 2. O copia manualmente el contenido
 
 ### Variables Personalizadas
-Si necesitas variables personales (tokens reales, etc.):
-1. Crea `environments/local-custom.http`
-2. Copia las variables de `local.http`
-3. Modifica los valores
-4. Usa `< ./environments/local-custom.http` en tus archivos
+Si necesitas usar valores diferentes (otra URL, otras credenciales):
+1. Copia el archivo `.http` que quieras personalizar (ej: `auth.http`)
+2. Renómbralo con sufijo `-custom` (ej: `auth-custom.http`)
+3. Modifica las variables al inicio del archivo
+4. Usa ese archivo personalizado
 
-El archivo `local-custom.http` está en `.gitignore` y no se commitea.
+Los archivos `*-custom.http` están en `.gitignore` y no se commitean.
 
 ### Múltiples Entornos
-Puedes crear múltiples archivos de entorno:
-```
-environments/
-├── local.http
-├── staging.http
-└── production.http
-```
-
-Cambia la línea `< ./environments/local.http` según necesites.
+Para trabajar con diferentes entornos (local, staging, production):
+1. Duplica los archivos `.http` con sufijos de entorno:
+   - `auth-staging.http` con `@baseUrl = https://staging.api.com`
+   - `auth-production.http` con `@baseUrl = https://api.com`
+2. Usa el archivo correspondiente según el entorno que necesites
 
 ## 📚 Recursos
 

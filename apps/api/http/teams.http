@@ -5,8 +5,8 @@
 # List/Get operations require any authenticated user.
 ###############################################################################
 
-### Load environment variables
-< ./environments/local.http
+### Environment Variables
+@baseUrl = http://localhost:3000
 
 ###############################################################################
 # Prerequisites

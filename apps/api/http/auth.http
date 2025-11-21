@@ -5,8 +5,14 @@
 # Make sure to run login first to populate the @accessToken variable.
 ###############################################################################
 
-### Load environment variables
-< ./environments/local.http
+### Environment Variables
+@baseUrl = http://localhost:3000
+@userEmail = user@test.com
+@userPassword = UserPassword123!
+@adminEmail = admin@test.com
+@adminPassword = AdminPassword123!
+@superAdminEmail = superadmin@test.com
+@superAdminPassword = SuperAdminPassword123!
 
 ###############################################################################
 # Login Flows
