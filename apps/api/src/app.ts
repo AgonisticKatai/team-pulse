@@ -59,6 +59,13 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     logger: createLoggerConfig(env.NODE_ENV, env.LOG_LEVEL),
     // Generate unique request IDs
     genReqId: () => crypto.randomUUID(),
+    // Configure Ajv to ignore OpenAPI-specific keywords that are not part of JSON Schema
+    ajv: {
+      customOptions: {
+        strict: false, // Disable strict mode to allow OpenAPI keywords like 'example'
+        removeAdditional: false, // Don't remove additional properties
+      },
+    },
   })
 
   // 5. Register Correlation ID middleware (for distributed tracing)
