@@ -35,12 +35,242 @@ Este archivo registra mejoras pendientes y tech debt identificado durante el des
 - [x] `apps/api/src/infrastructure/http/middleware/auth.ts` - Middleware de autenticación JWT - ✅ 21 tests + AuthService (2025-11-21)
 
 **Infrastructure/HTTP:**
-- [ ] `apps/api/src/infrastructure/http/utils/error-handler.ts` - Manejo global de errores
+- [ ] 🚧 **WIP: Sistema de Gestión de Errores Completo** - Ver diseño detallado abajo
 - [ ] `apps/api/src/infrastructure/http/routes/teams.ts` - Rutas HTTP de teams (unit tests)
 - [ ] `apps/api/src/infrastructure/http/routes/users.ts` - Rutas HTTP de users (unit tests)
 
 **Infrastructure/Logging:**
 - [ ] `apps/api/src/infrastructure/logging/logger-config.ts` - Configuración de logger
+
+---
+
+## 🚧 Work In Progress - Sistema de Gestión de Errores
+
+### 🎯 Objetivo: Error Management System de Excelencia
+
+Crear un sistema de gestión de errores robusto, type-safe, framework-agnostic y ejemplar que pueda ser referencia de mejores prácticas.
+
+### ❌ Problemas Actuales Identificados
+
+**Code Smells Críticos:**
+1. **String checking frágil** - `error-handler.ts:74`
+   ```typescript
+   if (error.message.includes('RefreshToken') || error.message.includes('User'))
+   ```
+2. **Field checking frágil** - `error-handler.ts:39`
+   ```typescript
+   if (error.field === 'credentials' || error.field === 'refreshToken')
+   ```
+3. **Acoplamiento a Fastify** - No puede moverse a shared package
+4. **No usa Result<T,E>** - Inconsistente con el resto de la aplicación
+5. **Falta semántica clara** - Los errores no "saben" su categoría
+
+### ✨ Arquitectura Propuesta: 5 Capas
+
+```
+Layer 5: Framework Adapter (Fastify)     ← apps/api/infrastructure
+  - FastifyErrorHandler
+  - Thin adapter, solo traduce a Fastify reply
+          ↓
+Layer 4: Error Handler Service           ← @team-pulse/shared/errors
+  - ErrorHandler (framework-agnostic)
+  - Category → HTTP status mapping
+  - ErrorResponse (agnostic interface)
+          ↓
+Layer 3: Domain Errors                   ← @team-pulse/shared/errors
+  - ValidationError, AuthenticationError
+  - AuthorizationError, NotFoundError
+  - ConflictError, BusinessRuleError, etc.
+          ↓
+Layer 2: Base Error System               ← @team-pulse/shared/errors
+  - IApplicationError (interface)
+  - ApplicationError (base class)
+  - ErrorCategory, ErrorSeverity types
+          ↓
+Layer 1: Result Integration              ← @team-pulse/shared/result
+  - Result<T, ApplicationError>
+  - unwrapResult, tryCatch helpers
+```
+
+### 🏗️ Componentes Clave
+
+#### Layer 2: Base Error System
+```typescript
+export type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical'
+
+export type ErrorCategory =
+  | 'validation'      // 400
+  | 'authentication'  // 401
+  | 'authorization'   // 403
+  | 'not_found'       // 404
+  | 'conflict'        // 409
+  | 'business_rule'   // 422
+  | 'external'        // 502
+  | 'internal'        // 500
+
+export interface IApplicationError {
+  readonly code: string
+  readonly message: string
+  readonly category: ErrorCategory  // ← Semántica REAL, no strings
+  readonly severity: ErrorSeverity  // ← Para logging/monitoring
+  readonly timestamp: Date
+  readonly metadata?: Record<string, unknown>
+  readonly isOperational: boolean   // ← Safe to expose?
+
+  withContext(ctx: Record<string, unknown>): IApplicationError
+  toJSON(): object
+}
+
+export abstract class ApplicationError extends Error implements IApplicationError {
+  // Implementación base con constructor privado + factory methods
+}
+```
+
+#### Layer 3: Domain-Specific Errors
+```typescript
+export class AuthenticationError extends ApplicationError {
+  readonly code = 'AUTHENTICATION_ERROR'
+  readonly category = 'authentication' as const
+
+  static invalidCredentials(): AuthenticationError
+  static invalidToken(): AuthenticationError
+  static missingToken(): AuthenticationError
+}
+
+export class AuthorizationError extends ApplicationError {
+  readonly code = 'AUTHORIZATION_ERROR'
+  readonly category = 'authorization' as const
+
+  static insufficientPermissions(required: string[], actual: string): AuthorizationError
+}
+```
+
+#### Layer 4: Framework-Agnostic Handler
+```typescript
+export interface ErrorResponse {
+  statusCode: number
+  body: {
+    success: false
+    error: {
+      code: string
+      message: string
+      details?: Record<string, unknown>
+    }
+  }
+}
+
+export class ErrorHandler {
+  static toResponse(error: unknown): ErrorResponse {
+    // Mapping puro sin lógica condicional basada en strings
+    if (error instanceof ApplicationError) {
+      return {
+        statusCode: CATEGORY_TO_HTTP[error.category],
+        body: { /* ... */ }
+      }
+    }
+  }
+}
+```
+
+#### Layer 5: Fastify Adapter
+```typescript
+export class FastifyErrorHandler {
+  static handle({ error, reply }: { error: unknown; reply: FastifyReply }) {
+    const response = ErrorHandler.toResponse(error)  // ← Usa core agnóstico
+    this.logError(error, response.statusCode)
+    reply.code(response.statusCode).send(response.body)
+  }
+}
+```
+
+### ✅ Características y Ventajas
+
+**Arquitectura:**
+- ✅ Zero coupling - Core 100% framework-agnostic
+- ✅ Proper separation of concerns - 5 capas claramente definidas
+- ✅ Can live in shared package - Reutilizable en toda la monorepo
+
+**Type Safety:**
+- ✅ Type-safe throughout - TypeScript compiler te protege
+- ✅ No string checking - Todo basado en tipos/categorías
+- ✅ Exhaustive pattern matching - Imposible olvidar casos
+
+**Integration:**
+- ✅ Result<T,E> first-class - Integración perfecta con Railway-Oriented Programming
+- ✅ No throw exceptions - Todo vía Result (control flow explícito)
+- ✅ Rich error context - Metadata, severity, timestamps, cause chain
+
+**Production Ready:**
+- ✅ Logging by severity - Solo loggea errores críticos
+- ✅ Hide internal errors - isOperational flag protege información sensible
+- ✅ Stack traces preserved - No pierdes debugging info
+- ✅ Observability ready - Metadata para monitoring/alerting
+
+**Developer Experience:**
+- ✅ Factory methods - API clara y descubrible
+- ✅ Testable in isolation - Cada capa testeable independientemente
+- ✅ Extensible - Nuevos errores sin cambiar handler
+- ✅ Self-documenting - El código explica el dominio
+
+### 📋 Plan de Implementación
+
+**Fase 1: Core Error System (Shared Package)**
+1. [ ] Crear `packages/shared/src/errors/core.ts`
+   - IApplicationError interface
+   - ApplicationError base class
+   - ErrorCategory y ErrorSeverity types
+2. [ ] Crear `packages/shared/src/errors/domain-errors.ts`
+   - ValidationError, AuthenticationError, AuthorizationError
+   - NotFoundError, ConflictError, BusinessRuleError
+   - InternalError, ExternalServiceError
+3. [ ] Crear tests exhaustivos para cada error type
+4. [ ] Configurar subpath exports en shared package
+
+**Fase 2: Framework-Agnostic Handler**
+5. [ ] Crear `packages/shared/src/errors/error-handler.ts`
+   - ErrorResponse interface
+   - ErrorHandler service
+   - Category → HTTP status mapping
+6. [ ] Tests para ErrorHandler con todos los casos
+
+**Fase 3: Result Integration**
+7. [ ] Crear `packages/shared/src/result/result-error.ts`
+   - unwrapResult helper
+   - tryCatch y tryCatchAsync helpers
+8. [ ] Tests de integración Result<T,E> + ApplicationError
+
+**Fase 4: Fastify Adapter**
+9. [ ] Crear `apps/api/src/infrastructure/http/utils/FastifyErrorHandler.ts`
+   - FastifyErrorHandler class
+   - Logging integration
+   - handleError convenience function
+10. [ ] Tests de integración con Fastify
+
+**Fase 5: Migration**
+11. [ ] Migrar errores existentes al nuevo sistema
+    - Actualizar DomainError, ValidationError, NotFoundError, DuplicatedError
+    - Mover de apps/api/domain a packages/shared/errors
+12. [ ] Actualizar use cases para retornar ApplicationError específicos
+13. [ ] Eliminar throw exceptions, todo vía Result<T,E>
+14. [ ] Actualizar route handlers para usar FastifyErrorHandler
+15. [ ] Eliminar error-handler.ts legacy
+16. [ ] Verificar 800+ tests siguen pasando
+
+**Fase 6: Documentation**
+17. [ ] Documentar patrón en AGREEMENTS.md
+18. [ ] Crear ejemplos de uso en TESTING.md
+19. [ ] Actualizar TODO.md con resultado
+
+### 🎯 Resultado Esperado
+
+Un sistema de gestión de errores que sea:
+- **Referencia de excelencia** - Digno de mostrar como ejemplo
+- **Type-safe** - El compilador previene errores
+- **Framework-agnostic** - Reutilizable en cualquier contexto
+- **Production-ready** - Logging, security, observability
+- **Developer-friendly** - API clara, tests claros, fácil de extender
+
+**Estado:** 🚧 WIP - Diseño aprobado, pendiente implementación (2025-11-21)
 
 ---
 
