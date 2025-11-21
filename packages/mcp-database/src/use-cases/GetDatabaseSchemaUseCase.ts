@@ -41,7 +41,6 @@ export class GetDatabaseSchemaUseCase {
         return Ok(this.formatSummary({ snapshot }))
       case 'tables-only':
         return Ok(this.formatTablesOnly({ snapshot }))
-      case 'full':
       default:
         return Ok(JSON.stringify(snapshot, null, 2))
     }

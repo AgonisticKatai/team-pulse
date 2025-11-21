@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { resolve } from 'node:path'
-import { Server } from '@modelcontextprotocol/sdk/server/index.js'
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
-import { CallToolRequestSchema, ListToolsRequestSchema, type Tool } from '@modelcontextprotocol/sdk/types.js'
+import { z } from 'zod'
 import { DrizzleSchemaReader } from './adapters/DrizzleSchemaReader.js'
 import { ExplainSchemaRelationshipsUseCase } from './use-cases/ExplainSchemaRelationshipsUseCase.js'
 import { GetDatabaseSchemaUseCase, type SchemaFormat } from './use-cases/GetDatabaseSchemaUseCase.js'
@@ -13,7 +13,7 @@ import { GetTableSchemaUseCase } from './use-cases/GetTableSchemaUseCase.js'
  * Database Schema MCP Server
  *
  * This is the ENTRY POINT / INFRASTRUCTURE LAYER:
- * - Sets up the MCP server
+ * - Sets up the MCP server using the new McpServer API with Zod schemas
  * - Wires up dependencies (DI)
  * - Handles MCP protocol communication
  * - Delegates to use cases for business logic
@@ -22,15 +22,15 @@ import { GetTableSchemaUseCase } from './use-cases/GetTableSchemaUseCase.js'
  * Infrastructure (this) → Application (use cases) → Domain (interfaces) → Adapters (implementations)
  */
 class DatabaseSchemaMCPServer {
-  private server: Server
+  private mcpServer: McpServer
   private getDatabaseSchemaUseCase: GetDatabaseSchemaUseCase
   private getTableSchemaUseCase: GetTableSchemaUseCase
   private getMigrationsHistoryUseCase: GetMigrationsHistoryUseCase
   private explainSchemaRelationshipsUseCase: ExplainSchemaRelationshipsUseCase
 
   private constructor() {
-    // Initialize MCP Server
-    this.server = new Server(
+    // Initialize MCP Server using the high-level McpServer API
+    this.mcpServer = new McpServer(
       {
         name: 'team-pulse-database',
         version: '1.0.0',
@@ -67,216 +67,110 @@ class DatabaseSchemaMCPServer {
   }
 
   private setupHandlers(): void {
-    // List available tools
-    this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
-      tools: [
-        {
-          name: 'get-database-schema',
-          description: 'Get the complete TeamPulse database schema including all tables, columns, relations, and types',
-          inputSchema: {
-            type: 'object',
-            properties: {
-              format: {
-                type: 'string',
-                enum: ['full', 'summary', 'tables-only'],
-                description: 'Output format: full (complete schema), summary (table names and counts), tables-only (just table structures)',
-                default: 'full',
-              },
-            },
-          },
+    // Register get-database-schema tool with Zod schema
+    this.mcpServer.registerTool(
+      'get-database-schema',
+      {
+        description: 'Get the complete TeamPulse database schema including all tables, columns, relations, and types',
+        inputSchema: {
+          format: z.enum(['full', 'summary', 'tables-only']).optional(),
         },
-        {
-          name: 'get-table-schema',
-          description: 'Get detailed schema information for a specific table',
-          inputSchema: {
-            type: 'object',
-            properties: {
-              tableName: {
-                type: 'string',
-                description: 'Name of the table to retrieve schema for',
-              },
-            },
-            required: ['tableName'],
-          },
-        },
-        {
-          name: 'get-migrations-history',
-          description: 'Get the history of database migrations with details about each migration',
-          inputSchema: {
-            type: 'object',
-            properties: {},
-          },
-        },
-        {
-          name: 'explain-schema-relationships',
-          description: 'Explain the relationships between tables in the database schema',
-          inputSchema: {
-            type: 'object',
-            properties: {
-              tableName: {
-                type: 'string',
-                description: 'Optional: focus on relationships for a specific table',
-              },
-            },
-          },
-        },
-      ] satisfies Tool[],
-    }))
+      },
+      async (args: { format?: string }) => {
+        const format = (args.format || 'full') as SchemaFormat
+        const result = await this.getDatabaseSchemaUseCase.execute({ format })
 
-    // Handle tool calls
-    // biome-ignore lint/suspicious/noExplicitAny: MCP SDK types are not fully typed
-    this.server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
-      try {
-        switch (request.params.name) {
-          case 'get-database-schema': {
-            const format = (request.params.arguments?.format || 'full') as SchemaFormat
-            const result = await this.getDatabaseSchemaUseCase.execute({
-              format,
-            })
-
-            if (!result.ok) {
-              return {
-                content: [
-                  {
-                    type: 'text' as const,
-                    text: `Error: ${result.error.message}`,
-                  },
-                ],
-                isError: true,
-              }
-            }
-
-            return {
-              content: [
-                {
-                  type: 'text' as const,
-                  text: result.value,
-                },
-              ],
-            }
+        if (!result.ok) {
+          return {
+            content: [{ type: 'text' as const, text: `Error: ${result.error.message}` }],
+            isError: true,
           }
-
-          case 'get-table-schema': {
-            const tableName = request.params.arguments?.tableName as string
-            if (!tableName) {
-              return {
-                content: [
-                  {
-                    type: 'text' as const,
-                    text: 'Error: tableName is required',
-                  },
-                ],
-                isError: true,
-              }
-            }
-
-            const result = await this.getTableSchemaUseCase.execute({
-              tableName,
-            })
-
-            if (!result.ok) {
-              return {
-                content: [
-                  {
-                    type: 'text' as const,
-                    text: `Error: ${result.error.message}`,
-                  },
-                ],
-                isError: true,
-              }
-            }
-
-            return {
-              content: [
-                {
-                  type: 'text' as const,
-                  text: result.value,
-                },
-              ],
-            }
-          }
-
-          case 'get-migrations-history': {
-            const result = await this.getMigrationsHistoryUseCase.execute()
-
-            if (!result.ok) {
-              return {
-                content: [
-                  {
-                    type: 'text' as const,
-                    text: `Error: ${result.error.message}`,
-                  },
-                ],
-                isError: true,
-              }
-            }
-
-            return {
-              content: [
-                {
-                  type: 'text' as const,
-                  text: result.value,
-                },
-              ],
-            }
-          }
-
-          case 'explain-schema-relationships': {
-            const tableName = request.params.arguments?.tableName as string | undefined
-            const result = await this.explainSchemaRelationshipsUseCase.execute({
-              tableName,
-            })
-
-            if (!result.ok) {
-              return {
-                content: [
-                  {
-                    type: 'text' as const,
-                    text: `Error: ${result.error.message}`,
-                  },
-                ],
-                isError: true,
-              }
-            }
-
-            return {
-              content: [
-                {
-                  type: 'text' as const,
-                  text: result.value,
-                },
-              ],
-            }
-          }
-
-          default:
-            return {
-              content: [
-                {
-                  type: 'text' as const,
-                  text: `Error: Unknown tool: ${request.params.name}`,
-                },
-              ],
-              isError: true,
-            }
         }
-      } catch (error) {
+
         return {
-          content: [
-            {
-              type: 'text' as const,
-              text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-            },
-          ],
-          isError: true,
+          content: [{ type: 'text' as const, text: result.value }],
         }
-      }
-    })
+      },
+    )
+
+    // Register get-table-schema tool with Zod schema
+    this.mcpServer.registerTool(
+      'get-table-schema',
+      {
+        description: 'Get detailed schema information for a specific table',
+        inputSchema: {
+          tableName: z.string(),
+        },
+      },
+      async (args: { tableName: string }) => {
+        const tableName = args.tableName as string
+        const result = await this.getTableSchemaUseCase.execute({ tableName })
+
+        if (!result.ok) {
+          return {
+            content: [{ type: 'text' as const, text: `Error: ${result.error.message}` }],
+            isError: true,
+          }
+        }
+
+        return {
+          content: [{ type: 'text' as const, text: result.value }],
+        }
+      },
+    )
+
+    // Register get-migrations-history tool (no parameters needed)
+    this.mcpServer.registerTool(
+      'get-migrations-history',
+      {
+        description: 'Get the history of database migrations with details about each migration',
+      },
+      async () => {
+        const result = await this.getMigrationsHistoryUseCase.execute()
+
+        if (!result.ok) {
+          return {
+            content: [{ type: 'text' as const, text: `Error: ${result.error.message}` }],
+            isError: true,
+          }
+        }
+
+        return {
+          content: [{ type: 'text' as const, text: result.value }],
+        }
+      },
+    )
+
+    // Register explain-schema-relationships tool with Zod schema
+    this.mcpServer.registerTool(
+      'explain-schema-relationships',
+      {
+        description: 'Explain the relationships between tables in the database schema',
+        inputSchema: {
+          tableName: z.string().optional(),
+        },
+      },
+      async (args: { tableName?: string }) => {
+        const tableName = args.tableName as string | undefined
+        const result = await this.explainSchemaRelationshipsUseCase.execute({ tableName })
+
+        if (!result.ok) {
+          return {
+            content: [{ type: 'text' as const, text: `Error: ${result.error.message}` }],
+            isError: true,
+          }
+        }
+
+        return {
+          content: [{ type: 'text' as const, text: result.value }],
+        }
+      },
+    )
   }
 
   async run(): Promise<void> {
     const transport = new StdioServerTransport()
-    await this.server.connect(transport)
+    await this.mcpServer.server.connect(transport)
     // biome-ignore lint/suspicious/noConsole: MCP server needs to log to stderr
     console.error('TeamPulse Database Schema MCP server running on stdio')
   }
