@@ -33,7 +33,7 @@ export const successResponseSchema = {
 } as const
 
 // Pagination metadata schema
-// Note: Fields are not marked as required to allow flexibility in serialization
+// Note: Response schemas are flexible to allow natural API responses
 export const paginationSchema = {
   type: 'object',
   properties: {
@@ -42,7 +42,6 @@ export const paginationSchema = {
     total: { type: 'number', example: 42, minimum: 0 },
     totalPages: { type: 'number', example: 5, minimum: 0 },
   },
-  additionalProperties: false,
 } as const
 
 // Security scheme for JWT Bearer token
@@ -175,6 +174,7 @@ export function createSuccessResponseSchema(dataSchema: object) {
 
 /**
  * Helper to create a paginated response schema
+ * Note: Response schemas are flexible to allow natural API responses
  */
 export function createPaginatedResponseSchema(itemSchema: object) {
   return {
@@ -190,7 +190,6 @@ export function createPaginatedResponseSchema(itemSchema: object) {
           },
           pagination: paginationSchema,
         },
-        additionalProperties: false,
       },
     },
     required: ['success', 'data'],

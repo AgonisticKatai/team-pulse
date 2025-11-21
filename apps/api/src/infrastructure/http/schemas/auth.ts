@@ -6,7 +6,7 @@ import { commonErrorResponses, createSuccessResponseSchema } from './common.js'
  */
 
 // User schema for login response (without password)
-// Note: Fields are not marked as required to allow flexibility in serialization
+// Note: Response schemas are flexible to allow natural API responses
 const userSchema = {
   type: 'object',
   properties: {
@@ -16,11 +16,10 @@ const userSchema = {
     createdAt: { type: 'string', format: 'date-time', example: '2024-01-01T00:00:00.000Z' },
     updatedAt: { type: 'string', format: 'date-time', example: '2024-01-01T00:00:00.000Z' },
   },
-  additionalProperties: false,
 } as const
 
 // Current user schema (from JWT token payload)
-// Note: Fields are not marked as required to allow flexibility in serialization
+// Note: Response schemas are flexible to allow natural API responses
 const currentUserSchema = {
   type: 'object',
   properties: {
@@ -28,7 +27,6 @@ const currentUserSchema = {
     email: { type: 'string', format: 'email', example: 'user@example.com' },
     role: { type: 'string', enum: ['SUPER_ADMIN', 'ADMIN', 'USER'], example: 'USER' },
   },
-  additionalProperties: false,
 } as const
 
 // Login request body schema
@@ -42,7 +40,7 @@ const loginBodySchema = {
 } as const
 
 // Login response data schema
-// Note: Fields are not marked as required to allow flexibility in serialization
+// Note: Response schemas are flexible to allow natural API responses
 const loginResponseDataSchema = {
   type: 'object',
   properties: {
@@ -50,7 +48,6 @@ const loginResponseDataSchema = {
     refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
     user: userSchema,
   },
-  additionalProperties: false,
 } as const
 
 // Refresh token request body schema
@@ -63,14 +60,13 @@ const refreshTokenBodySchema = {
 } as const
 
 // Refresh token response data schema
-// Note: Fields are not marked as required to allow flexibility in serialization
+// Note: Response schemas are flexible to allow natural API responses
 const refreshTokenResponseDataSchema = {
   type: 'object',
   properties: {
     accessToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
     refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
   },
-  additionalProperties: false,
 } as const
 
 /**

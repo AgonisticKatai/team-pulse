@@ -6,7 +6,7 @@ import { commonErrorResponses, createSuccessResponseSchema, paginationSchema } f
  */
 
 // Team schema
-// Note: Fields are not marked as required to allow flexibility in serialization
+// Note: Response schemas are flexible to allow natural API responses
 const teamSchema = {
   type: 'object',
   properties: {
@@ -17,7 +17,6 @@ const teamSchema = {
     createdAt: { type: 'string', format: 'date-time', example: '2024-01-01T00:00:00.000Z' },
     updatedAt: { type: 'string', format: 'date-time', example: '2024-01-01T00:00:00.000Z' },
   },
-  additionalProperties: false,
 } as const
 
 // Create team request body schema
@@ -89,7 +88,7 @@ const paginationQuerySchema = {
 } as const
 
 // List teams response data schema
-// Note: Fields are not marked as required to allow flexibility in serialization
+// Note: Response schemas are flexible to allow natural API responses
 const teamsListDataSchema = {
   type: 'object',
   properties: {
@@ -99,7 +98,6 @@ const teamsListDataSchema = {
     },
     pagination: paginationSchema,
   },
-  additionalProperties: false,
 } as const
 
 // Team ID param schema

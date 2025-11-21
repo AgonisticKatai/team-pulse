@@ -6,7 +6,7 @@ import { commonErrorResponses, createSuccessResponseSchema, paginationSchema } f
  */
 
 // User schema (without password)
-// Note: Fields are not marked as required to allow flexibility in serialization
+// Note: Response schemas are flexible to allow natural API responses
 const userSchema = {
   type: 'object',
   properties: {
@@ -16,7 +16,6 @@ const userSchema = {
     createdAt: { type: 'string', format: 'date-time', example: '2024-01-01T00:00:00.000Z' },
     updatedAt: { type: 'string', format: 'date-time', example: '2024-01-01T00:00:00.000Z' },
   },
-  additionalProperties: false,
 } as const
 
 // Create user request body schema
@@ -56,7 +55,7 @@ const paginationQuerySchema = {
 } as const
 
 // List users response data schema
-// Note: Fields are not marked as required to allow flexibility in serialization
+// Note: Response schemas are flexible to allow natural API responses
 const usersListDataSchema = {
   type: 'object',
   properties: {
@@ -66,7 +65,6 @@ const usersListDataSchema = {
     },
     pagination: paginationSchema,
   },
-  additionalProperties: false,
 } as const
 
 /**
