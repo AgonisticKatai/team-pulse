@@ -1,0 +1,329 @@
+###############################################################################
+# Team Management Endpoints
+#
+# Create/Update/Delete require ADMIN or SUPER_ADMIN role.
+# List/Get operations require any authenticated user.
+###############################################################################
+
+### Load environment variables
+< ./environments/local.http
+
+###############################################################################
+# Prerequisites
+###############################################################################
+
+### STEP 1: Login first
+# Run one of these from auth.http:
+# - Login as USER (for read operations)
+# - Login as ADMIN (for all operations)
+# - Login as SUPER_ADMIN (for all operations)
+
+###############################################################################
+# Create Teams
+###############################################################################
+
+### Create a new team
+# @name createTeam
+POST {{baseUrl}}/api/teams
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Real Madrid CF",
+  "city": "Madrid",
+  "foundedYear": 1902
+}
+
+> {%
+  client.global.set("teamId", response.body.data.id);
+%}
+
+###
+
+### Create team without foundedYear (optional field)
+POST {{baseUrl}}/api/teams
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "FC Barcelona",
+  "city": "Barcelona"
+}
+
+###
+
+### Create team - Missing required field (should fail)
+POST {{baseUrl}}/api/teams
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Manchester United"
+}
+
+###
+
+### Create team - Invalid foundedYear (too old, should fail)
+POST {{baseUrl}}/api/teams
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Ancient Team",
+  "city": "Rome",
+  "foundedYear": 1500
+}
+
+###
+
+### Create team - Invalid foundedYear (future, should fail)
+POST {{baseUrl}}/api/teams
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Future Team",
+  "city": "Mars",
+  "foundedYear": 2100
+}
+
+###
+
+### Create team - Without authentication (should fail with 401)
+POST {{baseUrl}}/api/teams
+Content-Type: application/json
+
+{
+  "name": "Unauthorized Team",
+  "city": "London"
+}
+
+###
+
+### Create team as USER (should fail with 403)
+# Login as USER first, then run this
+POST {{baseUrl}}/api/teams
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Forbidden Team",
+  "city": "Paris"
+}
+
+###############################################################################
+# List Teams
+###############################################################################
+
+### List all teams - First page (default pagination)
+GET {{baseUrl}}/api/teams
+Authorization: Bearer {{accessToken}}
+
+###
+
+### List teams - With pagination
+GET {{baseUrl}}/api/teams?page=1&limit=5
+Authorization: Bearer {{accessToken}}
+
+###
+
+### List teams - Page 2
+GET {{baseUrl}}/api/teams?page=2&limit=10
+Authorization: Bearer {{accessToken}}
+
+###
+
+### List teams - Without authentication (should fail with 401)
+GET {{baseUrl}}/api/teams
+
+###############################################################################
+# Get Single Team
+###############################################################################
+
+### Get team by ID
+# Use {{teamId}} from a previous create request, or replace with actual ID
+GET {{baseUrl}}/api/teams/{{teamId}}
+Authorization: Bearer {{accessToken}}
+
+###
+
+### Get team - Non-existent ID (should fail with 404)
+GET {{baseUrl}}/api/teams/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{accessToken}}
+
+###
+
+### Get team - Invalid UUID format (should fail with 400)
+GET {{baseUrl}}/api/teams/not-a-uuid
+Authorization: Bearer {{accessToken}}
+
+###
+
+### Get team - Without authentication (should fail with 401)
+GET {{baseUrl}}/api/teams/{{teamId}}
+
+###############################################################################
+# Update Teams
+###############################################################################
+
+### Update team - Change name and city
+PATCH {{baseUrl}}/api/teams/{{teamId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Real Madrid Club de Fútbol",
+  "city": "Madrid"
+}
+
+###
+
+### Update team - Change only foundedYear
+PATCH {{baseUrl}}/api/teams/{{teamId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "foundedYear": 1902
+}
+
+###
+
+### Update team - Set foundedYear to null
+PATCH {{baseUrl}}/api/teams/{{teamId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "foundedYear": null
+}
+
+###
+
+### Update team - Non-existent ID (should fail with 404)
+PATCH {{baseUrl}}/api/teams/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Non-existent Team"
+}
+
+###
+
+### Update team - Invalid data (should fail with validation error)
+PATCH {{baseUrl}}/api/teams/{{teamId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "",
+  "foundedYear": 1500
+}
+
+###
+
+### Update team - Without authentication (should fail with 401)
+PATCH {{baseUrl}}/api/teams/{{teamId}}
+Content-Type: application/json
+
+{
+  "name": "Unauthorized Update"
+}
+
+###
+
+### Update team as USER (should fail with 403)
+# Login as USER first, then run this
+PATCH {{baseUrl}}/api/teams/{{teamId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Forbidden Update"
+}
+
+###############################################################################
+# Delete Teams
+###############################################################################
+
+### Delete team by ID
+DELETE {{baseUrl}}/api/teams/{{teamId}}
+Authorization: Bearer {{accessToken}}
+
+###
+
+### Delete team - Non-existent ID (should fail with 404)
+DELETE {{baseUrl}}/api/teams/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{accessToken}}
+
+###
+
+### Delete team - Without authentication (should fail with 401)
+DELETE {{baseUrl}}/api/teams/{{teamId}}
+
+###
+
+### Delete team as USER (should fail with 403)
+# Login as USER first, then run this
+DELETE {{baseUrl}}/api/teams/{{teamId}}
+Authorization: Bearer {{accessToken}}
+
+###############################################################################
+# Complete CRUD Flow Example
+###############################################################################
+
+### FLOW: Create → Get → Update → Get → Delete
+
+### 1. Create a test team
+# @name createTestTeam
+POST {{baseUrl}}/api/teams
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Test Team FC",
+  "city": "Test City",
+  "foundedYear": 2000
+}
+
+> {%
+  client.global.set("testTeamId", response.body.data.id);
+%}
+
+###
+
+### 2. Get the created team
+GET {{baseUrl}}/api/teams/{{testTeamId}}
+Authorization: Bearer {{accessToken}}
+
+###
+
+### 3. Update the team
+PATCH {{baseUrl}}/api/teams/{{testTeamId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Updated Test Team FC",
+  "city": "Updated City",
+  "foundedYear": 2001
+}
+
+###
+
+### 4. Get the updated team
+GET {{baseUrl}}/api/teams/{{testTeamId}}
+Authorization: Bearer {{accessToken}}
+
+###
+
+### 5. Delete the team
+DELETE {{baseUrl}}/api/teams/{{testTeamId}}
+Authorization: Bearer {{accessToken}}
+
+###
+
+### 6. Verify deletion (should fail with 404)
+GET {{baseUrl}}/api/teams/{{testTeamId}}
+Authorization: Bearer {{accessToken}}

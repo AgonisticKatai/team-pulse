@@ -1,0 +1,151 @@
+###############################################################################
+# User Management Endpoints
+#
+# Requires ADMIN or SUPER_ADMIN role for all operations.
+# Make sure to login as admin/super_admin first.
+###############################################################################
+
+### Load environment variables
+< ./environments/local.http
+
+###############################################################################
+# Prerequisites
+###############################################################################
+
+### STEP 1: Login as ADMIN or SUPER_ADMIN first
+# Run one of these from auth.http:
+# - Login as ADMIN
+# - Login as SUPER_ADMIN
+
+###############################################################################
+# Create Users
+###############################################################################
+
+### Create a new user with USER role
+POST {{baseUrl}}/api/users
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "email": "newuser@example.com",
+  "password": "SecurePassword123!",
+  "role": "USER"
+}
+
+###
+
+### Create a new user with ADMIN role (requires SUPER_ADMIN)
+POST {{baseUrl}}/api/users
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "email": "newadmin@example.com",
+  "password": "AdminPassword123!",
+  "role": "ADMIN"
+}
+
+###
+
+### Create user - Weak password (should fail)
+POST {{baseUrl}}/api/users
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "email": "weakpass@example.com",
+  "password": "123",
+  "role": "USER"
+}
+
+###
+
+### Create user - Invalid email format (should fail)
+POST {{baseUrl}}/api/users
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "email": "not-an-email",
+  "password": "SecurePassword123!",
+  "role": "USER"
+}
+
+###
+
+### Create user - Duplicate email (should fail with 409)
+POST {{baseUrl}}/api/users
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "email": "{{userEmail}}",
+  "password": "SecurePassword123!",
+  "role": "USER"
+}
+
+###
+
+### Create user - Without authentication (should fail with 401)
+POST {{baseUrl}}/api/users
+Content-Type: application/json
+
+{
+  "email": "unauthorized@example.com",
+  "password": "SecurePassword123!",
+  "role": "USER"
+}
+
+###############################################################################
+# List Users
+###############################################################################
+
+### List all users - First page (default pagination)
+GET {{baseUrl}}/api/users
+Authorization: Bearer {{accessToken}}
+
+###
+
+### List users - With pagination
+GET {{baseUrl}}/api/users?page=1&limit=5
+Authorization: Bearer {{accessToken}}
+
+###
+
+### List users - Page 2
+GET {{baseUrl}}/api/users?page=2&limit=5
+Authorization: Bearer {{accessToken}}
+
+###
+
+### List users - Invalid pagination (should fail)
+GET {{baseUrl}}/api/users?page=-1&limit=1000
+Authorization: Bearer {{accessToken}}
+
+###
+
+### List users - Without authentication (should fail with 401)
+GET {{baseUrl}}/api/users
+
+###############################################################################
+# Authorization Tests
+###############################################################################
+
+### Try to create user as regular USER (should fail with 403)
+# First login as USER, then run this:
+POST {{baseUrl}}/api/users
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "email": "forbidden@example.com",
+  "password": "SecurePassword123!",
+  "role": "USER"
+}
+
+###
+
+### Try to list users as regular USER (should fail with 403)
+# Must be logged in as USER role
+GET {{baseUrl}}/api/users
+Authorization: Bearer {{accessToken}}

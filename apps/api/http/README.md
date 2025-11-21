@@ -1,0 +1,201 @@
+# TeamPulse API - HTTP Requests Collection
+
+Esta carpeta contiene colecciones de requests HTTP para probar la API de TeamPulse usando la extensión **REST Client** de VSCode.
+
+## 📋 Prerequisitos
+
+1. **Instalar la extensión REST Client**
+   - Abre VSCode
+   - Ve a Extensions (Ctrl+Shift+X / Cmd+Shift+X)
+   - Busca "REST Client" (por Huachao Mao)
+   - Instala la extensión
+
+2. **Iniciar el servidor de desarrollo**
+   ```bash
+   pnpm dev
+   ```
+
+3. **Asegúrate de tener usuarios de prueba creados**
+   - Ejecuta seeds si es necesario
+   - O crea usuarios manualmente usando los endpoints
+
+## 📁 Estructura de Archivos
+
+```
+http/
+├── environments/
+│   └── local.http          # Variables de entorno (URLs, credenciales)
+├── auth.http               # Autenticación (login, logout, refresh)
+├── users.http              # Gestión de usuarios
+├── teams.http              # Gestión de equipos (CRUD completo)
+├── health.http             # Health checks y métricas
+└── README.md               # Esta guía
+```
+
+## 🚀 Cómo Usar
+
+### 1. Configurar Variables de Entorno
+
+Edita `environments/local.http` si necesitas cambiar:
+- URL base del servidor
+- Credenciales de prueba
+- Otros valores por defecto
+
+### 2. Ejecutar Requests
+
+1. Abre cualquier archivo `.http` (ej: `auth.http`)
+2. Verás los requests separados por `###`
+3. Haz click en **"Send Request"** que aparece encima de cada request
+4. O usa el atajo: `Ctrl+Alt+R` (Windows/Linux) o `Cmd+Alt+R` (Mac)
+
+### 3. Flujo de Trabajo Típico
+
+#### Opción A: Usuario Normal (USER)
+```http
+1. Ejecutar "Login as USER" en auth.http
+2. Ejecutar "Get current user info" para verificar
+3. Ejecutar "List teams" en teams.http
+4. Ejecutar "Get team by ID" en teams.http
+```
+
+#### Opción B: Administrador (ADMIN)
+```http
+1. Ejecutar "Login as ADMIN" en auth.http
+2. Ejecutar "Create a new team" en teams.http
+3. Ejecutar "Update team" en teams.http
+4. Ejecutar "Create a new user" en users.http
+```
+
+#### Opción C: Super Admin (SUPER_ADMIN)
+```http
+1. Ejecutar "Login as SUPER_ADMIN" en auth.http
+2. Ejecutar cualquier operación (acceso completo)
+```
+
+## 🔑 Autenticación
+
+### Tokens Automáticos
+
+Los requests de login guardan automáticamente el token usando scripts:
+
+```javascript
+> {%
+  client.global.set("accessToken", response.body.data.accessToken);
+  client.global.set("refreshToken", response.body.data.refreshToken);
+%}
+```
+
+Después de login, todos los requests autenticados usarán automáticamente `{{accessToken}}`.
+
+### Expiración de Tokens
+
+Si recibes error 401:
+1. Ejecuta "Refresh access token" en `auth.http`
+2. O vuelve a hacer login
+
+## 📝 Variables Disponibles
+
+Las variables se definen en `environments/local.http` y se usan con `{{nombreVariable}}`:
+
+### Variables de Entorno
+- `{{baseUrl}}` - URL base de la API
+- `{{userEmail}}` - Email del usuario USER
+- `{{adminEmail}}` - Email del usuario ADMIN
+- `{{superAdminEmail}}` - Email del usuario SUPER_ADMIN
+
+### Variables Automáticas (se guardan tras ejecutar requests)
+- `{{accessToken}}` - Token de autenticación
+- `{{refreshToken}}` - Token para renovar
+- `{{userId}}` - ID del usuario autenticado
+- `{{teamId}}` - ID del último equipo creado/consultado
+- `{{testTeamId}}` - ID del equipo de prueba (flujos de testing)
+
+## 🎯 Casos de Uso Comunes
+
+### Testing de un Nuevo Endpoint
+
+1. Añade el request al archivo correspondiente:
+```http
+### Mi nuevo endpoint
+POST {{baseUrl}}/api/mi-endpoint
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "campo": "valor"
+}
+```
+
+2. Ejecuta el request
+3. Verifica la respuesta
+
+### Testing de Validaciones
+
+Cada archivo incluye casos de error para probar validaciones:
+- Campos requeridos faltantes
+- Formatos inválidos
+- Límites excedidos
+- Autenticación/Autorización
+
+### Testing de RBAC (Roles)
+
+Prueba diferentes roles:
+1. Login como USER → Intenta crear equipo → Debería fallar (403)
+2. Login como ADMIN → Crea equipo → Debería funcionar (200)
+
+## 🔧 Tips y Trucos
+
+### Ver Historial de Requests
+- REST Client guarda un historial
+- Accede con `Ctrl+Shift+P` → "Rest Client: Request History"
+
+### Guardar Responses
+Las responses se muestran en un panel temporal. Para guardarlas:
+1. Click en el icono de guardar en el panel de response
+2. O copia manualmente el contenido
+
+### Variables Personalizadas
+Si necesitas variables personales (tokens reales, etc.):
+1. Crea `environments/local-custom.http`
+2. Copia las variables de `local.http`
+3. Modifica los valores
+4. Usa `< ./environments/local-custom.http` en tus archivos
+
+El archivo `local-custom.http` está en `.gitignore` y no se commitea.
+
+### Múltiples Entornos
+Puedes crear múltiples archivos de entorno:
+```
+environments/
+├── local.http
+├── staging.http
+└── production.http
+```
+
+Cambia la línea `< ./environments/local.http` según necesites.
+
+## 📚 Recursos
+
+- [REST Client - Documentación Oficial](https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
+- [RFC 2616 - HTTP/1.1](https://www.rfc-editor.org/rfc/rfc2616)
+
+## ⚠️ Seguridad
+
+- **NUNCA** commitees tokens reales en git
+- Usa archivos `*-custom.http` para datos sensibles
+- Los archivos `*-custom.http` están en `.gitignore`
+- Las credenciales por defecto son SOLO para desarrollo local
+
+## 🤝 Compartir con el Equipo
+
+Todo el equipo puede usar estos archivos:
+1. Pull del repo
+2. Instalar REST Client
+3. Iniciar servidor local
+4. Ejecutar requests
+
+Sin necesidad de:
+- Cuentas externas (Postman)
+- Sincronización cloud
+- Aplicaciones adicionales
+- Configuración compleja

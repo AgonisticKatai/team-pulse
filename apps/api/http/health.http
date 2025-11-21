@@ -1,0 +1,38 @@
+###############################################################################
+# Health Check & Monitoring Endpoints
+#
+# These endpoints don't require authentication.
+###############################################################################
+
+### Load environment variables
+< ./environments/local.http
+
+###############################################################################
+# Health Checks
+###############################################################################
+
+### Basic health check
+GET {{baseUrl}}/health
+
+###
+
+### Liveness probe (for Kubernetes/Docker)
+GET {{baseUrl}}/health/liveness
+
+###
+
+### Readiness probe (for Kubernetes/Docker)
+GET {{baseUrl}}/health/readiness
+
+###############################################################################
+# Metrics
+###############################################################################
+
+### Prometheus metrics endpoint
+GET {{baseUrl}}/metrics
+
+###
+
+### Check specific metrics (filter Prometheus output)
+# This will show all metrics, you can grep/search for specific ones
+GET {{baseUrl}}/metrics
