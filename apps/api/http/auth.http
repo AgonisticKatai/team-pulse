@@ -1,19 +1,20 @@
 ###############################################################################
 # Authentication Endpoints
 #
-# This file contains all authentication-related requests.
-# Make sure to run login first to populate the @accessToken variable.
+# After login, COPY the accessToken from the response and paste it below:
+# @accessToken = paste-your-token-here
 #
 # Environment variables are loaded from .vscode/settings.json
-# Switch environment in VSCode: Click on environment selector in status bar
 ###############################################################################
+
+# Paste your access token here after login
+# @accessToken =
 
 ###############################################################################
 # Login Flows
 ###############################################################################
 
 ### Login as USER
-# @name loginUser
 POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
@@ -22,16 +23,9 @@ Content-Type: application/json
   "password": "{{userPassword}}"
 }
 
-> {%
-  client.global.set("accessToken", response.body.data.accessToken);
-  client.global.set("refreshToken", response.body.data.refreshToken);
-  client.global.set("userId", response.body.data.user.id);
-%}
-
 ###
 
 ### Login as ADMIN
-# @name loginAdmin
 POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
@@ -40,16 +34,9 @@ Content-Type: application/json
   "password": "{{adminPassword}}"
 }
 
-> {%
-  client.global.set("accessToken", response.body.data.accessToken);
-  client.global.set("refreshToken", response.body.data.refreshToken);
-  client.global.set("userId", response.body.data.user.id);
-%}
-
 ###
 
 ### Login as SUPER_ADMIN
-# @name loginSuperAdmin
 POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
@@ -57,12 +44,6 @@ Content-Type: application/json
   "email": "{{superAdminEmail}}",
   "password": "{{superAdminPassword}}"
 }
-
-> {%
-  client.global.set("accessToken", response.body.data.accessToken);
-  client.global.set("refreshToken", response.body.data.refreshToken);
-  client.global.set("userId", response.body.data.user.id);
-%}
 
 ###
 
@@ -108,18 +89,13 @@ Authorization: Bearer {{accessToken}}
 ###
 
 ### Refresh access token
-# @name refreshToken
+# Copy the new accessToken from response and update @accessToken above
 POST {{baseUrl}}/api/auth/refresh
 Content-Type: application/json
 
 {
   "refreshToken": "{{refreshToken}}"
 }
-
-> {%
-  client.global.set("accessToken", response.body.data.accessToken);
-  client.global.set("refreshToken", response.body.data.refreshToken);
-%}
 
 ###
 

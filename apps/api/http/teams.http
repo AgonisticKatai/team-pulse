@@ -7,6 +7,9 @@
 # Environment variables are loaded from .vscode/settings.json
 ###############################################################################
 
+# After creating a team, copy the ID from response and paste it here
+# @teamId =
+
 ###############################################################################
 # Prerequisites
 ###############################################################################
@@ -22,7 +25,7 @@
 ###############################################################################
 
 ### Create a new team
-# @name createTeam
+# Copy the 'id' from response and paste it in @teamId above
 POST {{baseUrl}}/api/teams
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
@@ -32,10 +35,6 @@ Content-Type: application/json
   "city": "Madrid",
   "foundedYear": 1902
 }
-
-> {%
-  client.global.set("teamId", response.body.data.id);
-%}
 
 ###
 
@@ -275,7 +274,7 @@ Authorization: Bearer {{accessToken}}
 ### FLOW: Create → Get → Update → Get → Delete
 
 ### 1. Create a test team
-# @name createTestTeam
+# Copy the 'id' from response and paste it in the testTeamId variable below
 POST {{baseUrl}}/api/teams
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
@@ -286,9 +285,7 @@ Content-Type: application/json
   "foundedYear": 2000
 }
 
-> {%
-  client.global.set("testTeamId", response.body.data.id);
-%}
+# @testTeamId = paste-id-here
 
 ###
 
