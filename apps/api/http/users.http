@@ -1,8 +1,10 @@
 ###############################################################################
 # User Management Endpoints
 #
-# Requires ADMIN or SUPER_ADMIN role for all operations.
-# Make sure to login as admin/super_admin first.
+# AUTOMATIC TOKEN PERSISTENCE:
+# 1. Execute "Login as ADMIN" from auth.http first
+# 2. The token is automatically available here via named request reference
+# 3. All requests below use {{loginAsAdmin.response.body.data.accessToken}}
 #
 # Environment variables are loaded from .vscode/settings.json
 ###############################################################################
@@ -11,10 +13,9 @@
 # Prerequisites
 ###############################################################################
 
-### STEP 1: Login as ADMIN or SUPER_ADMIN first
-# Run one of these from auth.http:
-# - Login as ADMIN
-# - Login as SUPER_ADMIN
+### STEP 1: Login as ADMIN first in auth.http
+# Execute the "Login as ADMIN" request in auth.http
+# The token will be automatically available for all requests below
 
 ###############################################################################
 # Create Users
@@ -22,7 +23,7 @@
 
 ### Create a new user with USER role
 POST {{baseUrl}}/api/users
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 Content-Type: application/json
 
 {
@@ -35,7 +36,7 @@ Content-Type: application/json
 
 ### Create a new user with ADMIN role (requires SUPER_ADMIN)
 POST {{baseUrl}}/api/users
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 Content-Type: application/json
 
 {
@@ -48,7 +49,7 @@ Content-Type: application/json
 
 ### Create user - Weak password (should fail)
 POST {{baseUrl}}/api/users
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 Content-Type: application/json
 
 {
@@ -61,7 +62,7 @@ Content-Type: application/json
 
 ### Create user - Invalid email format (should fail)
 POST {{baseUrl}}/api/users
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 Content-Type: application/json
 
 {
@@ -74,7 +75,7 @@ Content-Type: application/json
 
 ### Create user - Duplicate email (should fail with 409)
 POST {{baseUrl}}/api/users
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 Content-Type: application/json
 
 {
@@ -101,25 +102,25 @@ Content-Type: application/json
 
 ### List all users - First page (default pagination)
 GET {{baseUrl}}/api/users
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 
 ###
 
 ### List users - With pagination
 GET {{baseUrl}}/api/users?page=1&limit=5
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 
 ###
 
 ### List users - Page 2
 GET {{baseUrl}}/api/users?page=2&limit=5
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 
 ###
 
 ### List users - Invalid pagination (should fail)
 GET {{baseUrl}}/api/users?page=-1&limit=1000
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 
 ###
 
@@ -133,7 +134,7 @@ GET {{baseUrl}}/api/users
 ### Try to create user as regular USER (should fail with 403)
 # First login as USER, then run this:
 POST {{baseUrl}}/api/users
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 Content-Type: application/json
 
 {
@@ -147,4 +148,4 @@ Content-Type: application/json
 ### Try to list users as regular USER (should fail with 403)
 # Must be logged in as USER role
 GET {{baseUrl}}/api/users
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}

@@ -79,18 +79,33 @@ REST Client usa variables definidas en `.vscode/settings.json`. Para cambiar de 
 
 ## 🔑 Autenticación
 
-### Tokens Automáticos
+### Persistencia Automática de Tokens
 
-Los requests de login guardan automáticamente el token usando scripts:
+REST Client usa **named requests** para referenciar automáticamente respuestas de requests anteriores:
 
-```javascript
-> {%
-  client.global.set("accessToken", response.body.data.accessToken);
-  client.global.set("refreshToken", response.body.data.refreshToken);
-%}
+```http
+### Login as ADMIN
+# @name loginAsAdmin
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+
+### Usar el token automáticamente
+GET {{baseUrl}}/api/teams
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 ```
 
-Después de login, todos los requests autenticados usarán automáticamente `{{accessToken}}`.
+**Cómo funciona:**
+1. Ejecuta un request de login (ej: "Login as ADMIN")
+2. El request está marcado con `# @name loginAsAdmin`
+3. Otros requests referencian el token con `{{loginAsAdmin.response.body.data.accessToken}}`
+4. ¡No necesitas copiar/pegar nada!
+
+Después de login, todos los requests autenticados acceden automáticamente al token.
 
 ### Expiración de Tokens
 
@@ -100,9 +115,7 @@ Si recibes error 401:
 
 ## 📝 Variables Disponibles
 
-Las variables se definen en `.vscode/settings.json` bajo `rest-client.environmentVariables`:
-
-### Variables de Entorno (configuradas en settings.json)
+### Variables de Entorno (configuradas en .vscode/settings.json)
 - `{{baseUrl}}` - URL base de la API (cambia según entorno seleccionado)
 - `{{userEmail}}` - Email del usuario USER (compartido entre entornos)
 - `{{userPassword}}` - Password del usuario USER
@@ -111,12 +124,29 @@ Las variables se definen en `.vscode/settings.json` bajo `rest-client.environmen
 - `{{superAdminEmail}}` - Email del usuario SUPER_ADMIN
 - `{{superAdminPassword}}` - Password del usuario SUPER_ADMIN
 
-### Variables Automáticas (se guardan tras ejecutar requests)
-- `{{accessToken}}` - Token de autenticación (guardado tras login)
-- `{{refreshToken}}` - Token para renovar (guardado tras login)
-- `{{userId}}` - ID del usuario autenticado (guardado tras login)
-- `{{teamId}}` - ID del último equipo creado/consultado
-- `{{testTeamId}}` - ID del equipo de prueba (flujos de testing)
+### Variables Dinámicas (Named Requests)
+
+REST Client permite referenciar respuestas de requests anteriores usando named requests:
+
+**Tokens de autenticación:**
+- `{{loginAsUser.response.body.data.accessToken}}` - Token del usuario USER
+- `{{loginAsAdmin.response.body.data.accessToken}}` - Token del usuario ADMIN
+- `{{loginAsSuperAdmin.response.body.data.accessToken}}` - Token del usuario SUPER_ADMIN
+- `{{loginAsAdmin.response.body.data.refreshToken}}` - Refresh token
+
+**IDs de equipos:**
+- `{{createTeam.response.body.data.id}}` - ID del equipo creado (Real Madrid)
+- `{{createTestTeam.response.body.data.id}}` - ID del equipo de prueba
+
+**Cualquier dato de respuesta:**
+Puedes acceder a cualquier campo de la respuesta de un request nombrado:
+```http
+# @name myRequest
+POST {{baseUrl}}/api/endpoint
+
+### Luego úsalo
+GET {{baseUrl}}/api/other/{{myRequest.response.body.data.someField}}
+```
 
 ## 🎯 Casos de Uso Comunes
 

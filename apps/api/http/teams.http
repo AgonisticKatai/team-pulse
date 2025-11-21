@@ -1,33 +1,33 @@
 ###############################################################################
 # Team Management Endpoints
 #
+# AUTOMATIC TOKEN PERSISTENCE:
+# 1. Execute "Login as ADMIN" from auth.http first
+# 2. The token is automatically available here via named request reference
+# 3. Team IDs are automatically available via named create requests
+#
 # Create/Update/Delete require ADMIN or SUPER_ADMIN role.
 # List/Get operations require any authenticated user.
 #
 # Environment variables are loaded from .vscode/settings.json
 ###############################################################################
 
-# After creating a team, copy the ID from response and paste it here
-# @teamId =
-
 ###############################################################################
 # Prerequisites
 ###############################################################################
 
-### STEP 1: Login first
-# Run one of these from auth.http:
-# - Login as USER (for read operations)
-# - Login as ADMIN (for all operations)
-# - Login as SUPER_ADMIN (for all operations)
+### STEP 1: Login as ADMIN first in auth.http
+# Execute the "Login as ADMIN" request in auth.http
+# The token will be automatically available for all requests below
 
 ###############################################################################
 # Create Teams
 ###############################################################################
 
 ### Create a new team
-# Copy the 'id' from response and paste it in @teamId above
+# @name createTeam
 POST {{baseUrl}}/api/teams
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 Content-Type: application/json
 
 {
@@ -40,7 +40,7 @@ Content-Type: application/json
 
 ### Create team without foundedYear (optional field)
 POST {{baseUrl}}/api/teams
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 Content-Type: application/json
 
 {
@@ -52,7 +52,7 @@ Content-Type: application/json
 
 ### Create team - Missing required field (should fail)
 POST {{baseUrl}}/api/teams
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 Content-Type: application/json
 
 {
@@ -63,7 +63,7 @@ Content-Type: application/json
 
 ### Create team - Invalid foundedYear (too old, should fail)
 POST {{baseUrl}}/api/teams
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 Content-Type: application/json
 
 {
@@ -76,7 +76,7 @@ Content-Type: application/json
 
 ### Create team - Invalid foundedYear (future, should fail)
 POST {{baseUrl}}/api/teams
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 Content-Type: application/json
 
 {
@@ -101,7 +101,7 @@ Content-Type: application/json
 ### Create team as USER (should fail with 403)
 # Login as USER first, then run this
 POST {{baseUrl}}/api/teams
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 Content-Type: application/json
 
 {
@@ -115,19 +115,19 @@ Content-Type: application/json
 
 ### List all teams - First page (default pagination)
 GET {{baseUrl}}/api/teams
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 
 ###
 
 ### List teams - With pagination
 GET {{baseUrl}}/api/teams?page=1&limit=5
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 
 ###
 
 ### List teams - Page 2
 GET {{baseUrl}}/api/teams?page=2&limit=10
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 
 ###
 
@@ -139,34 +139,34 @@ GET {{baseUrl}}/api/teams
 ###############################################################################
 
 ### Get team by ID
-# Use {{teamId}} from a previous create request, or replace with actual ID
-GET {{baseUrl}}/api/teams/{{teamId}}
-Authorization: Bearer {{accessToken}}
+# Use {{createTeam.response.body.data.id}} from a previous create request, or replace with actual ID
+GET {{baseUrl}}/api/teams/{{createTeam.response.body.data.id}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 
 ###
 
 ### Get team - Non-existent ID (should fail with 404)
 GET {{baseUrl}}/api/teams/00000000-0000-0000-0000-000000000000
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 
 ###
 
 ### Get team - Invalid UUID format (should fail with 400)
 GET {{baseUrl}}/api/teams/not-a-uuid
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 
 ###
 
 ### Get team - Without authentication (should fail with 401)
-GET {{baseUrl}}/api/teams/{{teamId}}
+GET {{baseUrl}}/api/teams/{{createTeam.response.body.data.id}}
 
 ###############################################################################
 # Update Teams
 ###############################################################################
 
 ### Update team - Change name and city
-PATCH {{baseUrl}}/api/teams/{{teamId}}
-Authorization: Bearer {{accessToken}}
+PATCH {{baseUrl}}/api/teams/{{createTeam.response.body.data.id}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 Content-Type: application/json
 
 {
@@ -177,8 +177,8 @@ Content-Type: application/json
 ###
 
 ### Update team - Change only foundedYear
-PATCH {{baseUrl}}/api/teams/{{teamId}}
-Authorization: Bearer {{accessToken}}
+PATCH {{baseUrl}}/api/teams/{{createTeam.response.body.data.id}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 Content-Type: application/json
 
 {
@@ -188,8 +188,8 @@ Content-Type: application/json
 ###
 
 ### Update team - Set foundedYear to null
-PATCH {{baseUrl}}/api/teams/{{teamId}}
-Authorization: Bearer {{accessToken}}
+PATCH {{baseUrl}}/api/teams/{{createTeam.response.body.data.id}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 Content-Type: application/json
 
 {
@@ -200,7 +200,7 @@ Content-Type: application/json
 
 ### Update team - Non-existent ID (should fail with 404)
 PATCH {{baseUrl}}/api/teams/00000000-0000-0000-0000-000000000000
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 Content-Type: application/json
 
 {
@@ -210,8 +210,8 @@ Content-Type: application/json
 ###
 
 ### Update team - Invalid data (should fail with validation error)
-PATCH {{baseUrl}}/api/teams/{{teamId}}
-Authorization: Bearer {{accessToken}}
+PATCH {{baseUrl}}/api/teams/{{createTeam.response.body.data.id}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 Content-Type: application/json
 
 {
@@ -222,7 +222,7 @@ Content-Type: application/json
 ###
 
 ### Update team - Without authentication (should fail with 401)
-PATCH {{baseUrl}}/api/teams/{{teamId}}
+PATCH {{baseUrl}}/api/teams/{{createTeam.response.body.data.id}}
 Content-Type: application/json
 
 {
@@ -233,8 +233,8 @@ Content-Type: application/json
 
 ### Update team as USER (should fail with 403)
 # Login as USER first, then run this
-PATCH {{baseUrl}}/api/teams/{{teamId}}
-Authorization: Bearer {{accessToken}}
+PATCH {{baseUrl}}/api/teams/{{createTeam.response.body.data.id}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 Content-Type: application/json
 
 {
@@ -246,26 +246,26 @@ Content-Type: application/json
 ###############################################################################
 
 ### Delete team by ID
-DELETE {{baseUrl}}/api/teams/{{teamId}}
-Authorization: Bearer {{accessToken}}
+DELETE {{baseUrl}}/api/teams/{{createTeam.response.body.data.id}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 
 ###
 
 ### Delete team - Non-existent ID (should fail with 404)
 DELETE {{baseUrl}}/api/teams/00000000-0000-0000-0000-000000000000
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 
 ###
 
 ### Delete team - Without authentication (should fail with 401)
-DELETE {{baseUrl}}/api/teams/{{teamId}}
+DELETE {{baseUrl}}/api/teams/{{createTeam.response.body.data.id}}
 
 ###
 
 ### Delete team as USER (should fail with 403)
 # Login as USER first, then run this
-DELETE {{baseUrl}}/api/teams/{{teamId}}
-Authorization: Bearer {{accessToken}}
+DELETE {{baseUrl}}/api/teams/{{createTeam.response.body.data.id}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 
 ###############################################################################
 # Complete CRUD Flow Example
@@ -274,9 +274,9 @@ Authorization: Bearer {{accessToken}}
 ### FLOW: Create → Get → Update → Get → Delete
 
 ### 1. Create a test team
-# Copy the 'id' from response and paste it in the testTeamId variable below
+# @name createTestTeam
 POST {{baseUrl}}/api/teams
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 Content-Type: application/json
 
 {
@@ -285,19 +285,17 @@ Content-Type: application/json
   "foundedYear": 2000
 }
 
-# @testTeamId = paste-id-here
-
 ###
 
 ### 2. Get the created team
-GET {{baseUrl}}/api/teams/{{testTeamId}}
-Authorization: Bearer {{accessToken}}
+GET {{baseUrl}}/api/teams/{{createTestTeam.response.body.data.id}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 
 ###
 
 ### 3. Update the team
-PATCH {{baseUrl}}/api/teams/{{testTeamId}}
-Authorization: Bearer {{accessToken}}
+PATCH {{baseUrl}}/api/teams/{{createTestTeam.response.body.data.id}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 Content-Type: application/json
 
 {
@@ -309,17 +307,17 @@ Content-Type: application/json
 ###
 
 ### 4. Get the updated team
-GET {{baseUrl}}/api/teams/{{testTeamId}}
-Authorization: Bearer {{accessToken}}
+GET {{baseUrl}}/api/teams/{{createTestTeam.response.body.data.id}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 
 ###
 
 ### 5. Delete the team
-DELETE {{baseUrl}}/api/teams/{{testTeamId}}
-Authorization: Bearer {{accessToken}}
+DELETE {{baseUrl}}/api/teams/{{createTestTeam.response.body.data.id}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 
 ###
 
 ### 6. Verify deletion (should fail with 404)
-GET {{baseUrl}}/api/teams/{{testTeamId}}
-Authorization: Bearer {{accessToken}}
+GET {{baseUrl}}/api/teams/{{createTestTeam.response.body.data.id}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}

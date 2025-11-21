@@ -1,20 +1,20 @@
 ###############################################################################
 # Authentication Endpoints
 #
-# After login, COPY the accessToken from the response and paste it below:
-# @accessToken = paste-your-token-here
+# AUTOMATIC TOKEN PERSISTENCE:
+# 1. Execute any login request below (e.g., "Login as ADMIN")
+# 2. The token is automatically available for subsequent requests
+# 3. Use {{loginAsUser.response.body.data.accessToken}} or similar
 #
 # Environment variables are loaded from .vscode/settings.json
 ###############################################################################
-
-# Paste your access token here after login
-# @accessToken =
 
 ###############################################################################
 # Login Flows
 ###############################################################################
 
 ### Login as USER
+# @name loginAsUser
 POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
@@ -26,6 +26,7 @@ Content-Type: application/json
 ###
 
 ### Login as ADMIN
+# @name loginAsAdmin
 POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
@@ -37,6 +38,7 @@ Content-Type: application/json
 ###
 
 ### Login as SUPER_ADMIN
+# @name loginAsSuperAdmin
 POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
@@ -82,19 +84,20 @@ Content-Type: application/json
 ###############################################################################
 
 ### Get current user info (requires authentication)
-# Run a login request first to populate @accessToken
+# Execute a login request first (e.g., "Login as ADMIN")
+# Then the token is automatically available
 GET {{baseUrl}}/api/auth/me
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{loginAsAdmin.response.body.data.accessToken}}
 
 ###
 
 ### Refresh access token
-# Copy the new accessToken from response and update @accessToken above
+# @name refreshToken
 POST {{baseUrl}}/api/auth/refresh
 Content-Type: application/json
 
 {
-  "refreshToken": "{{refreshToken}}"
+  "refreshToken": "{{loginAsAdmin.response.body.data.refreshToken}}"
 }
 
 ###
