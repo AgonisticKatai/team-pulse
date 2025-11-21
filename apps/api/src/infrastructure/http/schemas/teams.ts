@@ -79,11 +79,12 @@ const updateTeamBodySchema = {
 } as const
 
 // Pagination query schema
+// Note: Query params are always received as strings in HTTP
 const paginationQuerySchema = {
   type: 'object',
   properties: {
-    page: { type: 'number', minimum: 1, default: 1, description: 'Page number' },
-    limit: { type: 'number', minimum: 1, maximum: 100, default: 10, description: 'Items per page' },
+    page: { type: 'string', pattern: '^[0-9]+$', description: 'Page number (will be converted to number)' },
+    limit: { type: 'string', pattern: '^[0-9]+$', description: 'Items per page (will be converted to number)' },
   },
 } as const
 
