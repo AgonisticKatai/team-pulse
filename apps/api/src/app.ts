@@ -65,6 +65,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
       customOptions: {
         strict: false, // Disable strict mode to allow OpenAPI keywords like 'example'
         removeAdditional: false, // Don't remove additional properties
+        coerceTypes: true, // Automatically coerce types (e.g., "1" string to 1 number for query params)
       },
     },
   })
