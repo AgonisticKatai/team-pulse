@@ -13,6 +13,7 @@ import { createMetricsOnRequest, createMetricsOnResponse } from '@infrastructure
 import { registerAuthRoutes } from '@infrastructure/http/routes/auth.js'
 import { registerTeamRoutes } from '@infrastructure/http/routes/teams.js'
 import { registerUserRoutes } from '@infrastructure/http/routes/users.js'
+import { handleError } from '@infrastructure/http/utils/error-handler.js'
 import { createLoggerConfig } from '@infrastructure/logging/logger-config.js'
 import Fastify, { type FastifyError, type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify'
 
@@ -221,18 +222,11 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
   })
 
   // 16. Global error handler
+  // Delegates to the centralized error handler which properly formats
+  // all error types (FastifyError, ZodError, DomainError, etc.)
   fastify.setErrorHandler((error: FastifyError, _request: FastifyRequest, reply: FastifyReply) => {
     fastify.log.error(error)
-
-    const statusCode = error.statusCode || 500
-
-    return reply.code(statusCode).send({
-      error: {
-        code: error.name || 'INTERNAL_SERVER_ERROR',
-        message: env.NODE_ENV === 'production' ? 'Something went wrong' : error.message,
-      },
-      success: false,
-    })
+    return handleError({ error, reply })
   })
 
   await fastify.ready()
