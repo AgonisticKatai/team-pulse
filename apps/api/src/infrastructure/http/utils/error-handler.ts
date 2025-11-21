@@ -3,6 +3,7 @@ import { DuplicatedError } from '@domain/errors/DuplicatedError.js'
 import { NotFoundError } from '@domain/errors/NotFoundError.js'
 import { ValidationError } from '@domain/errors/ValidationError.js'
 import type { FastifyReply } from 'fastify'
+import { ZodError } from 'zod'
 
 /**
  * Centralized HTTP Error Handler
@@ -22,11 +23,11 @@ import type { FastifyReply } from 'fastify'
  */
 export function handleError({ error, reply }: { error: unknown; reply: FastifyReply }) {
   // Zod validation errors
-  if (error instanceof Error && error.name === 'ZodError') {
+  if (error instanceof ZodError) {
     return reply.code(400).send({
       error: {
         code: 'VALIDATION_ERROR',
-        details: error,
+        details: error.issues,
         message: 'Invalid request data',
       },
       success: false,
