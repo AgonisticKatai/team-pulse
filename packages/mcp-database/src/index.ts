@@ -171,15 +171,9 @@ class DatabaseSchemaMCPServer {
   async run(): Promise<void> {
     const transport = new StdioServerTransport()
     await this.mcpServer.server.connect(transport)
-    // biome-ignore lint/suspicious/noConsole: MCP server needs to log to stderr
-    console.error('TeamPulse Database Schema MCP server running on stdio')
   }
 }
 
 // Entry point
 const server = DatabaseSchemaMCPServer.create()
-server.run().catch((error) => {
-  // biome-ignore lint/suspicious/noConsole: MCP server needs to log errors to stderr
-  console.error('Fatal error:', error)
-  process.exit(1)
-})
+server.run()

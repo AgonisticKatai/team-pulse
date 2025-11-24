@@ -8,7 +8,7 @@ Content-Type: {{jsonContentType}}
   "password": "{{superAdminRoleTestPassword}}"
 }
 
-###
+### Set Auth Token
 @authToken = {{login.response.body.data.accessToken}}
 
 ### List Teams
@@ -28,7 +28,7 @@ Authorization: Bearer {{authToken}}
   "name": "FC Barcelona"
 }
 
-###
+### Set Team ID
 @teamId = {{createTeam.response.body.data.id}}
 
 ### Get Team

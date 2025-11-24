@@ -43,7 +43,6 @@ class TestingMCPServer {
   }
 
   protected setupHandlers() {
-    // ✅ CORRECTO: Raw shape sin z.object()
     this.mcpServer.registerTool(
       'run-tests',
       {
@@ -152,12 +151,8 @@ class TestingMCPServer {
   async run() {
     const transport = new StdioServerTransport()
     await this.mcpServer.server.connect(transport)
-    console.error('TeamPulse Testing MCP server running on stdio')
   }
 }
 
 const server = new TestingMCPServer()
-server.run().catch((error) => {
-  console.error('Fatal error:', error)
-  process.exit(1)
-})
+server.run()

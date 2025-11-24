@@ -8,7 +8,7 @@ Content-Type: {{jsonContentType}}
   "password": "{{superAdminRoleTestPassword}}"
 }
 
-###
+### Set Auth Token
 @authToken = {{login.response.body.data.accessToken}}
 
 ### List Users

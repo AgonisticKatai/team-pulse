@@ -5,16 +5,15 @@ Content-Type: {{jsonContentType}}
 
 {
   "email": "{{superAdminRoleTestEmail}}",
-  "password": "{{superAdminRoleTestPassword}}"  
+  "password": "{{superAdminRoleTestPassword}}"
 }
 
-###
+### Set Auth Tokens
 @authToken = {{login.response.body.data.accessToken}}
 @refreshToken = {{login.response.body.data.refreshToken}}
 
 ### Refresh Token
-# @name refresh
-POST {{ protocol}}://{{host}}/api/auth/refresh
+POST {{protocol}}://{{host}}/api/auth/refresh
 Content-Type: {{jsonContentType}}
 Authorization: Bearer {{authToken}}
 

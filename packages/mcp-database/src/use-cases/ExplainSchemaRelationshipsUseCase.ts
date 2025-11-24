@@ -1,5 +1,5 @@
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
-import type { ISchemaReader } from '../domain/ISchemaReader.js'
+import type { ColumnSchema, ForeignKeyData, ISchemaReader, TableSchema } from '../domain/ISchemaReader.js'
 
 /**
  * Explain Schema Relationships Use Case
@@ -36,27 +36,38 @@ export class ExplainSchemaRelationshipsUseCase {
 
     for (const [name, tableData] of Object.entries(tables)) {
       if (!tableData) continue
-
-      output += `Table: ${name}\n`
-      output += `${'='.repeat(name.length + 7)}\n`
-
-      // Columns
-      output += 'Columns:\n'
-      for (const [, colData] of Object.entries(tableData.columns || {})) {
-        output += `  - ${colData.name}: ${colData.type}\n`
-      }
-
-      // Foreign Keys
-      if (tableData.foreignKeys && Object.keys(tableData.foreignKeys).length > 0) {
-        output += '\nForeign Keys:\n'
-        for (const [fkName, fkData] of Object.entries(tableData.foreignKeys)) {
-          output += `  - ${fkName}: ${JSON.stringify(fkData)}\n`
-        }
-      }
-
-      output += '\n'
+      output += this.formatTable(name, tableData)
     }
 
     return Ok(output)
+  }
+
+  private formatTable(name: string, tableData: TableSchema): string {
+    let output = `Table: ${name}\n`
+    output += `${'='.repeat(name.length + 7)}\n`
+    output += this.formatColumns(tableData.columns)
+    output += this.formatForeignKeys(tableData.foreignKeys)
+    output += '\n'
+    return output
+  }
+
+  private formatColumns(columns: Record<string, ColumnSchema>): string {
+    let output = 'Columns:\n'
+    for (const [, colData] of Object.entries(columns || {})) {
+      output += `  - ${colData.name}: ${colData.type}\n`
+    }
+    return output
+  }
+
+  private formatForeignKeys(foreignKeys: Record<string, ForeignKeyData> | undefined): string {
+    if (!foreignKeys || Object.keys(foreignKeys).length === 0) {
+      return ''
+    }
+
+    let output = '\nForeign Keys:\n'
+    for (const [fkName, fkData] of Object.entries(foreignKeys)) {
+      output += `  - ${fkName}: ${JSON.stringify(fkData)}\n`
+    }
+    return output
   }
 }
