@@ -1,0 +1,28 @@
+### Login (Required for standalone execution)
+# @name login
+POST {{ protocol}}://{{host}}/api/auth/login
+Content-Type: {{jsonContentType}}
+
+{
+  "email": "{{superAdminRoleTestEmail}}",
+  "password": "{{superAdminRoleTestPassword}}"
+}
+
+###
+@authToken = {{login.response.body.data.accessToken}}
+
+### List Users
+GET {{protocol}}://{{host}}/api/users
+Content-Type: {{jsonContentType}}
+Authorization: Bearer {{authToken}}
+
+### Create User
+POST {{protocol}}://{{host}}/api/users
+Content-Type: {{jsonContentType}}
+Authorization: Bearer {{authToken}}
+
+{
+  "email": "newuser@test.com",
+  "password": "NewUser123!",
+  "role": "ADMIN"
+}

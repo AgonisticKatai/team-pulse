@@ -1,0 +1,25 @@
+{
+  "rest-client.environmentVariables": {
+    "$shared": {
+      "jsonContentType": "application/json",
+      "adminRoleTestEmail": "admin@test.com",
+      "adminRoleTestPassword": "Admin123!",
+      "superAdminRoleTestEmail": "superadmin@test.com",
+      "superAdminRoleTestPassword": "SuperAdmin123!",
+      "userRoleTestEmail": "user@test.com",
+      "userRoleTestPassword": "User123!"
+    },
+    "local": {
+      "host": "localhost:3000",
+      "protocol": "http"
+    },
+    "dev": {
+      "host": "dev.api.example.com",
+      "protocol": "https"
+    },
+    "prod": {
+      "host": "api.example.com",
+      "protocol": "https"
+    }
+  }
+}

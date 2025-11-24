@@ -1,0 +1,32 @@
+### Login
+# @name login
+POST {{protocol}}://{{host}}/api/auth/login
+Content-Type: {{jsonContentType}}
+
+{
+  "email": "{{superAdminRoleTestEmail}}",
+  "password": "{{superAdminRoleTestPassword}}"  
+}
+
+###
+@authToken = {{login.response.body.data.accessToken}}
+@refreshToken = {{login.response.body.data.refreshToken}}
+
+### Refresh Token
+# @name refresh
+POST {{ protocol}}://{{host}}/api/auth/refresh
+Content-Type: {{jsonContentType}}
+Authorization: Bearer {{authToken}}
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### Logout
+POST {{protocol}}://{{host}}/api/auth/logout
+Content-Type: {{jsonContentType}}
+Authorization: Bearer {{authToken}}
+
+{
+  "refreshToken": "{{refreshToken}}"
+}

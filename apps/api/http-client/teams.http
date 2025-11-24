@@ -1,0 +1,52 @@
+### Login (Required for standalone execution)
+# @name login
+POST {{protocol}}://{{host}}/api/auth/login
+Content-Type: {{jsonContentType}}
+
+{
+  "email": "{{superAdminRoleTestEmail}}",
+  "password": "{{superAdminRoleTestPassword}}"
+}
+
+###
+@authToken = {{login.response.body.data.accessToken}}
+
+### List Teams
+GET {{protocol}}://{{host}}/api/teams
+Content-Type: {{jsonContentType}}
+Authorization: Bearer {{authToken}}
+
+### Create Team
+# @name createTeam
+POST {{protocol}}://{{host}}/api/teams
+Content-Type: {{jsonContentType}}
+Authorization: Bearer {{authToken}}
+
+{
+  "city": "Barcelona",
+  "foundedYear": 1899,
+  "name": "FC Barcelona"
+}
+
+###
+@teamId = {{createTeam.response.body.data.id}}
+
+### Get Team
+GET {{protocol}}://{{host}}/api/teams/{{teamId}}
+Content-Type: {{jsonContentType}}
+Authorization: Bearer {{authToken}}
+
+### Update Team
+PATCH  {{protocol}}://{{host}}/api/teams/{{teamId}}
+Content-Type: {{jsonContentType}}
+Authorization: Bearer {{authToken}}
+
+{
+  "city": "Barcelona",
+  "foundedYear": 2025,
+  "name": "FC Barcelona"
+}∏
+
+### Delete Team
+DELETE {{protocol}}://{{host}}/api/teams/{{teamId}}
+Authorization: Bearer {{authToken}}
