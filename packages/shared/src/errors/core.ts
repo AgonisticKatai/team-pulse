@@ -57,6 +57,28 @@ export const ERROR_CATEGORY = {
 export type ErrorCategory = (typeof ERROR_CATEGORY)[keyof typeof ERROR_CATEGORY]
 
 /**
+ * Error codes for identifying specific error types
+ *
+ * Each domain-specific error has a unique code for identification in logs,
+ * monitoring, and error handling.
+ */
+export const ERROR_CODES = {
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  AUTHENTICATION_ERROR: 'AUTHENTICATION_ERROR',
+  AUTHORIZATION_ERROR: 'AUTHORIZATION_ERROR',
+  NOT_FOUND_ERROR: 'NOT_FOUND_ERROR',
+  CONFLICT_ERROR: 'CONFLICT_ERROR',
+  BUSINESS_RULE_ERROR: 'BUSINESS_RULE_ERROR',
+  EXTERNAL_SERVICE_ERROR: 'EXTERNAL_SERVICE_ERROR',
+  INTERNAL_ERROR: 'INTERNAL_ERROR',
+} as const
+
+/**
+ * Error code type derived from ERROR_CODES constant
+ */
+export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES]
+
+/**
  * Interface for all application errors
  *
  * Provides a consistent contract for error handling across the application.
