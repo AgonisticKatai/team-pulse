@@ -215,17 +215,22 @@ export abstract class ApplicationError extends Error implements IApplicationErro
    * Useful for logging, API responses, and debugging
    */
   toJSON(): object {
-    return {
+    const result: Record<string, unknown> = {
       name: this.name,
-      code: this.code,
       message: this.message,
+      code: this.code,
       category: this.category,
       severity: this.severity,
       timestamp: this.timestamp.toISOString(),
-      metadata: this.metadata,
       isOperational: this.isOperational,
-      ...(this.stack && { stack: this.stack }),
     }
+
+    // Only include metadata if it exists
+    if (this.metadata) {
+      result.metadata = this.metadata
+    }
+
+    return result
   }
 }
 
@@ -246,5 +251,14 @@ export function isApplicationError(error: unknown): error is ApplicationError {
  * so this function uses a positional parameter instead of named parameters.
  */
 export function isIApplicationError(error: unknown): error is IApplicationError {
-  return typeof error === 'object' && error !== null && 'code' in error && 'category' in error && 'severity' in error && 'isOperational' in error
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    'code' in error &&
+    'category' in error &&
+    'severity' in error &&
+    'timestamp' in error &&
+    'isOperational' in error
+  )
 }

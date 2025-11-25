@@ -79,6 +79,68 @@ export const TEST_CONSTANTS = {
     invalidCredentials: 'Invalid credentials',
     tokenExpired: 'Token has expired',
     tokenNotFound: 'Refresh token not found',
+    // Test error messages
+    testError: 'Test error',
+    testErrorMessage: 'Test error message',
+    validationFailed: 'Validation failed',
+    fieldRequired: 'Field is required',
+    invalidFormat: 'Invalid format',
+    authenticationFailed: 'Authentication failed',
+    insufficientPermissions: 'Insufficient permissions to perform this action',
+    resourceNotFound: 'Resource not found',
+    resourceAlreadyExists: 'Resource already exists',
+    businessRuleViolation: 'Business rule violated',
+    externalServiceFailed: 'External service failed',
+    internalServerError: 'Internal server error',
+  },
+
+  // Error Test Data
+  errorTestData: {
+    fields: {
+      email: 'email',
+      password: 'password',
+      username: 'username',
+      field: 'field',
+    },
+    resources: {
+      user: 'User',
+      team: 'Team',
+      token: 'Token',
+      resource: 'Resource',
+    },
+    identifiers: {
+      userId: 'user-123',
+      teamId: 'team-456',
+      tokenId: 'token-789',
+      identifier: 'test-identifier',
+    },
+    reasons: {
+      invalidCredentials: 'invalid_credentials',
+      invalidToken: 'invalid_token',
+      missingToken: 'missing_token',
+      duplicate: 'duplicate',
+    },
+    permissions: {
+      read: 'read',
+      write: 'write',
+      delete: 'delete',
+      admin: 'admin',
+    },
+    rules: {
+      maxLength: 'max_length',
+      minLength: 'min_length',
+      required: 'required',
+      businessRule: 'business_rule',
+    },
+    services: {
+      paymentService: 'PaymentService',
+      emailService: 'EmailService',
+      externalApi: 'ExternalAPI',
+    },
+    context: {
+      operation: 'test operation',
+      module: 'test module',
+    },
   },
 
   // Mock IDs
