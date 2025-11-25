@@ -1327,6 +1327,94 @@ export interface UserProps {
 
 ---
 
+## 5.3 Constants Pattern - Enum-like Constants
+
+**Pattern Name:** Const Object with `as const`
+
+**Why:**
+- Single source of truth: Literal values defined in one place
+- Type-safe mappings: Enables exhaustive checking in Record types
+- Zero typos: Reference constants instead of typing strings
+- Better discoverability: IDE autocomplete for available values
+- Runtime access: Can iterate, validate, or map values
+- Refactoring-friendly: Change value in one place, propagates everywhere
+
+**When to use:**
+- Set of related string/number literals used in multiple places
+- Values that will be used in type-safe mappings (e.g., Category → HTTP Status)
+- Public APIs where values should be well-documented
+- Avoiding magic strings/numbers throughout codebase
+
+**Real Code Example:**
+```typescript
+// packages/shared/src/errors/core.ts
+
+// ✅ Define enum-like constants with as const
+export const ERROR_SEVERITY = {
+  LOW: 'low',
+  MEDIUM: 'medium',
+  HIGH: 'high',
+  CRITICAL: 'critical',
+} as const
+
+// Derive type from constant (type follows data)
+export type ErrorSeverity = (typeof ERROR_SEVERITY)[keyof typeof ERROR_SEVERITY]
+// ErrorSeverity = 'low' | 'medium' | 'high' | 'critical'
+
+// Usage in code
+export class ValidationError extends ApplicationError {
+  readonly code = 'VALIDATION_ERROR'
+  readonly category = ERROR_CATEGORY.VALIDATION // ← Reference constant
+  readonly severity = ERROR_SEVERITY.LOW        // ← No typos possible
+}
+
+// Type-safe exhaustive mapping
+const CATEGORY_TO_HTTP: Record<ErrorCategory, number> = {
+  [ERROR_CATEGORY.VALIDATION]: 400,
+  [ERROR_CATEGORY.AUTHENTICATION]: 401,
+  [ERROR_CATEGORY.AUTHORIZATION]: 403,
+  [ERROR_CATEGORY.NOT_FOUND]: 404,
+  [ERROR_CATEGORY.CONFLICT]: 409,
+  [ERROR_CATEGORY.BUSINESS_RULE]: 422,
+  [ERROR_CATEGORY.EXTERNAL]: 502,
+  [ERROR_CATEGORY.INTERNAL]: 500,
+  // ↑ TypeScript enforces all categories are covered
+}
+```
+
+**❌ DO NOT:**
+```typescript
+// Magic strings everywhere
+export class ValidationError extends ApplicationError {
+  readonly category = 'validation' // ← Typo risk: 'validaton', 'Validation', etc.
+  readonly severity = 'low'         // ← What are valid values?
+}
+
+// Non-exhaustive mapping (no type safety)
+const CATEGORY_TO_HTTP = {
+  'validation': 400,
+  'authentication': 401,
+  // Forgot 'authorization'? TypeScript won't tell you
+}
+
+// Redundant const object
+export const ERROR_SEVERITY = {
+  low: 'low',      // ← Redundant, use enum or direct strings
+  medium: 'medium',
+}
+```
+
+**Naming Convention:**
+- Constant name: `SCREAMING_SNAKE_CASE` (e.g., `ERROR_SEVERITY`, `HTTP_STATUS`)
+- Properties: `SCREAMING_SNAKE_CASE` for enum-like values (e.g., `LOW`, `NOT_FOUND`)
+- Note: Biome config allows `CONSTANT_CASE` for `objectLiteralProperty` to support this pattern
+
+**Applied in:**
+- `packages/shared/src/errors/core.ts` - ERROR_SEVERITY, ERROR_CATEGORY
+- `apps/api/src/domain/value-objects/Role.ts` - UserRole (enum, similar pattern)
+
+---
+
 # 6. HEXAGONAL ARCHITECTURE
 
 ## 6.1 Ports & Adapters Pattern
