@@ -244,38 +244,67 @@ export class FastifyErrorHandler {
 10. [x] Resolver warnings de linter con biome-ignore contextuales
 **Resultado:** Handler framework-agnostic completo con logging y mapeo HTTP
 
-**Fase 3: Integración en API** 🚧 EN PROGRESO (2025-11-26)
+**Fase 3: Integración en API** ✅ COMPLETADO (2025-11-26)
 11. [x] Crear adapter FastifyLogger para ILogger - ✅ 9 tests pasando
     - Mapear ILogger a fastify.log
     - Implementar ILogger interface usando Fastify logger
     - Extender TEST_CONSTANTS con logContext
-12. [ ] Migrar errores del domain de API
-    - Eliminar `apps/api/src/domain/errors/` (DomainError, ValidationError, etc.)
-    - Actualizar imports para usar `@team-pulse/shared/errors`
-    - Verificar que use cases compilan correctamente
+12. [x] Agregar compatibilidad hacia atrás en ErrorHandler - ✅ TEMPORAL
+    - Detectar errores legacy del domain (ValidationError, NotFoundError, DuplicatedError)
+    - Convertir a ApplicationError apropiado
+    - Manejo de ZodError → ValidationError
+    - **NOTA:** Esta compatibilidad será eliminada en Fase 4
 13. [x] Crear FastifyErrorHandler - ✅ 6 tests pasando
     - Crear `apps/api/src/infrastructure/http/middleware/error-handler.ts`
     - Usar ErrorHandler de shared
     - Integrar con FastifyLogger
     - Función handleError() para routes
-14. [ ] Actualizar routes para usar nuevo error handling
-    - auth.ts, users.ts, teams.ts
-    - Reemplazar handleError legacy con nuevo
-15. [ ] Actualizar app.ts
+14. [x] Actualizar routes para usar nuevo error handling - ✅ 11 endpoints actualizados
+    - auth.ts (4 endpoints), users.ts (2 endpoints), teams.ts (5 endpoints)
+    - Patrón: crear FastifyLogger y llamar handleError
+15. [x] Actualizar app.ts - ✅ Global error handler integrado
     - Integrar FastifyErrorHandler en global error handler
     - Eliminar lógica de error handling legacy
-16. [ ] Tests de integración
-    - Verificar que todos los tests existentes pasen (800+)
-17. [ ] Eliminar código legacy
-    - Eliminar `apps/api/src/infrastructure/http/utils/error-handler.ts`
-    - Eliminar `apps/api/src/domain/errors/` completo
-18. [x] Type-check ✅ Pasando sin errores
-19. [ ] Lint y type-check final después de integración completa
+16. [x] Tests de integración - ✅ 829/829 tests pasando
+    - Todos los tests existentes pasan
+17. [x] Eliminar código legacy de infrastructure - ✅ Completado
+    - Eliminado `apps/api/src/infrastructure/http/utils/error-handler.ts`
+    - Eliminado directorio `/utils/` vacío
+18. [x] Lint y type-check - ✅ Pasando sin errores
+**Resultado:** Sistema de error handling integrado y funcionando con 1,143 tests pasando (829 API + 314 shared)
 
-**Fase 4: Documentation**
-19. [ ] Documentar patrón en AGREEMENTS.md
-20. [ ] Crear ejemplos de uso en TESTING.md
-21. [ ] Actualizar TODO.md con resultado final
+**Fase 4: Migración Completa (Eliminar Legacy)** ⚠️ CRÍTICO - NO OPCIONAL
+19. [ ] Migrar use cases a ApplicationError (7 use cases)
+    - [ ] LoginUseCase - Cambiar ValidationError.forField a AuthenticationError
+    - [ ] RefreshTokenUseCase - Cambiar NotFoundError y ValidationError
+    - [ ] LogoutUseCase - Verificar errores usados
+    - [ ] CreateUserUseCase - Cambiar ValidationError y DuplicatedError
+    - [ ] ListUsersUseCase - Verificar errores usados
+    - [ ] CreateTeamUseCase - Cambiar ValidationError
+    - [ ] UpdateTeamUseCase - Cambiar ValidationError y NotFoundError
+    - [ ] DeleteTeamUseCase - Cambiar NotFoundError
+    - [ ] GetTeamUseCase - Cambiar NotFoundError
+    - [ ] ListTeamsUseCase - Verificar errores usados
+20. [ ] Actualizar todos los tests de use cases
+    - Actualizar imports para usar `@team-pulse/shared/errors`
+    - Verificar expectations de error codes/messages
+21. [ ] Eliminar COMPLETAMENTE errores legacy
+    - Eliminar `apps/api/src/domain/errors/` (DomainError, ValidationError, NotFoundError, DuplicatedError)
+    - Verificar que no queden imports a estos archivos
+22. [ ] Eliminar compatibilidad hacia atrás del ErrorHandler
+    - Eliminar método `convertLegacyDomainError()` de ErrorHandler
+    - Eliminar lógica de detección de legacy errors
+    - Simplificar `normalizeError()` para solo manejar ApplicationError y ZodError
+23. [ ] Verificación final exhaustiva
+    - [ ] Ejecutar todos los tests (API + shared)
+    - [ ] Type-check completo
+    - [ ] Lint completo
+    - [ ] Verificar que no existan imports a domain/errors legacy
+24. [ ] Actualizar documentación
+    - Actualizar AGREEMENTS.md con patrón de error handling
+    - Actualizar TESTING.md con ejemplos de error handling
+    - Actualizar TODO.md con resultado final
+**Objetivo:** Sistema 100% limpio usando únicamente ApplicationError de shared, sin código legacy
 
 ### 🎯 Resultado Esperado
 
@@ -286,7 +315,7 @@ Un sistema de gestión de errores que sea:
 - **Production-ready** - Logging, security, observability
 - **Developer-friendly** - API clara, tests claros, fácil de extender
 
-**Estado:** 🚧 WIP - Diseño aprobado, pendiente implementación (2025-11-21)
+**Estado:** 🚧 WIP - Fase 3 completada (2025-11-26), Fase 4 pendiente (migración completa obligatoria)
 
 ---
 
@@ -513,4 +542,4 @@ Un sistema de gestión de errores que sea:
   4. Performance
 
 **Última revisión de arquitectura:** 2025-11-20
-**Última actualización:** 2025-11-20
+**Última actualización:** 2025-11-26 (Fase 3 error handling completada, Fase 4 pendiente)
