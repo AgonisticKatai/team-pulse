@@ -16,6 +16,7 @@ import {
 } from '@errors/index.js'
 import { TEST_CONSTANTS } from '@testing/constants.js'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { z } from 'zod'
 import { ErrorHandler } from './error-handler.js'
 import { HTTP_STATUS } from './http-status-codes.js'
 import type { ILogger } from './logger.js'
@@ -294,6 +295,36 @@ describe('error-handler', () => {
   })
 
   describe('handle - unknown errors', () => {
+    it('should convert ZodError to ValidationError with 400 status', () => {
+      // Arrange
+      const schema = z.object({
+        email: z.string().min(1),
+        password: z.string().min(8),
+      })
+
+      const invalidData = {
+        email: TEST_CONSTANTS.emails.empty,
+        password: TEST_CONSTANTS.passwords.short,
+      }
+
+      // Act
+      let error: unknown
+      try {
+        schema.parse(invalidData)
+      } catch (err) {
+        error = err
+      }
+
+      const result = errorHandler.handle({ error })
+
+      // Assert
+      expect(result.statusCode).toBe(HTTP_STATUS.BAD_REQUEST)
+      expect(result.response.name).toBe('ValidationError')
+      expect(result.response.code).toBe(ERROR_CODES.VALIDATION_ERROR)
+      expect(result.response.category).toBe(ERROR_CATEGORY.VALIDATION)
+      expect(result.response.message).toBe('Invalid request data')
+    })
+
     it('should convert standard Error to InternalError', () => {
       // Arrange
       const error = new Error(TEST_CONSTANTS.errors.testError)

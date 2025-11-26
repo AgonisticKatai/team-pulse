@@ -4,8 +4,9 @@
  * Framework-agnostic error handler for processing ApplicationError instances
  */
 
+import { ZodError } from 'zod'
 import type { IApplicationError } from '../core.js'
-import { InternalError } from '../index.js'
+import { AuthenticationError, ConflictError, InternalError, NotFoundError, ValidationError } from '../index.js'
 import { createSafeErrorResponse, type ErrorResponse } from './error-response.js'
 import { getHttpStatusForCategory } from './http-status-codes.js'
 import { getLogLevelForSeverity, type ILogger } from './logger.js'
@@ -73,6 +74,22 @@ export class ErrorHandler {
       return error
     }
 
+    // Legacy domain errors (backward compatibility)
+    const legacyError = this.convertLegacyDomainError({ error })
+    if (legacyError) {
+      return legacyError
+    }
+
+    // Zod validation errors
+    if (error instanceof ZodError) {
+      return ValidationError.create({
+        message: 'Invalid request data',
+        metadata: {
+          issues: error.issues,
+        },
+      })
+    }
+
     // Standard Error
     if (error instanceof Error) {
       return InternalError.fromError({ error })
@@ -85,6 +102,69 @@ export class ErrorHandler {
         originalError: String(error),
       },
     })
+  }
+
+  /**
+   * Convert legacy domain errors to ApplicationErrors
+   * This provides backward compatibility during migration
+   */
+  private convertLegacyDomainError({ error }: { error: unknown }): IApplicationError | null {
+    if (typeof error !== 'object' || error === null) {
+      return null
+    }
+
+    // Check if it's a legacy domain error (has code and isOperational but not category/severity/timestamp)
+    const hasLegacyShape = 'code' in error && 'message' in error && 'isOperational' in error && !('category' in error) && !('severity' in error)
+
+    if (!hasLegacyShape) {
+      return null
+    }
+
+    const legacyError = error as {
+      code: string
+      message: string
+      isOperational: boolean
+      field?: string
+      details?: Record<string, unknown>
+    }
+
+    // Legacy ValidationError with credentials field -> AuthenticationError
+    if (legacyError.code === 'VALIDATION_ERROR' && (legacyError.field === 'credentials' || legacyError.field === 'refreshToken')) {
+      return AuthenticationError.create({
+        message: legacyError.message,
+      })
+    }
+
+    // Legacy ValidationError -> ValidationError (new)
+    if (legacyError.code === 'VALIDATION_ERROR') {
+      return ValidationError.create({
+        message: legacyError.message,
+        metadata: legacyError.field ? { field: legacyError.field, ...legacyError.details } : legacyError.details,
+      })
+    }
+
+    // Legacy DUPLICATED -> ConflictError
+    if (legacyError.code === 'DUPLICATED') {
+      return ConflictError.create({
+        message: legacyError.message,
+      })
+    }
+
+    // Legacy NOT_FOUND -> NotFoundError
+    if (legacyError.code === 'NOT_FOUND') {
+      // Special case: refresh token or user not found during auth -> AuthenticationError
+      if (legacyError.message.includes('RefreshToken') || legacyError.message.includes('User')) {
+        return AuthenticationError.create({
+          message: 'Invalid or expired refresh token',
+        })
+      }
+      return NotFoundError.create({
+        message: legacyError.message,
+      })
+    }
+
+    // Other legacy domain errors -> InternalError
+    return null
   }
 
   /**

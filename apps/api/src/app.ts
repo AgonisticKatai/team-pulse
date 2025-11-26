@@ -6,10 +6,12 @@ import { type Container, createContainer } from '@infrastructure/config/containe
 import { type Env, validateEnv, validateProductionEnv } from '@infrastructure/config/env.js'
 import { runMigrations } from '@infrastructure/database/migrate.js'
 import { correlationIdMiddleware } from '@infrastructure/http/middleware/correlation-id.js'
+import { handleError } from '@infrastructure/http/middleware/error-handler.js'
 import { createMetricsOnRequest, createMetricsOnResponse } from '@infrastructure/http/middleware/metrics.js'
 import { registerAuthRoutes } from '@infrastructure/http/routes/auth.js'
 import { registerTeamRoutes } from '@infrastructure/http/routes/teams.js'
 import { registerUserRoutes } from '@infrastructure/http/routes/users.js'
+import { FastifyLogger } from '@infrastructure/logging/FastifyLogger.js'
 import { createLoggerConfig } from '@infrastructure/logging/logger-config.js'
 import Fastify, { type FastifyError, type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify'
 
@@ -203,18 +205,9 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
   })
 
   // 14. Global error handler
-  fastify.setErrorHandler((error: FastifyError, _request: FastifyRequest, reply: FastifyReply) => {
-    fastify.log.error(error)
-
-    const statusCode = error.statusCode || 500
-
-    return reply.code(statusCode).send({
-      error: {
-        code: error.name || 'INTERNAL_SERVER_ERROR',
-        message: env.NODE_ENV === 'production' ? 'Something went wrong' : error.message,
-      },
-      success: false,
-    })
+  fastify.setErrorHandler((error: FastifyError, request: FastifyRequest, reply: FastifyReply) => {
+    const logger = FastifyLogger.create({ logger: request.log })
+    return handleError({ error, reply, logger })
   })
 
   await fastify.ready()
