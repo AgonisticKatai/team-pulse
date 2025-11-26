@@ -1,8 +1,9 @@
 import type { TokenFactory } from '@application/factories/TokenFactory.js'
-import { NotFoundError, type RepositoryError, ValidationError } from '@domain/errors/index.js'
+import { NotFoundError, type RepositoryError, type ValidationError } from '@domain/errors/index.js'
 import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { RefreshTokenDTO, RefreshTokenResponseDTO } from '@team-pulse/shared/dtos'
+import { AuthenticationError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
 
 /**
@@ -57,7 +58,9 @@ export class RefreshTokenUseCase {
     return new RefreshTokenUseCase({ tokenFactory, refreshTokenRepository, userRepository })
   }
 
-  async execute(dto: RefreshTokenDTO): Promise<Result<RefreshTokenResponseDTO, NotFoundError | RepositoryError | ValidationError>> {
+  async execute(
+    dto: RefreshTokenDTO,
+  ): Promise<Result<RefreshTokenResponseDTO, AuthenticationError | NotFoundError | RepositoryError | ValidationError>> {
     const verifyRefreshTokenResult = this.tokenFactory.verifyRefreshToken({ token: dto.refreshToken })
 
     if (!verifyRefreshTokenResult.ok) {
@@ -81,7 +84,12 @@ export class RefreshTokenUseCase {
         return Err(deleteRefreshTokenResult.error)
       }
 
-      return Err(ValidationError.forField({ field: 'refreshToken', message: 'Refresh token has expired' }))
+      return Err(
+        AuthenticationError.create({
+          message: 'Refresh token has expired',
+          metadata: { field: 'refreshToken', reason: 'token_expired' },
+        }),
+      )
     }
 
     const userResult = await this.userRepository.findById({ id: verifyRefreshTokenResult.value.userId })

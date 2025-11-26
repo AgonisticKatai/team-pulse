@@ -1,9 +1,10 @@
 import { TokenFactory } from '@application/factories/TokenFactory.js'
-import { ValidationError } from '@domain/errors/index.js'
+import { ValidationError } from '@domain/errors/ValidationError.js'
 import { AuthService } from '@infrastructure/auth/AuthService.js'
 import { TEST_INVALID_TOKEN_ENV, TEST_TOKEN_ENV } from '@infrastructure/testing/test-env.js'
+import { AuthenticationError } from '@team-pulse/shared/errors'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
-import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it } from 'vitest'
 
 describe('AuthService', () => {
@@ -76,8 +77,7 @@ describe('AuthService', () => {
         const result = authService.verifyAuthHeader({ authHeader: undefined })
 
         // Assert
-        const error = expectError(result)
-        expect(error).toBeInstanceOf(ValidationError)
+        const error = expectErrorType({ errorType: ValidationError, result })
         expect(error.field).toBe('authorization')
         expect(error.message).toContain('Missing Authorization header')
       })
@@ -87,8 +87,7 @@ describe('AuthService', () => {
         const result = authService.verifyAuthHeader({ authHeader: '' })
 
         // Assert
-        const error = expectError(result)
-        expect(error).toBeInstanceOf(ValidationError)
+        const error = expectErrorType({ errorType: ValidationError, result })
         expect(error.field).toBe('authorization')
       })
     })
@@ -99,8 +98,7 @@ describe('AuthService', () => {
         const result = authService.verifyAuthHeader({ authHeader: validToken })
 
         // Assert
-        const error = expectError(result)
-        expect(error).toBeInstanceOf(ValidationError)
+        const error = expectErrorType({ errorType: ValidationError, result })
         expect(error.field).toBe('authorization')
         expect(error.message).toContain('Bearer')
       })
@@ -110,8 +108,7 @@ describe('AuthService', () => {
         const result = authService.verifyAuthHeader({ authHeader: `Basic ${validToken}` })
 
         // Assert
-        const error = expectError(result)
-        expect(error).toBeInstanceOf(ValidationError)
+        const error = expectErrorType({ errorType: ValidationError, result })
         expect(error.field).toBe('authorization')
         expect(error.message).toContain('Bearer')
       })
@@ -121,8 +118,7 @@ describe('AuthService', () => {
         const result = authService.verifyAuthHeader({ authHeader: 'Bearer ' })
 
         // Assert
-        const error = expectError(result)
-        expect(error).toBeInstanceOf(ValidationError)
+        const error = expectErrorType({ errorType: ValidationError, result })
         expect(error.field).toBe('authorization')
       })
 
@@ -131,8 +127,7 @@ describe('AuthService', () => {
         const result = authService.verifyAuthHeader({ authHeader: 'Bearer' })
 
         // Assert
-        const error = expectError(result)
-        expect(error).toBeInstanceOf(ValidationError)
+        const error = expectErrorType({ errorType: ValidationError, result })
         expect(error.field).toBe('authorization')
       })
 
@@ -141,8 +136,7 @@ describe('AuthService', () => {
         const result = authService.verifyAuthHeader({ authHeader: `Bearer  ${validToken}` })
 
         // Assert
-        const error = expectError(result)
-        expect(error).toBeInstanceOf(ValidationError)
+        const error = expectErrorType({ errorType: ValidationError, result })
         expect(error.field).toBe('authorization')
       })
 
@@ -151,25 +145,23 @@ describe('AuthService', () => {
         const result = authService.verifyAuthHeader({ authHeader: `Bearer ${validToken} extra` })
 
         // Assert
-        const error = expectError(result)
-        expect(error).toBeInstanceOf(ValidationError)
+        const error = expectErrorType({ errorType: ValidationError, result })
         expect(error.field).toBe('authorization')
       })
     })
 
     describe('Error cases - Invalid JWT token', () => {
-      it('should return ValidationError for malformed JWT', () => {
+      it('should return AuthenticationError for malformed JWT', () => {
         // Act
         const result = authService.verifyAuthHeader({ authHeader: 'Bearer not-a-jwt-token' })
 
         // Assert
-        const error = expectError(result)
-        expect(error).toBeInstanceOf(ValidationError)
-        expect(error.field).toBe('accessToken')
+        const error = expectErrorType({ errorType: AuthenticationError, result })
+        expect(error.metadata?.field).toBe('accessToken')
         expect(error.message).toContain('Invalid token')
       })
 
-      it('should return ValidationError for JWT with invalid signature', () => {
+      it('should return AuthenticationError for JWT with invalid signature', () => {
         // Arrange - Tamper with the token
         const parts = validToken.split('.')
         const tamperedToken = `${parts[0]}.${parts[1]}.invalid-signature`
@@ -178,13 +170,12 @@ describe('AuthService', () => {
         const result = authService.verifyAuthHeader({ authHeader: `Bearer ${tamperedToken}` })
 
         // Assert
-        const error = expectError(result)
-        expect(error).toBeInstanceOf(ValidationError)
-        expect(error.field).toBe('accessToken')
+        const error = expectErrorType({ errorType: AuthenticationError, result })
+        expect(error.metadata?.field).toBe('accessToken')
         expect(error.message).toContain('Invalid token')
       })
 
-      it('should return ValidationError for expired JWT', () => {
+      it('should return AuthenticationError for expired JWT', () => {
         // Arrange - Create a token with TokenFactory from the past (this is tricky, we'll use a pre-expired token)
         // For this test, we can create a token and wait, or mock time
         // For simplicity, we'll test the error message format
@@ -194,12 +185,11 @@ describe('AuthService', () => {
         const result = authService.verifyAuthHeader({ authHeader: expiredToken })
 
         // Assert
-        const error = expectError(result)
-        expect(error).toBeInstanceOf(ValidationError)
-        expect(error.field).toBe('accessToken')
+        const error = expectErrorType({ errorType: AuthenticationError, result })
+        expect(error.metadata?.field).toBe('accessToken')
       })
 
-      it('should return ValidationError for JWT with wrong issuer', () => {
+      it('should return AuthenticationError for JWT with wrong issuer', () => {
         // Arrange - Create a token with different secret/issuer
         const wrongTokenFactory = TokenFactory.create({ env: TEST_INVALID_TOKEN_ENV })
         const wrongTokenResult = wrongTokenFactory.createAccessToken({
@@ -213,9 +203,8 @@ describe('AuthService', () => {
         const result = authService.verifyAuthHeader({ authHeader: `Bearer ${wrongToken}` })
 
         // Assert
-        const error = expectError(result)
-        expect(error).toBeInstanceOf(ValidationError)
-        expect(error.field).toBe('accessToken')
+        const error = expectErrorType({ errorType: AuthenticationError, result })
+        expect(error.metadata?.field).toBe('accessToken')
       })
     })
   })

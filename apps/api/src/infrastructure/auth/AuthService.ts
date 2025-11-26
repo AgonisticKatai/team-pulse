@@ -1,5 +1,6 @@
 import type { AccessTokenPayload, TokenFactory } from '@application/factories/TokenFactory.js'
-import { ValidationError } from '@domain/errors/index.js'
+import { ValidationError } from '@domain/errors/ValidationError.js'
+import type { AuthenticationError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
 import type { UserRole } from '@team-pulse/shared/types'
 
@@ -54,9 +55,9 @@ export class AuthService {
    * 3. JWT token is valid and not expired
    *
    * @param authHeader - Authorization header value
-   * @returns Result with JWT payload or ValidationError
+   * @returns Result with JWT payload or ValidationError (header format) or AuthenticationError (JWT validation)
    */
-  verifyAuthHeader({ authHeader }: { authHeader: string | undefined }): Result<AccessTokenPayload, ValidationError> {
+  verifyAuthHeader({ authHeader }: { authHeader: string | undefined }): Result<AccessTokenPayload, AuthenticationError | ValidationError> {
     // Validate header exists
     if (!authHeader || authHeader.trim() === '') {
       return Err(

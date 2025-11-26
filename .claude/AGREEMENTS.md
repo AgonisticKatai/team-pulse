@@ -1190,6 +1190,141 @@ const TEST_VALUES = {
 
 ---
 
+## 4.4 Error Testing - Type-Safe Error Assertions
+
+**Pattern Name:** expectErrorType for All Error Testing
+
+**Why:**
+- **Consistency**: Same pattern for single-type and union-type errors
+- **Type Safety**: TypeScript correctly narrows error type with instanceof check
+- **Explicit**: Test declares expected error type, improving readability
+- **Maintainable**: If error types change from single to union, tests still work
+- **Self-documenting**: Clear what error the test expects
+
+**The Problem:**
+When testing Result types with union errors (e.g., `Result<T, AuthenticationError | ValidationError>`), using `expectError` doesn't provide type narrowing:
+
+```typescript
+// ❌ PROBLEM: TypeScript doesn't know which error type
+const error = expectError(result) // Type: AuthenticationError | ValidationError
+expect(error.field).toBe('email') // ❌ Error: AuthenticationError doesn't have .field
+expect(error.metadata?.field).toBe('email') // ❌ Error: ValidationError doesn't have .metadata
+```
+
+**The Solution:**
+Always use `expectErrorType` which performs instanceof check and narrows the type:
+
+```typescript
+// ✅ CORRECT: Type narrowing works correctly
+const error = expectErrorType({ errorType: ValidationError, result })
+expect(error.field).toBe('email') // ✅ TypeScript knows it's ValidationError
+
+const error = expectErrorType({ errorType: AuthenticationError, result })
+expect(error.metadata?.field).toBe('accessToken') // ✅ TypeScript knows it's AuthenticationError
+```
+
+**Real Code Example:**
+```typescript
+// LoginUseCase.test.ts
+describe('error cases', () => {
+  it('should return AuthenticationError when user does not exist', async () => {
+    // ARRANGE
+    const dto = buildLoginDTO({ email: TEST_CONSTANTS.emails.nonexistent })
+    vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(null))
+
+    // ACT
+    const result = await loginUseCase.execute(dto)
+
+    // ASSERT
+    const error = expectErrorType({ errorType: AuthenticationError, result })
+    expect(error.message).toBe('Invalid email or password')
+    expect(error.metadata?.field).toBe('credentials')
+    // ↑ TypeScript knows error is AuthenticationError, not union type
+  })
+
+  it('should return ValidationError when email is invalid', async () => {
+    // ARRANGE
+    const dto = buildLoginDTO({ email: 'invalid-email' })
+
+    // ACT
+    const result = await loginUseCase.execute(dto)
+
+    // ASSERT
+    const error = expectErrorType({ errorType: ValidationError, result })
+    expect(error.field).toBe('email')
+    expect(error.message).toContain('Email')
+    // ↑ TypeScript knows error is ValidationError, .field exists
+  })
+})
+```
+
+**MANDATORY RULE:**
+```typescript
+// ✅ ALWAYS use expectErrorType for error assertions
+const error = expectErrorType({ errorType: AuthenticationError, result })
+expect(error.message).toBe('Invalid credentials')
+
+// ❌ NEVER use expectError for error assertions
+const error = expectError(result)
+expect(error).toBeInstanceOf(AuthenticationError) // Redundant with expectErrorType
+```
+
+**Benefits:**
+1. **Works with both single and union error types** - no need to remember which to use
+2. **Automatic type narrowing** - no manual type assertions needed
+3. **Built-in instanceof check** - eliminates need for separate `toBeInstanceOf` assertion
+4. **More explicit** - test clearly states what error it expects
+5. **Future-proof** - if error type changes from single to union, test doesn't break
+
+**Helper Implementation:**
+```typescript
+// packages/shared/src/testing/helpers.ts (lines 108-129)
+/**
+ * Test helper to assert a Result contains a specific error type
+ *
+ * This helper allows type-safe extraction of specific error types from union types.
+ * It automatically narrows the error type using instanceof check.
+ */
+export function expectErrorType<E extends Error>({
+  result,
+  errorType,
+}: {
+  result: Result<unknown, unknown>
+  errorType: Function & { prototype: E }
+}): E {
+  const error = expectError(result)
+  expect(error).toBeInstanceOf(errorType)
+  return error as E
+}
+```
+
+**❌ DO NOT:**
+```typescript
+// Using expectError without type narrowing
+const error = expectError(result)
+expect(error).toBeInstanceOf(ValidationError)
+expect(error.field).toBe('email') // ❌ Type error with union types
+
+// Using expectError and manual type assertion
+const error = expectError(result) as ValidationError
+expect(error.field).toBe('email') // ❌ Unsafe, bypasses type checking
+
+// Inconsistent usage - mixing both helpers
+const error1 = expectError(result1) // In some tests
+const error2 = expectErrorType({ errorType: ValidationError, result2 }) // In other tests
+// ❌ Inconsistent, confusing for maintainers
+```
+
+**Applied in:**
+- `application/use-cases/LoginUseCase.test.ts` (lines 249-323)
+- `application/use-cases/RefreshTokenUseCase.test.ts` (lines 249-433)
+- `infrastructure/auth/AuthService.test.ts` (lines 75-220)
+
+**Migration Task:**
+- See TODO.md: "Estandarizar todos los tests para usar expectErrorType"
+
+---
+
 # 5. TYPE SYSTEM PATTERNS
 
 ## 5.1 Result Type - Railway-Oriented

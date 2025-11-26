@@ -1,12 +1,13 @@
 import type { TokenFactory } from '@application/factories/TokenFactory.js'
 import { LoginUseCase } from '@application/use-cases/LoginUseCase.js'
-import { RepositoryError, ValidationError } from '@domain/errors/index.js'
+import { RepositoryError } from '@domain/errors/RepositoryError.js'
 import { RefreshToken } from '@domain/models/RefreshToken.js'
 import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { IMetricsService } from '@domain/services/IMetricsService.js'
 import type { IPasswordHasher } from '@domain/services/IPasswordHasher.js'
 import { buildAdminUser, buildSuperAdminUser, buildUser } from '@infrastructure/testing/index.js'
+import { AuthenticationError } from '@team-pulse/shared/errors'
 import { Err, Ok } from '@team-pulse/shared/result'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { buildLoginDTO } from '@team-pulse/shared/testing/dto-builders'
@@ -246,7 +247,7 @@ describe('LoginUseCase', () => {
     })
 
     describe('error cases', () => {
-      it('should return ValidationError when user does not exist', async () => {
+      it('should return AuthenticationError when user does not exist', async () => {
         // Arrange
         const loginDTO = buildLoginDTO({ email: TEST_CONSTANTS.emails.nonexistent })
 
@@ -256,7 +257,7 @@ describe('LoginUseCase', () => {
         const result = await loginUseCase.execute(loginDTO)
 
         // Assert
-        const error = expectErrorType({ errorType: ValidationError, result })
+        const error = expectErrorType({ errorType: AuthenticationError, result })
         expect(error.message).toBe('Invalid email or password')
       })
 
@@ -270,11 +271,11 @@ describe('LoginUseCase', () => {
         const result = await loginUseCase.execute(loginDTO)
 
         // Assert
-        expectErrorType({ errorType: ValidationError, result })
+        expectErrorType({ errorType: AuthenticationError, result })
         expect(passwordHasher.verify).not.toHaveBeenCalled()
       })
 
-      it('should return ValidationError when password is incorrect', async () => {
+      it('should return AuthenticationError when password is incorrect', async () => {
         // Arrange
         const loginDTO = buildLoginDTO({ password: TEST_CONSTANTS.invalid.wrongPassword })
 
@@ -285,7 +286,7 @@ describe('LoginUseCase', () => {
         const result = await loginUseCase.execute(loginDTO)
 
         // Assert
-        const error = expectErrorType({ errorType: ValidationError, result })
+        const error = expectErrorType({ errorType: AuthenticationError, result })
         expect(error.message).toBe('Invalid email or password')
       })
 
@@ -300,7 +301,7 @@ describe('LoginUseCase', () => {
         const result = await loginUseCase.execute(loginDTO)
 
         // Assert
-        expectErrorType({ errorType: ValidationError, result })
+        expectErrorType({ errorType: AuthenticationError, result })
         expect(tokenFactory.createAccessToken).not.toHaveBeenCalled()
         expect(tokenFactory.createRefreshToken).not.toHaveBeenCalled()
         expect(refreshTokenRepository.save).not.toHaveBeenCalled()
@@ -317,9 +318,9 @@ describe('LoginUseCase', () => {
         const result = await loginUseCase.execute(loginDTO)
 
         // Assert - Error message should be the same for "user not found" and "wrong password"
-        const error = expectErrorType({ errorType: ValidationError, result })
+        const error = expectErrorType({ errorType: AuthenticationError, result })
         expect(error.message).toBe('Invalid email or password')
-        expect(error.field).toBe('credentials')
+        expect(error.metadata?.field).toBe('credentials')
       })
 
       it('should return RepositoryError when saving refresh token fails', async () => {

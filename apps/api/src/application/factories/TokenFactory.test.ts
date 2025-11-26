@@ -1,6 +1,6 @@
 import { TokenFactory } from '@application/factories/TokenFactory.js'
-import { ValidationError } from '@domain/errors/index.js'
 import { TEST_TOKEN_ENV } from '@infrastructure/testing/test-env.js'
+import { AuthenticationError } from '@team-pulse/shared/errors'
 import { Ok } from '@team-pulse/shared/result'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
@@ -139,8 +139,8 @@ describe('TokenFactory', () => {
 
       // Assert
       const error = expectError(result)
-      expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('accessToken')
+      expect(error).toBeInstanceOf(AuthenticationError)
+      expect(error.metadata?.field).toBe('accessToken')
     })
   })
 
@@ -170,8 +170,8 @@ describe('TokenFactory', () => {
 
       // Assert
       const error = expectError(result)
-      expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('refreshToken')
+      expect(error).toBeInstanceOf(AuthenticationError)
+      expect(error.metadata?.field).toBe('refreshToken')
     })
   })
 
@@ -245,8 +245,8 @@ describe('TokenFactory', () => {
       })
 
       const error = expectError(verifyResult)
-      expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('accessToken')
+      expect(error).toBeInstanceOf(AuthenticationError)
+      expect(error.metadata?.field).toBe('accessToken')
     })
 
     it('should not allow using access token as refresh token', () => {
@@ -265,8 +265,8 @@ describe('TokenFactory', () => {
       })
 
       const error = expectError(verifyResult)
-      expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('refreshToken')
+      expect(error).toBeInstanceOf(AuthenticationError)
+      expect(error.metadata?.field).toBe('refreshToken')
     })
   })
 })

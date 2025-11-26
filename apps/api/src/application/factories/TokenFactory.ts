@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto'
 import type { IEnvironment } from '@domain/config/IEnvironment.js'
-import { ValidationError } from '@domain/errors/index.js'
+import type { ValidationError } from '@domain/errors/ValidationError.js'
 import { RefreshToken } from '@domain/models/RefreshToken.js'
+import { AuthenticationError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
 import type { UserRole } from '@team-pulse/shared/types'
 import jwt from 'jsonwebtoken'
@@ -70,15 +71,18 @@ export class TokenFactory {
   // ============================================
 
   /**
-   * Handle JWT errors and convert to ValidationError
+   * Handle JWT errors and convert to AuthenticationError
    */
-  protected static handleJwtError({ error, field }: { error: unknown; field: string }): ValidationError {
+  protected static handleJwtError({ error, field }: { error: unknown; field: string }): AuthenticationError {
     const errorName = error instanceof Error ? error.name : 'UnknownError'
-    const errorMessage = JWT_ERROR_TYPES[errorName]
+    const errorMessage = JWT_ERROR_TYPES[errorName] || 'Invalid token'
 
-    return ValidationError.forField({
-      field,
-      message: errorMessage || 'Invalid token',
+    return AuthenticationError.create({
+      message: errorMessage,
+      metadata: {
+        field,
+        originalError: errorName,
+      },
     })
   }
 
@@ -155,9 +159,9 @@ export class TokenFactory {
    * @param email - User's email
    * @param role - User's role
    * @param userId - User's ID
-   * @returns Result with JWT string or ValidationError
+   * @returns Result with JWT string or AuthenticationError
    */
-  createAccessToken({ email, role, userId }: { email: string; role: UserRole; userId: string }): Result<string, ValidationError> {
+  createAccessToken({ email, role, userId }: { email: string; role: UserRole; userId: string }): Result<string, AuthenticationError> {
     try {
       const token = jwt.sign({ email, role, userId }, this.env.JWT_SECRET, {
         audience: 'team-pulse-app',
@@ -174,9 +178,9 @@ export class TokenFactory {
    * Verify an access token
    *
    * @param token - The JWT token to verify
-   * @returns Result with decoded payload or ValidationError
+   * @returns Result with decoded payload or AuthenticationError
    */
-  verifyAccessToken({ token }: { token: string }): Result<AccessTokenPayload, ValidationError> {
+  verifyAccessToken({ token }: { token: string }): Result<AccessTokenPayload, AuthenticationError> {
     try {
       const payload = jwt.verify(token, this.env.JWT_SECRET, {
         audience: 'team-pulse-app',
@@ -193,9 +197,9 @@ export class TokenFactory {
    * Verify a refresh token
    *
    * @param token - The JWT token to verify
-   * @returns Result with decoded payload or ValidationError
+   * @returns Result with decoded payload or AuthenticationError
    */
-  verifyRefreshToken({ token }: { token: string }): Result<RefreshTokenPayload, ValidationError> {
+  verifyRefreshToken({ token }: { token: string }): Result<RefreshTokenPayload, AuthenticationError> {
     try {
       const payload = jwt.verify(token, this.env.JWT_REFRESH_SECRET, {
         audience: 'team-pulse-app',

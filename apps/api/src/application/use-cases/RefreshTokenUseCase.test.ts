@@ -1,9 +1,10 @@
 import type { TokenFactory } from '@application/factories/TokenFactory.js'
 import { RefreshTokenUseCase } from '@application/use-cases/RefreshTokenUseCase.js'
-import { NotFoundError, RepositoryError, ValidationError } from '@domain/errors/index.js'
+import { NotFoundError, RepositoryError } from '@domain/errors/index.js'
 import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import { buildAdminUser, buildExpiredRefreshToken, buildSuperAdminUser, buildUser, buildValidRefreshToken } from '@infrastructure/testing/index.js'
+import { AuthenticationError } from '@team-pulse/shared/errors'
 import { Err, Ok } from '@team-pulse/shared/result'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { buildRefreshTokenDTO } from '@team-pulse/shared/testing/dto-builders'
@@ -246,15 +247,15 @@ describe('RefreshTokenUseCase', () => {
     })
 
     describe('error cases', () => {
-      it('should return ValidationError when JWT signature is invalid', async () => {
+      it('should return AuthenticationError when JWT signature is invalid', async () => {
         // Arrange
         const dto = buildRefreshTokenDTO()
 
         vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(
           Err(
-            ValidationError.forField({
-              field: 'refreshToken',
+            AuthenticationError.create({
               message: 'Invalid token signature',
+              metadata: { field: 'refreshToken', reason: 'invalid_signature' },
             }),
           ),
         )
@@ -263,7 +264,7 @@ describe('RefreshTokenUseCase', () => {
         const result = await refreshTokenUseCase.execute(dto)
 
         // Assert
-        const error = expectErrorType({ errorType: ValidationError, result })
+        const error = expectErrorType({ errorType: AuthenticationError, result })
         expect(error.message).toBe('Invalid token signature')
 
         // Should not proceed to database checks
@@ -288,7 +289,7 @@ describe('RefreshTokenUseCase', () => {
         expect(userRepository.findById).not.toHaveBeenCalled()
       })
 
-      it('should return ValidationError and delete token when refresh token has expired', async () => {
+      it('should return AuthenticationError and delete token when refresh token has expired', async () => {
         // Arrange
         const dto = buildRefreshTokenDTO({
           refreshToken: TEST_CONSTANTS.auth.expiredRefreshToken,
@@ -305,7 +306,7 @@ describe('RefreshTokenUseCase', () => {
         const result = await refreshTokenUseCase.execute(dto)
 
         // Assert
-        const error = expectErrorType({ errorType: ValidationError, result })
+        const error = expectErrorType({ errorType: AuthenticationError, result })
         expect(error.message).toBe('Refresh token has expired')
 
         // Should clean up expired token
@@ -334,15 +335,15 @@ describe('RefreshTokenUseCase', () => {
         expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledTimes(1)
       })
 
-      it('should include field name in ValidationError', async () => {
+      it('should include field name in AuthenticationError metadata', async () => {
         // Arrange
         const dto = buildRefreshTokenDTO()
 
         vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(
           Err(
-            ValidationError.forField({
-              field: 'refreshToken',
+            AuthenticationError.create({
               message: 'Invalid token format',
+              metadata: { field: 'refreshToken', reason: 'invalid_format' },
             }),
           ),
         )
@@ -351,8 +352,8 @@ describe('RefreshTokenUseCase', () => {
         const result = await refreshTokenUseCase.execute(dto)
 
         // Assert
-        const error = expectErrorType({ errorType: ValidationError, result })
-        expect(error.field).toBe('refreshToken')
+        const error = expectErrorType({ errorType: AuthenticationError, result })
+        expect(error.metadata?.field).toBe('refreshToken')
       })
     })
 
@@ -417,9 +418,9 @@ describe('RefreshTokenUseCase', () => {
 
         vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(
           Err(
-            ValidationError.forField({
-              field: 'refreshToken',
+            AuthenticationError.create({
               message: 'Invalid access token',
+              metadata: { field: 'refreshToken', reason: 'invalid_token' },
             }),
           ),
         )
@@ -428,7 +429,7 @@ describe('RefreshTokenUseCase', () => {
         const result = await refreshTokenUseCase.execute(dto)
 
         // Assert - Should return error but NOT delete token on JWT verification failure
-        expectErrorType({ errorType: ValidationError, result })
+        expectErrorType({ errorType: AuthenticationError, result })
         expect(refreshTokenRepository.deleteByToken).not.toHaveBeenCalled()
       })
     })

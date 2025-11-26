@@ -1,10 +1,11 @@
 import type { TokenFactory } from '@application/factories/TokenFactory.js'
-import { type NotFoundError, type RepositoryError, ValidationError } from '@domain/errors/index.js'
+import type { RepositoryError, ValidationError } from '@domain/errors/index.js'
 import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { IMetricsService } from '@domain/services/IMetricsService.js'
 import type { IPasswordHasher } from '@domain/services/IPasswordHasher.js'
 import type { LoginDTO, LoginResponseDTO } from '@team-pulse/shared/dtos'
+import { AuthenticationError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
 
 /**
@@ -68,7 +69,7 @@ export class LoginUseCase {
     return new LoginUseCase({ metricsService, passwordHasher, refreshTokenRepository, tokenFactory, userRepository })
   }
 
-  async execute(dto: LoginDTO): Promise<Result<LoginResponseDTO, NotFoundError | RepositoryError | ValidationError>> {
+  async execute(dto: LoginDTO): Promise<Result<LoginResponseDTO, AuthenticationError | RepositoryError | ValidationError>> {
     const findUserResult = await this.userRepository.findByEmail({ email: dto.email })
 
     if (!findUserResult.ok) {
@@ -76,7 +77,12 @@ export class LoginUseCase {
     }
 
     if (!findUserResult.value) {
-      return Err(ValidationError.forField({ field: 'credentials', message: 'Invalid email or password' }))
+      return Err(
+        AuthenticationError.create({
+          message: 'Invalid email or password',
+          metadata: { field: 'credentials', reason: 'invalid_credentials' },
+        }),
+      )
     }
 
     const verifyResult = await this.passwordHasher.verify({ password: dto.password, hash: findUserResult.value.getPasswordHash() })
@@ -86,7 +92,12 @@ export class LoginUseCase {
     }
 
     if (!verifyResult.value) {
-      return Err(ValidationError.forField({ field: 'credentials', message: 'Invalid email or password' }))
+      return Err(
+        AuthenticationError.create({
+          message: 'Invalid email or password',
+          metadata: { field: 'credentials', reason: 'invalid_credentials' },
+        }),
+      )
     }
 
     const refreshTokenResult = this.tokenFactory.createRefreshToken({ userId: findUserResult.value.id.getValue() })

@@ -362,6 +362,44 @@ Un sistema de gestión de errores que sea:
 - Mantener pattern actual de factories
 **Razón:** Determinar el patrón más apropiado según arquitectura del proyecto
 
+#### ⚠️ CRÍTICO: Use Cases violan convención de parámetros nombrados
+**Ubicación:** `apps/api/src/application/use-cases/` (TODOS los use cases)
+**Problema detectado (2025-11-26):** Todos los métodos `execute()` usan parámetros posicionales en lugar de parámetros nombrados
+**Archivos afectados:**
+- `CreateUserUseCase.ts:41` - `execute(dto: CreateUserDTO)`
+- `DeleteTeamUseCase.ts:21` - `execute(id: string)`
+- `LoginUseCase.ts:72` - `execute(dto: LoginDTO)`
+- `GetTeamUseCase.ts:22` - `execute(id: string)`
+- `RefreshTokenUseCase.ts:60` - `execute(dto: RefreshTokenDTO)`
+- `LogoutUseCase.ts:35` - `execute(refreshToken: string)`
+- `CreateTeamUseCase.ts:39` - `execute(dto: CreateTeamDTO)`
+- `UpdateTeamUseCase.ts:22` - `execute(id: string, dto: UpdateTeamDTO)`
+- `ListUsersUseCase.ts:44` - `execute({ page, limit })` (usa parámetros nombrados con destructuring, pero no como objeto)
+- `ListTeamsUseCase.ts:33` - `execute({ page, limit })` (usa parámetros nombrados con destructuring, pero no como objeto)
+
+**Violación de RULES.md:**
+```typescript
+// ❌ ACTUAL (incorrecto)
+async execute(dto: LoginDTO): Promise<Result<...>>
+
+// ✅ ESPERADO (correcto según RULES.md)
+async execute({ dto }: { dto: LoginDTO }): Promise<Result<...>>
+```
+
+**Impacto:**
+- Viola convención fundamental del proyecto (RULES.md línea 52-57)
+- Todos los call sites deben actualizarse: `useCase.execute(dto)` → `useCase.execute({ dto })`
+- Todos los tests deben actualizarse
+- Inconsistente con el resto del proyecto (constructores, factory methods, etc.)
+
+**Solución propuesta:**
+1. Refactorizar TODOS los métodos `execute()` para usar parámetros nombrados
+2. Actualizar todos los call sites en routes, tests, etc.
+3. Verificar que todos los tests pasan
+4. Documentar en AGREEMENTS.md el patrón correcto de Use Cases
+
+**Prioridad:** Media (no rompe funcionalidad, pero viola convención core del proyecto)
+
 #### ✅ Refactorizar middleware de autenticación - COMPLETADO (2025-11-21)
 **Ubicación:** `apps/api/src/infrastructure/http/middleware/auth.ts` + `AuthService.ts`
 **Solución implementada (TDD):**
@@ -397,6 +435,131 @@ Un sistema de gestión de errores que sea:
 - ¿Es mejor mantener consistencia con env vars o con convenciones TypeScript?
 - Evaluar trade-offs: consistencia vs mapping explícito
 **Objetivo:** Determinar approach más correcto según mejores prácticas del proyecto
+
+#### ⚠️ Analizar definición hardcoded de mensajes y metadata en errores
+**Ubicación:** `packages/shared/src/errors/`, `apps/api/src/application/`
+**Problema detectado (2025-11-26):** Los mensajes de error, campos y metadata se están definiendo con strings hardcoded desde fuera de los modelos de error:
+```typescript
+// ❌ ACTUAL: Strings hardcoded, repetitivos, propensos a typos
+AuthenticationError.create({
+  message: 'Invalid email or password',
+  metadata: { field: 'credentials', reason: 'invalid_credentials' },
+})
+
+// En múltiples lugares se repite el mismo mensaje/metadata
+// No hay single source of truth para mensajes
+// Difícil de mantener y escalar
+```
+
+**Problemas identificados:**
+1. **Strings hardcoded repetidos** - El mismo mensaje se escribe múltiples veces en diferentes archivos
+2. **Sin type safety** - Los campos de metadata pueden tener typos (`field: 'credencials'`)
+3. **No escalable** - Cada vez que se necesita un nuevo tipo de error hay que recordar el formato exacto
+4. **Dificulta i18n** - Mensajes hardcoded dificultan internacionalización futura
+5. **Inconsistencia** - Diferentes desarrolladores pueden usar diferentes formatos/mensajes para el mismo tipo de error
+
+**Alternativas a evaluar:**
+1. **Factory methods específicos** (más type-safe):
+   ```typescript
+   // ✅ Opción 1: Factory methods con mensajes predefinidos
+   AuthenticationError.invalidCredentials()  // Mensaje y metadata ya definidos internamente
+   AuthenticationError.tokenExpired({ tokenType: 'access' })
+   ```
+
+2. **Diccionario centralizado de mensajes**:
+   ```typescript
+   // ✅ Opción 2: Constantes/diccionario
+   export const AUTH_ERROR_MESSAGES = {
+     INVALID_CREDENTIALS: { message: 'Invalid email or password', field: 'credentials' },
+     TOKEN_EXPIRED: { message: 'Token has expired', field: 'token' },
+   } as const
+
+   AuthenticationError.fromTemplate(AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS)
+   ```
+
+3. **Builders con validación**:
+   ```typescript
+   // ✅ Opción 3: Builder pattern con type safety
+   AuthenticationError.builder()
+     .withReason('invalid_credentials')
+     .withField('credentials')
+     .build()
+   ```
+
+**Archivos afectados:**
+- `packages/shared/src/errors/AuthenticationError.ts`
+- `packages/shared/src/errors/ValidationError.ts`
+- `packages/shared/src/errors/NotFoundError.ts`
+- `packages/shared/src/errors/ConflictError.ts`
+- `apps/api/src/application/use-cases/LoginUseCase.ts`
+- `apps/api/src/application/factories/TokenFactory.ts`
+- Y todos los futuros use cases que usen estos errores
+
+**Objetivo:** Diseñar una solución escalable, type-safe y mantenible para la creación de errores que:
+- Evite repetición de strings
+- Proporcione type safety
+- Facilite mantenimiento
+- Prepare el terreno para i18n si es necesario
+- Sea consistente con los patrones del proyecto (factory methods, parámetros nombrados)
+
+**Prioridad:** Media-Alta (afecta la arquitectura de errores que estamos migrando)
+
+#### ⚠️ Analizar integración de Zod en sistema de errores
+**Ubicación:** `packages/shared/src/errors/ValidationError.ts`
+**Problema detectado (2025-11-26):** ValidationError tiene un método `fromZodError()` que acopla el sistema de errores con Zod
+```typescript
+static fromZodError({ error }: { error: { errors: Array<{ path: (string | number)[]; message: string }> } }): ValidationError {
+  // ...
+}
+```
+
+**Preguntas a resolver:**
+1. ¿Es correcto que el sistema de errores de `shared` conozca sobre Zod?
+2. ¿Debería este método estar en la capa de aplicación/infrastructure en su lugar?
+3. ¿Qué pasa si queremos cambiar de Zod a otro validador (Yup, Joi, etc.)?
+4. ¿Deberíamos tener un adapter pattern para validadores?
+
+**Alternativas:**
+- Mover `fromZodError` a un adapter en infrastructure
+- Crear una interfaz genérica `ValidationErrorAdapter` que pueda trabajar con cualquier validador
+- Mantener Zod en shared pero hacerlo más genérico
+
+**Objetivo:** Determinar la arquitectura correcta para integrar validadores externos sin acoplar shared a librerías específicas
+
+**Prioridad:** Media
+
+#### ⚠️ Analizar patrón handleJwtError en TokenFactory
+**Ubicación:** `apps/api/src/application/factories/TokenFactory.ts`
+**Problema detectado (2025-11-26):** El método `handleJwtError` mapea errores de jwt a AuthenticationError usando un diccionario simple
+```typescript
+const JWT_ERROR_TYPES: Record<string, string> = {
+  JsonWebTokenError: 'Invalid token',
+  NotBeforeError: 'Token not yet valid',
+  TokenExpiredError: 'Token has expired',
+}
+
+protected static handleJwtError({ error, field }: { error: unknown; field: string }): AuthenticationError {
+  const errorName = error instanceof Error ? error.name : 'UnknownError'
+  const errorMessage = JWT_ERROR_TYPES[errorName] || 'Invalid token'
+  // ...
+}
+```
+
+**Preguntas a resolver:**
+1. ¿Es este el patrón correcto para mapear errores de librerías externas?
+2. ¿Deberíamos tener factory methods específicos por tipo de error JWT?
+   - `AuthenticationError.tokenExpired()`
+   - `AuthenticationError.tokenNotYetValid()`
+3. ¿El mapping debería ser más explícito (switch/if) en lugar de un diccionario?
+4. ¿Cómo se relaciona esto con el problema de mensajes hardcoded mencionado arriba?
+
+**Relación con otros issues:**
+- Se conecta directamente con el issue de "mensajes hardcoded"
+- Podría beneficiarse de factory methods específicos
+
+**Objetivo:** Definir el patrón estándar para mapear errores de librerías externas a errores del dominio
+
+**Prioridad:** Baja-Media (funciona correctamente, pero podría mejorar la arquitectura)
 
 #### Unificar convenciones de definición de tipos TypeScript
 **Ubicación:** Todo el proyecto (apps/api, packages/shared, etc.)
