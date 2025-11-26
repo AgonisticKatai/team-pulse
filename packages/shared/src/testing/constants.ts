@@ -148,6 +148,15 @@ export const TEST_CONSTANTS = {
         infoLogged: 'Test info logged',
         debugLogged: 'Test debug logged',
       },
+      logContext: {
+        userId: 'user-123',
+        operation: 'deleteUser',
+        retries: 3,
+        endpoint: '/api/users',
+        action: 'login',
+        requestId: 'abc-123',
+        duration: 245,
+      },
       httpStatusCodes: {
         ok: 200,
         badRequest: 400,

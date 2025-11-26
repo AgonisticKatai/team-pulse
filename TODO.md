@@ -214,52 +214,68 @@ export class FastifyErrorHandler {
 
 ### 📋 Plan de Implementación
 
-**Fase 1: Core Error System (Shared Package)**
-1. [ ] Crear `packages/shared/src/errors/core.ts`
+**Fase 1: Core Error System (Shared Package)** ✅ COMPLETADO (2025-11-26)
+1. [x] Crear `packages/shared/src/errors/core.ts`
    - IApplicationError interface
    - ApplicationError base class
-   - ErrorCategory y ErrorSeverity types
-2. [ ] Crear `packages/shared/src/errors/domain-errors.ts`
+   - ERROR_CATEGORY y ERROR_SEVERITY constants (enum-like)
+2. [x] Crear errores específicos con factory methods:
    - ValidationError, AuthenticationError, AuthorizationError
    - NotFoundError, ConflictError, BusinessRuleError
    - InternalError, ExternalServiceError
-3. [ ] Crear tests exhaustivos para cada error type
-4. [ ] Configurar subpath exports en shared package
+3. [x] Crear tests exhaustivos para cada error type (243 tests pasando)
+4. [x] Configurar subpath exports en shared package
+**Resultado:** Sistema de errores type-safe y framework-agnostic funcionando
 
-**Fase 2: Framework-Agnostic Handler**
-5. [ ] Crear `packages/shared/src/errors/error-handler.ts`
-   - ErrorResponse interface
-   - ErrorHandler service
-   - Category → HTTP status mapping
-6. [ ] Tests para ErrorHandler con todos los casos
+**Fase 2: Framework-Agnostic Handler** ✅ COMPLETADO (2025-11-26)
+5. [x] Crear `packages/shared/src/errors/handler/error-handler.ts`
+   - ErrorHandler service con método handle()
+   - Logging basado en severity (ILogger interface)
+   - Safe error responses (oculta detalles internos)
+6. [x] Crear `packages/shared/src/errors/handler/http-status-codes.ts`
+   - HTTP_STATUS constants
+   - ERROR_CATEGORY_TO_HTTP_STATUS mapping (usando computed property names)
+7. [x] Crear `packages/shared/src/errors/handler/error-response.ts`
+   - createSafeErrorResponse() function
+8. [x] Crear `packages/shared/src/errors/handler/logger.ts`
+   - ILogger interface
+   - ConsoleLogger y NoOpLogger implementations
+9. [x] Tests para ErrorHandler con todos los casos (70 tests adicionales = 313 tests totales)
+10. [x] Resolver warnings de linter con biome-ignore contextuales
+**Resultado:** Handler framework-agnostic completo con logging y mapeo HTTP
 
-**Fase 3: Result Integration**
-7. [ ] Crear `packages/shared/src/result/result-error.ts`
-   - unwrapResult helper
-   - tryCatch y tryCatchAsync helpers
-8. [ ] Tests de integración Result<T,E> + ApplicationError
+**Fase 3: Integración en API** 🚧 EN PROGRESO (2025-11-26)
+11. [x] Crear adapter FastifyLogger para ILogger - ✅ 9 tests pasando
+    - Mapear ILogger a fastify.log
+    - Implementar ILogger interface usando Fastify logger
+    - Extender TEST_CONSTANTS con logContext
+12. [ ] Migrar errores del domain de API
+    - Eliminar `apps/api/src/domain/errors/` (DomainError, ValidationError, etc.)
+    - Actualizar imports para usar `@team-pulse/shared/errors`
+    - Verificar que use cases compilan correctamente
+13. [x] Crear FastifyErrorHandler - ✅ 6 tests pasando
+    - Crear `apps/api/src/infrastructure/http/middleware/error-handler.ts`
+    - Usar ErrorHandler de shared
+    - Integrar con FastifyLogger
+    - Función handleError() para routes
+14. [ ] Actualizar routes para usar nuevo error handling
+    - auth.ts, users.ts, teams.ts
+    - Reemplazar handleError legacy con nuevo
+15. [ ] Actualizar app.ts
+    - Integrar FastifyErrorHandler en global error handler
+    - Eliminar lógica de error handling legacy
+16. [ ] Tests de integración
+    - Verificar que todos los tests existentes pasen (800+)
+17. [ ] Eliminar código legacy
+    - Eliminar `apps/api/src/infrastructure/http/utils/error-handler.ts`
+    - Eliminar `apps/api/src/domain/errors/` completo
+18. [x] Type-check ✅ Pasando sin errores
+19. [ ] Lint y type-check final después de integración completa
 
-**Fase 4: Fastify Adapter**
-9. [ ] Crear `apps/api/src/infrastructure/http/utils/FastifyErrorHandler.ts`
-   - FastifyErrorHandler class
-   - Logging integration
-   - handleError convenience function
-10. [ ] Tests de integración con Fastify
-
-**Fase 5: Migration**
-11. [ ] Migrar errores existentes al nuevo sistema
-    - Actualizar DomainError, ValidationError, NotFoundError, DuplicatedError
-    - Mover de apps/api/domain a packages/shared/errors
-12. [ ] Actualizar use cases para retornar ApplicationError específicos
-13. [ ] Eliminar throw exceptions, todo vía Result<T,E>
-14. [ ] Actualizar route handlers para usar FastifyErrorHandler
-15. [ ] Eliminar error-handler.ts legacy
-16. [ ] Verificar 800+ tests siguen pasando
-
-**Fase 6: Documentation**
-17. [ ] Documentar patrón en AGREEMENTS.md
-18. [ ] Crear ejemplos de uso en TESTING.md
-19. [ ] Actualizar TODO.md con resultado
+**Fase 4: Documentation**
+19. [ ] Documentar patrón en AGREEMENTS.md
+20. [ ] Crear ejemplos de uso en TESTING.md
+21. [ ] Actualizar TODO.md con resultado final
 
 ### 🎯 Resultado Esperado
 
