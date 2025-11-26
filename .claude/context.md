@@ -99,7 +99,7 @@ presentation/        # 🎨 UI Layer
 
 ### DevTools
 - **Monorepo**: Turborepo 2.6.0
-- **Package Manager**: pnpm 10.19.0
+- **Package Manager**: pnpm 10.23.0
 - **Linting**: Biome 2.3.2 (replaces ESLint + Prettier)
 - **TypeScript**: 5.9.3 (strict mode)
 - **Git Hooks**: Husky 9.1.7 + lint-staged 16.2.6
@@ -1108,4 +1108,4 @@ make db-down        # Stop DB
 
 **Last updated**: 2025-11-05
 **Node version**: 22.0.0
-**Package manager**: pnpm 10.19.0
+**Package manager**: pnpm 10.23.0

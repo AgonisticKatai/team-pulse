@@ -4,13 +4,13 @@ packages:
 
 catalog:
   '@types/node': ^24.10.1
-  '@vitest/coverage-v8': ^4.0.12
-  '@vitest/ui': ^4.0.12
+  '@vitest/coverage-v8': ^4.0.14
+  '@vitest/ui': ^4.0.14
   drizzle-kit: ^0.31.5
   drizzle-orm: ^0.44.7
   typescript: ^5.9.3
-  vitest: ^4.0.12
-  zod: ^4.1.12
+  vitest: ^4.0.14
+  zod: ^4.1.13
 
 onlyBuiltDependencies:
   - '@biomejs/biome'

@@ -8,7 +8,7 @@ FROM node:25-alpine AS deps
 RUN apk add --no-cache python3 make g++ bash && \
     npm install -g corepack --force && \
     corepack enable && \
-    corepack prepare pnpm@10.21.0 --activate
+    corepack prepare pnpm@10.23.0 --activate
 
 WORKDIR /app
 
@@ -32,7 +32,7 @@ FROM node:25-alpine AS builder
 RUN apk add --no-cache bash && \
     npm install -g corepack --force && \
     corepack enable && \
-    corepack prepare pnpm@10.21.0 --activate
+    corepack prepare pnpm@10.23.0 --activate
 
 WORKDIR /app
 
@@ -60,7 +60,7 @@ FROM node:25-alpine AS prod-deps
 
 RUN npm install -g corepack --force && \
     corepack enable && \
-    corepack prepare pnpm@10.21.0 --activate
+    corepack prepare pnpm@10.23.0 --activate
 
 WORKDIR /app
 

@@ -6,12 +6,12 @@
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
     "@types/node": "catalog:",
-    "@vercel/node": "^5.5.8",
+    "@vercel/node": "^5.5.12",
     "@vitest/coverage-v8": "catalog:",
     "@vitest/ui": "catalog:",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
-    "node-gyp": "^11.5.0",
+    "node-gyp": "^12.1.0",
     "turbo": "^2.6.1",
     "typescript": "catalog:",
     "vitest": "catalog:"
@@ -33,7 +33,7 @@
     ]
   },
   "name": "team-pulse",
-  "packageManager": "pnpm@10.21.0",
+  "packageManager": "pnpm@10.23.0",
   "private": true,
   "scripts": {
     "build": "turbo build",
