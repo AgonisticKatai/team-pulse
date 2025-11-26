@@ -2,7 +2,8 @@ import type { TokenFactory } from '@application/factories/TokenFactory.js'
 import type { CreateUserUseCase } from '@application/use-cases/CreateUserUseCase.js'
 import type { ListUsersUseCase } from '@application/use-cases/ListUsersUseCase.js'
 import { requireAuth, requireRole } from '@infrastructure/http/middleware/auth.js'
-import { handleError } from '@infrastructure/http/utils/error-handler.js'
+import { handleError } from '@infrastructure/http/middleware/error-handler.js'
+import { FastifyLogger } from '@infrastructure/logging/FastifyLogger.js'
 import { CreateUserDTOSchema, PaginationQuerySchema } from '@team-pulse/shared/dtos'
 import type { FastifyInstance } from 'fastify'
 
@@ -47,7 +48,8 @@ export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserR
 
       // Handle Result type
       if (!result.ok) {
-        return handleError({ error: result.error, reply })
+        const logger = FastifyLogger.create({ logger: request.log })
+        return handleError({ error: result.error, reply, logger })
       }
 
       // Return success response
@@ -56,7 +58,8 @@ export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserR
         success: true,
       })
     } catch (error) {
-      return handleError({ error, reply })
+      const logger = FastifyLogger.create({ logger: request.log })
+      return handleError({ error, reply, logger })
     }
   })
 
@@ -79,7 +82,8 @@ export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserR
 
       // Handle Result type
       if (!result.ok) {
-        return handleError({ error: result.error, reply })
+        const logger = FastifyLogger.create({ logger: request.log })
+        return handleError({ error: result.error, reply, logger })
       }
 
       return reply.code(200).send({
@@ -87,7 +91,8 @@ export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserR
         success: true,
       })
     } catch (error) {
-      return handleError({ error, reply })
+      const logger = FastifyLogger.create({ logger: request.log })
+      return handleError({ error, reply, logger })
     }
   })
 }

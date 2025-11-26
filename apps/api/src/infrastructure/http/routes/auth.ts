@@ -3,7 +3,8 @@ import type { LoginUseCase } from '@application/use-cases/LoginUseCase.js'
 import type { LogoutUseCase } from '@application/use-cases/LogoutUseCase.js'
 import type { RefreshTokenUseCase } from '@application/use-cases/RefreshTokenUseCase.js'
 import { requireAuth } from '@infrastructure/http/middleware/auth.js'
-import { handleError } from '@infrastructure/http/utils/error-handler.js'
+import { handleError } from '@infrastructure/http/middleware/error-handler.js'
+import { FastifyLogger } from '@infrastructure/logging/FastifyLogger.js'
 import { LoginDTOSchema, RefreshTokenDTOSchema } from '@team-pulse/shared/dtos'
 import type { FastifyInstance } from 'fastify'
 
@@ -58,7 +59,8 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
 
         // Handle Result type
         if (!result.ok) {
-          return handleError({ error: result.error, reply })
+          const logger = FastifyLogger.create({ logger: request.log })
+          return handleError({ error: result.error, reply, logger })
         }
 
         // Return success response
@@ -67,7 +69,8 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
           success: true,
         })
       } catch (error) {
-        return handleError({ error, reply })
+        const logger = FastifyLogger.create({ logger: request.log })
+        return handleError({ error, reply, logger })
       }
     },
   )
@@ -86,7 +89,8 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
 
       // Handle Result type
       if (!result.ok) {
-        return handleError({ error: result.error, reply })
+        const logger = FastifyLogger.create({ logger: request.log })
+        return handleError({ error: result.error, reply, logger })
       }
 
       // Return success response
@@ -95,7 +99,8 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
         success: true,
       })
     } catch (error) {
-      return handleError({ error, reply })
+      const logger = FastifyLogger.create({ logger: request.log })
+      return handleError({ error, reply, logger })
     }
   })
 
@@ -116,7 +121,8 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
       // Return success response
       return reply.code(204).send()
     } catch (error) {
-      return handleError({ error, reply })
+      const logger = FastifyLogger.create({ logger: request.log })
+      return handleError({ error, reply, logger })
     }
   })
 
@@ -136,7 +142,8 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
         success: true,
       })
     } catch (error) {
-      return handleError({ error, reply })
+      const logger = FastifyLogger.create({ logger: request.log })
+      return handleError({ error, reply, logger })
     }
   })
 }
