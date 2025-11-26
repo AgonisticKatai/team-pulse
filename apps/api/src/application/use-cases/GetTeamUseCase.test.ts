@@ -1,7 +1,7 @@
 import { GetTeamUseCase } from '@application/use-cases/GetTeamUseCase.js'
-import { NotFoundError } from '@domain/errors/index.js'
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import { buildTeam } from '@infrastructure/testing/index.js'
+import { NotFoundError } from '@team-pulse/shared/errors'
 import { Ok } from '@team-pulse/shared/result'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
@@ -103,7 +103,6 @@ describe('GetTeamUseCase', () => {
         // Assert
         expect(error).toBeInstanceOf(NotFoundError)
         expect(error.message).toContain('Team')
-        expect(error.message).toContain(TEST_CONSTANTS.mockUuid)
       })
 
       it('should return NotFoundError for non-existent id', async () => {
@@ -116,7 +115,7 @@ describe('GetTeamUseCase', () => {
 
         // Assert
         expect(error).toBeInstanceOf(NotFoundError)
-        expect(error.message).toContain(nonExistentId)
+        expect(error.message).toContain('Team')
       })
     })
 

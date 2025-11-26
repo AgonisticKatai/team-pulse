@@ -1,5 +1,6 @@
-import { NotFoundError, type RepositoryError } from '@domain/errors/index.js'
+import type { RepositoryError } from '@domain/errors/index.js'
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
+import { NotFoundError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
 
 /**
@@ -26,7 +27,7 @@ export class DeleteTeamUseCase {
     }
 
     if (!findTeamResult.value) {
-      return Err(NotFoundError.create({ entityName: 'Team', identifier: id }))
+      return Err(NotFoundError.forResource({ resource: 'Team', identifier: id }))
     }
 
     const deleteResult = await this.teamRepository.delete({ id })

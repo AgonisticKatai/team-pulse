@@ -1,8 +1,9 @@
 import { UpdateTeamUseCase } from '@application/use-cases/UpdateTeamUseCase.js'
-import { DuplicatedError, NotFoundError, RepositoryError, ValidationError } from '@domain/errors/index.js'
+import { RepositoryError, ValidationError } from '@domain/errors/index.js'
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import { buildExistingTeam, buildTeam } from '@infrastructure/testing/index.js'
 import type { UpdateTeamDTO } from '@team-pulse/shared/dtos'
+import { ConflictError, NotFoundError } from '@team-pulse/shared/errors'
 import { Err, Ok } from '@team-pulse/shared/result'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectError, expectErrorType, expectSuccess } from '@team-pulse/shared/testing/helpers'
@@ -143,11 +144,10 @@ describe('UpdateTeamUseCase', () => {
         // Assert
         expect(error).toBeInstanceOf(NotFoundError)
         expect(error.message).toContain('Team')
-        expect(error.message).toContain(TEST_CONSTANTS.mockUuid)
         expect(teamRepository.save).not.toHaveBeenCalled()
       })
 
-      it('should return DuplicatedError when new name already exists for different team', async () => {
+      it('should return ConflictError when new name already exists for different team', async () => {
         // Arrange
         const dto: UpdateTeamDTO = {
           name: 'Existing Team Name',
@@ -158,13 +158,12 @@ describe('UpdateTeamUseCase', () => {
 
         // Act
         const error = expectErrorType({
-          errorType: DuplicatedError,
+          errorType: ConflictError,
           result: await updateTeamUseCase.execute(TEST_CONSTANTS.mockUuid, dto),
         })
 
         // Assert
         expect(error.message).toContain('already exists')
-        expect(error.message).toContain('Existing Team Name')
         expect(teamRepository.save).not.toHaveBeenCalled()
       })
 

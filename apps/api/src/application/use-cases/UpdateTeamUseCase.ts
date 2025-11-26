@@ -1,6 +1,7 @@
-import { DuplicatedError, NotFoundError, type RepositoryError, type ValidationError } from '@domain/errors/index.js'
+import type { RepositoryError, ValidationError } from '@domain/errors/index.js'
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import type { TeamResponseDTO, UpdateTeamDTO } from '@team-pulse/shared/dtos'
+import { ConflictError, NotFoundError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
 
 /**
@@ -19,10 +20,7 @@ export class UpdateTeamUseCase {
     return new UpdateTeamUseCase({ teamRepository })
   }
 
-  async execute(
-    id: string,
-    dto: UpdateTeamDTO,
-  ): Promise<Result<TeamResponseDTO, DuplicatedError | NotFoundError | ValidationError | RepositoryError>> {
+  async execute(id: string, dto: UpdateTeamDTO): Promise<Result<TeamResponseDTO, ConflictError | NotFoundError | ValidationError | RepositoryError>> {
     const findTeamResult = await this.teamRepository.findById({ id })
 
     if (!findTeamResult.ok) {
@@ -30,7 +28,7 @@ export class UpdateTeamUseCase {
     }
 
     if (!findTeamResult.value) {
-      return Err(NotFoundError.create({ entityName: 'Team', identifier: id }))
+      return Err(NotFoundError.forResource({ resource: 'Team', identifier: id }))
     }
 
     if (dto.name && dto.name !== findTeamResult.value.name.getValue()) {
@@ -41,7 +39,7 @@ export class UpdateTeamUseCase {
       }
 
       if (findTeamResult.value && findTeamResult.value.id.getValue() !== id) {
-        return Err(DuplicatedError.create({ entityName: 'Team', identifier: dto.name }))
+        return Err(ConflictError.duplicate({ resource: 'Team', identifier: dto.name }))
       }
     }
 

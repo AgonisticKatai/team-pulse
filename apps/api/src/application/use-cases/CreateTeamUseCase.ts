@@ -1,8 +1,9 @@
 import { randomUUID } from 'node:crypto'
-import { DuplicatedError, type RepositoryError, type ValidationError } from '@domain/errors/index.js'
+import type { RepositoryError, ValidationError } from '@domain/errors/index.js'
 import { Team } from '@domain/models/Team.js'
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import type { CreateTeamDTO, TeamResponseDTO } from '@team-pulse/shared/dtos'
+import { ConflictError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
 
 /**
@@ -36,7 +37,7 @@ export class CreateTeamUseCase {
     return new CreateTeamUseCase({ teamRepository })
   }
 
-  async execute(dto: CreateTeamDTO): Promise<Result<TeamResponseDTO, DuplicatedError | RepositoryError | ValidationError>> {
+  async execute(dto: CreateTeamDTO): Promise<Result<TeamResponseDTO, ConflictError | RepositoryError | ValidationError>> {
     const findTeamResult = await this.teamRepository.findByName({ name: dto.name })
 
     if (!findTeamResult.ok) {
@@ -44,7 +45,7 @@ export class CreateTeamUseCase {
     }
 
     if (findTeamResult.value) {
-      return Err(DuplicatedError.create({ entityName: 'Team', identifier: dto.name }))
+      return Err(ConflictError.duplicate({ resource: 'Team', identifier: dto.name }))
     }
 
     const createTeamResult = Team.create({ city: dto.city, foundedYear: dto.foundedYear ?? undefined, id: randomUUID(), name: dto.name })

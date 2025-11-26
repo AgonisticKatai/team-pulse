@@ -362,6 +362,35 @@ Un sistema de gestión de errores que sea:
 - Mantener pattern actual de factories
 **Razón:** Determinar el patrón más apropiado según arquitectura del proyecto
 
+#### Unificar uso de expectErrorType en tests de Use Cases
+**Ubicación:** `apps/api/src/application/use-cases/*.test.ts`
+**Problema detectado (2025-11-26):** Inconsistencia en cómo se validan errores en tests de use cases:
+- ✅ **Patrón correcto:** `expectErrorType({ errorType: SomeError, result })` - valida tipo automáticamente y retorna error tipado
+- ❌ **Patrón inconsistente:** `expectError(await useCase.execute(...))` + `expect(error).toBeInstanceOf(SomeError)` - redundante porque hace validación manual
+
+**Archivos afectados:**
+- `GetTeamUseCase.test.ts` - usa `expectError()` + `toBeInstanceOf()`
+- `DeleteTeamUseCase.test.ts` - usa `expectError()` + `toBeInstanceOf()`
+- `CreateTeamUseCase.test.ts` - usa `expectError()` + `toBeInstanceOf()`
+- `UpdateTeamUseCase.test.ts` - mezcla ambos patrones
+- `CreateUserUseCase.test.ts` - usa `expectErrorType()` ✅
+- Otros tests pueden tener la misma inconsistencia
+
+**Solución propuesta:**
+1. Auditar TODOS los tests de use cases (*.test.ts)
+2. Reemplazar patrón `expectError()` + `toBeInstanceOf()` por `expectErrorType()`
+3. Eliminar líneas redundantes de `expect(error).toBeInstanceOf()`
+4. Verificar que todos los tests siguen pasando
+5. Documentar en TESTING.md el patrón correcto a usar
+
+**Razón:**
+- `expectErrorType` ya valida la instancia internamente, haciendo el `toBeInstanceOf()` redundante
+- Mayor consistencia en el codebase
+- Menos código, más expresivo
+- Type-safety mejorado (el error retornado está correctamente tipado)
+
+**Prioridad:** Media (no afecta funcionalidad, pero afecta calidad y mantenibilidad del código de tests)
+
 #### ⚠️ CRÍTICO: Use Cases violan convención de parámetros nombrados
 **Ubicación:** `apps/api/src/application/use-cases/` (TODOS los use cases)
 **Problema detectado (2025-11-26):** Todos los métodos `execute()` usan parámetros posicionales en lugar de parámetros nombrados

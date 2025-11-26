@@ -1,9 +1,10 @@
 import { randomUUID } from 'node:crypto'
-import { DuplicatedError, type RepositoryError, type ValidationError } from '@domain/errors/index.js'
+import type { RepositoryError, ValidationError } from '@domain/errors/index.js'
 import { User } from '@domain/models/User.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { IPasswordHasher } from '@domain/services/IPasswordHasher.js'
 import type { CreateUserDTO, UserResponseDTO } from '@team-pulse/shared/dtos'
+import { ConflictError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
 
 /**
@@ -38,7 +39,7 @@ export class CreateUserUseCase {
     return new CreateUserUseCase({ userRepository, passwordHasher })
   }
 
-  async execute(dto: CreateUserDTO): Promise<Result<UserResponseDTO, DuplicatedError | RepositoryError | ValidationError>> {
+  async execute(dto: CreateUserDTO): Promise<Result<UserResponseDTO, ConflictError | RepositoryError | ValidationError>> {
     const findUserResult = await this.userRepository.findByEmail({ email: dto.email })
 
     if (!findUserResult.ok) {
@@ -46,7 +47,7 @@ export class CreateUserUseCase {
     }
 
     if (findUserResult.value) {
-      return Err(DuplicatedError.create({ entityName: 'User', identifier: dto.email }))
+      return Err(ConflictError.duplicate({ resource: 'User', identifier: dto.email }))
     }
 
     const hashResult = await this.passwordHasher.hash({ password: dto.password })

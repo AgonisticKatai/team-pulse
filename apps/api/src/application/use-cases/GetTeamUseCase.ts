@@ -1,6 +1,7 @@
-import { NotFoundError, type RepositoryError } from '@domain/errors/index.js'
+import type { RepositoryError } from '@domain/errors/index.js'
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import type { TeamResponseDTO } from '@team-pulse/shared/dtos'
+import { NotFoundError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
 
 /**
@@ -27,7 +28,7 @@ export class GetTeamUseCase {
     }
 
     if (!findTeamResult.value) {
-      return Err(NotFoundError.create({ entityName: 'Team', identifier: id }))
+      return Err(NotFoundError.forResource({ resource: 'Team', identifier: id }))
     }
 
     return Ok(findTeamResult.value.toDTO())

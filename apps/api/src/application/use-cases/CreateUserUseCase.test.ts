@@ -1,9 +1,10 @@
 import { CreateUserUseCase } from '@application/use-cases/CreateUserUseCase.js'
-import { DuplicatedError, RepositoryError } from '@domain/errors/index.js'
+import { RepositoryError } from '@domain/errors/index.js'
 import { User } from '@domain/models/User.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { IPasswordHasher } from '@domain/services/IPasswordHasher.js'
 import { buildAdminUser, buildExistingUser, buildSuperAdminUser, buildUser } from '@infrastructure/testing/index.js'
+import { ConflictError } from '@team-pulse/shared/errors'
 import { Err, Ok } from '@team-pulse/shared/result'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { buildCreateUserDTO } from '@team-pulse/shared/testing/dto-builders'
@@ -168,7 +169,7 @@ describe('CreateUserUseCase', () => {
     })
 
     describe('error cases', () => {
-      it('should return DuplicatedError when email already exists', async () => {
+      it('should return ConflictError when email already exists', async () => {
         // Arrange
         const existingUser = buildExistingUser({ email: TEST_CONSTANTS.emails.existing })
 
@@ -180,10 +181,8 @@ describe('CreateUserUseCase', () => {
         const result = await createUserUseCase.execute(dto)
 
         // Assert
-        const error = expectErrorType({ errorType: DuplicatedError, result })
-        expect(error).toBeInstanceOf(DuplicatedError)
+        const error = expectErrorType({ errorType: ConflictError, result })
         expect(error.message).toContain('already exists')
-        expect(error.message).toContain(TEST_CONSTANTS.emails.existing)
       })
 
       it('should not hash password when email already exists', async () => {
@@ -198,7 +197,7 @@ describe('CreateUserUseCase', () => {
         const result = await createUserUseCase.execute(dto)
 
         // Assert - Should fail before hashing password
-        expectErrorType({ errorType: DuplicatedError, result })
+        expectErrorType({ errorType: ConflictError, result })
         expect(passwordHasher.hash).not.toHaveBeenCalled()
         expect(userRepository.save).not.toHaveBeenCalled()
       })

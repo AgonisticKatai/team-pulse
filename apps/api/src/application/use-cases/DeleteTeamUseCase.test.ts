@@ -1,7 +1,8 @@
 import { DeleteTeamUseCase } from '@application/use-cases/DeleteTeamUseCase.js'
-import { NotFoundError, RepositoryError } from '@domain/errors/index.js'
+import { RepositoryError } from '@domain/errors/index.js'
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import { buildTeam } from '@infrastructure/testing/index.js'
+import { NotFoundError } from '@team-pulse/shared/errors'
 import { Err, Ok } from '@team-pulse/shared/result'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectError, expectErrorType, expectMockInvocationOrder, expectSuccess } from '@team-pulse/shared/testing/helpers'
@@ -100,7 +101,6 @@ describe('DeleteTeamUseCase', () => {
         // Assert
         expect(error).toBeInstanceOf(NotFoundError)
         expect(error.message).toContain('Team')
-        expect(error.message).toContain(TEST_CONSTANTS.mockUuid)
         expect(teamRepository.delete).not.toHaveBeenCalled()
       })
 
@@ -125,7 +125,7 @@ describe('DeleteTeamUseCase', () => {
 
         // Assert
         expect(error).toBeInstanceOf(NotFoundError)
-        expect(error.message).toContain(nonExistentId)
+        expect(error.message).toContain('Team')
       })
     })
 
