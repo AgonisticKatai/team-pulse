@@ -55,7 +55,7 @@ team-pulse/
 
 ### Prerequisites
 
-- Node.js >= 25.1.0
+- Node.js >= 25.2.1
 - pnpm >= 11.6.2
 - Docker and Docker Compose (for local database)
   - **macOS users**: We recommend [OrbStack](https://orbstack.dev/) instead of Docker Desktop for better performance and lower resource usage (especially on Apple Silicon)
