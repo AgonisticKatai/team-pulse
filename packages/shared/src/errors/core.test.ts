@@ -445,6 +445,7 @@ describe('isIApplicationError', () => {
   it('should return true for plain objects with all required properties', () => {
     // Arrange
     const errorLike = {
+      name: 'ValidationError',
       message: TEST_CONSTANTS.errors.testError,
       code: ERROR_CODES.VALIDATION_ERROR,
       category: ERROR_CATEGORY.VALIDATION,

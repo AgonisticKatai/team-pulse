@@ -49,6 +49,12 @@ src/
 │   ├── BusinessRuleError.ts       # 422 - Business rule violations
 │   ├── ExternalServiceError.ts    # 502 - External service failures
 │   ├── InternalError.ts           # 500 - Internal server errors
+│   ├── handler/                   # Error handling infrastructure
+│   │   ├── error-handler.ts       # Framework-agnostic error handler
+│   │   ├── error-response.ts      # Safe error response generation
+│   │   ├── http-status-codes.ts   # HTTP status code mappings
+│   │   ├── logger.ts              # Logger interface and implementations
+│   │   └── index.ts
 │   └── index.ts
 ├── types/          # Core domain types
 │   └── index.ts
@@ -295,6 +301,301 @@ ERROR_CATEGORY.BUSINESS_RULE   // 'business_rule' (422)
 ERROR_CATEGORY.EXTERNAL        // 'external' (502)
 ERROR_CATEGORY.INTERNAL        // 'internal' (500)
 ```
+
+## Error Handler
+
+A framework-agnostic error handler that processes ApplicationError instances, maps them to HTTP responses, and logs them with appropriate severity levels.
+
+### Importing
+
+```typescript
+// Import error handler
+import { ErrorHandler } from '@team-pulse/shared/errors/handler'
+
+// Import logger interface
+import type { ILogger } from '@team-pulse/shared/errors/handler'
+
+// Import HTTP status codes
+import { HTTP_STATUS } from '@team-pulse/shared/errors/handler'
+
+// Import error response utilities
+import { createSafeErrorResponse } from '@team-pulse/shared/errors/handler'
+```
+
+### Basic Usage
+
+```typescript
+import { ErrorHandler, ConsoleLogger } from '@team-pulse/shared/errors/handler'
+import { ValidationError } from '@team-pulse/shared/errors'
+
+// Create error handler with logger
+const logger = new ConsoleLogger()
+const errorHandler = ErrorHandler.create({ logger })
+
+// Handle an error
+const error = ValidationError.forField({
+  field: 'email',
+  message: 'Invalid email format'
+})
+
+const result = errorHandler.handle({ error })
+
+console.log(result.statusCode)  // 400
+console.log(result.response)
+// {
+//   name: 'ValidationError',
+//   message: 'Invalid email format',
+//   code: 'VALIDATION_ERROR',
+//   category: 'validation',
+//   severity: 'low',
+//   timestamp: '2025-11-25T...',
+//   metadata: { field: 'email' }
+// }
+```
+
+### Logger Interface
+
+The error handler accepts any logger implementing the `ILogger` interface:
+
+```typescript
+interface ILogger {
+  error(params: { message: string; context?: LogContext }): void
+  warn(params: { message: string; context?: LogContext }): void
+  info(params: { message: string; context?: LogContext }): void
+  debug(params: { message: string; context?: LogContext }): void
+}
+```
+
+#### Built-in Loggers
+
+**ConsoleLogger** - Logs to console (development/testing):
+
+```typescript
+import { ConsoleLogger } from '@team-pulse/shared/errors/handler'
+
+const logger = new ConsoleLogger()
+const errorHandler = ErrorHandler.create({ logger })
+```
+
+**NoOpLogger** - No-op logger (testing):
+
+```typescript
+import { NoOpLogger } from '@team-pulse/shared/errors/handler'
+
+const logger = new NoOpLogger()
+const errorHandler = ErrorHandler.create({ logger })
+```
+
+#### Custom Logger
+
+Integrate with any logging library (Pino, Winston, etc.):
+
+```typescript
+import type { ILogger, LogContext } from '@team-pulse/shared/errors/handler'
+import pino from 'pino'
+
+class PinoLogger implements ILogger {
+  private logger = pino()
+
+  error({ message, context }: { message: string; context?: LogContext }): void {
+    this.logger.error(context, message)
+  }
+
+  warn({ message, context }: { message: string; context?: LogContext }): void {
+    this.logger.warn(context, message)
+  }
+
+  info({ message, context }: { message: string; context?: LogContext }): void {
+    this.logger.info(context, message)
+  }
+
+  debug({ message, context }: { message: string; context?: LogContext }): void {
+    this.logger.debug(context, message)
+  }
+}
+
+const errorHandler = ErrorHandler.create({ logger: new PinoLogger() })
+```
+
+### HTTP Status Code Mapping
+
+The handler automatically maps error categories to HTTP status codes:
+
+```typescript
+import { HTTP_STATUS, getHttpStatusForCategory } from '@team-pulse/shared/errors/handler'
+
+// Get status code for category
+const statusCode = getHttpStatusForCategory({ category: 'validation' })
+console.log(statusCode)  // 400
+
+// Direct access to status codes
+HTTP_STATUS.OK                       // 200
+HTTP_STATUS.BAD_REQUEST              // 400
+HTTP_STATUS.UNAUTHORIZED             // 401
+HTTP_STATUS.FORBIDDEN                // 403
+HTTP_STATUS.NOT_FOUND                // 404
+HTTP_STATUS.CONFLICT                 // 409
+HTTP_STATUS.UNPROCESSABLE_ENTITY     // 422
+HTTP_STATUS.INTERNAL_SERVER_ERROR    // 500
+HTTP_STATUS.BAD_GATEWAY              // 502
+```
+
+Category to status mapping:
+
+| Category         | HTTP Status | Code |
+|-----------------|-------------|------|
+| validation      | 400         | Bad Request |
+| authentication  | 401         | Unauthorized |
+| authorization   | 403         | Forbidden |
+| not_found       | 404         | Not Found |
+| conflict        | 409         | Conflict |
+| business_rule   | 422         | Unprocessable Entity |
+| external        | 502         | Bad Gateway |
+| internal        | 500         | Internal Server Error |
+
+### Safe Error Responses
+
+The handler distinguishes between **operational** and **non-operational** errors:
+
+#### Operational Errors (isOperational: true)
+
+Safe to expose to clients - returns full error details:
+
+```typescript
+const error = ValidationError.forField({
+  field: 'email',
+  message: 'Invalid email format'
+})
+
+const result = errorHandler.handle({ error })
+
+// Full details exposed
+console.log(result.response)
+// {
+//   name: 'ValidationError',
+//   message: 'Invalid email format',
+//   code: 'VALIDATION_ERROR',
+//   category: 'validation',
+//   severity: 'low',
+//   timestamp: '2025-11-25T...',
+//   metadata: { field: 'email' }
+// }
+```
+
+#### Non-Operational Errors (isOperational: false)
+
+Programming errors - hides internal details from clients:
+
+```typescript
+const error = InternalError.create({
+  message: 'Database connection failed at line 42',
+  metadata: {
+    connectionString: 'postgresql://...',
+    stackTrace: '...'
+  }
+})
+
+const result = errorHandler.handle({ error })
+
+// Sanitized response - internal details hidden
+console.log(result.response)
+// {
+//   name: 'InternalError',
+//   message: 'An unexpected error occurred',
+//   code: 'INTERNAL_ERROR',
+//   category: 'internal',
+//   severity: 'critical',
+//   timestamp: '2025-11-25T...'
+//   // NO metadata exposed!
+// }
+```
+
+### Structured Logging
+
+The handler logs errors based on their severity:
+
+| Severity  | Log Level |
+|-----------|-----------|
+| LOW       | info      |
+| MEDIUM    | warn      |
+| HIGH      | error     |
+| CRITICAL  | error     |
+
+```typescript
+// LOW severity -> logged as INFO
+const validationError = ValidationError.create({ message: 'Invalid input' })
+errorHandler.handle({ error: validationError })
+// logs: INFO with context
+
+// MEDIUM severity -> logged as WARN
+const authError = AuthenticationError.invalidCredentials()
+errorHandler.handle({ error: authError })
+// logs: WARN with context
+
+// HIGH severity -> logged as ERROR
+const externalError = ExternalServiceError.create({ message: 'Service down' })
+errorHandler.handle({ error: externalError })
+// logs: ERROR with context
+
+// CRITICAL severity -> logged as ERROR
+const internalError = InternalError.create({ message: 'System failure' })
+errorHandler.handle({ error: internalError })
+// logs: ERROR with context
+// PLUS additional warning about non-operational error
+```
+
+### Integration with Fastify
+
+```typescript
+import Fastify from 'fastify'
+import { ErrorHandler, ConsoleLogger } from '@team-pulse/shared/errors/handler'
+import { ValidationError } from '@team-pulse/shared/errors'
+
+const fastify = Fastify()
+const errorHandler = ErrorHandler.create({ logger: new ConsoleLogger() })
+
+// Error handler middleware
+fastify.setErrorHandler((error, request, reply) => {
+  const result = errorHandler.handle({ error })
+
+  reply.status(result.statusCode).send(result.response)
+})
+
+// Route handler
+fastify.post('/users', async (request, reply) => {
+  // Validation error
+  throw ValidationError.forField({
+    field: 'email',
+    message: 'Invalid email'
+  })
+})
+```
+
+### Unknown Error Handling
+
+The handler automatically converts unknown errors to `InternalError`:
+
+```typescript
+// Standard Error
+const stdError = new Error('Something went wrong')
+const result = errorHandler.handle({ error: stdError })
+// Converted to InternalError with sanitized message
+
+// String error
+const strError = 'Unexpected failure'
+const result2 = errorHandler.handle({ error: strError })
+// Converted to InternalError
+
+// Null/undefined
+const result3 = errorHandler.handle({ error: null })
+// Converted to InternalError
+
+// Unknown object
+const result4 = errorHandler.handle({ error: { foo: 'bar' } })
+// Converted to InternalError
+```
+
+All unknown errors are logged with full context for debugging while returning safe responses to clients.
 
 ## Development
 

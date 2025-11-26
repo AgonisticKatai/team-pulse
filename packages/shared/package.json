@@ -26,6 +26,10 @@
       "import": "./dist/errors/index.js",
       "types": "./dist/errors/index.d.ts"
     },
+    "./errors/handler": {
+      "import": "./dist/errors/handler/index.js",
+      "types": "./dist/errors/handler/index.d.ts"
+    },
     "./testing/helpers": {
       "import": "./dist/testing/helpers.js",
       "types": "./dist/testing/helpers.d.ts"

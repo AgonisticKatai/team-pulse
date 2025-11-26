@@ -85,6 +85,9 @@ export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES]
  * All custom error classes should implement this interface.
  */
 export interface IApplicationError {
+  /** Error name (e.g., 'ValidationError', 'NotFoundError') */
+  readonly name: string
+
   /** Unique error code for identification (e.g., 'VALIDATION_ERROR', 'AUTH_FAILED') */
   readonly code: string
 
@@ -254,6 +257,7 @@ export function isIApplicationError(error: unknown): error is IApplicationError 
   return (
     typeof error === 'object' &&
     error !== null &&
+    'name' in error &&
     'message' in error &&
     'code' in error &&
     'category' in error &&

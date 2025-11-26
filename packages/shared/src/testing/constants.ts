@@ -141,6 +141,27 @@ export const TEST_CONSTANTS = {
       operation: 'test operation',
       module: 'test module',
     },
+    handler: {
+      logMessages: {
+        errorLogged: 'Test error logged',
+        warningLogged: 'Test warning logged',
+        infoLogged: 'Test info logged',
+        debugLogged: 'Test debug logged',
+      },
+      httpStatusCodes: {
+        ok: 200,
+        badRequest: 400,
+        unauthorized: 401,
+        forbidden: 403,
+        notFound: 404,
+        conflict: 409,
+        unprocessableEntity: 422,
+        internalServerError: 500,
+        badGateway: 502,
+      },
+      unexpectedError: 'An unexpected error occurred',
+      originalError: 'Original error message',
+    },
   },
 
   // Mock IDs
