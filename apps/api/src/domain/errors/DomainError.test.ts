@@ -1,4 +1,6 @@
 import { DomainError } from '@domain/errors/DomainError.js'
+import { ERROR_CATEGORY, ERROR_SEVERITY } from '@team-pulse/shared/errors'
+import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { describe, expect, it } from 'vitest'
 
 /**
@@ -10,12 +12,12 @@ class TestDomainError extends DomainError {
   readonly code = 'TEST_ERROR'
   readonly isOperational = true
 
-  private constructor(message: string) {
-    super(message)
+  private constructor(message: string, metadata?: Record<string, unknown>) {
+    super(message, metadata)
   }
 
-  static create({ message }: { message: string }): TestDomainError {
-    return new TestDomainError(message)
+  static create({ message, metadata }: { message: string; metadata?: Record<string, unknown> }): TestDomainError {
+    return new TestDomainError(message, metadata)
   }
 }
 
@@ -27,12 +29,12 @@ class NonOperationalTestError extends DomainError {
   readonly code = 'NON_OPERATIONAL_ERROR'
   readonly isOperational = false
 
-  private constructor(message: string) {
-    super(message)
+  private constructor(message: string, metadata?: Record<string, unknown>) {
+    super(message, metadata)
   }
 
-  static create({ message }: { message: string }): NonOperationalTestError {
-    return new NonOperationalTestError(message)
+  static create({ message, metadata }: { message: string; metadata?: Record<string, unknown> }): NonOperationalTestError {
+    return new NonOperationalTestError(message, metadata)
   }
 }
 
@@ -332,7 +334,7 @@ describe('DomainError', () => {
   describe('Different error code formats', () => {
     it('should support standard error code format', () => {
       // Arrange & Act
-      const error = TestDomainError.create({ message: 'Test' })
+      const error = TestDomainError.create({ message: TEST_CONSTANTS.errors.testError })
 
       // Assert
       expect(error.code).toBe('TEST_ERROR')
@@ -341,11 +343,162 @@ describe('DomainError', () => {
 
     it('should support different error code format in different implementation', () => {
       // Arrange & Act
-      const error = NonOperationalTestError.create({ message: 'Test' })
+      const error = NonOperationalTestError.create({ message: TEST_CONSTANTS.errors.testError })
 
       // Assert
       expect(error.code).toBe('NON_OPERATIONAL_ERROR')
       expect(error.code).toMatch(/^[A-Z_]+$/)
+    })
+  })
+
+  describe('IApplicationError implementation', () => {
+    describe('category property', () => {
+      it('should have default category of validation', () => {
+        // Arrange & Act
+        const error = TestDomainError.create({ message: TEST_CONSTANTS.errors.testError })
+
+        // Assert
+        expect(error.category).toBe(ERROR_CATEGORY.VALIDATION)
+      })
+
+      it('should have readonly category property', () => {
+        // Arrange
+        const error = TestDomainError.create({ message: TEST_CONSTANTS.errors.testError })
+
+        // Act & Assert
+        expect(error.category).toBe(ERROR_CATEGORY.VALIDATION)
+        expect(error.category).toBe(ERROR_CATEGORY.VALIDATION)
+      })
+    })
+
+    describe('severity property', () => {
+      it('should have default severity of low', () => {
+        // Arrange & Act
+        const error = TestDomainError.create({ message: TEST_CONSTANTS.errors.testError })
+
+        // Assert
+        expect(error.severity).toBe(ERROR_SEVERITY.LOW)
+      })
+
+      it('should have readonly severity property', () => {
+        // Arrange
+        const error = TestDomainError.create({ message: TEST_CONSTANTS.errors.testError })
+
+        // Act & Assert
+        expect(error.severity).toBe(ERROR_SEVERITY.LOW)
+        expect(error.severity).toBe(ERROR_SEVERITY.LOW)
+      })
+    })
+
+    describe('timestamp property', () => {
+      it('should have timestamp property', () => {
+        // Arrange & Act
+        const error = TestDomainError.create({ message: TEST_CONSTANTS.errors.testError })
+
+        // Assert
+        expect(error.timestamp).toBeInstanceOf(Date)
+      })
+
+      it('should set timestamp to current time', () => {
+        // Arrange
+        const beforeCreation = new Date()
+
+        // Act
+        const error = TestDomainError.create({ message: TEST_CONSTANTS.errors.testError })
+        const afterCreation = new Date()
+
+        // Assert
+        expect(error.timestamp.getTime()).toBeGreaterThanOrEqual(beforeCreation.getTime())
+        expect(error.timestamp.getTime()).toBeLessThanOrEqual(afterCreation.getTime())
+      })
+
+      it('should have readonly timestamp property', () => {
+        // Arrange
+        const error = TestDomainError.create({ message: TEST_CONSTANTS.errors.testError })
+        const originalTimestamp = error.timestamp
+
+        // Act & Assert
+        expect(error.timestamp).toBe(originalTimestamp)
+        expect(error.timestamp.getTime()).toBe(originalTimestamp.getTime())
+      })
+    })
+
+    describe('metadata property', () => {
+      it('should be undefined when no metadata provided', () => {
+        // Arrange & Act
+        const error = TestDomainError.create({ message: TEST_CONSTANTS.errors.testError })
+
+        // Assert
+        expect(error.metadata).toBeUndefined()
+      })
+    })
+
+    describe('toJSON method', () => {
+      it('should serialize error to JSON', () => {
+        // Arrange
+        const message = TEST_CONSTANTS.errors.resourceNotFound
+        const error = TestDomainError.create({ message })
+
+        // Act
+        const json = error.toJSON()
+
+        // Assert
+        expect(json).toBeDefined()
+        expect(typeof json).toBe('object')
+      })
+
+      it('should include all required properties', () => {
+        // Arrange
+        const message = TEST_CONSTANTS.errors.resourceNotFound
+        const error = TestDomainError.create({ message })
+
+        // Act
+        const json = error.toJSON() as Record<string, unknown>
+
+        // Assert
+        expect(json.name).toBe('TestDomainError')
+        expect(json.code).toBe('TEST_ERROR')
+        expect(json.message).toBe(message)
+        expect(json.category).toBe(ERROR_CATEGORY.VALIDATION)
+        expect(json.severity).toBe(ERROR_SEVERITY.LOW)
+        expect(json.isOperational).toBe(true)
+        expect(json.stack).toBeDefined()
+      })
+
+      it('should serialize timestamp as ISO string', () => {
+        // Arrange
+        const error = TestDomainError.create({ message: TEST_CONSTANTS.errors.testError })
+
+        // Act
+        const json = error.toJSON() as Record<string, unknown>
+
+        // Assert
+        expect(typeof json.timestamp).toBe('string')
+        expect(json.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)
+      })
+
+      it('should include metadata when present', () => {
+        // Arrange
+        const metadata = { action: 'delete', userId: TEST_CONSTANTS.errorTestData.identifiers.userId }
+        const error = TestDomainError.create({ message: TEST_CONSTANTS.errors.testError, metadata })
+
+        // Act
+        const json = error.toJSON() as Record<string, unknown>
+
+        // Assert
+        expect(json.metadata).toEqual(metadata)
+      })
+
+      it('should handle errors without metadata', () => {
+        // Arrange
+        const error = TestDomainError.create({ message: TEST_CONSTANTS.errors.testError })
+
+        // Act
+        const json = error.toJSON() as Record<string, unknown>
+
+        // Assert
+        expect(json.metadata).toBeUndefined()
+      })
     })
   })
 

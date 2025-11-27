@@ -233,63 +233,6 @@ describe('ApplicationError', () => {
     })
   })
 
-  describe('withContext', () => {
-    it('should return new instance with merged metadata', () => {
-      // Arrange
-      const originalMetadata = { [TEST_CONSTANTS.errorTestData.fields.field]: TEST_CONSTANTS.errorTestData.fields.email }
-      const error = new TestApplicationError({
-        message: TEST_CONSTANTS.errors.testError,
-        metadata: originalMetadata,
-      })
-      const additionalContext = {
-        [TEST_CONSTANTS.errorTestData.context.operation]: TEST_CONSTANTS.errorTestData.context.module,
-      }
-
-      // Act
-      const errorWithContext = error.withContext({ ctx: additionalContext })
-
-      // Assert
-      expect(errorWithContext).toBeInstanceOf(TestApplicationError)
-      expect(errorWithContext).not.toBe(error) // Should be a new instance
-      expect(errorWithContext.metadata).toEqual({
-        ...originalMetadata,
-        ...additionalContext,
-      })
-      expect(errorWithContext.message).toBe(error.message)
-      expect(errorWithContext.severity).toBe(error.severity)
-    })
-
-    it('should create metadata when original error has none', () => {
-      // Arrange
-      const error = new TestApplicationError({
-        message: TEST_CONSTANTS.errors.testError,
-      })
-      const context = {
-        [TEST_CONSTANTS.errorTestData.context.operation]: TEST_CONSTANTS.errorTestData.context.module,
-      }
-
-      // Act
-      const errorWithContext = error.withContext({ ctx: context })
-
-      // Assert
-      expect(errorWithContext.metadata).toEqual(context)
-    })
-
-    it('should override metadata properties with same key', () => {
-      // Arrange
-      const error = new TestApplicationError({
-        message: TEST_CONSTANTS.errors.testError,
-        metadata: { key: 'original' },
-      })
-
-      // Act
-      const errorWithContext = error.withContext({ ctx: { key: 'updated' } })
-
-      // Assert
-      expect(errorWithContext.metadata).toEqual({ key: 'updated' })
-    })
-  })
-
   describe('toJSON', () => {
     it('should serialize error to JSON with all properties', () => {
       // Arrange

@@ -1,5 +1,6 @@
 import { DomainError } from '@domain/errors/DomainError.js'
 import { ValidationError } from '@domain/errors/ValidationError.js'
+import { ERROR_CATEGORY, ERROR_SEVERITY } from '@team-pulse/shared/errors'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { describe, expect, it } from 'vitest'
 
@@ -502,6 +503,262 @@ describe('ValidationError', () => {
       // Assert
       expect(error).toBeDefined()
       expect(error.field).toBe(field)
+    })
+  })
+
+  describe('IApplicationError implementation', () => {
+    describe('category property', () => {
+      it('should have default category of validation inherited from DomainError', () => {
+        // Arrange & Act
+        const error = ValidationError.create({ message: TEST_CONSTANTS.errors.testError })
+
+        // Assert
+        expect(error.category).toBe(ERROR_CATEGORY.VALIDATION)
+      })
+
+      it('should maintain validation category when created with forField', () => {
+        // Arrange & Act
+        const error = ValidationError.forField({ field: 'email', message: TEST_CONSTANTS.errors.testError })
+
+        // Assert
+        expect(error.category).toBe(ERROR_CATEGORY.VALIDATION)
+      })
+
+      it('should maintain validation category when created from Zod error', () => {
+        // Arrange
+        const zodError = {
+          errors: [
+            {
+              message: TEST_CONSTANTS.errors.testError,
+              path: ['email'],
+            },
+          ],
+        }
+
+        // Act
+        const error = ValidationError.fromZodError(zodError)
+
+        // Assert
+        expect(error.category).toBe(ERROR_CATEGORY.VALIDATION)
+      })
+    })
+
+    describe('severity property', () => {
+      it('should have default severity of low inherited from DomainError', () => {
+        // Arrange & Act
+        const error = ValidationError.create({ message: TEST_CONSTANTS.errors.testError })
+
+        // Assert
+        expect(error.severity).toBe(ERROR_SEVERITY.LOW)
+      })
+
+      it('should maintain low severity when created with forField', () => {
+        // Arrange & Act
+        const error = ValidationError.forField({ field: 'email', message: TEST_CONSTANTS.errors.testError })
+
+        // Assert
+        expect(error.severity).toBe(ERROR_SEVERITY.LOW)
+      })
+
+      it('should maintain low severity when created from Zod error', () => {
+        // Arrange
+        const zodError = {
+          errors: [
+            {
+              message: TEST_CONSTANTS.errors.testError,
+              path: ['email'],
+            },
+          ],
+        }
+
+        // Act
+        const error = ValidationError.fromZodError(zodError)
+
+        // Assert
+        expect(error.severity).toBe(ERROR_SEVERITY.LOW)
+      })
+    })
+
+    describe('timestamp property', () => {
+      it('should have timestamp property', () => {
+        // Arrange & Act
+        const error = ValidationError.create({ message: TEST_CONSTANTS.errors.testError })
+
+        // Assert
+        expect(error.timestamp).toBeInstanceOf(Date)
+      })
+
+      it('should set timestamp to current time', () => {
+        // Arrange
+        const beforeCreation = new Date()
+
+        // Act
+        const error = ValidationError.create({ message: TEST_CONSTANTS.errors.testError })
+
+        // Assert
+        const afterCreation = new Date()
+        expect(error.timestamp.getTime()).toBeGreaterThanOrEqual(beforeCreation.getTime())
+        expect(error.timestamp.getTime()).toBeLessThanOrEqual(afterCreation.getTime())
+      })
+
+      it('should have unique timestamp for each error instance', () => {
+        // Arrange & Act
+        const error1 = ValidationError.create({ message: TEST_CONSTANTS.errors.testError })
+        const error2 = ValidationError.create({ message: TEST_CONSTANTS.errors.testError })
+
+        // Assert
+        expect(error1.timestamp).not.toBe(error2.timestamp)
+      })
+    })
+
+    describe('metadata property', () => {
+      it('should include field in metadata when provided', () => {
+        // Arrange & Act
+        const error = ValidationError.create({ field: 'email', message: TEST_CONSTANTS.errors.testError })
+
+        // Assert
+        expect(error.metadata).toBeDefined()
+        expect(error.metadata?.field).toBe('email')
+      })
+
+      it('should include details in metadata when provided', () => {
+        // Arrange
+        const details = { maxLength: 255, minLength: 5 }
+
+        // Act
+        const error = ValidationError.create({
+          details,
+          field: 'email',
+          message: TEST_CONSTANTS.errors.testError,
+        })
+
+        // Assert
+        expect(error.metadata).toBeDefined()
+        expect(error.metadata?.details).toEqual(details)
+      })
+
+      it('should include both field and details in metadata', () => {
+        // Arrange
+        const field = 'email'
+        const details = { maxLength: 255, minLength: 5 }
+
+        // Act
+        const error = ValidationError.create({
+          details,
+          field,
+          message: TEST_CONSTANTS.errors.testError,
+        })
+
+        // Assert
+        expect(error.metadata).toBeDefined()
+        expect(error.metadata?.field).toBe(field)
+        expect(error.metadata?.details).toEqual(details)
+      })
+
+      it('should have metadata when created with forField', () => {
+        // Arrange & Act
+        const error = ValidationError.forField({ field: 'email', message: TEST_CONSTANTS.errors.testError })
+
+        // Assert
+        expect(error.metadata).toBeDefined()
+        expect(error.metadata?.field).toBe('email')
+      })
+
+      it('should include errors in metadata when created from Zod error', () => {
+        // Arrange
+        const zodError = {
+          errors: [
+            {
+              message: TEST_CONSTANTS.errors.testError,
+              path: ['email'],
+            },
+          ],
+        }
+
+        // Act
+        const error = ValidationError.fromZodError(zodError)
+
+        // Assert
+        expect(error.metadata).toBeDefined()
+        expect(error.metadata?.field).toBe('email')
+        expect(error.metadata?.details).toEqual({ errors: zodError.errors })
+      })
+    })
+
+    describe('toJSON method', () => {
+      it('should serialize error to JSON', () => {
+        // Arrange
+        const error = ValidationError.create({ message: TEST_CONSTANTS.errors.testError })
+
+        // Act
+        const json = error.toJSON()
+
+        // Assert
+        expect(json).toBeDefined()
+        expect(typeof json).toBe('object')
+      })
+
+      it('should include all required IApplicationError properties', () => {
+        // Arrange
+        const error = ValidationError.create({ message: TEST_CONSTANTS.errors.testError })
+
+        // Act
+        const json = error.toJSON() as Record<string, unknown>
+
+        // Assert
+        expect(json.name).toBe('ValidationError')
+        expect(json.code).toBe('VALIDATION_ERROR')
+        expect(json.message).toBe(TEST_CONSTANTS.errors.testError)
+        expect(json.category).toBe(ERROR_CATEGORY.VALIDATION)
+        expect(json.severity).toBe(ERROR_SEVERITY.LOW)
+        expect(json.timestamp).toBeDefined()
+        expect(json.isOperational).toBe(true)
+        expect(json.stack).toBeDefined()
+      })
+
+      it('should include metadata in JSON output', () => {
+        // Arrange
+        const error = ValidationError.create({
+          details: { maxLength: 255 },
+          field: 'email',
+          message: TEST_CONSTANTS.errors.testError,
+        })
+
+        // Act
+        const json = error.toJSON() as Record<string, unknown>
+
+        // Assert
+        expect(json.metadata).toBeDefined()
+        expect(json.metadata).toEqual({
+          details: { maxLength: 255 },
+          field: 'email',
+        })
+      })
+
+      it('should serialize timestamp as ISO string', () => {
+        // Arrange
+        const error = ValidationError.create({ message: TEST_CONSTANTS.errors.testError })
+
+        // Act
+        const json = error.toJSON() as Record<string, unknown>
+
+        // Assert
+        expect(typeof json.timestamp).toBe('string')
+        expect(json.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)
+      })
+
+      it('should include stack trace in JSON output', () => {
+        // Arrange
+        const error = ValidationError.create({ message: TEST_CONSTANTS.errors.testError })
+
+        // Act
+        const json = error.toJSON() as Record<string, unknown>
+
+        // Assert
+        expect(json.stack).toBeDefined()
+        expect(typeof json.stack).toBe('string')
+        expect(json.stack).toContain('ValidationError')
+      })
     })
   })
 })

@@ -1,5 +1,6 @@
 import { DomainError } from '@domain/errors/DomainError.js'
 import { RepositoryError } from '@domain/errors/RepositoryError.js'
+import { ERROR_CATEGORY, ERROR_SEVERITY } from '@team-pulse/shared/errors'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { describe, expect, it } from 'vitest'
 
@@ -612,6 +613,277 @@ describe('RepositoryError', () => {
       expect(errorFromCreate.operation).toBe(errorFromForOperation.operation)
       expect(errorFromCreate.cause).toBe(errorFromForOperation.cause)
       expect(errorFromCreate.code).toBe(errorFromForOperation.code)
+    })
+  })
+
+  describe('IApplicationError implementation', () => {
+    describe('category property', () => {
+      it('should have category set to INTERNAL', () => {
+        // Arrange & Act
+        const error = RepositoryError.create({ message: TEST_CONSTANTS.errors.databaseConnectionLost })
+
+        // Assert
+        expect(error.category).toBe(ERROR_CATEGORY.INTERNAL)
+      })
+
+      it('should maintain INTERNAL category when created with forOperation', () => {
+        // Arrange & Act
+        const error = RepositoryError.forOperation({
+          message: TEST_CONSTANTS.errors.databaseQueryTimeout,
+          operation: 'save',
+        })
+
+        // Assert
+        expect(error.category).toBe(ERROR_CATEGORY.INTERNAL)
+      })
+
+      it('should maintain INTERNAL category when created with cause', () => {
+        // Arrange
+        const cause = new Error('Database connection failed')
+
+        // Act
+        const error = RepositoryError.create({ cause, message: TEST_CONSTANTS.errors.databaseConnectionLost })
+
+        // Assert
+        expect(error.category).toBe(ERROR_CATEGORY.INTERNAL)
+      })
+    })
+
+    describe('severity property', () => {
+      it('should have severity set to HIGH', () => {
+        // Arrange & Act
+        const error = RepositoryError.create({ message: TEST_CONSTANTS.errors.databaseConnectionLost })
+
+        // Assert
+        expect(error.severity).toBe(ERROR_SEVERITY.HIGH)
+      })
+
+      it('should maintain HIGH severity when created with forOperation', () => {
+        // Arrange & Act
+        const error = RepositoryError.forOperation({
+          message: TEST_CONSTANTS.errors.databaseQueryTimeout,
+          operation: 'findAll',
+        })
+
+        // Assert
+        expect(error.severity).toBe(ERROR_SEVERITY.HIGH)
+      })
+
+      it('should maintain HIGH severity when created with cause', () => {
+        // Arrange
+        const cause = new Error('Network timeout')
+
+        // Act
+        const error = RepositoryError.create({ cause, message: TEST_CONSTANTS.errors.databaseConnectionLost })
+
+        // Assert
+        expect(error.severity).toBe(ERROR_SEVERITY.HIGH)
+      })
+    })
+
+    describe('timestamp property', () => {
+      it('should have timestamp property', () => {
+        // Arrange & Act
+        const error = RepositoryError.create({ message: TEST_CONSTANTS.errors.databaseConnectionLost })
+
+        // Assert
+        expect(error.timestamp).toBeInstanceOf(Date)
+      })
+
+      it('should set timestamp to current time', () => {
+        // Arrange
+        const beforeCreation = new Date()
+
+        // Act
+        const error = RepositoryError.create({ message: TEST_CONSTANTS.errors.databaseConnectionLost })
+
+        // Assert
+        const afterCreation = new Date()
+        expect(error.timestamp.getTime()).toBeGreaterThanOrEqual(beforeCreation.getTime())
+        expect(error.timestamp.getTime()).toBeLessThanOrEqual(afterCreation.getTime())
+      })
+
+      it('should have unique timestamp for each error instance', () => {
+        // Arrange & Act
+        const error1 = RepositoryError.create({ message: TEST_CONSTANTS.errors.databaseConnectionLost })
+        const error2 = RepositoryError.create({ message: TEST_CONSTANTS.errors.databaseConnectionLost })
+
+        // Assert
+        expect(error1.timestamp).not.toBe(error2.timestamp)
+      })
+    })
+
+    describe('metadata property', () => {
+      it('should include operation in metadata when provided', () => {
+        // Arrange & Act
+        const error = RepositoryError.create({
+          message: TEST_CONSTANTS.errors.databaseConnectionLost,
+          operation: 'save',
+        })
+
+        // Assert
+        expect(error.metadata).toBeDefined()
+        expect(error.metadata?.operation).toBe('save')
+      })
+
+      it('should include cause message in metadata when provided', () => {
+        // Arrange
+        const cause = new Error('Network timeout')
+
+        // Act
+        const error = RepositoryError.create({ cause, message: TEST_CONSTANTS.errors.databaseConnectionLost })
+
+        // Assert
+        expect(error.metadata).toBeDefined()
+        expect(error.metadata?.cause).toBe('Network timeout')
+      })
+
+      it('should include both operation and cause in metadata', () => {
+        // Arrange
+        const operation = 'findById'
+        const cause = new Error('Connection refused')
+
+        // Act
+        const error = RepositoryError.create({
+          cause,
+          message: TEST_CONSTANTS.errors.databaseConnectionLost,
+          operation,
+        })
+
+        // Assert
+        expect(error.metadata).toBeDefined()
+        expect(error.metadata?.operation).toBe(operation)
+        expect(error.metadata?.cause).toBe('Connection refused')
+      })
+
+      it('should have metadata when created with forOperation', () => {
+        // Arrange & Act
+        const error = RepositoryError.forOperation({
+          message: TEST_CONSTANTS.errors.databaseQueryTimeout,
+          operation: 'delete',
+        })
+
+        // Assert
+        expect(error.metadata).toBeDefined()
+        expect(error.metadata?.operation).toBe('delete')
+      })
+
+      it('should include cause message when created with forOperation and cause', () => {
+        // Arrange
+        const cause = new Error('Query timeout exceeded')
+
+        // Act
+        const error = RepositoryError.forOperation({
+          cause,
+          message: TEST_CONSTANTS.errors.databaseQueryTimeout,
+          operation: 'findAll',
+        })
+
+        // Assert
+        expect(error.metadata).toBeDefined()
+        expect(error.metadata?.operation).toBe('findAll')
+        expect(error.metadata?.cause).toBe('Query timeout exceeded')
+      })
+    })
+
+    describe('toJSON method', () => {
+      it('should serialize error to JSON', () => {
+        // Arrange
+        const error = RepositoryError.create({ message: TEST_CONSTANTS.errors.databaseConnectionLost })
+
+        // Act
+        const json = error.toJSON()
+
+        // Assert
+        expect(json).toBeDefined()
+        expect(typeof json).toBe('object')
+      })
+
+      it('should include all required IApplicationError properties', () => {
+        // Arrange
+        const error = RepositoryError.create({ message: TEST_CONSTANTS.errors.databaseConnectionLost })
+
+        // Act
+        const json = error.toJSON() as Record<string, unknown>
+
+        // Assert
+        expect(json.name).toBe('RepositoryError')
+        expect(json.code).toBe('REPOSITORY_ERROR')
+        expect(json.message).toBe(TEST_CONSTANTS.errors.databaseConnectionLost)
+        expect(json.category).toBe(ERROR_CATEGORY.INTERNAL)
+        expect(json.severity).toBe(ERROR_SEVERITY.HIGH)
+        expect(json.timestamp).toBeDefined()
+        expect(json.isOperational).toBe(true)
+        expect(json.stack).toBeDefined()
+      })
+
+      it('should include metadata in JSON output', () => {
+        // Arrange
+        const cause = new Error('Connection timeout')
+        const error = RepositoryError.create({
+          cause,
+          message: TEST_CONSTANTS.errors.databaseConnectionLost,
+          operation: 'save',
+        })
+
+        // Act
+        const json = error.toJSON() as Record<string, unknown>
+
+        // Assert
+        expect(json.metadata).toBeDefined()
+        expect(json.metadata).toEqual({
+          cause: 'Connection timeout',
+          operation: 'save',
+        })
+      })
+
+      it('should serialize timestamp as ISO string', () => {
+        // Arrange
+        const error = RepositoryError.create({ message: TEST_CONSTANTS.errors.databaseConnectionLost })
+
+        // Act
+        const json = error.toJSON() as Record<string, unknown>
+
+        // Assert
+        expect(typeof json.timestamp).toBe('string')
+        expect(json.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)
+      })
+
+      it('should include stack trace in JSON output', () => {
+        // Arrange
+        const error = RepositoryError.create({ message: TEST_CONSTANTS.errors.databaseConnectionLost })
+
+        // Act
+        const json = error.toJSON() as Record<string, unknown>
+
+        // Assert
+        expect(json.stack).toBeDefined()
+        expect(typeof json.stack).toBe('string')
+        expect(json.stack).toContain('RepositoryError')
+      })
+
+      it('should serialize error created with forOperation', () => {
+        // Arrange
+        const cause = new Error('Query timeout')
+        const error = RepositoryError.forOperation({
+          cause,
+          message: TEST_CONSTANTS.errors.databaseQueryTimeout,
+          operation: 'findAll',
+        })
+
+        // Act
+        const json = error.toJSON() as Record<string, unknown>
+
+        // Assert
+        expect(json.name).toBe('RepositoryError')
+        expect(json.code).toBe('REPOSITORY_ERROR')
+        expect(json.category).toBe(ERROR_CATEGORY.INTERNAL)
+        expect(json.severity).toBe(ERROR_SEVERITY.HIGH)
+        expect(json.metadata).toEqual({
+          cause: 'Query timeout',
+          operation: 'findAll',
+        })
+      })
     })
   })
 })

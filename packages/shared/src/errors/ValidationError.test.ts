@@ -264,19 +264,4 @@ describe('ValidationError', () => {
       })
     })
   })
-
-  describe('withContext', () => {
-    it('should add context to error', () => {
-      // Arrange
-      const error = ValidationError.create({ message: TEST_CONSTANTS.errors.validationFailed })
-      const context = { [TEST_CONSTANTS.errorTestData.context.operation]: TEST_CONSTANTS.errorTestData.context.module }
-
-      // Act
-      const errorWithContext = error.withContext({ ctx: context })
-
-      // Assert
-      expect(errorWithContext).toBeInstanceOf(ValidationError)
-      expect(errorWithContext.metadata).toEqual(context)
-    })
-  })
 })

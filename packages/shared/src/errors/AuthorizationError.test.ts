@@ -164,19 +164,4 @@ describe('AuthorizationError', () => {
       })
     })
   })
-
-  describe('withContext', () => {
-    it('should add context to error', () => {
-      // Arrange
-      const error = AuthorizationError.create({ message: TEST_CONSTANTS.errors.insufficientPermissions })
-      const context = { [TEST_CONSTANTS.errorTestData.context.operation]: TEST_CONSTANTS.errorTestData.context.module }
-
-      // Act
-      const errorWithContext = error.withContext({ ctx: context })
-
-      // Assert
-      expect(errorWithContext).toBeInstanceOf(AuthorizationError)
-      expect(errorWithContext.metadata).toEqual(context)
-    })
-  })
 })

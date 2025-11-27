@@ -19,7 +19,10 @@ export class ValidationError extends DomainError {
   public readonly details?: Record<string, unknown>
 
   private constructor({ message, field, details }: { message: string; field?: string; details?: Record<string, unknown> }) {
-    super(message)
+    super(message, {
+      field,
+      details,
+    })
     this.field = field
     this.details = details
   }

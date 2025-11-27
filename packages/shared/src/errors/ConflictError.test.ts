@@ -151,19 +151,4 @@ describe('ConflictError', () => {
       })
     })
   })
-
-  describe('withContext', () => {
-    it('should add context to error', () => {
-      // Arrange
-      const error = ConflictError.create({ message: TEST_CONSTANTS.errors.resourceAlreadyExists })
-      const context = { [TEST_CONSTANTS.errorTestData.context.operation]: TEST_CONSTANTS.errorTestData.context.module }
-
-      // Act
-      const errorWithContext = error.withContext({ ctx: context })
-
-      // Assert
-      expect(errorWithContext).toBeInstanceOf(ConflictError)
-      expect(errorWithContext.metadata).toEqual(context)
-    })
-  })
 })

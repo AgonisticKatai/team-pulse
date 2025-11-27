@@ -114,12 +114,6 @@ export interface IApplicationError {
   readonly isOperational: boolean
 
   /**
-   * Add additional context to the error
-   * Returns a new error instance with merged metadata
-   */
-  withContext({ ctx }: { ctx: Record<string, unknown> }): IApplicationError
-
-  /**
    * Serialize error to JSON format
    * Useful for logging, API responses, and debugging
    */
@@ -189,28 +183,6 @@ export abstract class ApplicationError extends Error implements IApplicationErro
 
     // Maintains proper stack trace for where our error was thrown (V8 only)
     Error.captureStackTrace(this, this.constructor)
-  }
-
-  /**
-   * Add additional context to the error
-   * Returns a new error instance with merged metadata
-   */
-  withContext({ ctx }: { ctx: Record<string, unknown> }): this {
-    const ErrorClass = this.constructor as new (props: {
-      message: string
-      severity: ErrorSeverity
-      timestamp: Date
-      metadata?: Record<string, unknown>
-      isOperational: boolean
-    }) => this
-
-    return new ErrorClass({
-      message: this.message,
-      severity: this.severity,
-      timestamp: this.timestamp,
-      metadata: { ...this.metadata, ...ctx },
-      isOperational: this.isOperational,
-    })
   }
 
   /**
