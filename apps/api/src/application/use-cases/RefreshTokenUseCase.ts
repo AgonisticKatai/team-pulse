@@ -1,5 +1,5 @@
 import type { TokenFactory } from '@application/factories/TokenFactory.js'
-import { NotFoundError, type RepositoryError, type ValidationError } from '@domain/errors/index.js'
+import type { RepositoryError, ValidationError } from '@domain/errors/index.js'
 import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { RefreshTokenDTO, RefreshTokenResponseDTO } from '@team-pulse/shared/dtos'
@@ -58,9 +58,7 @@ export class RefreshTokenUseCase {
     return new RefreshTokenUseCase({ tokenFactory, refreshTokenRepository, userRepository })
   }
 
-  async execute(
-    dto: RefreshTokenDTO,
-  ): Promise<Result<RefreshTokenResponseDTO, AuthenticationError | NotFoundError | RepositoryError | ValidationError>> {
+  async execute(dto: RefreshTokenDTO): Promise<Result<RefreshTokenResponseDTO, AuthenticationError | RepositoryError | ValidationError>> {
     const verifyRefreshTokenResult = this.tokenFactory.verifyRefreshToken({ token: dto.refreshToken })
 
     if (!verifyRefreshTokenResult.ok) {
@@ -74,7 +72,12 @@ export class RefreshTokenUseCase {
     }
 
     if (!findRefreshTokenResult.value) {
-      return Err(NotFoundError.create({ entityName: 'RefreshToken', identifier: dto.refreshToken }))
+      return Err(
+        AuthenticationError.create({
+          message: 'Invalid or expired refresh token',
+          metadata: { field: 'refreshToken', reason: 'token_not_found' },
+        }),
+      )
     }
 
     if (findRefreshTokenResult.value.isExpired()) {
@@ -101,7 +104,12 @@ export class RefreshTokenUseCase {
 
     if (!userResult.value) {
       await this.refreshTokenRepository.deleteByToken({ token: dto.refreshToken })
-      return Err(NotFoundError.create({ entityName: 'User', identifier: verifyRefreshTokenResult.value.userId }))
+      return Err(
+        AuthenticationError.create({
+          message: 'Invalid or expired refresh token',
+          metadata: { field: 'refreshToken', reason: 'user_not_found' },
+        }),
+      )
     }
 
     const createAccessTokenResult = this.tokenFactory.createAccessToken({

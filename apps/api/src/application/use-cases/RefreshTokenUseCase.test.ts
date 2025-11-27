@@ -1,6 +1,6 @@
 import type { TokenFactory } from '@application/factories/TokenFactory.js'
 import { RefreshTokenUseCase } from '@application/use-cases/RefreshTokenUseCase.js'
-import { NotFoundError, RepositoryError } from '@domain/errors/index.js'
+import { RepositoryError } from '@domain/errors/index.js'
 import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import { buildAdminUser, buildExpiredRefreshToken, buildSuperAdminUser, buildUser, buildValidRefreshToken } from '@infrastructure/testing/index.js'
@@ -271,7 +271,7 @@ describe('RefreshTokenUseCase', () => {
         expect(refreshTokenRepository.findByToken).not.toHaveBeenCalled()
       })
 
-      it('should return NotFoundError when refresh token does not exist in database', async () => {
+      it('should return AuthenticationError when refresh token does not exist in database', async () => {
         // Arrange
         const dto = buildRefreshTokenDTO()
 
@@ -282,8 +282,8 @@ describe('RefreshTokenUseCase', () => {
         const result = await refreshTokenUseCase.execute(dto)
 
         // Assert
-        const error = expectErrorType({ errorType: NotFoundError, result })
-        expect(error.message).toContain('RefreshToken')
+        const error = expectErrorType({ errorType: AuthenticationError, result })
+        expect(error.message).toContain('Invalid or expired refresh token')
 
         // Should not proceed to user check
         expect(userRepository.findById).not.toHaveBeenCalled()
@@ -314,7 +314,7 @@ describe('RefreshTokenUseCase', () => {
         expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledTimes(1)
       })
 
-      it('should return NotFoundError and delete token when user no longer exists', async () => {
+      it('should return AuthenticationError and delete token when user no longer exists', async () => {
         // Arrange
         const dto = buildRefreshTokenDTO({ refreshToken: TEST_CONSTANTS.auth.validRefreshToken })
 
@@ -327,8 +327,8 @@ describe('RefreshTokenUseCase', () => {
         const result = await refreshTokenUseCase.execute(dto)
 
         // Assert
-        const error = expectErrorType({ errorType: NotFoundError, result })
-        expect(error.message).toContain('User')
+        const error = expectErrorType({ errorType: AuthenticationError, result })
+        expect(error.message).toContain('Invalid or expired refresh token')
 
         // Should clean up orphaned token
         expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith({ token: TEST_CONSTANTS.auth.validRefreshToken })
