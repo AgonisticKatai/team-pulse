@@ -1,10 +1,9 @@
 import { randomUUID } from 'node:crypto'
-import type { RepositoryError } from '@domain/errors/index.js'
 import { User } from '@domain/models/User.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { IPasswordHasher } from '@domain/services/IPasswordHasher.js'
 import type { CreateUserDTO, UserResponseDTO } from '@team-pulse/shared/dtos'
-import type { ValidationError } from '@team-pulse/shared/errors'
+import type { RepositoryError, ValidationError } from '@team-pulse/shared/errors'
 import { ConflictError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
 

@@ -1,9 +1,8 @@
 import type { TokenFactory } from '@application/factories/TokenFactory.js'
-import type { RepositoryError } from '@domain/errors/index.js'
 import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { RefreshTokenDTO, RefreshTokenResponseDTO } from '@team-pulse/shared/dtos'
-import type { ValidationError } from '@team-pulse/shared/errors'
+import type { RepositoryError, ValidationError } from '@team-pulse/shared/errors'
 import { AuthenticationError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
 

@@ -1,5 +1,5 @@
-import type { RepositoryError } from '@domain/errors/index.js'
 import type { Team } from '@domain/models/Team.js'
+import type { RepositoryError } from '@team-pulse/shared/errors'
 import type { Result } from '@team-pulse/shared/result'
 
 /**

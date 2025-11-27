@@ -24,4 +24,6 @@ export {
 export { ExternalServiceError } from './ExternalServiceError.js'
 export { InternalError } from './InternalError.js'
 export { NotFoundError } from './NotFoundError.js'
+export type { ForOperationProps, RepositoryErrorProps } from './RepositoryError.js'
+export { RepositoryError } from './RepositoryError.js'
 export { ValidationError } from './ValidationError.js'

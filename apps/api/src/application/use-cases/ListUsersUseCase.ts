@@ -1,9 +1,8 @@
-import type { RepositoryError } from '@domain/errors/RepositoryError.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { IMetricsService } from '@domain/services/IMetricsService.js'
 import { Pagination } from '@domain/value-objects/index.js'
 import type { UsersListResponseDTO } from '@team-pulse/shared/dtos'
-import type { ValidationError } from '@team-pulse/shared/errors'
+import type { RepositoryError, ValidationError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
 
 /**
