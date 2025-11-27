@@ -30,6 +30,7 @@
     "build": "tsc && bash scripts/copy-migrations.sh",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "db:migrate:ci": "tsx src/scripts/run-migrations.ts",
     "db:migrate:run": "tsx --env-file=.env src/scripts/run-migrations.ts",
     "db:push": "drizzle-kit push",
     "db:seed": "tsx --env-file=.env src/scripts/seed-super-admin.ts",
