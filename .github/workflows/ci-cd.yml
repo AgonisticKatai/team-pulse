@@ -1,0 +1,111 @@
+name: CI/CD Pipeline
+
+# Main workflow that orchestrates all CI/CD processes
+# Uses reusable workflows for modularity and maintainability
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel previous runs when new commits are pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ==========================================
+  # CI: Lint, Type Check, Tests & Build
+  # Runs on all PRs and pushes to main
+  # ==========================================
+  ci:
+    name: CI
+    uses: ./.github/workflows/_reusable-test.yml
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  # ==========================================
+  # Database Migrations
+  # Only runs on pushes to main
+  # ==========================================
+  migrate:
+    name: Migrate
+    needs: ci
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/_reusable-migrate.yml
+    secrets:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+  # ==========================================
+  # Deploy to Production
+  # Only runs on pushes to main, after migrations
+  # ==========================================
+  deploy:
+    name: Deploy
+    needs: migrate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/_reusable-deploy.yml
+    with:
+      environment: production
+      vercel-args: '--prod'
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ==========================================
+  # Send Notifications
+  # Always runs after deploy (success or failure)
+  # ==========================================
+  notify:
+    name: Notify
+    needs: [ci, migrate, deploy]
+    if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Check pipeline status
+        id: status
+        run: |
+          if [ "${{ needs.ci.result }}" == "success" ] && \
+             [ "${{ needs.migrate.result }}" == "success" ] && \
+             [ "${{ needs.deploy.result }}" == "success" ]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "emoji=✅" >> $GITHUB_OUTPUT
+            echo "message=Pipeline completed successfully!" >> $GITHUB_OUTPUT
+          else
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "emoji=❌" >> $GITHUB_OUTPUT
+            echo "message=Pipeline failed! Check logs." >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create deployment summary
+        run: |
+          echo "## ${{ steps.status.outputs.emoji }} Deployment Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ${{ steps.status.outputs.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Message:** ${{ steps.status.outputs.message }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Job Results" >> $GITHUB_STEP_SUMMARY
+          echo "- CI: ${{ needs.ci.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Migrate: ${{ needs.migrate.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Deploy: ${{ needs.deploy.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Author:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+
+      # Uncomment to enable Slack notifications
+      # - name: Send Slack notification
+      #   if: always()
+      #   uses: slackapi/slack-github-action@v1.26.0
+      #   with:
+      #     payload: |
+      #       {
+      #         "text": "${{ steps.status.outputs.emoji }} TeamPulse ${{ steps.status.outputs.status }}"
+      #       }
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      #     SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

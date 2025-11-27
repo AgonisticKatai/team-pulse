@@ -1,42 +1,46 @@
-name: CI
+name: Reusable - Tests
 
+# Runs lint, type check, and tests with coverage
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_call:
+    secrets:
+      CODECOV_TOKEN:
+        description: 'Codecov token for coverage reports'
+        required: false
 
 jobs:
-  ci:
-    name: CI Pipeline
+  test:
+    name: Lint, Type Check & Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 15  # Increased for testcontainers startup
+    timeout-minutes: 15
 
     env:
       NODE_ENV: test
+      # Test secrets (not sensitive)
       JWT_SECRET: test-jwt-secret-key-for-ci-minimum-32-characters-long
       JWT_REFRESH_SECRET: test-jwt-refresh-secret-key-for-ci-minimum-32-characters-long
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
+      # ============ DOCKER SETUP FOR TESTCONTAINERS ============
       - name: Setup Docker for testcontainers
         run: |
-          # Verify Docker is available
+          echo "Verifying Docker installation..."
           docker --version
           docker info
 
-          # Give testcontainers access to Docker socket
+          echo "Setting up Docker socket permissions..."
           sudo chmod 666 /var/run/docker.sock
-
-          # Verify socket permissions
           ls -la /var/run/docker.sock
 
-          # Test Docker works
+          echo "Testing Docker..."
           docker run --rm hello-world
-          docker ps -a
 
+      # ============ NODE + PNPM + CACHE ============
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -44,6 +48,8 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -59,26 +65,41 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        id: node-modules-cache
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+
       - name: Install dependencies
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile
 
-      - name: Lint
+      - name: Verify dependencies
+        if: steps.node-modules-cache.outputs.cache-hit == 'true'
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      # ============ QUALITY CHECKS ============
+      - name: Run linter
         run: make lint
 
-      - name: Type check
+      - name: Run type checking
         run: make type-check
 
-      - name: Run tests with coverage (with testcontainers)
+      # ============ TESTS ============
+      - name: Run tests with coverage
         run: make test-coverage
         env:
-          NODE_ENV: test
-          JWT_SECRET: test-jwt-secret-key-for-ci-minimum-32-characters-long
-          JWT_REFRESH_SECRET: test-jwt-refresh-secret-key-for-ci-minimum-32-characters-long
-          # Testcontainers configuration for CI
           TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: /var/run/docker.sock
           TESTCONTAINERS_RYUK_DISABLED: false
 
+      # ============ UPLOAD COVERAGE ============
       - name: Upload coverage to Codecov
+        if: secrets.CODECOV_TOKEN != ''
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -90,10 +111,22 @@ jobs:
           name: codecov-umbrella
           fail_ci_if_error: false
 
-      - name: Build
+      # ============ BUILD ============
+      - name: Build project
         run: make build
 
-      - name: Upload coverage artifacts
+      # ============ UPLOAD ARTIFACTS ============
+      - name: Upload build artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            apps/*/dist
+            packages/*/dist
+          retention-days: 7
+
+      - name: Upload coverage reports
         if: always()
         uses: actions/upload-artifact@v4
         with:

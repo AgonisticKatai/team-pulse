@@ -1,0 +1,73 @@
+name: Reusable - Setup Environment
+
+# This workflow sets up Node.js, pnpm, and caching
+# Can be called from other workflows
+on:
+  workflow_call:
+    inputs:
+      node-version-file:
+        description: 'Path to .nvmrc file'
+        required: false
+        type: string
+        default: '.nvmrc'
+      pnpm-version:
+        description: 'pnpm version'
+        required: false
+        type: string
+        default: '9'
+
+jobs:
+  setup:
+    name: Setup Node & pnpm
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ${{ inputs.node-version-file }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ inputs.pnpm-version }}
+
+      # ============ SMART CACHING ============
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        id: node-modules-cache
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
+      - name: Install dependencies
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify dependencies
+        if: steps.node-modules-cache.outputs.cache-hit == 'true'
+        run: pnpm install --frozen-lockfile --prefer-offline

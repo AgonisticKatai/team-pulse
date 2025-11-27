@@ -1,0 +1,91 @@
+name: Reusable - Deploy to Vercel
+
+# Deploys to Vercel and runs smoke tests
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: false
+        type: string
+        default: 'production'
+      vercel-args:
+        description: 'Additional Vercel CLI arguments'
+        required: false
+        type: string
+        default: '--prod'
+    secrets:
+      VERCEL_TOKEN:
+        description: 'Vercel authentication token'
+        required: true
+      VERCEL_ORG_ID:
+        description: 'Vercel Organization ID'
+        required: true
+      VERCEL_PROJECT_ID:
+        description: 'Vercel Project ID'
+        required: true
+      GITHUB_TOKEN:
+        description: 'GitHub token for PR comments'
+        required: false
+
+jobs:
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    environment:
+      name: ${{ inputs.environment }}
+      url: https://team-pulse.vercel.app
+
+    outputs:
+      deployment-url: ${{ steps.deploy.outputs.preview-url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to Vercel
+        id: deploy
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: ${{ inputs.vercel-args }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate deployment summary
+        run: |
+          echo "## 🚀 Deployment Successful!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL:** https://team-pulse.vercel.app" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Author:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+
+      # ============ SMOKE TESTS ============
+      - name: Run smoke tests
+        run: |
+          echo "🧪 Running smoke tests..."
+
+          # Health check
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://team-pulse.vercel.app/api/health)
+          if [ $response -eq 200 ]; then
+            echo "✅ Health check passed"
+          else
+            echo "❌ Health check failed (HTTP $response)"
+            exit 1
+          fi
+
+          # API check
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://team-pulse.vercel.app/api)
+          if [ $response -eq 200 ]; then
+            echo "✅ API check passed"
+          else
+            echo "❌ API check failed (HTTP $response)"
+            exit 1
+          fi
+
+          echo "✅ All smoke tests passed!"

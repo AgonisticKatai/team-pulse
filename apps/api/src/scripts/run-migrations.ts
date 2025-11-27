@@ -21,7 +21,6 @@
  *   1 - Migration failed (stops CI/CD pipeline)
  */
 
-import { validateEnv } from '@infrastructure/config/env.js'
 import { runMigrations } from '@infrastructure/database/migrate.js'
 
 // Self-executing async function for top-level await
@@ -29,11 +28,15 @@ import { runMigrations } from '@infrastructure/database/migrate.js'
   try {
     console.log('🏁 Starting standalone migration script...')
 
-    // Validate environment variables (provides better error messages)
-    const env = validateEnv()
+    // Validate only DATABASE_URL (migrations don't need JWT secrets, etc.)
+    const databaseUrl = process.env.DATABASE_URL
+
+    if (!databaseUrl) {
+      throw new Error('DATABASE_URL environment variable is required')
+    }
 
     // Run migrations
-    await runMigrations(env.DATABASE_URL)
+    await runMigrations(databaseUrl)
 
     console.log('✨ Standalone migrations completed successfully')
     process.exit(0)

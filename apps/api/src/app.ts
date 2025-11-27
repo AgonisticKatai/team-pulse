@@ -4,7 +4,6 @@ import helmet from '@fastify/helmet'
 import rateLimit from '@fastify/rate-limit'
 import { type Container, createContainer } from '@infrastructure/config/container.js'
 import { type Env, validateEnv, validateProductionEnv } from '@infrastructure/config/env.js'
-import { runMigrations } from '@infrastructure/database/migrate.js'
 import { correlationIdMiddleware } from '@infrastructure/http/middleware/correlation-id.js'
 import { handleError } from '@infrastructure/http/middleware/error-handler.js'
 import { createMetricsOnRequest, createMetricsOnResponse } from '@infrastructure/http/middleware/metrics.js'
@@ -16,42 +15,28 @@ import { createLoggerConfig } from '@infrastructure/logging/logger-config.js'
 import Fastify, { type FastifyError, type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify'
 
 /**
- * Options for building the application
- */
-export interface BuildAppOptions {
-  /**
-   * Skip database migrations during app initialization
-   *
-   * When true, migrations should be run separately (e.g., in CI/CD pipeline)
-   * When false (default), migrations run automatically on app startup
-   *
-   * Use cases:
-   * - Production: Set to true, run migrations in CI/CD before deployment
-   * - Tests: Set to true, run migrations once in global setup
-   * - Development: Set to false for convenience
-   */
-  skipMigrations?: boolean
-}
-
-/**
  * Build and configure the Fastify application
  *
  * This is the main entry point for assembling the application:
  * 1. Validate environment configuration
- * 2. Run database migrations (unless skipped)
- * 3. Create dependency injection container
- * 4. Configure Fastify with structured logging
- * 5. Add correlation ID middleware
- * 6. Configure security headers (Helmet)
- * 7. Configure metrics hooks (Prometheus)
- * 8. Configure HTTP compression
- * 9. Configure CORS
- * 10. Configure rate limiting
- * 11. Register routes (HTTP adapters)
- * 12. Setup health check endpoint
- * 13. Setup API info endpoint
- * 14. Setup 404 handler
- * 15. Setup global error handler
+ * 2. Create dependency injection container
+ * 3. Configure Fastify with structured logging
+ * 4. Add correlation ID middleware
+ * 5. Configure security headers (Helmet)
+ * 6. Configure metrics hooks (Prometheus)
+ * 7. Configure HTTP compression
+ * 8. Configure CORS
+ * 9. Configure rate limiting
+ * 10. Register routes (HTTP adapters)
+ * 11. Setup health check endpoint
+ * 12. Setup API info endpoint
+ * 13. Setup 404 handler
+ * 14. Setup global error handler
+ *
+ * Note: Database migrations are NOT run here. They should be executed separately:
+ * - Development: npm run db:migrate:run
+ * - Production: npm run db:migrate:ci (in CI/CD before deployment)
+ * - Tests: Test containers use db:push automatically
  *
  * The application follows Hexagonal Architecture:
  * - Domain: Business logic (entities, repository interfaces)
@@ -59,20 +44,10 @@ export interface BuildAppOptions {
  * - Infrastructure: Adapters (HTTP, Database, etc.)
  */
 
-export async function buildApp(options: BuildAppOptions = {}): Promise<{ app: FastifyInstance; container: Container }> {
+export async function buildApp(): Promise<{ app: FastifyInstance; container: Container }> {
   // 1. Validate environment variables (fail-fast if invalid)
   const env: Env = validateEnv()
   validateProductionEnv(env)
-
-  // 2. Run database migrations (unless explicitly skipped)
-  if (!options.skipMigrations) {
-    // biome-ignore lint/suspicious/noConsole: migrations need console output
-    console.log('🔄 Running migrations inside app startup...')
-    await runMigrations(env.DATABASE_URL)
-  } else {
-    // biome-ignore lint/suspicious/noConsole: migrations need console output
-    console.log('⏩ Skipping migrations (handled externally or testing)')
-  }
 
   // 3. Create dependency injection container
   const container = createContainer(env)
