@@ -1,9 +1,16 @@
 import { existsSync } from 'node:fs'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import * as schema from '@infrastructure/database/schema.js'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import postgres from 'postgres'
+
+// Get the directory of this file (works with ESM)
+// biome-ignore lint: __filename is standard Node.js convention
+const __filename = fileURLToPath(import.meta.url)
+// biome-ignore lint: __dirname is standard Node.js convention
+const __dirname = dirname(__filename)
 
 /**
  * Run database migrations programmatically
@@ -25,8 +32,8 @@ import postgres from 'postgres'
  * - Works in all environments (dev, staging, production)
  *
  * Path resolution:
- * - Uses process.cwd() to resolve from the monorepo root
- * - Assumes the process is always run from the workspace root
+ * - Uses relative path from this file's location (__dirname)
+ * - Independent of where the process is executed from
  * - Works in both development and production (Vercel)
  */
 export async function runMigrations(dbUrl: string): Promise<void> {
@@ -34,10 +41,10 @@ export async function runMigrations(dbUrl: string): Promise<void> {
   const migrationClient = postgres(dbUrl, { max: 1 })
   const db = drizzle(migrationClient, { schema })
 
-  // Resolve path to migrations folder from monorepo root
-  // Assumes process runs from workspace root: /path/to/team-pulse/
-  // Target: apps/api/drizzle
-  const migrationsPath = join(process.cwd(), 'apps/api/drizzle')
+  // Resolve path to migrations folder relative to this file
+  // From: apps/api/src/infrastructure/database/migrate.ts (or dist/infrastructure/database/migrate.js)
+  // To:   apps/api/drizzle
+  const migrationsPath = join(__dirname, '../../../drizzle')
 
   try {
     // Verify migrations folder exists before attempting to run migrations
