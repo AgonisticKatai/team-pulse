@@ -1,15 +1,9 @@
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import * as schema from '@infrastructure/database/schema.js'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import postgres from 'postgres'
-
-// Get the directory of this file (works with both ESM and CommonJS)
-// biome-ignore lint: __filename is standard Node.js convention
-const __filename = fileURLToPath(import.meta.url)
-// biome-ignore lint: __dirname is standard Node.js convention
-const __dirname = dirname(__filename)
 
 /**
  * Run database migrations programmatically
@@ -31,8 +25,8 @@ const __dirname = dirname(__filename)
  * - Works in all environments (dev, staging, production)
  *
  * Path resolution:
- * - Uses absolute path from this file's location
- * - Goes up to apps/api/ directory and finds drizzle/ folder
+ * - Uses process.cwd() to resolve from the monorepo root
+ * - Assumes the process is always run from the workspace root
  * - Works in both development and production (Vercel)
  */
 export async function runMigrations(dbUrl: string): Promise<void> {
@@ -40,38 +34,36 @@ export async function runMigrations(dbUrl: string): Promise<void> {
   const migrationClient = postgres(dbUrl, { max: 1 })
   const db = drizzle(migrationClient, { schema })
 
-  // Resolve absolute path to migrations folder
-  // From: apps/api/src/infrastructure/database/migrate.ts
-  // To:   apps/api/drizzle
-  const migrationsPath = join(__dirname, '../../../drizzle')
+  // Resolve path to migrations folder from monorepo root
+  // Assumes process runs from workspace root: /path/to/team-pulse/
+  // Target: apps/api/drizzle
+  const migrationsPath = join(process.cwd(), 'apps/api/drizzle')
 
   try {
+    // Verify migrations folder exists before attempting to run migrations
+    // This prevents obscure errors in production if the folder wasn't copied to the build
+    if (!existsSync(migrationsPath)) {
+      throw new Error(`Migrations folder not found: ${migrationsPath}. Ensure the drizzle/ folder is copied to your build output.`)
+    }
+
     // biome-ignore lint/suspicious/noConsole: migrations need console output for debugging
     console.log('🔄 Running database migrations...')
     // biome-ignore lint/suspicious/noConsole: migrations need console output for debugging
     console.log(`📂 Migrations folder: ${migrationsPath}`)
 
     // Run all pending migrations
+    // Drizzle manages idempotency via the __drizzle_migrations table
+    // If a migration already ran, it will be skipped automatically
+    // If this throws an error, it means something is wrong and deployment should stop
     await migrate(db, { migrationsFolder: migrationsPath })
 
     // biome-ignore lint/suspicious/noConsole: migrations need console output for debugging
     console.log('✅ Migrations completed successfully')
   } catch (error) {
-    // Handle the case where tables already exist (e.g., from using db:push or previous migration runs)
-    // PostgreSQL error code 42P07 = duplicate_table
-    // This is graceful - it means the database schema is already up-to-date
-    const errorMessage = error instanceof Error ? error.message : String(error)
-    const errorCause = error && typeof error === 'object' && 'cause' in error ? error.cause : null
-    const postgresCode = errorCause && typeof errorCause === 'object' && 'code' in errorCause ? errorCause.code : null
-
-    if (errorMessage.includes('already exists') || postgresCode === '42P07') {
-      // biome-ignore lint/suspicious/noConsole: migrations need console output for debugging
-      console.log('ℹ️  Database schema already exists (skipping migrations)')
-      return
-    }
-
     // biome-ignore lint/suspicious/noConsole: migrations need console output for debugging
     console.error('❌ Migration failed:', error)
+    // Re-throw to ensure the process exits with error code
+    // This prevents the application from starting with an inconsistent database state
     throw error
   } finally {
     // Close the migration connection
