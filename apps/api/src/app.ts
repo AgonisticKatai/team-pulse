@@ -16,11 +16,29 @@ import { createLoggerConfig } from '@infrastructure/logging/logger-config.js'
 import Fastify, { type FastifyError, type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify'
 
 /**
+ * Options for building the application
+ */
+export interface BuildAppOptions {
+  /**
+   * Skip database migrations during app initialization
+   *
+   * When true, migrations should be run separately (e.g., in CI/CD pipeline)
+   * When false (default), migrations run automatically on app startup
+   *
+   * Use cases:
+   * - Production: Set to true, run migrations in CI/CD before deployment
+   * - Tests: Set to true, run migrations once in global setup
+   * - Development: Set to false for convenience
+   */
+  skipMigrations?: boolean
+}
+
+/**
  * Build and configure the Fastify application
  *
  * This is the main entry point for assembling the application:
  * 1. Validate environment configuration
- * 2. Run database migrations
+ * 2. Run database migrations (unless skipped)
  * 3. Create dependency injection container
  * 4. Configure Fastify with structured logging
  * 5. Add correlation ID middleware
@@ -41,13 +59,20 @@ import Fastify, { type FastifyError, type FastifyInstance, type FastifyReply, ty
  * - Infrastructure: Adapters (HTTP, Database, etc.)
  */
 
-export async function buildApp(): Promise<{ app: FastifyInstance; container: Container }> {
+export async function buildApp(options: BuildAppOptions = {}): Promise<{ app: FastifyInstance; container: Container }> {
   // 1. Validate environment variables (fail-fast if invalid)
   const env: Env = validateEnv()
   validateProductionEnv(env)
 
-  // 2. Run database migrations (ensures database schema is up-to-date)
-  await runMigrations(env.DATABASE_URL)
+  // 2. Run database migrations (unless explicitly skipped)
+  if (!options.skipMigrations) {
+    // biome-ignore lint/suspicious/noConsole: migrations need console output
+    console.log('🔄 Running migrations inside app startup...')
+    await runMigrations(env.DATABASE_URL)
+  } else {
+    // biome-ignore lint/suspicious/noConsole: migrations need console output
+    console.log('⏩ Skipping migrations (handled externally or testing)')
+  }
 
   // 3. Create dependency injection container
   const container = createContainer(env)

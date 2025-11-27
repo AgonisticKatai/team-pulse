@@ -1,4 +1,3 @@
-#!/usr/bin/env tsx
 /**
  * Standalone migration script for CI/CD pipelines
  *
@@ -13,8 +12,8 @@
  * - Allows migrations to run with elevated database privileges if needed
  *
  * Usage:
- *   npm run db:migrate:run        # Production/Development (reads from .env)
- *   DATABASE_URL=... tsx src/scripts/run-migrations.ts  # Manual
+ *   npm run db:migrate        # Production (reads from environment)
+ *   npm run db:migrate:dev    # Development (reads from .env file)
  *
  * Exit codes:
  *   0 - Migrations completed successfully
@@ -24,15 +23,15 @@
 import { validateEnv } from '@infrastructure/config/env.js'
 import { runMigrations } from '@infrastructure/database/migrate.js'
 
-// Self-executing async function for top-level await
+// Self-executing async function to use top-level await
 ;(async () => {
   try {
     console.log('🏁 Starting standalone migration script...')
 
-    // Validate environment variables (provides better error messages)
+    // 1. Validate environment variables
     const env = validateEnv()
 
-    // Run migrations
+    // 2. Run migrations
     await runMigrations(env.DATABASE_URL)
 
     console.log('✨ Standalone migrations completed successfully')

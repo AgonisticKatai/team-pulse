@@ -28,7 +28,7 @@ describe('Correlation ID Middleware - Critical Integration Tests', () => {
 
   beforeEach(async () => {
     // Build app with test container database and ALL middleware enabled
-    const result = await buildApp()
+    const result = await buildApp({ skipMigrations: true })
     app = result.app
     await app.ready()
   })

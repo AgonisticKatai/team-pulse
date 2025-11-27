@@ -7,7 +7,7 @@ describe('Metrics Middleware', () => {
   setupTestEnvironment()
 
   it('should expose /metrics endpoint', async () => {
-    const { app, container } = await buildApp()
+    const { app, container } = await buildApp({ skipMigrations: true })
 
     try {
       const response = await app.inject({
@@ -26,7 +26,7 @@ describe('Metrics Middleware', () => {
   })
 
   it('should track HTTP request duration', async () => {
-    const { app, container } = await buildApp()
+    const { app, container } = await buildApp({ skipMigrations: true })
 
     try {
       // Make a request to generate metrics
@@ -49,7 +49,7 @@ describe('Metrics Middleware', () => {
   })
 
   it('should increment request counter', async () => {
-    const { app, container } = await buildApp()
+    const { app, container } = await buildApp({ skipMigrations: true })
 
     try {
       // Get baseline
@@ -73,7 +73,7 @@ describe('Metrics Middleware', () => {
   })
 
   it('should track metrics for failed requests', async () => {
-    const { app, container } = await buildApp()
+    const { app, container } = await buildApp({ skipMigrations: true })
 
     try {
       // Make a failing request
@@ -91,7 +91,7 @@ describe('Metrics Middleware', () => {
   })
 
   it('should include default Node.js metrics', async () => {
-    const { app, container } = await buildApp()
+    const { app, container } = await buildApp({ skipMigrations: true })
 
     try {
       const response = await app.inject({ method: 'GET', url: '/metrics' })

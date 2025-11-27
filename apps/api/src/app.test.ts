@@ -20,7 +20,7 @@ describe('Fastify App', () => {
   })
 
   it('should create a Fastify instance', async () => {
-    const result = await buildApp()
+    const result = await buildApp({ skipMigrations: true })
     app = result.app
     container = result.container
 
@@ -30,7 +30,7 @@ describe('Fastify App', () => {
   })
 
   it('should respond to health check', async () => {
-    const result = await buildApp()
+    const result = await buildApp({ skipMigrations: true })
     app = result.app
     container = result.container
 
@@ -47,7 +47,7 @@ describe('Fastify App', () => {
   })
 
   it('should respond to root endpoint', async () => {
-    const result = await buildApp()
+    const result = await buildApp({ skipMigrations: true })
     app = result.app
     container = result.container
 
@@ -64,7 +64,7 @@ describe('Fastify App', () => {
   })
 
   it('should return 404 for unknown routes', async () => {
-    const result = await buildApp()
+    const result = await buildApp({ skipMigrations: true })
     app = result.app
     container = result.container
 

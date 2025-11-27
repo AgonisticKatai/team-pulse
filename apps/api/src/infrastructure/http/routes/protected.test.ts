@@ -28,7 +28,8 @@ describe('Protected Routes and RBAC', () => {
 
   beforeEach(async () => {
     // Build app with test container database
-    const result = await buildApp()
+    // Skip migrations - schema is already created by setupTestContainer() using db:push
+    const result = await buildApp({ skipMigrations: true })
     app = result.app
     container = result.container
 

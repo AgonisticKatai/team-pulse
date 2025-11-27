@@ -40,7 +40,7 @@ describe('HTTP Compression Middleware', () => {
 
   // Helper to build fresh app for each test
   async function buildTestApp() {
-    const result = await buildApp()
+    const result = await buildApp({ skipMigrations: true })
     app = result.app
     // Clean database for test isolation
     await db.execute(sql`TRUNCATE TABLE users, refresh_tokens, teams RESTART IDENTITY CASCADE`)
