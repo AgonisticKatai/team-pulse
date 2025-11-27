@@ -49,7 +49,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -125,6 +125,7 @@ jobs:
             apps/*/dist
             packages/*/dist
           retention-days: 7
+          if-no-files-found: ignore
 
       - name: Upload coverage reports
         if: always()
@@ -135,3 +136,4 @@ jobs:
             apps/*/coverage
             packages/*/coverage
           retention-days: 7
+          if-no-files-found: ignore
