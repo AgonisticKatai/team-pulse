@@ -358,66 +358,82 @@ export class Email {
 
 ## 1.6 Domain Errors - Error Hierarchy
 
-**Pattern Name:** Domain Error Hierarchy with Factory Methods
+**Pattern Name:** Centralized Error System in Shared Package
 
 **Why:**
-- Single hierarchy: Easy `instanceof` checks
-- Factory methods: Consistency in creation
-- Rich information: `code`, `field`, `operation`, `cause`
-- Traceability: Native Error stack traces
+- Centralized in `@team-pulse/shared/errors`: Reusable across API and Web
+- Single hierarchy: All errors extend `ApplicationError`
+- Factory methods: Consistency and type safety
+- Rich metadata: `code`, `category`, `severity`, `metadata`
+- Framework-agnostic: Works with any HTTP framework or frontend
+
+📚 **Full documentation**: `docs/errors/README.md`
 
 **Real Code Example:**
 ```typescript
-// DomainError.ts - Abstract base class
-export abstract class DomainError extends Error {
-  abstract readonly code: string
-  abstract readonly isOperational: boolean
+// All errors imported from shared
+import { ValidationError, NotFoundError, RepositoryError } from '@team-pulse/shared/errors'
 
-  constructor(message: string) {
-    super(message)
-    this.name = this.constructor.name
-    Error.captureStackTrace(this, this.constructor)
+// ValidationError - Use in Value Objects (Result<T, E>)
+export class Email {
+  static create({ value }: { value: string }): Result<Email, ValidationError> {
+    if (!value) {
+      return Err(ValidationError.forField({
+        field: 'email',
+        message: 'Email is required'
+      }))
+    }
+
+    if (!EMAIL_REGEX.test(value)) {
+      return Err(ValidationError.invalidValue({
+        field: 'email',
+        value,
+        message: 'Invalid email format'
+      }))
+    }
+
+    return Ok(new Email(value))
   }
 }
 
-// ValidationError.ts - Operational error
-export class ValidationError extends DomainError {
-  readonly code = 'VALIDATION_ERROR'
-  readonly isOperational = true
+// NotFoundError - Use in Use Cases or Repositories
+const user = await repository.findById(id)
+if (!user) {
+  throw NotFoundError.forResource({
+    resource: 'User',
+    identifier: id
+  })
+}
 
-  public readonly field?: string
-  public readonly details?: Record<string, unknown>
-
-  private constructor({ message, field, details }: {...}) {
-    super(message)
-    this.field = field
-    this.details = details
-  }
-
-  static create({ message, field, details }: {...}): ValidationError {
-    return new ValidationError({ details, field, message })
-  }
-
-  static forField({ field, message }: { field: string; message: string }): ValidationError {
-    return new ValidationError({ field, message })
-  }
-
-  static fromZodError(error: { errors: Array<{ path: string[]; message: string }> }): ValidationError {
-    const firstError = error.errors[0]
-    const field = firstError?.path.join('.') || 'unknown'
-    const message = firstError?.message || 'Validation failed'
-    return new ValidationError({ details: { errors: error.errors }, field, message })
+// RepositoryError - Use in Repository implementations
+async save(user: User): Promise<void> {
+  try {
+    await this.db.insert(users).values(userData)
+  } catch (error) {
+    throw RepositoryError.forOperation({
+      operation: 'save',
+      message: 'Failed to save user',
+      cause: error as Error
+    })
   }
 }
 ```
 
 **❌ DO NOT:**
 ```typescript
-// Generic exceptions
+// ❌ Creating errors with new directly
+const error = new ValidationError({ message: '...' })
+
+// ❌ Generic Error
 throw new Error("User not found")
 
-// Without factory methods
-const error = new ValidationError()
+// ❌ Creating errors in domain/ (use shared instead)
+// domain/errors/ValidationError.ts ❌
+
+// ❌ Using throw in Value Objects (use Result<T,E> instead)
+static create(value: string): Email {
+  if (!value) throw new Error('Invalid') // ❌
+}
 error.field = "email" // Mutable, can be forgotten
 ```
 

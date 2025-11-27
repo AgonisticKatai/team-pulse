@@ -39,8 +39,7 @@ Presentation (OUTER - UI)
 ```
 domain/              # ⚡ Core business logic
 ├── models/          # Rich entities (User, Team, RefreshToken)
-├── repositories/    # Interfaces (PORTS) - eg: IUserRepository
-└── errors/          # Domain errors
+└── repositories/    # Interfaces (PORTS) - eg: IUserRepository
 
 application/         # 🎯 Use cases
 └── use-cases/       # Business logic orchestration (LoginUseCase, CreateTeamUseCase)
@@ -51,6 +50,9 @@ infrastructure/      # 🔌 External adapters
 ├── auth/            # JWT, bcrypt
 ├── config/          # DI container, environment variables
 └── testing/         # Testcontainers setup
+
+# ⚡ ERRORS ARE IN SHARED PACKAGE
+packages/shared/src/errors/  # All application errors (ValidationError, RepositoryError, etc.)
 ```
 
 ### Frontend Structure (apps/web/src/)
@@ -58,8 +60,10 @@ infrastructure/      # 🔌 External adapters
 domain/              # ⚡ Business logic
 ├── value-objects/   # Email, Role, TeamName, EntityId, FoundedYear, City
 ├── types/           # Result<T, E>, error types
-├── errors/          # Domain errors
 └── repositories/    # Interfaces (PORTS)
+
+# ⚡ ERRORS ARE IN SHARED PACKAGE
+packages/shared/src/errors/  # All application errors (shared with API)
 
 application/         # 🎯 Application logic
 ├── use-cases/       # Business orchestration
@@ -197,7 +201,10 @@ class Email {
 
   private static validate({ value }: { value: string }): ValidationError | null {
     if (!value || !value.includes('@')) {
-      return new ValidationError('Invalid email')
+      return ValidationError.forField({
+        field: 'email',
+        message: 'Invalid email format'
+      })
     }
     return null
   }
@@ -735,6 +742,149 @@ describe('EntityName', () => {
 - ❌ Low test coverage
 
 **Remember**: If you write code without tests first, you're doing it wrong. Delete it and start over with TDD.
+
+---
+
+## 🚨 Error Management System
+
+### Overview
+All errors are **centralized** in `@team-pulse/shared/errors` for:
+- ✅ Type safety across API and Web
+- ✅ Framework-agnostic design
+- ✅ Consistent error handling
+- ✅ Automatic sanitization of internal errors
+
+📚 **Full documentation**: `docs/errors/README.md`
+
+### Error Types & HTTP Status Codes
+
+```typescript
+import {
+  ValidationError,        // 400 - Bad Request
+  AuthenticationError,    // 401 - Unauthorized
+  AuthorizationError,     // 403 - Forbidden
+  NotFoundError,          // 404 - Not Found
+  ConflictError,          // 409 - Conflict
+  BusinessRuleError,      // 422 - Unprocessable Entity
+  RepositoryError,        // 500 - Internal Server Error
+  ExternalServiceError,   // 502/503 - Service Error
+  InternalError,          // 500 - Internal Server Error
+} from '@team-pulse/shared/errors'
+```
+
+### Usage Patterns
+
+#### ✅ In Value Objects (use Result<T, E>)
+```typescript
+import { ValidationError } from '@team-pulse/shared/errors'
+import { Ok, Err, type Result } from '@team-pulse/shared/result'
+
+static create({ value }: { value: string }): Result<Email, ValidationError> {
+  if (!value) {
+    return Err(ValidationError.forField({
+      field: 'email',
+      message: 'Email is required'
+    }))
+  }
+
+  if (!EMAIL_REGEX.test(value)) {
+    return Err(ValidationError.invalidValue({
+      field: 'email',
+      value,
+      message: 'Invalid email format'
+    }))
+  }
+
+  return Ok(new Email(value))
+}
+```
+
+#### ✅ In Use Cases (use Result<T, E>)
+```typescript
+async execute(dto: CreateUserDTO): Promise<Result<UserDTO, ValidationError | ConflictError>> {
+  // 1. Validate input
+  const emailResult = Email.create({ value: dto.email })
+  if (!emailResult.ok) return Err(emailResult.error)
+
+  // 2. Check duplicates
+  const exists = await this.repository.existsByEmail(dto.email)
+  if (exists) {
+    return Err(ConflictError.duplicate({
+      resource: 'User',
+      identifier: dto.email
+    }))
+  }
+
+  // ... persist and return
+}
+```
+
+#### ✅ In Repositories (throw for exceptional errors)
+```typescript
+import { RepositoryError } from '@team-pulse/shared/errors'
+
+async save(user: User): Promise<void> {
+  try {
+    await this.db.insert(users).values(userData)
+  } catch (error) {
+    throw RepositoryError.forOperation({
+      operation: 'save',
+      message: 'Failed to save user',
+      cause: error as Error
+    })
+  }
+}
+```
+
+### Factory Methods
+
+All errors use **factory methods** (never `new` directly):
+
+```typescript
+// ✅ CORRECT
+ValidationError.forField({ field: 'email', message: 'Required' })
+ValidationError.invalidValue({ field: 'email', value, message: 'Invalid' })
+ValidationError.fromZodError({ error: zodError })
+
+NotFoundError.forResource({ resource: 'User', identifier: id })
+
+ConflictError.duplicate({ resource: 'User', identifier: email })
+
+RepositoryError.forOperation({ operation: 'save', message: '...', cause: err })
+
+AuthenticationError.invalidCredentials()
+AuthenticationError.invalidToken({ reason: 'expired' })
+
+// ❌ WRONG
+new ValidationError({ message: '...' })
+```
+
+### Error Handler
+
+The `ErrorHandler` is framework-agnostic and handles normalization + sanitization:
+
+```typescript
+import { ErrorHandler, ConsoleLogger } from '@team-pulse/shared/errors/handler'
+
+const errorHandler = new ErrorHandler({
+  logger: new ConsoleLogger(),
+  includeStackTrace: process.env.NODE_ENV === 'development'
+})
+
+// Automatically:
+// 1. Normalizes any error to ApplicationError
+// 2. Logs with appropriate severity
+// 3. Sanitizes internal errors (500s) - hides sensitive details
+// 4. Returns safe HTTP response
+```
+
+### Key Rules
+
+1. **All errors in shared package** - NEVER create errors in domain/
+2. **Use factory methods** - NEVER use `new ValidationError()` directly
+3. **Result<T, E> for expected errors** - In Value Objects and Use Cases
+4. **throw for exceptional errors** - In Repositories and Infrastructure
+5. **Trust the ErrorHandler** - It normalizes and sanitizes automatically
 
 ---
 
