@@ -24,9 +24,6 @@ on:
       VERCEL_PROJECT_ID:
         description: 'Vercel Project ID'
         required: true
-      GITHUB_TOKEN:
-        description: 'GitHub token for PR comments'
-        required: false
 
 jobs:
   deploy:
@@ -53,7 +50,6 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           vercel-args: ${{ inputs.vercel-args }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate deployment summary
         run: |

@@ -120,7 +120,6 @@ jobs:
 - `VERCEL_TOKEN` (required): Vercel authentication token
 - `VERCEL_ORG_ID` (required): Vercel Organization ID
 - `VERCEL_PROJECT_ID` (required): Vercel Project ID
-- `GITHUB_TOKEN` (optional): For PR comments
 
 **Usage:**
 ```yaml
