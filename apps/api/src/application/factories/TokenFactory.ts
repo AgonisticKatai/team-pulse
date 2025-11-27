@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import type { IEnvironment } from '@domain/config/IEnvironment.js'
-import type { ValidationError } from '@domain/errors/ValidationError.js'
 import { RefreshToken } from '@domain/models/RefreshToken.js'
+import type { ValidationError } from '@team-pulse/shared/errors'
 import { AuthenticationError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
 import type { UserRole } from '@team-pulse/shared/types'

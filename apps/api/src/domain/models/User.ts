@@ -1,10 +1,9 @@
-import { ValidationError } from '@domain/errors/ValidationError.js'
 import type { CreateUserData, UpdateUserData, UserConstructorProps, UserData, UserProps } from '@domain/models/User.types.js'
 import { Email } from '@domain/value-objects/Email.js'
 import { EntityId } from '@domain/value-objects/EntityId.js'
 import { Role, UserRole } from '@domain/value-objects/Role.js'
-
 import type { UserResponseDTO } from '@team-pulse/shared/dtos'
+import { ValidationError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
 
 // Re-export public types

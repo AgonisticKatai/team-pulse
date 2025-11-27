@@ -1,9 +1,9 @@
-import { ValidationError } from '@domain/errors/ValidationError.js'
 import { Team } from '@domain/models/Team.js'
 import { City } from '@domain/value-objects/City.js'
 import { EntityId } from '@domain/value-objects/EntityId.js'
 import { FoundedYear } from '@domain/value-objects/FoundedYear.js'
 import { TeamName } from '@domain/value-objects/TeamName.js'
+import { ValidationError } from '@team-pulse/shared/errors'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { describe, expect, it } from 'vitest'
@@ -78,7 +78,7 @@ describe('Team Domain Entity', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('name')
+      expect(error.metadata?.field).toBe('name')
     })
 
     it('should return error for name exceeding max length', () => {
@@ -93,7 +93,7 @@ describe('Team Domain Entity', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('name')
+      expect(error.metadata?.field).toBe('name')
     })
 
     it('should return error for empty city', () => {
@@ -108,7 +108,7 @@ describe('Team Domain Entity', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('city')
+      expect(error.metadata?.field).toBe('city')
     })
 
     it('should return error for city exceeding max length', () => {
@@ -123,7 +123,7 @@ describe('Team Domain Entity', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('city')
+      expect(error.metadata?.field).toBe('city')
     })
 
     it('should return error for invalid founded year (too old)', () => {
@@ -139,7 +139,7 @@ describe('Team Domain Entity', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('foundedYear')
+      expect(error.metadata?.field).toBe('foundedYear')
     })
 
     it('should return error for invalid founded year (future)', () => {
@@ -155,7 +155,7 @@ describe('Team Domain Entity', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('foundedYear')
+      expect(error.metadata?.field).toBe('foundedYear')
     })
 
     it('should return error for empty id', () => {
@@ -170,7 +170,7 @@ describe('Team Domain Entity', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('id')
+      expect(error.metadata?.field).toBe('id')
     })
   })
 
@@ -364,7 +364,7 @@ describe('Team Domain Entity', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('name')
+      expect(error.metadata?.field).toBe('name')
     })
 
     it('should preserve createdAt when updating', () => {

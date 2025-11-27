@@ -1,5 +1,5 @@
-import { ValidationError } from '@domain/errors/ValidationError.js'
 import { Role, UserRole } from '@domain/value-objects/Role.js'
+import { ValidationError } from '@team-pulse/shared/errors'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { describe, expect, it } from 'vitest'
 

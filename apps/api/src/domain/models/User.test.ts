@@ -1,8 +1,8 @@
-import { ValidationError } from '@domain/errors/ValidationError.js'
 import { User } from '@domain/models/User.js'
 import { Email } from '@domain/value-objects/Email.js'
 import { EntityId } from '@domain/value-objects/EntityId.js'
 import { Role, UserRole } from '@domain/value-objects/Role.js'
+import { ValidationError } from '@team-pulse/shared/errors'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { describe, expect, it } from 'vitest'
 
@@ -79,7 +79,7 @@ describe('User Domain Entity', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('email')
+      expect(error.metadata?.field).toBe('email')
     })
 
     it('should return error for invalid email format', () => {
@@ -95,7 +95,7 @@ describe('User Domain Entity', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('email')
+      expect(error.metadata?.field).toBe('email')
     })
 
     it('should return error for email without domain', () => {
@@ -111,7 +111,7 @@ describe('User Domain Entity', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('email')
+      expect(error.metadata?.field).toBe('email')
     })
 
     it('should return error for email too long', () => {
@@ -131,7 +131,7 @@ describe('User Domain Entity', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('email')
+      expect(error.metadata?.field).toBe('email')
     })
 
     it('should return error for invalid role', () => {
@@ -147,7 +147,7 @@ describe('User Domain Entity', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('role')
+      expect(error.metadata?.field).toBe('role')
     })
 
     it('should return error for empty password hash', () => {
@@ -163,7 +163,7 @@ describe('User Domain Entity', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('password')
+      expect(error.metadata?.field).toBe('password')
     })
 
     it('should return error for empty id', () => {
@@ -179,7 +179,7 @@ describe('User Domain Entity', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('id')
+      expect(error.metadata?.field).toBe('id')
     })
   })
 
@@ -370,7 +370,7 @@ describe('User Domain Entity', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('email')
+      expect(error.metadata?.field).toBe('email')
     })
 
     it('should return error for invalid role update', () => {
@@ -389,7 +389,7 @@ describe('User Domain Entity', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('role')
+      expect(error.metadata?.field).toBe('role')
     })
   })
 

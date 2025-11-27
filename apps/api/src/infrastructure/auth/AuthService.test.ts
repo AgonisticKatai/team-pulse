@@ -1,8 +1,7 @@
 import { TokenFactory } from '@application/factories/TokenFactory.js'
-import { ValidationError } from '@domain/errors/ValidationError.js'
 import { AuthService } from '@infrastructure/auth/AuthService.js'
 import { TEST_INVALID_TOKEN_ENV, TEST_TOKEN_ENV } from '@infrastructure/testing/test-env.js'
-import { AuthenticationError } from '@team-pulse/shared/errors'
+import { AuthenticationError, ValidationError } from '@team-pulse/shared/errors'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it } from 'vitest'
@@ -78,7 +77,7 @@ describe('AuthService', () => {
 
         // Assert
         const error = expectErrorType({ errorType: ValidationError, result })
-        expect(error.field).toBe('authorization')
+        expect(error.metadata?.field).toBe('authorization')
         expect(error.message).toContain('Missing Authorization header')
       })
 
@@ -88,7 +87,7 @@ describe('AuthService', () => {
 
         // Assert
         const error = expectErrorType({ errorType: ValidationError, result })
-        expect(error.field).toBe('authorization')
+        expect(error.metadata?.field).toBe('authorization')
       })
     })
 
@@ -99,7 +98,7 @@ describe('AuthService', () => {
 
         // Assert
         const error = expectErrorType({ errorType: ValidationError, result })
-        expect(error.field).toBe('authorization')
+        expect(error.metadata?.field).toBe('authorization')
         expect(error.message).toContain('Bearer')
       })
 
@@ -109,7 +108,7 @@ describe('AuthService', () => {
 
         // Assert
         const error = expectErrorType({ errorType: ValidationError, result })
-        expect(error.field).toBe('authorization')
+        expect(error.metadata?.field).toBe('authorization')
         expect(error.message).toContain('Bearer')
       })
 
@@ -119,7 +118,7 @@ describe('AuthService', () => {
 
         // Assert
         const error = expectErrorType({ errorType: ValidationError, result })
-        expect(error.field).toBe('authorization')
+        expect(error.metadata?.field).toBe('authorization')
       })
 
       it('should return ValidationError when Bearer token is empty', () => {
@@ -128,7 +127,7 @@ describe('AuthService', () => {
 
         // Assert
         const error = expectErrorType({ errorType: ValidationError, result })
-        expect(error.field).toBe('authorization')
+        expect(error.metadata?.field).toBe('authorization')
       })
 
       it('should return ValidationError with extra spaces', () => {
@@ -137,7 +136,7 @@ describe('AuthService', () => {
 
         // Assert
         const error = expectErrorType({ errorType: ValidationError, result })
-        expect(error.field).toBe('authorization')
+        expect(error.metadata?.field).toBe('authorization')
       })
 
       it('should return ValidationError with multiple parts', () => {
@@ -146,7 +145,7 @@ describe('AuthService', () => {
 
         // Assert
         const error = expectErrorType({ errorType: ValidationError, result })
-        expect(error.field).toBe('authorization')
+        expect(error.metadata?.field).toBe('authorization')
       })
     })
 

@@ -1,10 +1,10 @@
-import type { ValidationError } from '@domain/errors/ValidationError.js'
 import type { TeamFactoryInput, TeamUpdateInput, TeamValueObjects } from '@domain/models/Team.types.js'
 import { City } from '@domain/value-objects/City.js'
 import { EntityId } from '@domain/value-objects/EntityId.js'
 import { FoundedYear } from '@domain/value-objects/FoundedYear.js'
 import { TeamName } from '@domain/value-objects/TeamName.js'
 import type { TeamResponseDTO } from '@team-pulse/shared/dtos'
+import type { ValidationError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
 
 // Re-export public types

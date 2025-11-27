@@ -1,5 +1,5 @@
-import { ValidationError } from '@domain/errors/ValidationError.js'
 import { City } from '@domain/value-objects/City.js'
+import { ValidationError } from '@team-pulse/shared/errors'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { describe, expect, it } from 'vitest'

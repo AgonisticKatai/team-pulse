@@ -1,6 +1,6 @@
-import { ValidationError } from '@domain/errors/ValidationError.js'
 import { RefreshToken } from '@domain/models/RefreshToken.js'
 import { EntityId } from '@domain/value-objects/EntityId.js'
+import { ValidationError } from '@team-pulse/shared/errors'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { describe, expect, it } from 'vitest'
@@ -53,7 +53,7 @@ describe('RefreshToken Domain Entity', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('token')
+      expect(error.metadata?.field).toBe('token')
     })
 
     it('should return error for empty userId', () => {
@@ -70,7 +70,7 @@ describe('RefreshToken Domain Entity', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('id')
+      expect(error.metadata?.field).toBe('id')
     })
 
     it('should return error for empty id', () => {
@@ -87,7 +87,7 @@ describe('RefreshToken Domain Entity', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
-      expect(error.field).toBe('id')
+      expect(error.metadata?.field).toBe('id')
     })
 
     it('should allow creation with past expiration date', () => {

@@ -63,4 +63,14 @@ export class ValidationError extends ApplicationError {
       },
     })
   }
+
+  /**
+   * Create a validation error for an invalid value (useful for Value Objects)
+   */
+  static invalidValue({ field, value, message }: { field: string; value: unknown; message: string }): ValidationError {
+    return new ValidationError({
+      message,
+      metadata: { field, value },
+    })
+  }
 }

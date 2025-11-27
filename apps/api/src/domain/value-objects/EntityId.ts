@@ -1,4 +1,4 @@
-import { ValidationError } from '@domain/errors/ValidationError.js'
+import { ValidationError } from '@team-pulse/shared/errors'
 import type { Result } from '@team-pulse/shared/result'
 import { Err, Ok } from '@team-pulse/shared/result'
 

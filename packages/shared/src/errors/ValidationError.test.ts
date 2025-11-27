@@ -199,6 +199,69 @@ describe('ValidationError', () => {
     })
   })
 
+  describe('invalidValue', () => {
+    it('should create validation error with field and value', () => {
+      // Arrange
+      const field = TEST_CONSTANTS.errorTestData.fields.email
+      const value = 'invalid-email'
+      const message = TEST_CONSTANTS.errors.invalidFormat
+
+      // Act
+      const error = ValidationError.invalidValue({ field, value, message })
+
+      // Assert
+      expect(error).toBeInstanceOf(ValidationError)
+      expect(error.message).toBe(message)
+      expect(error.code).toBe(ERROR_CODES.VALIDATION_ERROR)
+      expect(error.category).toBe(ERROR_CATEGORY.VALIDATION)
+      expect(error.severity).toBe(ERROR_SEVERITY.LOW)
+      expect(error.isOperational).toBe(true)
+      expect(error.metadata).toEqual({ field, value })
+    })
+
+    it('should create validation error with complex value', () => {
+      // Arrange
+      const field = TEST_CONSTANTS.errorTestData.fields.field
+      const value = { nested: 'object', with: ['arrays'] }
+      const message = TEST_CONSTANTS.errors.validationFailed
+
+      // Act
+      const error = ValidationError.invalidValue({ field, value, message })
+
+      // Assert
+      expect(error).toBeInstanceOf(ValidationError)
+      expect(error.metadata).toEqual({ field, value })
+    })
+
+    it('should create validation error with null value', () => {
+      // Arrange
+      const field = TEST_CONSTANTS.errorTestData.fields.field
+      const value = null
+      const message = TEST_CONSTANTS.errors.fieldRequired
+
+      // Act
+      const error = ValidationError.invalidValue({ field, value, message })
+
+      // Assert
+      expect(error).toBeInstanceOf(ValidationError)
+      expect(error.metadata).toEqual({ field, value })
+    })
+
+    it('should create validation error with undefined value', () => {
+      // Arrange
+      const field = TEST_CONSTANTS.errorTestData.fields.field
+      const value = undefined
+      const message = TEST_CONSTANTS.errors.fieldRequired
+
+      // Act
+      const error = ValidationError.invalidValue({ field, value, message })
+
+      // Assert
+      expect(error).toBeInstanceOf(ValidationError)
+      expect(error.metadata).toEqual({ field, value })
+    })
+  })
+
   describe('error properties', () => {
     it('should have correct code', () => {
       // Arrange & Act

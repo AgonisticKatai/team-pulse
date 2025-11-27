@@ -1,5 +1,5 @@
-import { ValidationError } from '@domain/errors/ValidationError.js'
 import type { PaginationMetadata } from '@team-pulse/shared/dtos'
+import { ValidationError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
 
 /**

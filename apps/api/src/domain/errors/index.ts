@@ -8,4 +8,3 @@
 
 export { DomainError } from '@domain/errors/DomainError.js'
 export { RepositoryError } from '@domain/errors/RepositoryError.js'
-export { ValidationError } from '@domain/errors/ValidationError.js'
