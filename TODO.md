@@ -388,43 +388,6 @@ Un sistema de gestión de errores que sea:
 
 **Prioridad:** Media (no afecta funcionalidad, pero afecta calidad y mantenibilidad del código de tests)
 
-#### ⚠️ CRÍTICO: Use Cases violan convención de parámetros nombrados
-**Ubicación:** `apps/api/src/application/use-cases/` (TODOS los use cases)
-**Problema detectado (2025-11-26):** Todos los métodos `execute()` usan parámetros posicionales en lugar de parámetros nombrados
-**Archivos afectados:**
-- `CreateUserUseCase.ts:41` - `execute(dto: CreateUserDTO)`
-- `DeleteTeamUseCase.ts:21` - `execute(id: string)`
-- `LoginUseCase.ts:72` - `execute(dto: LoginDTO)`
-- `GetTeamUseCase.ts:22` - `execute(id: string)`
-- `RefreshTokenUseCase.ts:60` - `execute(dto: RefreshTokenDTO)`
-- `LogoutUseCase.ts:35` - `execute(refreshToken: string)`
-- `CreateTeamUseCase.ts:39` - `execute(dto: CreateTeamDTO)`
-- `UpdateTeamUseCase.ts:22` - `execute(id: string, dto: UpdateTeamDTO)`
-- `ListUsersUseCase.ts:44` - `execute({ page, limit })` (usa parámetros nombrados con destructuring, pero no como objeto)
-- `ListTeamsUseCase.ts:33` - `execute({ page, limit })` (usa parámetros nombrados con destructuring, pero no como objeto)
-
-**Violación de RULES.md:**
-```typescript
-// ❌ ACTUAL (incorrecto)
-async execute(dto: LoginDTO): Promise<Result<...>>
-
-// ✅ ESPERADO (correcto según RULES.md)
-async execute({ dto }: { dto: LoginDTO }): Promise<Result<...>>
-```
-
-**Impacto:**
-- Viola convención fundamental del proyecto (RULES.md línea 52-57)
-- Todos los call sites deben actualizarse: `useCase.execute(dto)` → `useCase.execute({ dto })`
-- Todos los tests deben actualizarse
-- Inconsistente con el resto del proyecto (constructores, factory methods, etc.)
-
-**Solución propuesta:**
-1. Refactorizar TODOS los métodos `execute()` para usar parámetros nombrados
-2. Actualizar todos los call sites en routes, tests, etc.
-3. Verificar que todos los tests pasan
-4. Documentar en AGREEMENTS.md el patrón correcto de Use Cases
-
-**Prioridad:** Media (no rompe funcionalidad, pero viola convención core del proyecto)
 
 #### ✅ Refactorizar middleware de autenticación - COMPLETADO (2025-11-21)
 **Ubicación:** `apps/api/src/infrastructure/http/middleware/auth.ts` + `AuthService.ts`
@@ -685,6 +648,12 @@ protected static handleJwtError({ error, field }: { error: unknown; field: strin
 - [x] Mantener entity builders en `infrastructure/testing` (buildUser, buildTeam, buildRefreshToken)
 - [x] Actualizar 100+ archivos con imports organizados
 - [x] **Resultado:** 793 tests pasando, 0 errores TypeScript, arquitectura hexagonal respetada
+
+### 📦 API - Use Case Refactoring (2025-11-28)
+- [x] Refactorizar todos los Use Cases para usar parámetros nombrados en `execute()`
+- [x] Actualizar call sites en HTTP routes
+- [x] Actualizar unit tests
+- [x] **Resultado:** 100% cumplimiento con RULES.md, código más legible y mantenible.
 
 ---
 
