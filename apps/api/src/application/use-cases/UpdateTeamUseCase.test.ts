@@ -5,7 +5,7 @@ import type { UpdateTeamDTO } from '@team-pulse/shared/dtos'
 import { ConflictError, NotFoundError, RepositoryError, ValidationError } from '@team-pulse/shared/errors'
 import { Err, Ok } from '@team-pulse/shared/result'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
-import { expectError, expectErrorType, expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('UpdateTeamUseCase', () => {
@@ -138,10 +138,12 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(null))
 
         // Act
-        const error = expectError(await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto }))
+        const error = expectErrorType({
+          errorType: NotFoundError,
+          result: await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto }),
+        })
 
         // Assert
-        expect(error).toBeInstanceOf(NotFoundError)
         expect(error.message).toContain('Team')
         expect(teamRepository.save).not.toHaveBeenCalled()
       })
@@ -175,10 +177,12 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        const error = expectError(await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto }))
+        expectErrorType({
+          errorType: ValidationError,
+          result: await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto }),
+        })
 
         // Assert
-        expect(error).toBeInstanceOf(ValidationError)
         expect(teamRepository.save).not.toHaveBeenCalled()
       })
 
@@ -191,10 +195,12 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        const error = expectError(await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto }))
+        expectErrorType({
+          errorType: ValidationError,
+          result: await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto }),
+        })
 
         // Assert
-        expect(error).toBeInstanceOf(ValidationError)
         expect(teamRepository.save).not.toHaveBeenCalled()
       })
     })
@@ -215,10 +221,12 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.findByName).mockResolvedValue(Err(repositoryError))
 
         // Act
-        const error = expectError(await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto }))
+        const error = expectErrorType({
+          errorType: RepositoryError,
+          result: await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto }),
+        })
 
         // Assert
-        expect(error).toBeInstanceOf(RepositoryError)
         expect(error.message).toContain(TEST_CONSTANTS.errors.databaseConnectionLost)
         expect(teamRepository.save).not.toHaveBeenCalled()
       })
@@ -238,10 +246,12 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Err(repositoryError))
 
         // Act
-        const error = expectError(await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto }))
+        const error = expectErrorType({
+          errorType: RepositoryError,
+          result: await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto }),
+        })
 
         // Assert
-        expect(error).toBeInstanceOf(RepositoryError)
         expect(error.message).toContain(TEST_CONSTANTS.errors.databaseConnectionLost)
       })
     })

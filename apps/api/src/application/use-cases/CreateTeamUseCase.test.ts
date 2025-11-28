@@ -6,7 +6,7 @@ import { ConflictError, RepositoryError, ValidationError } from '@team-pulse/sha
 import { Err, Ok } from '@team-pulse/shared/result'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { buildCreateTeamDTO } from '@team-pulse/shared/testing/dto-builders'
-import { expectError, expectMockCallArg, expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { expectErrorType, expectMockCallArg, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock external dependencies
@@ -149,10 +149,12 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(existingTeam))
 
         // Act
-        const error = expectError(await createTeamUseCase.execute({ dto }))
+        const error = expectErrorType({
+          errorType: ConflictError,
+          result: await createTeamUseCase.execute({ dto }),
+        })
 
         // Assert
-        expect(error).toBeInstanceOf(ConflictError)
         expect(error.message).toContain('already exists')
       })
 
@@ -170,7 +172,7 @@ describe('CreateTeamUseCase', () => {
         expect(teamRepository.save).not.toHaveBeenCalled()
       })
 
-      it('should return Err when team data is invalid', async () => {
+      it('should return ValidationError when team data is invalid', async () => {
         // Arrange - Invalid foundedYear (too old)
         const dto = buildCreateTeamDTO({
           foundedYear: TEST_CONSTANTS.invalid.foundedYearTooOld,
@@ -179,10 +181,10 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
 
         // Act
-        const error = expectError(await createTeamUseCase.execute({ dto }))
-
-        // Assert
-        expect(error).toBeInstanceOf(ValidationError)
+        expectErrorType({
+          errorType: ValidationError,
+          result: await createTeamUseCase.execute({ dto }),
+        })
       })
 
       it('should return Err when repository save fails', async () => {
@@ -198,10 +200,12 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Err(repositoryError))
 
         // Act
-        const error = expectError(await createTeamUseCase.execute({ dto }))
+        const error = expectErrorType({
+          errorType: RepositoryError,
+          result: await createTeamUseCase.execute({ dto }),
+        })
 
         // Assert
-        expect(error).toBeInstanceOf(RepositoryError)
         expect(error.message).toBe(TEST_CONSTANTS.errors.databaseConnectionLost)
       })
 
@@ -217,10 +221,12 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.findByName).mockResolvedValue(Err(repositoryError))
 
         // Act
-        const error = expectError(await createTeamUseCase.execute({ dto }))
+        const error = expectErrorType({
+          errorType: RepositoryError,
+          result: await createTeamUseCase.execute({ dto }),
+        })
 
         // Assert
-        expect(error).toBeInstanceOf(RepositoryError)
         expect(error.message).toBe(TEST_CONSTANTS.errors.databaseQueryTimeout)
       })
     })

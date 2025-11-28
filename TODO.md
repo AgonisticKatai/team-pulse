@@ -655,6 +655,10 @@ protected static handleJwtError({ error, field }: { error: unknown; field: strin
 - [x] Actualizar unit tests
 - [x] **Resultado:** 100% cumplimiento con RULES.md, código más legible y mantenible.
 
+### 🧪 API - Test Refactoring (2025-11-28)
+- [x] Unificar uso de `expectErrorType` en tests de Use Cases (`GetTeamUseCase`, `DeleteTeamUseCase`, `CreateTeamUseCase`, `UpdateTeamUseCase`)
+- [x] **Resultado:** Tests más consistentes y type-safe.
+
 ---
 
 ## ✨ Reconocimientos de Arquitectura

@@ -4,7 +4,7 @@ import { buildTeam } from '@infrastructure/testing/index.js'
 import { NotFoundError, RepositoryError } from '@team-pulse/shared/errors'
 import { Err, Ok } from '@team-pulse/shared/result'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
-import { expectError, expectErrorType, expectMockInvocationOrder, expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { expectErrorType, expectMockInvocationOrder, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('DeleteTeamUseCase', () => {
@@ -95,10 +95,12 @@ describe('DeleteTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(null))
 
         // Act
-        const error = expectError(await deleteTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid }))
+        const error = expectErrorType({
+          errorType: NotFoundError,
+          result: await deleteTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid }),
+        })
 
         // Assert
-        expect(error).toBeInstanceOf(NotFoundError)
         expect(error.message).toContain('Team')
         expect(teamRepository.delete).not.toHaveBeenCalled()
       })
@@ -120,10 +122,12 @@ describe('DeleteTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(null))
 
         // Act
-        const error = expectError(await deleteTeamUseCase.execute({ id: nonExistentId }))
+        const error = expectErrorType({
+          errorType: NotFoundError,
+          result: await deleteTeamUseCase.execute({ id: nonExistentId }),
+        })
 
         // Assert
-        expect(error).toBeInstanceOf(NotFoundError)
         expect(error.message).toContain('Team')
       })
     })
@@ -135,10 +139,12 @@ describe('DeleteTeamUseCase', () => {
         vi.mocked(teamRepository.delete).mockResolvedValue(Err(RepositoryError.create({ message: 'Failed to delete team' })))
 
         // Act
-        const error = expectError(await deleteTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid }))
+        const error = expectErrorType({
+          errorType: RepositoryError,
+          result: await deleteTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid }),
+        })
 
         // Assert
-        expect(error).toBeInstanceOf(RepositoryError)
         expect(error.message).toContain('Failed to delete team')
       })
 

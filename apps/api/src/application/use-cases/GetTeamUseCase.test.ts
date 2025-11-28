@@ -4,7 +4,7 @@ import { buildTeam } from '@infrastructure/testing/index.js'
 import { NotFoundError } from '@team-pulse/shared/errors'
 import { Ok } from '@team-pulse/shared/result'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
-import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('GetTeamUseCase', () => {
@@ -98,10 +98,12 @@ describe('GetTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(null))
 
         // Act
-        const error = expectError(await getTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid }))
+        const error = expectErrorType({
+          errorType: NotFoundError,
+          result: await getTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid }),
+        })
 
         // Assert
-        expect(error).toBeInstanceOf(NotFoundError)
         expect(error.message).toContain('Team')
       })
 
@@ -111,10 +113,12 @@ describe('GetTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(null))
 
         // Act
-        const error = expectError(await getTeamUseCase.execute({ id: nonExistentId }))
+        const error = expectErrorType({
+          errorType: NotFoundError,
+          result: await getTeamUseCase.execute({ id: nonExistentId }),
+        })
 
         // Assert
-        expect(error).toBeInstanceOf(NotFoundError)
         expect(error.message).toContain('Team')
       })
     })
