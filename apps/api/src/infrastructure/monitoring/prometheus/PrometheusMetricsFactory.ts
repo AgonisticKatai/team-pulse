@@ -1,5 +1,6 @@
 import type { IMetricsFactory } from '@domain/services/metrics/IMetricsFactory.js'
 import type { MetricsCollection } from '@domain/services/metrics/MetricsCollection.js'
+import { METRIC_CONFIG } from '@domain/services/metrics/metrics.config.js'
 import { PrometheusCounter } from '@infrastructure/monitoring/prometheus/adapters/PrometheusCounter.js'
 import { PrometheusGauge } from '@infrastructure/monitoring/prometheus/adapters/PrometheusGauge.js'
 import { PrometheusHistogram } from '@infrastructure/monitoring/prometheus/adapters/PrometheusHistogram.js'
@@ -65,57 +66,57 @@ export class PrometheusMetricsFactory implements IMetricsFactory {
   private createNativeMetrics({ registry }: { registry: Registry }) {
     return {
       httpRequestDuration: new promClient.Histogram({
-        name: 'http_request_duration_seconds',
-        help: 'Duration of HTTP requests in seconds',
-        labelNames: ['method', 'route', 'status_code'],
+        name: METRIC_CONFIG.HTTP.REQUEST_DURATION.name,
+        help: METRIC_CONFIG.HTTP.REQUEST_DURATION.help,
+        labelNames: [...METRIC_CONFIG.HTTP.REQUEST_DURATION.labelNames],
         buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5],
         registers: [registry],
       }),
       httpRequestTotal: new promClient.Counter({
-        name: 'http_requests_total',
-        help: 'Total number of HTTP requests',
-        labelNames: ['method', 'route', 'status_code'],
+        name: METRIC_CONFIG.HTTP.REQUEST_TOTAL.name,
+        help: METRIC_CONFIG.HTTP.REQUEST_TOTAL.help,
+        labelNames: [...METRIC_CONFIG.HTTP.REQUEST_TOTAL.labelNames],
         registers: [registry],
       }),
       httpRequestErrors: new promClient.Counter({
-        name: 'http_request_errors_total',
-        help: 'Total number of HTTP request errors',
-        labelNames: ['method', 'route', 'error_type'],
+        name: METRIC_CONFIG.HTTP.REQUEST_ERRORS.name,
+        help: METRIC_CONFIG.HTTP.REQUEST_ERRORS.help,
+        labelNames: [...METRIC_CONFIG.HTTP.REQUEST_ERRORS.labelNames],
         registers: [registry],
       }),
       dbQueryDuration: new promClient.Histogram({
-        name: 'db_query_duration_seconds',
-        help: 'Duration of database queries in seconds',
-        labelNames: ['operation', 'table'],
+        name: METRIC_CONFIG.DB.QUERY_DURATION.name,
+        help: METRIC_CONFIG.DB.QUERY_DURATION.help,
+        labelNames: [...METRIC_CONFIG.DB.QUERY_DURATION.labelNames],
         buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1],
         registers: [registry],
       }),
       dbQueryTotal: new promClient.Counter({
-        name: 'db_queries_total',
-        help: 'Total number of database queries',
-        labelNames: ['operation', 'table'],
+        name: METRIC_CONFIG.DB.QUERY_TOTAL.name,
+        help: METRIC_CONFIG.DB.QUERY_TOTAL.help,
+        labelNames: [...METRIC_CONFIG.DB.QUERY_TOTAL.labelNames],
         registers: [registry],
       }),
       dbQueryErrors: new promClient.Counter({
-        name: 'db_query_errors_total',
-        help: 'Total number of database query errors',
-        labelNames: ['operation', 'table', 'error_type'],
+        name: METRIC_CONFIG.DB.QUERY_ERRORS.name,
+        help: METRIC_CONFIG.DB.QUERY_ERRORS.help,
+        labelNames: [...METRIC_CONFIG.DB.QUERY_ERRORS.labelNames],
         registers: [registry],
       }),
       usersTotal: new promClient.Gauge({
-        name: 'users_total',
-        help: 'Total number of users in the system',
+        name: METRIC_CONFIG.BUSINESS.USERS_TOTAL.name,
+        help: METRIC_CONFIG.BUSINESS.USERS_TOTAL.help,
         registers: [registry],
       }),
       teamsTotal: new promClient.Gauge({
-        name: 'teams_total',
-        help: 'Total number of teams in the system',
+        name: METRIC_CONFIG.BUSINESS.TEAMS_TOTAL.name,
+        help: METRIC_CONFIG.BUSINESS.TEAMS_TOTAL.help,
         registers: [registry],
       }),
       loginsTotal: new promClient.Counter({
-        name: 'logins_total',
-        help: 'Total number of successful logins',
-        labelNames: ['role'],
+        name: METRIC_CONFIG.BUSINESS.LOGINS_TOTAL.name,
+        help: METRIC_CONFIG.BUSINESS.LOGINS_TOTAL.help,
+        labelNames: [...METRIC_CONFIG.BUSINESS.LOGINS_TOTAL.labelNames],
         registers: [registry],
       }),
     }

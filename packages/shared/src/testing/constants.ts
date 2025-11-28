@@ -453,17 +453,16 @@ export const TEST_CONSTANTS = {
           verySlow: 0.15,
         },
         errors: {
-          validation: 'ValidationError' as const,
-          authentication: 'AuthenticationError' as const,
-          notFound: 'NotFoundError' as const,
+          client: 'client_error' as const,
+          server: 'server_error' as const,
         },
       },
       db: {
         operations: {
-          select: 'SELECT' as const,
-          insert: 'INSERT' as const,
-          update: 'UPDATE' as const,
-          delete: 'DELETE' as const,
+          select: 'select' as const,
+          insert: 'insert' as const,
+          update: 'update' as const,
+          delete: 'delete' as const,
         },
         tables: {
           users: 'users' as const,

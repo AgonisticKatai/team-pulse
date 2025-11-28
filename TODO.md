@@ -317,15 +317,18 @@ Un sistema de gestión de errores que sea:
 ---
 
 ## 🟡 Media Prioridad
+## 📦 API - Auditorías y Refactoring
 
-### 📦 API - Auditorías y Refactoring
+#### ✅ Centralizar nombres de métricas - COMPLETADO (2025-11-28)
+**Ubicación:** `apps/api/src/domain/services/metrics/`
+**Completado:** Sistema rediseñado con tipos TypeScript avanzados para type safety completo.
+**Archivos:**
+- `metrics.config.ts` - Configuración centralizada con const arrays
+- `metrics.types.ts` - Tipos derivados (HttpMethod, DbOperation, etc.)
+- Interfaces actualizadas con validación compile-time
+**Beneficio:** Validación en compile-time, autocomplete completo, zero runtime overhead.
 
-#### Centralizar nombres de métricas en constantes compartidas
-**Ubicación:** `apps/api/src/infrastructure/monitoring/`
-**Acción:** Los nombres de métricas (http_request_duration_seconds, http_requests_total, etc.) están hardcodeados en:
-- PrometheusMetricsFactory (creación de métricas)
-- MetricsService.test.ts (verificación en tests)
-**Solución:** Crear constantes compartidas para nombres de métricas que puedan ser usadas tanto por factory como por tests
+## 🟡 Media Prioridad
 
 #### Revisar TEST_CONSTANTS para mejoras de tipado y estructura
 **Ubicación:** `apps/api/src/infrastructure/testing/test-constants.ts`
@@ -658,6 +661,18 @@ protected static handleJwtError({ error, field }: { error: unknown; field: strin
 ### 🧪 API - Test Refactoring (2025-11-28)
 - [x] Unificar uso de `expectErrorType` en tests de Use Cases (`GetTeamUseCase`, `DeleteTeamUseCase`, `CreateTeamUseCase`, `UpdateTeamUseCase`)
 - [x] **Resultado:** Tests más consistentes y type-safe.
+
+### 📊 API - Centralize Metric Names (2025-11-28)
+- [x] Created `MetricNames.ts` with centralized constants
+- [x] Updated `PrometheusMetricsFactory.ts` to use constants
+- [x] **Resultado:** Improved maintainability, easier to update metric names.
+
+### 🔒 API - Type-Safe Metrics System (2025-11-28)
+- [x] Created `metrics.config.ts` with const arrays for valid values
+- [x] Created `metrics.types.ts` with derived TypeScript types  
+- [x] Updated all interfaces to use type-safe parameters
+- [x] Added compile-time validation for HttpMethod, DbOperation, DbTable, etc.
+- [x] **Resultado:** Full type safety with zero runtime overhead. Invalid values caught at compile time.
 
 ---
 

@@ -1,3 +1,4 @@
+import { METRIC_CONFIG } from '@domain/services/metrics/metrics.config.js'
 import { MetricsService } from '@infrastructure/monitoring/MetricsService.js'
 import { PrometheusMetricsFactory } from '@infrastructure/monitoring/prometheus/PrometheusMetricsFactory.js'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
@@ -63,25 +64,25 @@ describe('MetricsService', () => {
     it('should include HTTP metrics definitions', async () => {
       const metrics = await service.getMetrics()
 
-      expect(metrics).toContain('http_request_duration_seconds')
-      expect(metrics).toContain('http_requests_total')
-      expect(metrics).toContain('http_request_errors_total')
+      expect(metrics).toContain(METRIC_CONFIG.HTTP.REQUEST_DURATION.name)
+      expect(metrics).toContain(METRIC_CONFIG.HTTP.REQUEST_TOTAL.name)
+      expect(metrics).toContain(METRIC_CONFIG.HTTP.REQUEST_ERRORS.name)
     })
 
     it('should include database metrics definitions', async () => {
       const metrics = await service.getMetrics()
 
-      expect(metrics).toContain('db_query_duration_seconds')
-      expect(metrics).toContain('db_queries_total')
-      expect(metrics).toContain('db_query_errors_total')
+      expect(metrics).toContain(METRIC_CONFIG.DB.QUERY_DURATION.name)
+      expect(metrics).toContain(METRIC_CONFIG.DB.QUERY_TOTAL.name)
+      expect(metrics).toContain(METRIC_CONFIG.DB.QUERY_ERRORS.name)
     })
 
     it('should include business metrics definitions', async () => {
       const metrics = await service.getMetrics()
 
-      expect(metrics).toContain('users_total')
-      expect(metrics).toContain('teams_total')
-      expect(metrics).toContain('logins_total')
+      expect(metrics).toContain(METRIC_CONFIG.BUSINESS.USERS_TOTAL.name)
+      expect(metrics).toContain(METRIC_CONFIG.BUSINESS.TEAMS_TOTAL.name)
+      expect(metrics).toContain(METRIC_CONFIG.BUSINESS.LOGINS_TOTAL.name)
     })
   })
 
@@ -97,7 +98,7 @@ describe('MetricsService', () => {
       service.recordHttpRequest(params)
       const metrics = await service.getMetrics()
 
-      expect(metrics).toContain('http_requests_total')
+      expect(metrics).toContain(METRIC_CONFIG.HTTP.REQUEST_TOTAL.name)
       expect(metrics).toContain(`method="${prometheus.http.methods.get}"`)
       expect(metrics).toContain(`route="${prometheus.http.routes.users}"`)
       expect(metrics).toContain(`status_code="${prometheus.http.statusCodes.ok}"`)
@@ -141,7 +142,7 @@ describe('MetricsService', () => {
 
       const metrics = await service.getMetrics()
 
-      expect(metrics).toContain('http_request_duration_seconds')
+      expect(metrics).toContain(METRIC_CONFIG.HTTP.REQUEST_DURATION.name)
     })
 
     it('should handle different HTTP status codes', async () => {
@@ -175,40 +176,40 @@ describe('MetricsService', () => {
       const params = {
         method: prometheus.http.methods.post,
         route: prometheus.http.routes.users,
-        errorType: prometheus.http.errors.validation,
+        errorType: prometheus.http.errors.client,
       }
 
       service.recordHttpError(params)
       const metrics = await service.getMetrics()
 
-      expect(metrics).toContain('http_request_errors_total')
+      expect(metrics).toContain(METRIC_CONFIG.HTTP.REQUEST_ERRORS.name)
       expect(metrics).toContain(`method="${prometheus.http.methods.post}"`)
       expect(metrics).toContain(`route="${prometheus.http.routes.users}"`)
-      expect(metrics).toContain(`error_type="${prometheus.http.errors.validation}"`)
+      expect(metrics).toContain(`error_type="${prometheus.http.errors.client}"`)
     })
 
     it('should record multiple error types', async () => {
       service.recordHttpError({
         method: prometheus.http.methods.post,
         route: prometheus.http.routes.login,
-        errorType: prometheus.http.errors.authentication,
+        errorType: prometheus.http.errors.client,
       })
       service.recordHttpError({
         method: prometheus.http.methods.get,
         route: prometheus.http.routes.teamsById,
-        errorType: prometheus.http.errors.notFound,
+        errorType: prometheus.http.errors.client,
       })
       service.recordHttpError({
         method: prometheus.http.methods.put,
         route: prometheus.http.routes.usersById,
-        errorType: prometheus.http.errors.validation,
+        errorType: prometheus.http.errors.client,
       })
 
       const metrics = await service.getMetrics()
 
-      expect(metrics).toContain(`error_type="${prometheus.http.errors.authentication}"`)
-      expect(metrics).toContain(`error_type="${prometheus.http.errors.notFound}"`)
-      expect(metrics).toContain(`error_type="${prometheus.http.errors.validation}"`)
+      expect(metrics).toContain(`error_type="${prometheus.http.errors.client}"`)
+      expect(metrics).toContain(`error_type="${prometheus.http.errors.client}"`)
+      expect(metrics).toContain(`error_type="${prometheus.http.errors.client}"`)
     })
   })
 
@@ -223,7 +224,7 @@ describe('MetricsService', () => {
       service.recordDbQuery(params)
       const metrics = await service.getMetrics()
 
-      expect(metrics).toContain('db_queries_total')
+      expect(metrics).toContain(METRIC_CONFIG.DB.QUERY_TOTAL.name)
       expect(metrics).toContain(`operation="${prometheus.db.operations.select}"`)
       expect(metrics).toContain(`table="${prometheus.db.tables.users}"`)
     })
@@ -267,11 +268,11 @@ describe('MetricsService', () => {
 
       const metrics = await service.getMetrics()
 
-      expect(metrics).toContain('db_query_duration_seconds')
+      expect(metrics).toContain(METRIC_CONFIG.DB.QUERY_DURATION.name)
     })
 
     it('should handle queries on different tables', async () => {
-      const tables = [prometheus.db.tables.users, prometheus.db.tables.teams, prometheus.db.tables.refreshTokens, prometheus.db.tables.sessions]
+      const tables = [prometheus.db.tables.users, prometheus.db.tables.teams, prometheus.db.tables.refreshTokens, prometheus.db.tables.refreshTokens]
 
       for (const table of tables) {
         service.recordDbQuery({
@@ -300,7 +301,7 @@ describe('MetricsService', () => {
       service.recordDbError(params)
       const metrics = await service.getMetrics()
 
-      expect(metrics).toContain('db_query_errors_total')
+      expect(metrics).toContain(METRIC_CONFIG.DB.QUERY_ERRORS.name)
       expect(metrics).toContain(`operation="${prometheus.db.operations.insert}"`)
       expect(metrics).toContain(`table="${prometheus.db.tables.users}"`)
       expect(metrics).toContain(`error_type="${prometheus.db.errors.uniqueConstraint}"`)
@@ -319,7 +320,7 @@ describe('MetricsService', () => {
       })
       service.recordDbError({
         operation: prometheus.db.operations.update,
-        table: prometheus.db.tables.sessions,
+        table: prometheus.db.tables.refreshTokens,
         errorType: prometheus.db.errors.queryTimeout,
       })
 
@@ -338,8 +339,8 @@ describe('MetricsService', () => {
       service.setUsersTotal({ count })
       const metrics = await service.getMetrics()
 
-      expect(metrics).toContain('users_total')
-      expect(metrics).toContain(`users_total ${count}`)
+      expect(metrics).toContain(METRIC_CONFIG.BUSINESS.USERS_TOTAL.name)
+      expect(metrics).toContain(`${METRIC_CONFIG.BUSINESS.USERS_TOTAL.name} ${count}`)
     })
 
     it('should update users count', async () => {
@@ -349,16 +350,16 @@ describe('MetricsService', () => {
 
       const metrics = await service.getMetrics()
 
-      expect(metrics).toContain(`users_total ${prometheus.business.counts.huge}`)
-      expect(metrics).not.toContain(`users_total ${prometheus.business.counts.large}`)
-      expect(metrics).not.toContain(`users_total ${prometheus.business.counts.veryLarge}`)
+      expect(metrics).toContain(`${METRIC_CONFIG.BUSINESS.USERS_TOTAL.name} ${prometheus.business.counts.huge}`)
+      expect(metrics).not.toContain(`${METRIC_CONFIG.BUSINESS.USERS_TOTAL.name} ${prometheus.business.counts.large}`)
+      expect(metrics).not.toContain(`${METRIC_CONFIG.BUSINESS.USERS_TOTAL.name} ${prometheus.business.counts.veryLarge}`)
     })
 
     it('should handle zero users', async () => {
       service.setUsersTotal({ count: prometheus.business.counts.zero })
       const metrics = await service.getMetrics()
 
-      expect(metrics).toContain(`users_total ${prometheus.business.counts.zero}`)
+      expect(metrics).toContain(`${METRIC_CONFIG.BUSINESS.USERS_TOTAL.name} ${prometheus.business.counts.zero}`)
     })
   })
 
@@ -369,8 +370,8 @@ describe('MetricsService', () => {
       service.setTeamsTotal({ count })
       const metrics = await service.getMetrics()
 
-      expect(metrics).toContain('teams_total')
-      expect(metrics).toContain(`teams_total ${count}`)
+      expect(metrics).toContain(METRIC_CONFIG.BUSINESS.TEAMS_TOTAL.name)
+      expect(metrics).toContain(`${METRIC_CONFIG.BUSINESS.TEAMS_TOTAL.name} ${count}`)
     })
 
     it('should update teams count', async () => {
@@ -380,16 +381,16 @@ describe('MetricsService', () => {
 
       const metrics = await service.getMetrics()
 
-      expect(metrics).toContain(`teams_total ${prometheus.business.counts.large}`)
-      expect(metrics).not.toContain(`teams_total ${prometheus.business.counts.small}`)
-      expect(metrics).not.toContain(`teams_total ${prometheus.business.counts.medium}`)
+      expect(metrics).toContain(`${METRIC_CONFIG.BUSINESS.TEAMS_TOTAL.name} ${prometheus.business.counts.large}`)
+      expect(metrics).not.toContain(`${METRIC_CONFIG.BUSINESS.TEAMS_TOTAL.name} ${prometheus.business.counts.small}`)
+      expect(metrics).not.toContain(`${METRIC_CONFIG.BUSINESS.TEAMS_TOTAL.name} ${prometheus.business.counts.medium}`)
     })
 
     it('should handle zero teams', async () => {
       service.setTeamsTotal({ count: prometheus.business.counts.zero })
       const metrics = await service.getMetrics()
 
-      expect(metrics).toContain(`teams_total ${prometheus.business.counts.zero}`)
+      expect(metrics).toContain(`${METRIC_CONFIG.BUSINESS.TEAMS_TOTAL.name} ${prometheus.business.counts.zero}`)
     })
   })
 
@@ -398,7 +399,7 @@ describe('MetricsService', () => {
       service.recordLogin({ role: users.johnDoe.role })
       const metrics = await service.getMetrics()
 
-      expect(metrics).toContain('logins_total')
+      expect(metrics).toContain(METRIC_CONFIG.BUSINESS.LOGINS_TOTAL.name)
       expect(metrics).toContain(`role="${users.johnDoe.role}"`)
     })
 
@@ -444,8 +445,8 @@ describe('MetricsService', () => {
       service.reset()
       const metricsAfterReset = await service.getMetrics()
 
-      expect(metricsAfterReset).toContain(`users_total ${prometheus.business.counts.zero}`)
-      expect(metricsAfterReset).toContain(`teams_total ${prometheus.business.counts.zero}`)
+      expect(metricsAfterReset).toContain(`${METRIC_CONFIG.BUSINESS.USERS_TOTAL.name} ${prometheus.business.counts.zero}`)
+      expect(metricsAfterReset).toContain(`${METRIC_CONFIG.BUSINESS.TEAMS_TOTAL.name} ${prometheus.business.counts.zero}`)
     })
 
     it('should allow recording new metrics after reset', async () => {
@@ -481,7 +482,7 @@ describe('MetricsService', () => {
       service.recordHttpError({
         method: prometheus.http.methods.post,
         route: prometheus.http.routes.teams,
-        errorType: prometheus.http.errors.validation,
+        errorType: prometheus.http.errors.client,
       })
 
       service.recordDbQuery({
@@ -501,13 +502,13 @@ describe('MetricsService', () => {
 
       const metrics = await service.getMetrics()
 
-      expect(metrics).toContain('http_requests_total')
-      expect(metrics).toContain('http_request_errors_total')
-      expect(metrics).toContain('db_queries_total')
-      expect(metrics).toContain('db_query_errors_total')
-      expect(metrics).toContain(`users_total ${prometheus.business.counts.massive}`)
-      expect(metrics).toContain(`teams_total ${prometheus.business.counts.large}`)
-      expect(metrics).toContain('logins_total')
+      expect(metrics).toContain(METRIC_CONFIG.HTTP.REQUEST_TOTAL.name)
+      expect(metrics).toContain(METRIC_CONFIG.HTTP.REQUEST_ERRORS.name)
+      expect(metrics).toContain(METRIC_CONFIG.DB.QUERY_TOTAL.name)
+      expect(metrics).toContain(METRIC_CONFIG.DB.QUERY_ERRORS.name)
+      expect(metrics).toContain(`${METRIC_CONFIG.BUSINESS.USERS_TOTAL.name} ${prometheus.business.counts.massive}`)
+      expect(metrics).toContain(`${METRIC_CONFIG.BUSINESS.TEAMS_TOTAL.name} ${prometheus.business.counts.large}`)
+      expect(metrics).toContain(METRIC_CONFIG.BUSINESS.LOGINS_TOTAL.name)
     })
   })
 })

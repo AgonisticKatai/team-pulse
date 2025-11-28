@@ -1,6 +1,14 @@
 import type { IMetricsService } from '@domain/services/IMetricsService.js'
 import type { IMetricsFactory } from '@domain/services/metrics/IMetricsFactory.js'
 import type { MetricsCollection } from '@domain/services/metrics/MetricsCollection.js'
+import type {
+  DbErrorMetrics,
+  DbQueryMetrics,
+  HttpErrorMetrics,
+  HttpRequestMetrics,
+  LoginMetrics,
+  TotalCountMetrics,
+} from '@domain/services/metrics/metrics.types.js'
 
 /**
  * Service for managing application metrics
@@ -56,17 +64,7 @@ export class MetricsService implements IMetricsService {
   /**
    * Record HTTP request metrics
    */
-  recordHttpRequest({
-    durationSeconds,
-    method,
-    route,
-    statusCode,
-  }: {
-    durationSeconds: number
-    method: string
-    route: string
-    statusCode: number
-  }): void {
+  recordHttpRequest({ durationSeconds, method, route, statusCode }: HttpRequestMetrics): void {
     // biome-ignore lint/style/useNamingConvention: Prometheus label names use snake_case
     const labels = { method, route, status_code: statusCode }
     this.metrics.httpRequestDuration.observe({ labels, value: durationSeconds })
@@ -76,7 +74,7 @@ export class MetricsService implements IMetricsService {
   /**
    * Record HTTP request error
    */
-  recordHttpError({ errorType, method, route }: { errorType: string; method: string; route: string }): void {
+  recordHttpError({ errorType, method, route }: HttpErrorMetrics): void {
     // biome-ignore lint/style/useNamingConvention: Prometheus label names use snake_case
     this.metrics.httpRequestErrors.inc({ labels: { method, route, error_type: errorType } })
   }
@@ -84,7 +82,7 @@ export class MetricsService implements IMetricsService {
   /**
    * Record database query metrics
    */
-  recordDbQuery({ durationSeconds, operation, table }: { durationSeconds: number; operation: string; table: string }): void {
+  recordDbQuery({ durationSeconds, operation, table }: DbQueryMetrics): void {
     const labels = { operation, table }
     this.metrics.dbQueryDuration.observe({ labels, value: durationSeconds })
     this.metrics.dbQueryTotal.inc({ labels })
@@ -93,7 +91,7 @@ export class MetricsService implements IMetricsService {
   /**
    * Record database query error
    */
-  recordDbError({ errorType, operation, table }: { errorType: string; operation: string; table: string }): void {
+  recordDbError({ errorType, operation, table }: DbErrorMetrics): void {
     // biome-ignore lint/style/useNamingConvention: Prometheus label names use snake_case
     this.metrics.dbQueryErrors.inc({ labels: { operation, table, error_type: errorType } })
   }
@@ -101,21 +99,21 @@ export class MetricsService implements IMetricsService {
   /**
    * Set total number of users
    */
-  setUsersTotal({ count }: { count: number }): void {
+  setUsersTotal({ count }: TotalCountMetrics): void {
     this.metrics.usersTotal.set({ value: count })
   }
 
   /**
    * Set total number of teams
    */
-  setTeamsTotal({ count }: { count: number }): void {
+  setTeamsTotal({ count }: TotalCountMetrics): void {
     this.metrics.teamsTotal.set({ value: count })
   }
 
   /**
    * Record successful login
    */
-  recordLogin({ role }: { role: string }): void {
+  recordLogin({ role }: LoginMetrics): void {
     this.metrics.loginsTotal.inc({ labels: { role } })
   }
 

@@ -1,3 +1,4 @@
+import { METRIC_CONFIG } from '@domain/services/metrics/metrics.config.js'
 import { PrometheusMetricsFactory } from '@infrastructure/monitoring/prometheus/PrometheusMetricsFactory.js'
 import { beforeEach, describe, expect, it } from 'vitest'
 
@@ -57,8 +58,8 @@ describe('PrometheusMetricsFactory', () => {
       metrics.usersTotal.set({ value: 42 })
 
       const metricsOutput = await metrics.registry.metrics()
-      expect(metricsOutput).toContain('http_requests_total')
-      expect(metricsOutput).toContain('users_total')
+      expect(metricsOutput).toContain(METRIC_CONFIG.HTTP.REQUEST_TOTAL.name)
+      expect(metricsOutput).toContain(METRIC_CONFIG.BUSINESS.USERS_TOTAL.name)
     })
 
     it('should create isolated metrics for each factory instance', async () => {

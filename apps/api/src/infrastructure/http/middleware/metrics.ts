@@ -1,4 +1,5 @@
 import type { IMetricsService } from '@domain/services/IMetricsService.js'
+import type { HttpErrorType, HttpMethod } from '@domain/services/metrics/metrics.types.js'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
 // WeakMap to store request start times
@@ -33,14 +34,16 @@ export function createMetricsOnResponse({ metricsService }: { metricsService: IM
     const endTime = process.hrtime.bigint()
     const durationSeconds = Number(endTime - startTime) / 1e9
 
-    const method = request.method
+    // Fastify returns string for method, but HTTP methods are standardized
+    // Safe to cast as all valid HTTP methods are in our HttpMethod type
+    const method = request.method as HttpMethod
     const route = request.routeOptions?.url || 'unknown'
     const statusCode = reply.statusCode
 
     metricsService.recordHttpRequest({ durationSeconds, method, route, statusCode })
 
     if (statusCode >= 400) {
-      const errorType = statusCode >= 500 ? 'server_error' : 'client_error'
+      const errorType: HttpErrorType = statusCode >= 500 ? 'server_error' : 'client_error'
       metricsService.recordHttpError({ errorType, method, route })
     }
 
