@@ -2,6 +2,8 @@
    CSS CUSTOM PROPERTIES (Design Tokens)
    ========================================== */
 
+@import "tailwindcss";
+
 :root {
   /* Colors - Primary */
   --color-primary: 102 126 234;
