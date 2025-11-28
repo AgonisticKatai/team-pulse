@@ -1,7 +1,7 @@
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import type { IMetricsService } from '@domain/services/IMetricsService.js'
 import { Pagination } from '@domain/value-objects/index.js'
-import type { TeamsListResponseDTO } from '@team-pulse/shared/dtos'
+import type { PaginationQuery, TeamsListResponseDTO } from '@team-pulse/shared/dtos'
 import type { RepositoryError, ValidationError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
 
@@ -29,13 +29,8 @@ export class ListTeamsUseCase {
     return new ListTeamsUseCase({ metricsService, teamRepository })
   }
 
-  async execute({
-    page = 1,
-    limit = 10,
-  }: {
-    page?: number
-    limit?: number
-  } = {}): Promise<Result<TeamsListResponseDTO, RepositoryError | ValidationError>> {
+  async execute({ dto }: { dto: PaginationQuery }): Promise<Result<TeamsListResponseDTO, RepositoryError | ValidationError>> {
+    const { page = 1, limit = 10 } = dto
     const findTeamResult = await this.teamRepository.findAllPaginated({ page, limit })
 
     if (!findTeamResult.ok) {

@@ -39,7 +39,7 @@ export class CreateUserUseCase {
     return new CreateUserUseCase({ userRepository, passwordHasher })
   }
 
-  async execute(dto: CreateUserDTO): Promise<Result<UserResponseDTO, ConflictError | RepositoryError | ValidationError>> {
+  async execute({ dto }: { dto: CreateUserDTO }): Promise<Result<UserResponseDTO, ConflictError | RepositoryError | ValidationError>> {
     const findUserResult = await this.userRepository.findByEmail({ email: dto.email })
 
     if (!findUserResult.ok) {

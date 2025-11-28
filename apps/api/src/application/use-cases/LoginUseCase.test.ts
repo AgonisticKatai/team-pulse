@@ -102,7 +102,7 @@ describe('LoginUseCase', () => {
         vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
 
         // Act
-        const result = await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute({ dto: loginDTO })
 
         // Assert
         const data = expectSuccess(result)
@@ -127,7 +127,7 @@ describe('LoginUseCase', () => {
         vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
 
         // Act
-        const result = await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute({ dto: loginDTO })
 
         // Assert
         expectSuccess(result)
@@ -146,7 +146,7 @@ describe('LoginUseCase', () => {
         vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
 
         // Act
-        const result = await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute({ dto: loginDTO })
 
         // Assert
         expectSuccess(result)
@@ -166,7 +166,7 @@ describe('LoginUseCase', () => {
         vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
 
         // Act
-        const result = await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute({ dto: loginDTO })
 
         // Assert
         expectSuccess(result)
@@ -187,7 +187,7 @@ describe('LoginUseCase', () => {
         vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
 
         // Act
-        const result = await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute({ dto: loginDTO })
 
         // Assert
         expectSuccess(result)
@@ -206,7 +206,7 @@ describe('LoginUseCase', () => {
         vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
 
         // Act
-        const result = await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute({ dto: loginDTO })
 
         // Assert
         expectSuccess(result)
@@ -230,7 +230,7 @@ describe('LoginUseCase', () => {
         vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
 
         // Act
-        const result = await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute({ dto: loginDTO })
 
         // Assert
         const data = expectSuccess(result)
@@ -253,7 +253,7 @@ describe('LoginUseCase', () => {
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(null))
 
         // Act
-        const result = await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute({ dto: loginDTO })
 
         // Assert
         const error = expectErrorType({ errorType: AuthenticationError, result })
@@ -267,7 +267,7 @@ describe('LoginUseCase', () => {
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(null))
 
         // Act
-        const result = await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute({ dto: loginDTO })
 
         // Assert
         expectErrorType({ errorType: AuthenticationError, result })
@@ -282,7 +282,7 @@ describe('LoginUseCase', () => {
         vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(false))
 
         // Act
-        const result = await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute({ dto: loginDTO })
 
         // Assert
         const error = expectErrorType({ errorType: AuthenticationError, result })
@@ -297,7 +297,7 @@ describe('LoginUseCase', () => {
         vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(false))
 
         // Act
-        const result = await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute({ dto: loginDTO })
 
         // Assert
         expectErrorType({ errorType: AuthenticationError, result })
@@ -314,7 +314,7 @@ describe('LoginUseCase', () => {
         vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(false))
 
         // Act
-        const result = await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute({ dto: loginDTO })
 
         // Assert - Error message should be the same for "user not found" and "wrong password"
         const error = expectErrorType({ errorType: AuthenticationError, result })
@@ -336,7 +336,7 @@ describe('LoginUseCase', () => {
         vi.mocked(refreshTokenRepository.save).mockResolvedValue(Err(repositoryError))
 
         // Act
-        const result = await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute({ dto: loginDTO })
 
         // Assert
         const error = expectErrorType({ errorType: RepositoryError, result })
@@ -358,7 +358,7 @@ describe('LoginUseCase', () => {
         vi.mocked(refreshTokenRepository.save).mockResolvedValue(Err(repositoryError))
 
         // Act
-        const result = await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute({ dto: loginDTO })
 
         // Assert
         expectErrorType({ errorType: RepositoryError, result })
@@ -381,7 +381,7 @@ describe('LoginUseCase', () => {
         vi.mocked(refreshTokenRepository.save).mockResolvedValue(Err(repositoryError))
 
         // Act
-        const result = await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute({ dto: loginDTO })
 
         // Assert
         expectErrorType({ errorType: RepositoryError, result })
@@ -407,7 +407,7 @@ describe('LoginUseCase', () => {
         vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
 
         // Act
-        const result = await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute({ dto: loginDTO })
 
         // Assert
         const data = expectSuccess(result)
@@ -428,7 +428,7 @@ describe('LoginUseCase', () => {
         vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
 
         // Act
-        const result = await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute({ dto: loginDTO })
 
         // Assert
         const data = expectSuccess(result)
@@ -444,7 +444,7 @@ describe('LoginUseCase', () => {
         vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
 
         // Act
-        const result = await loginUseCase.execute(loginDTO)
+        const result = await loginUseCase.execute({ dto: loginDTO })
 
         // Assert
         const data = expectSuccess(result)

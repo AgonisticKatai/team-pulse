@@ -37,7 +37,7 @@ export class CreateTeamUseCase {
     return new CreateTeamUseCase({ teamRepository })
   }
 
-  async execute(dto: CreateTeamDTO): Promise<Result<TeamResponseDTO, ConflictError | RepositoryError | ValidationError>> {
+  async execute({ dto }: { dto: CreateTeamDTO }): Promise<Result<TeamResponseDTO, ConflictError | RepositoryError | ValidationError>> {
     const findTeamResult = await this.teamRepository.findByName({ name: dto.name })
 
     if (!findTeamResult.ok) {

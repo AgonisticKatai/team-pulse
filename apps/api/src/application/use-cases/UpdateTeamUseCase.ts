@@ -20,7 +20,13 @@ export class UpdateTeamUseCase {
     return new UpdateTeamUseCase({ teamRepository })
   }
 
-  async execute(id: string, dto: UpdateTeamDTO): Promise<Result<TeamResponseDTO, ConflictError | NotFoundError | ValidationError | RepositoryError>> {
+  async execute({
+    id,
+    dto,
+  }: {
+    id: string
+    dto: UpdateTeamDTO
+  }): Promise<Result<TeamResponseDTO, ConflictError | NotFoundError | ValidationError | RepositoryError>> {
     const findTeamResult = await this.teamRepository.findById({ id })
 
     if (!findTeamResult.ok) {

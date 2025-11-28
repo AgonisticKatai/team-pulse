@@ -55,7 +55,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
         const dto = LoginDTOSchema.parse(request.body)
 
         // Execute use case
-        const result = await loginUseCase.execute(dto)
+        const result = await loginUseCase.execute({ dto })
 
         // Handle Result type
         if (!result.ok) {
@@ -85,7 +85,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
       const dto = RefreshTokenDTOSchema.parse(request.body)
 
       // Execute use case
-      const result = await refreshTokenUseCase.execute(dto)
+      const result = await refreshTokenUseCase.execute({ dto })
 
       // Handle Result type
       if (!result.ok) {
@@ -116,7 +116,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
       const dto = RefreshTokenDTOSchema.parse(request.body)
 
       // Execute use case (Result<void, never> - always succeeds)
-      await logoutUseCase.execute(dto.refreshToken)
+      await logoutUseCase.execute({ refreshToken: dto.refreshToken })
 
       // Return success response
       return reply.code(204).send()

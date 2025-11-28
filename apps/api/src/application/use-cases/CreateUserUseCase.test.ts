@@ -59,7 +59,7 @@ describe('CreateUserUseCase', () => {
         vi.mocked(userRepository.save).mockResolvedValue(Ok(mockUser))
 
         // Act
-        const result = await createUserUseCase.execute(dto)
+        const result = await createUserUseCase.execute({ dto })
 
         // Assert
         const data = expectSuccess(result)
@@ -77,7 +77,7 @@ describe('CreateUserUseCase', () => {
         vi.mocked(userRepository.save).mockResolvedValue(Ok(mockUser))
 
         // Act
-        const result = await createUserUseCase.execute(dto)
+        const result = await createUserUseCase.execute({ dto })
 
         // Assert
         expectSuccess(result)
@@ -95,7 +95,7 @@ describe('CreateUserUseCase', () => {
         vi.mocked(userRepository.save).mockResolvedValue(Ok(mockUser))
 
         // Act
-        const result = await createUserUseCase.execute(dto)
+        const result = await createUserUseCase.execute({ dto })
 
         // Assert
         expectSuccess(result)
@@ -111,7 +111,7 @@ describe('CreateUserUseCase', () => {
         vi.mocked(userRepository.save).mockResolvedValue(Ok(mockUser))
 
         // Act
-        const result = await createUserUseCase.execute(dto)
+        const result = await createUserUseCase.execute({ dto })
 
         // Assert
         expectSuccess(result)
@@ -134,7 +134,7 @@ describe('CreateUserUseCase', () => {
         vi.mocked(userRepository.save).mockResolvedValue(Ok(mockUser))
 
         // Act
-        const result = await createUserUseCase.execute(dto)
+        const result = await createUserUseCase.execute({ dto })
 
         // Assert
         const data = expectSuccess(result)
@@ -156,7 +156,7 @@ describe('CreateUserUseCase', () => {
         vi.mocked(userRepository.save).mockResolvedValue(Ok(mockUser))
 
         // Act
-        const result = await createUserUseCase.execute(dto)
+        const result = await createUserUseCase.execute({ dto })
 
         // Assert
         const data = expectSuccess(result)
@@ -177,7 +177,7 @@ describe('CreateUserUseCase', () => {
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(existingUser))
 
         // Act
-        const result = await createUserUseCase.execute(dto)
+        const result = await createUserUseCase.execute({ dto })
 
         // Assert
         const error = expectErrorType({ errorType: ConflictError, result })
@@ -193,7 +193,7 @@ describe('CreateUserUseCase', () => {
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(existingUser))
 
         // Act
-        const result = await createUserUseCase.execute(dto)
+        const result = await createUserUseCase.execute({ dto })
 
         // Assert - Should fail before hashing password
         expectErrorType({ errorType: ConflictError, result })
@@ -213,7 +213,7 @@ describe('CreateUserUseCase', () => {
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Err(repositoryError))
 
         // Act
-        const error = expectError(await createUserUseCase.execute(dto))
+        const error = expectError(await createUserUseCase.execute({ dto }))
 
         // Assert
         expect(error).toBeInstanceOf(RepositoryError)
@@ -233,7 +233,7 @@ describe('CreateUserUseCase', () => {
         vi.mocked(userRepository.save).mockResolvedValue(Err(repositoryError))
 
         // Act
-        const error = expectError(await createUserUseCase.execute(dto))
+        const error = expectError(await createUserUseCase.execute({ dto }))
 
         // Assert
         expect(error).toBeInstanceOf(RepositoryError)
@@ -256,7 +256,7 @@ describe('CreateUserUseCase', () => {
         vi.mocked(userRepository.save).mockResolvedValue(Ok(adminUser))
 
         // Act
-        const result = await createUserUseCase.execute(dto)
+        const result = await createUserUseCase.execute({ dto })
 
         // Assert
         const data = expectSuccess(result)
@@ -281,7 +281,7 @@ describe('CreateUserUseCase', () => {
         vi.mocked(userRepository.save).mockResolvedValue(Ok(superAdminUser))
 
         // Act
-        const result = await createUserUseCase.execute(dto)
+        const result = await createUserUseCase.execute({ dto })
 
         // Assert
         const data = expectSuccess(result)
@@ -302,7 +302,7 @@ describe('CreateUserUseCase', () => {
         const { randomUUID } = await import('node:crypto')
 
         // Act
-        const result = await createUserUseCase.execute(dto)
+        const result = await createUserUseCase.execute({ dto })
 
         // Assert
         expectSuccess(result)

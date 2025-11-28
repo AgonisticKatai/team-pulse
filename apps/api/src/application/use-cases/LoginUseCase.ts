@@ -69,7 +69,7 @@ export class LoginUseCase {
     return new LoginUseCase({ metricsService, passwordHasher, refreshTokenRepository, tokenFactory, userRepository })
   }
 
-  async execute(dto: LoginDTO): Promise<Result<LoginResponseDTO, AuthenticationError | RepositoryError | ValidationError>> {
+  async execute({ dto }: { dto: LoginDTO }): Promise<Result<LoginResponseDTO, AuthenticationError | RepositoryError | ValidationError>> {
     const findUserResult = await this.userRepository.findByEmail({ email: dto.email })
 
     if (!findUserResult.ok) {

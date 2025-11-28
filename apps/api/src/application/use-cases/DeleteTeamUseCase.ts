@@ -19,7 +19,7 @@ export class DeleteTeamUseCase {
     return new DeleteTeamUseCase({ teamRepository })
   }
 
-  async execute(id: string): Promise<Result<void, NotFoundError | RepositoryError>> {
+  async execute({ id }: { id: string }): Promise<Result<void, NotFoundError | RepositoryError>> {
     const findTeamResult = await this.teamRepository.findById({ id })
 
     if (!findTeamResult.ok) {

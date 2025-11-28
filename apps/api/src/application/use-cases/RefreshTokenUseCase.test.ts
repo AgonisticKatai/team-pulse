@@ -84,7 +84,7 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
 
         // Act
-        const result = await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute({ dto })
 
         // Assert
         const data = expectSuccess(result)
@@ -101,7 +101,7 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
 
         // Act
-        const result = await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute({ dto })
 
         // Assert
         expectSuccess(result)
@@ -119,7 +119,7 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
 
         // Act
-        const result = await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute({ dto })
 
         // Assert
         expectSuccess(result)
@@ -135,7 +135,7 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
 
         // Act
-        const result = await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute({ dto })
 
         // Assert
         expectSuccess(result)
@@ -151,7 +151,7 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
 
         // Act
-        const result = await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute({ dto })
 
         // Assert
         expectSuccess(result)
@@ -173,7 +173,7 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
 
         // Act
-        const result = await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute({ dto })
 
         // Assert
         expectSuccess(result)
@@ -191,7 +191,7 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
 
         // Act
-        const result = await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute({ dto })
 
         // Assert
         expectSuccess(result)
@@ -209,7 +209,7 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
 
         // Act
-        const result = await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute({ dto })
 
         // Assert
         expectSuccess(result)
@@ -236,7 +236,7 @@ describe('RefreshTokenUseCase', () => {
         )
 
         // Act
-        const result = await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute({ dto })
 
         // Assert - Should still succeed even if deletion fails
         const data = expectSuccess(result)
@@ -260,7 +260,7 @@ describe('RefreshTokenUseCase', () => {
         )
 
         // Act
-        const result = await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute({ dto })
 
         // Assert
         const error = expectErrorType({ errorType: AuthenticationError, result })
@@ -278,7 +278,7 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(null))
 
         // Act
-        const result = await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute({ dto })
 
         // Assert
         const error = expectErrorType({ errorType: AuthenticationError, result })
@@ -302,7 +302,7 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(refreshTokenRepository.deleteByToken).mockResolvedValue(Ok(true))
 
         // Act
-        const result = await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute({ dto })
 
         // Assert
         const error = expectErrorType({ errorType: AuthenticationError, result })
@@ -323,7 +323,7 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(refreshTokenRepository.deleteByToken).mockResolvedValue(Ok(true))
 
         // Act
-        const result = await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute({ dto })
 
         // Assert
         const error = expectErrorType({ errorType: AuthenticationError, result })
@@ -348,7 +348,7 @@ describe('RefreshTokenUseCase', () => {
         )
 
         // Act
-        const result = await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute({ dto })
 
         // Assert
         const error = expectErrorType({ errorType: AuthenticationError, result })
@@ -373,7 +373,7 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(userRepository.findById).mockResolvedValue(Ok(adminUser))
 
         // Act
-        const result = await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute({ dto })
 
         // Assert
         expectSuccess(result)
@@ -400,7 +400,7 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(userRepository.findById).mockResolvedValue(Ok(superAdminUser))
 
         // Act
-        const result = await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute({ dto })
 
         // Assert
         expectSuccess(result)
@@ -425,7 +425,7 @@ describe('RefreshTokenUseCase', () => {
         )
 
         // Act
-        const result = await refreshTokenUseCase.execute(dto)
+        const result = await refreshTokenUseCase.execute({ dto })
 
         // Assert - Should return error but NOT delete token on JWT verification failure
         expectErrorType({ errorType: AuthenticationError, result })

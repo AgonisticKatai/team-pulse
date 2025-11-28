@@ -41,7 +41,7 @@ describe('DeleteTeamUseCase', () => {
         vi.mocked(teamRepository.delete).mockResolvedValue(Ok(undefined))
 
         // Act
-        const result = expectSuccess(await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid))
+        const result = expectSuccess(await deleteTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid }))
 
         // Assert
         expect(result).toBeUndefined()
@@ -53,7 +53,7 @@ describe('DeleteTeamUseCase', () => {
         vi.mocked(teamRepository.delete).mockResolvedValue(Ok(undefined))
 
         // Act
-        await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid)
+        await deleteTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid })
 
         // Assert
         expect(teamRepository.findById).toHaveBeenCalledWith({ id: TEST_CONSTANTS.mockUuid })
@@ -66,7 +66,7 @@ describe('DeleteTeamUseCase', () => {
         vi.mocked(teamRepository.delete).mockResolvedValue(Ok(undefined))
 
         // Act
-        await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid)
+        await deleteTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid })
 
         // Assert
         expect(teamRepository.delete).toHaveBeenCalledWith({ id: TEST_CONSTANTS.mockUuid })
@@ -79,7 +79,7 @@ describe('DeleteTeamUseCase', () => {
         vi.mocked(teamRepository.delete).mockResolvedValue(Ok(undefined))
 
         // Act
-        await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid)
+        await deleteTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid })
 
         // Assert
         // findById should be called before delete
@@ -95,7 +95,7 @@ describe('DeleteTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(null))
 
         // Act
-        const error = expectError(await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid))
+        const error = expectError(await deleteTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid }))
 
         // Assert
         expect(error).toBeInstanceOf(NotFoundError)
@@ -108,7 +108,7 @@ describe('DeleteTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(null))
 
         // Act
-        await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid)
+        await deleteTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid })
 
         // Assert
         expect(teamRepository.delete).not.toHaveBeenCalled()
@@ -120,7 +120,7 @@ describe('DeleteTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(null))
 
         // Act
-        const error = expectError(await deleteTeamUseCase.execute(nonExistentId))
+        const error = expectError(await deleteTeamUseCase.execute({ id: nonExistentId }))
 
         // Assert
         expect(error).toBeInstanceOf(NotFoundError)
@@ -135,7 +135,7 @@ describe('DeleteTeamUseCase', () => {
         vi.mocked(teamRepository.delete).mockResolvedValue(Err(RepositoryError.create({ message: 'Failed to delete team' })))
 
         // Act
-        const error = expectError(await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid))
+        const error = expectError(await deleteTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid }))
 
         // Assert
         expect(error).toBeInstanceOf(RepositoryError)
@@ -150,7 +150,7 @@ describe('DeleteTeamUseCase', () => {
         // Act
         const error = expectErrorType({
           errorType: RepositoryError,
-          result: await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid),
+          result: await deleteTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid }),
         })
 
         // Assert
@@ -167,7 +167,7 @@ describe('DeleteTeamUseCase', () => {
         vi.mocked(teamRepository.delete).mockResolvedValue(Ok(undefined))
 
         // Act
-        const result = expectSuccess(await deleteTeamUseCase.execute(differentId))
+        const result = expectSuccess(await deleteTeamUseCase.execute({ id: differentId }))
 
         // Assert
         expect(result).toBeUndefined()
@@ -182,7 +182,7 @@ describe('DeleteTeamUseCase', () => {
         vi.mocked(teamRepository.delete).mockResolvedValue(Ok(undefined))
 
         // Act
-        const result = expectSuccess(await deleteTeamUseCase.execute(TEST_CONSTANTS.mockUuid))
+        const result = expectSuccess(await deleteTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid }))
 
         // Assert
         expect(result).toBeUndefined()

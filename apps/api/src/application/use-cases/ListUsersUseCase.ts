@@ -1,7 +1,7 @@
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { IMetricsService } from '@domain/services/IMetricsService.js'
 import { Pagination } from '@domain/value-objects/index.js'
-import type { UsersListResponseDTO } from '@team-pulse/shared/dtos'
+import type { PaginationQuery, UsersListResponseDTO } from '@team-pulse/shared/dtos'
 import type { RepositoryError, ValidationError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
 
@@ -40,13 +40,8 @@ export class ListUsersUseCase {
     return new ListUsersUseCase({ metricsService, userRepository })
   }
 
-  async execute({
-    page = 1,
-    limit = 10,
-  }: {
-    page?: number
-    limit?: number
-  } = {}): Promise<Result<UsersListResponseDTO, RepositoryError | ValidationError>> {
+  async execute({ dto }: { dto: PaginationQuery }): Promise<Result<UsersListResponseDTO, RepositoryError | ValidationError>> {
+    const { page = 1, limit = 10 } = dto
     const findUserResult = await this.userRepository.findAllPaginated({ page, limit })
 
     if (!findUserResult.ok) {

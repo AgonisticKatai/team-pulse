@@ -33,7 +33,7 @@ describe('LogoutUseCase', () => {
       const refreshToken = TEST_CONSTANTS.auth.validRefreshToken
 
       // Act
-      const result = await logoutUseCase.execute(refreshToken)
+      const result = await logoutUseCase.execute({ refreshToken })
 
       // Assert
       expectSuccess(result)
@@ -47,7 +47,7 @@ describe('LogoutUseCase', () => {
       vi.mocked(refreshTokenRepository.deleteByToken).mockResolvedValue(Ok(false))
 
       // Act
-      const result = await logoutUseCase.execute(refreshToken)
+      const result = await logoutUseCase.execute({ refreshToken })
 
       // Assert
       expectSuccess(result)
@@ -59,7 +59,7 @@ describe('LogoutUseCase', () => {
       const refreshToken = TEST_CONSTANTS.auth.mockRefreshToken
 
       // Act
-      const result = await logoutUseCase.execute(refreshToken)
+      const result = await logoutUseCase.execute({ refreshToken })
 
       // Assert
       const value = expectSuccess(result)
@@ -71,7 +71,7 @@ describe('LogoutUseCase', () => {
       const refreshToken = ''
 
       // Act
-      const result = await logoutUseCase.execute(refreshToken)
+      const result = await logoutUseCase.execute({ refreshToken })
 
       // Assert
       expectSuccess(result)
@@ -84,9 +84,9 @@ describe('LogoutUseCase', () => {
       const refreshToken = TEST_CONSTANTS.auth.mockRefreshToken
 
       // Act - Call multiple times
-      const result1 = await logoutUseCase.execute(refreshToken)
-      const result2 = await logoutUseCase.execute(refreshToken)
-      const result3 = await logoutUseCase.execute(refreshToken)
+      const result1 = await logoutUseCase.execute({ refreshToken })
+      const result2 = await logoutUseCase.execute({ refreshToken })
+      const result3 = await logoutUseCase.execute({ refreshToken })
 
       // Assert - Should be called 3 times (idempotent operation)
       expectSuccess(result1)

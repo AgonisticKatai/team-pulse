@@ -20,7 +20,7 @@ export class GetTeamUseCase {
     return new GetTeamUseCase({ teamRepository })
   }
 
-  async execute(id: string): Promise<Result<TeamResponseDTO, NotFoundError | RepositoryError>> {
+  async execute({ id }: { id: string }): Promise<Result<TeamResponseDTO, NotFoundError | RepositoryError>> {
     const findTeamResult = await this.teamRepository.findById({ id })
 
     if (!findTeamResult.ok) {

@@ -55,7 +55,7 @@ describe('ListUsersUseCase', () => {
         vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ users: mockUsers, total: 2 }))
 
         // Act
-        const result = await listUsersUseCase.execute()
+        const result = await listUsersUseCase.execute({ dto: { page: 1, limit: 10 } })
 
         // Assert
         const data = expectSuccess(result)
@@ -71,7 +71,7 @@ describe('ListUsersUseCase', () => {
         vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ users: [], total: 0 }))
 
         // Act
-        await listUsersUseCase.execute()
+        await listUsersUseCase.execute({ dto: { page: 1, limit: 10 } })
 
         // Assert
         expect(userRepository.findAllPaginated).toHaveBeenCalledTimes(1)
@@ -85,7 +85,7 @@ describe('ListUsersUseCase', () => {
         vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ users: mockUsers, total: 1 }))
 
         // Act
-        const result = await listUsersUseCase.execute()
+        const result = await listUsersUseCase.execute({ dto: { page: 1, limit: 10 } })
 
         // Assert
         const data = expectSuccess(result)
@@ -107,7 +107,7 @@ describe('ListUsersUseCase', () => {
         vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ users: mockUsers, total: 1 }))
 
         // Act
-        const result = await listUsersUseCase.execute()
+        const result = await listUsersUseCase.execute({ dto: { page: 1, limit: 10 } })
 
         // Assert
         const data = expectSuccess(result)
@@ -125,7 +125,7 @@ describe('ListUsersUseCase', () => {
         vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ users: [], total: 0 }))
 
         // Act
-        const result = await listUsersUseCase.execute()
+        const result = await listUsersUseCase.execute({ dto: { page: 1, limit: 10 } })
 
         // Assert
         const data = expectSuccess(result)
@@ -141,7 +141,7 @@ describe('ListUsersUseCase', () => {
         vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ users: mockUsers, total: 1 }))
 
         // Act
-        const result = await listUsersUseCase.execute()
+        const result = await listUsersUseCase.execute({ dto: { page: 1, limit: 10 } })
 
         // Assert
         const data = expectSuccess(result)
@@ -158,7 +158,7 @@ describe('ListUsersUseCase', () => {
         vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ users: mockUsers, total: 3 }))
 
         // Act
-        const result = await listUsersUseCase.execute()
+        const result = await listUsersUseCase.execute({ dto: { page: 1, limit: 10 } })
 
         // Assert
         const data = expectSuccess(result)
@@ -180,7 +180,7 @@ describe('ListUsersUseCase', () => {
         vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ users: mockUsers, total: 10 }))
 
         // Act
-        const result = await listUsersUseCase.execute()
+        const result = await listUsersUseCase.execute({ dto: { page: 1, limit: 10 } })
 
         // Assert
         const data = expectSuccess(result)
@@ -202,7 +202,7 @@ describe('ListUsersUseCase', () => {
         vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ users: mockUsers, total: 3 }))
 
         // Act
-        const result = await listUsersUseCase.execute()
+        const result = await listUsersUseCase.execute({ dto: { page: 1, limit: 10 } })
 
         // Assert
         const data = expectSuccess(result)
@@ -218,7 +218,7 @@ describe('ListUsersUseCase', () => {
         vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ users: mockUsers, total: 20 }))
 
         // Act
-        const result = await listUsersUseCase.execute({ page: 2, limit: 5 })
+        const result = await listUsersUseCase.execute({ dto: { page: 2, limit: 5 } })
 
         // Assert
         expect(userRepository.findAllPaginated).toHaveBeenCalledWith({ page: 2, limit: 5 })
@@ -241,7 +241,7 @@ describe('ListUsersUseCase', () => {
         vi.mocked(userRepository.findAllPaginated).mockResolvedValueOnce(Err(mockError as any))
 
         // Act
-        const result = await listUsersUseCase.execute()
+        const result = await listUsersUseCase.execute({ dto: { page: 1, limit: 10 } })
 
         // Assert
         const error = expectError(result)

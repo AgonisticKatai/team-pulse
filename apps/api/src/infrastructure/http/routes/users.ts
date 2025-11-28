@@ -44,7 +44,7 @@ export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserR
       const dto = CreateUserDTOSchema.parse(request.body)
 
       // Execute use case
-      const result = await createUserUseCase.execute(dto)
+      const result = await createUserUseCase.execute({ dto })
 
       // Handle Result type
       if (!result.ok) {
@@ -78,7 +78,7 @@ export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserR
       // Parse and validate pagination query params
       const { page, limit } = PaginationQuerySchema.parse(request.query)
 
-      const result = await listUsersUseCase.execute({ page, limit })
+      const result = await listUsersUseCase.execute({ dto: { page, limit } })
 
       // Handle Result type
       if (!result.ok) {

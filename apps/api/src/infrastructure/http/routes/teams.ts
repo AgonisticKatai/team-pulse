@@ -59,7 +59,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
       const dto = CreateTeamDTOSchema.parse(request.body)
 
       // Execute use case - Returns Result<TeamResponseDTO, ValidationError>
-      const result = await createTeamUseCase.execute(dto)
+      const result = await createTeamUseCase.execute({ dto })
 
       // Handle use case error
       if (!result.ok) {
@@ -94,7 +94,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
       // Parse and validate pagination query params
       const { page, limit } = PaginationQuerySchema.parse(request.query)
 
-      const result = await listTeamsUseCase.execute({ page, limit })
+      const result = await listTeamsUseCase.execute({ dto: { page, limit } })
 
       if (!result.ok) {
         const logger = FastifyLogger.create({ logger: request.log })
@@ -121,7 +121,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
     try {
       const { id } = request.params
 
-      const result = await getTeamUseCase.execute(id)
+      const result = await getTeamUseCase.execute({ id })
 
       if (!result.ok) {
         const logger = FastifyLogger.create({ logger: request.log })
@@ -155,7 +155,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
         const dto = UpdateTeamDTOSchema.parse(request.body)
 
         // Execute use case - Returns Result<TeamResponseDTO, NotFoundError | ValidationError | RepositoryError>
-        const result = await updateTeamUseCase.execute(id, dto)
+        const result = await updateTeamUseCase.execute({ id, dto })
 
         // Handle use case error
         if (!result.ok) {
@@ -188,7 +188,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
       try {
         const { id } = request.params
 
-        await deleteTeamUseCase.execute(id)
+        await deleteTeamUseCase.execute({ id })
 
         return reply.code(204).send()
       } catch (error) {

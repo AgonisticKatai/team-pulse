@@ -40,7 +40,7 @@ describe('GetTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        const team = expectSuccess(await getTeamUseCase.execute(TEST_CONSTANTS.mockUuid))
+        const team = expectSuccess(await getTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid }))
 
         // Assert
         expect(team.id).toBe(TEST_CONSTANTS.mockUuid)
@@ -54,7 +54,7 @@ describe('GetTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        await getTeamUseCase.execute(TEST_CONSTANTS.mockUuid)
+        await getTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid })
 
         // Assert
         expect(teamRepository.findById).toHaveBeenCalledWith({ id: TEST_CONSTANTS.mockUuid })
@@ -66,7 +66,7 @@ describe('GetTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        const team = expectSuccess(await getTeamUseCase.execute(TEST_CONSTANTS.mockUuid))
+        const team = expectSuccess(await getTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid }))
 
         // Assert
         expect(team).toHaveProperty('id')
@@ -82,7 +82,7 @@ describe('GetTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        const team = expectSuccess(await getTeamUseCase.execute(TEST_CONSTANTS.mockUuid))
+        const team = expectSuccess(await getTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid }))
 
         // Assert
         expect(typeof team.createdAt).toBe('string')
@@ -98,7 +98,7 @@ describe('GetTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(null))
 
         // Act
-        const error = expectError(await getTeamUseCase.execute(TEST_CONSTANTS.mockUuid))
+        const error = expectError(await getTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid }))
 
         // Assert
         expect(error).toBeInstanceOf(NotFoundError)
@@ -111,7 +111,7 @@ describe('GetTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(null))
 
         // Act
-        const error = expectError(await getTeamUseCase.execute(nonExistentId))
+        const error = expectError(await getTeamUseCase.execute({ id: nonExistentId }))
 
         // Assert
         expect(error).toBeInstanceOf(NotFoundError)
@@ -126,7 +126,7 @@ describe('GetTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(teamWithoutYear))
 
         // Act
-        const team = expectSuccess(await getTeamUseCase.execute(TEST_CONSTANTS.mockUuid))
+        const team = expectSuccess(await getTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid }))
 
         // Assert
         expect(team.foundedYear).toBeNull()
@@ -139,7 +139,7 @@ describe('GetTeamUseCase', () => {
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(differentTeam))
 
         // Act
-        const team = expectSuccess(await getTeamUseCase.execute(differentId))
+        const team = expectSuccess(await getTeamUseCase.execute({ id: differentId }))
 
         // Assert
         expect(team.id).toBe(differentId)

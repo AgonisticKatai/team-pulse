@@ -65,7 +65,7 @@ describe('ListTeamsUseCase', () => {
         vi.mocked(teamRepository.findAllPaginated).mockResolvedValue(Ok({ teams: [mockTeam1, mockTeam2, mockTeam3], total: 3 }))
 
         // Act
-        const result = expectSuccess(await listTeamsUseCase.execute())
+        const result = expectSuccess(await listTeamsUseCase.execute({ dto: { page: 1, limit: 10 } }))
 
         // Assert
         expect(result.teams).toHaveLength(3)
@@ -80,7 +80,7 @@ describe('ListTeamsUseCase', () => {
         vi.mocked(teamRepository.findAllPaginated).mockResolvedValue(Ok({ teams: [mockTeam1, mockTeam2], total: 2 }))
 
         // Act
-        await listTeamsUseCase.execute()
+        await listTeamsUseCase.execute({ dto: { page: 1, limit: 10 } })
 
         // Assert
         expect(teamRepository.findAllPaginated).toHaveBeenCalledTimes(1)
@@ -92,7 +92,7 @@ describe('ListTeamsUseCase', () => {
         vi.mocked(teamRepository.findAllPaginated).mockResolvedValue(Ok({ teams: [mockTeam1], total: 1 }))
 
         // Act
-        const result = expectSuccess(await listTeamsUseCase.execute())
+        const result = expectSuccess(await listTeamsUseCase.execute({ dto: { page: 1, limit: 10 } }))
 
         // Assert - verify structure
         expect(result.teams).toHaveLength(1)
@@ -110,7 +110,7 @@ describe('ListTeamsUseCase', () => {
         vi.mocked(teamRepository.findAllPaginated).mockResolvedValue(Ok({ teams: [mockTeam1], total: 1 }))
 
         // Act
-        const result = expectSuccess(await listTeamsUseCase.execute())
+        const result = expectSuccess(await listTeamsUseCase.execute({ dto: { page: 1, limit: 10 } }))
 
         // Assert - dates are ISO strings
         expect(result.teams[0]).toMatchObject({
@@ -124,7 +124,7 @@ describe('ListTeamsUseCase', () => {
         vi.mocked(teamRepository.findAllPaginated).mockResolvedValue(Ok({ teams: [mockTeam1, mockTeam2], total: 2 }))
 
         // Act
-        const result = expectSuccess(await listTeamsUseCase.execute())
+        const result = expectSuccess(await listTeamsUseCase.execute({ dto: { page: 1, limit: 10 } }))
 
         // Assert
         expect(result.pagination.total).toBe(2)
@@ -139,7 +139,7 @@ describe('ListTeamsUseCase', () => {
         vi.mocked(teamRepository.findAllPaginated).mockResolvedValue(Ok({ teams: [mockTeam1, mockTeam3], total: 2 }))
 
         // Act
-        const result = expectSuccess(await listTeamsUseCase.execute())
+        const result = expectSuccess(await listTeamsUseCase.execute({ dto: { page: 1, limit: 10 } }))
 
         // Assert
         expect(result.teams[0]?.foundedYear).toBe(TEST_CONSTANTS.teams.fcBarcelona.foundedYear)
@@ -153,7 +153,7 @@ describe('ListTeamsUseCase', () => {
         vi.mocked(teamRepository.findAllPaginated).mockResolvedValue(Ok({ teams: [], total: 0 }))
 
         // Act
-        const result = expectSuccess(await listTeamsUseCase.execute())
+        const result = expectSuccess(await listTeamsUseCase.execute({ dto: { page: 1, limit: 10 } }))
 
         // Assert
         expect(result.teams).toEqual([])
@@ -166,7 +166,7 @@ describe('ListTeamsUseCase', () => {
         vi.mocked(teamRepository.findAllPaginated).mockResolvedValue(Ok({ teams: [], total: 0 }))
 
         // Act
-        const result = expectSuccess(await listTeamsUseCase.execute())
+        const result = expectSuccess(await listTeamsUseCase.execute({ dto: { page: 1, limit: 10 } }))
 
         // Assert
         expect(result.pagination.total).toBe(0)
@@ -182,7 +182,7 @@ describe('ListTeamsUseCase', () => {
         vi.mocked(teamRepository.findAllPaginated).mockResolvedValue(Ok({ teams: [mockTeam1], total: 1 }))
 
         // Act
-        const result = expectSuccess(await listTeamsUseCase.execute())
+        const result = expectSuccess(await listTeamsUseCase.execute({ dto: { page: 1, limit: 10 } }))
 
         // Assert
         expect(result.teams).toHaveLength(1)
@@ -197,7 +197,7 @@ describe('ListTeamsUseCase', () => {
         vi.mocked(teamRepository.findAllPaginated).mockResolvedValue(Ok({ teams: [mockTeam1, mockTeam2, mockTeam3], total: 3 }))
 
         // Act
-        const result = expectSuccess(await listTeamsUseCase.execute())
+        const result = expectSuccess(await listTeamsUseCase.execute({ dto: { page: 1, limit: 10 } }))
 
         // Assert
         expect(result.teams[0]?.name).toBe(TEST_CONSTANTS.teams.fcBarcelona.name)
@@ -217,7 +217,7 @@ describe('ListTeamsUseCase', () => {
         vi.mocked(teamRepository.findAllPaginated).mockResolvedValue(Ok({ teams: manyTeams, total: 50 }))
 
         // Act
-        const result = expectSuccess(await listTeamsUseCase.execute())
+        const result = expectSuccess(await listTeamsUseCase.execute({ dto: { page: 1, limit: 10 } }))
 
         // Assert
         expect(result.teams).toHaveLength(10)
@@ -232,7 +232,7 @@ describe('ListTeamsUseCase', () => {
         vi.mocked(teamRepository.findAllPaginated).mockResolvedValue(Ok({ teams: [mockTeam1, mockTeam2], total: 20 }))
 
         // Act
-        const result = expectSuccess(await listTeamsUseCase.execute({ page: 2, limit: 5 }))
+        const result = expectSuccess(await listTeamsUseCase.execute({ dto: { page: 2, limit: 5 } }))
 
         // Assert
         expect(teamRepository.findAllPaginated).toHaveBeenCalledWith({ page: 2, limit: 5 })
@@ -249,7 +249,7 @@ describe('ListTeamsUseCase', () => {
         vi.mocked(teamRepository.findAllPaginated).mockResolvedValue(Ok({ teams: [mockTeam1, mockTeam2], total: 2 }))
 
         // Act
-        const result = expectSuccess(await listTeamsUseCase.execute())
+        const result = expectSuccess(await listTeamsUseCase.execute({ dto: { page: 1, limit: 10 } }))
 
         // Assert
         result.teams.forEach((team) => {
@@ -267,7 +267,7 @@ describe('ListTeamsUseCase', () => {
         vi.mocked(teamRepository.findAllPaginated).mockResolvedValue(Ok({ teams: teamsWithNullYear, total: 2 }))
 
         // Act
-        const result = expectSuccess(await listTeamsUseCase.execute())
+        const result = expectSuccess(await listTeamsUseCase.execute({ dto: { page: 1, limit: 10 } }))
 
         // Assert
         expect(result.teams[0]?.foundedYear).toBeNull()

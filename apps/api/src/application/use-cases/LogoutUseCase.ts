@@ -32,7 +32,7 @@ export class LogoutUseCase {
     return new LogoutUseCase({ refreshTokenRepository })
   }
 
-  async execute(refreshToken: string): Promise<Result<void, never>> {
+  async execute({ refreshToken }: { refreshToken: string }): Promise<Result<void, never>> {
     await this.refreshTokenRepository.deleteByToken({ token: refreshToken })
 
     return Ok(undefined)

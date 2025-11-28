@@ -58,7 +58,11 @@ export class RefreshTokenUseCase {
     return new RefreshTokenUseCase({ tokenFactory, refreshTokenRepository, userRepository })
   }
 
-  async execute(dto: RefreshTokenDTO): Promise<Result<RefreshTokenResponseDTO, AuthenticationError | RepositoryError | ValidationError>> {
+  async execute({
+    dto,
+  }: {
+    dto: RefreshTokenDTO
+  }): Promise<Result<RefreshTokenResponseDTO, AuthenticationError | RepositoryError | ValidationError>> {
     const verifyRefreshTokenResult = this.tokenFactory.verifyRefreshToken({ token: dto.refreshToken })
 
     if (!verifyRefreshTokenResult.ok) {

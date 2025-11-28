@@ -50,7 +50,7 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        const team = expectSuccess(await createTeamUseCase.execute(dto))
+        const team = expectSuccess(await createTeamUseCase.execute({ dto }))
 
         // Assert
         expect(team.id).toBe(TEST_CONSTANTS.mockUuid)
@@ -67,7 +67,7 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        await createTeamUseCase.execute(dto)
+        await createTeamUseCase.execute({ dto })
 
         // Assert
         expect(teamRepository.findByName).toHaveBeenCalledWith({
@@ -84,7 +84,7 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        await createTeamUseCase.execute(dto)
+        await createTeamUseCase.execute({ dto })
 
         // Assert
         expect(teamRepository.save).toHaveBeenCalledTimes(1)
@@ -107,7 +107,7 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        const team = expectSuccess(await createTeamUseCase.execute(dto))
+        const team = expectSuccess(await createTeamUseCase.execute({ dto }))
 
         // Assert
         expect(typeof team.createdAt).toBe('string')
@@ -133,7 +133,7 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(teamWithoutYear))
 
         // Act
-        const team = expectSuccess(await createTeamUseCase.execute(dto))
+        const team = expectSuccess(await createTeamUseCase.execute({ dto }))
 
         // Assert
         expect(team.foundedYear).toBeNull()
@@ -149,7 +149,7 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(existingTeam))
 
         // Act
-        const error = expectError(await createTeamUseCase.execute(dto))
+        const error = expectError(await createTeamUseCase.execute({ dto }))
 
         // Assert
         expect(error).toBeInstanceOf(ConflictError)
@@ -164,7 +164,7 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(existingTeam))
 
         // Act
-        await createTeamUseCase.execute(dto)
+        await createTeamUseCase.execute({ dto })
 
         // Assert - Should fail before saving
         expect(teamRepository.save).not.toHaveBeenCalled()
@@ -179,7 +179,7 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
 
         // Act
-        const error = expectError(await createTeamUseCase.execute(dto))
+        const error = expectError(await createTeamUseCase.execute({ dto }))
 
         // Assert
         expect(error).toBeInstanceOf(ValidationError)
@@ -198,7 +198,7 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Err(repositoryError))
 
         // Act
-        const error = expectError(await createTeamUseCase.execute(dto))
+        const error = expectError(await createTeamUseCase.execute({ dto }))
 
         // Assert
         expect(error).toBeInstanceOf(RepositoryError)
@@ -217,7 +217,7 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.findByName).mockResolvedValue(Err(repositoryError))
 
         // Act
-        const error = expectError(await createTeamUseCase.execute(dto))
+        const error = expectError(await createTeamUseCase.execute({ dto }))
 
         // Assert
         expect(error).toBeInstanceOf(RepositoryError)
@@ -236,7 +236,7 @@ describe('CreateTeamUseCase', () => {
         const { randomUUID } = await import('node:crypto')
 
         // Act
-        await createTeamUseCase.execute(dto)
+        await createTeamUseCase.execute({ dto })
 
         // Assert
         expect(randomUUID).toHaveBeenCalled()
@@ -264,7 +264,7 @@ describe('CreateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(teamWithoutYear))
 
         // Act
-        expectSuccess(await createTeamUseCase.execute(dto))
+        expectSuccess(await createTeamUseCase.execute({ dto }))
 
         // Assert
         // Verify the saved team entity
