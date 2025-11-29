@@ -9,6 +9,15 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@/app': path.resolve(__dirname, './src/app'),
+      '@/features': path.resolve(__dirname, './src/features'),
+      '@/pages': path.resolve(__dirname, './src/pages'),
+      '@/components': path.resolve(__dirname, './src/components'),
+      '@/lib': path.resolve(__dirname, './src/lib'),
+      '@/domain': path.resolve(__dirname, './src/domain'),
+      '@/infrastructure': path.resolve(__dirname, './src/infrastructure'),
+      '@/types': path.resolve(__dirname, './src/types'),
+      '@/styles': path.resolve(__dirname, './src/styles'),
     },
   },
   server: {
