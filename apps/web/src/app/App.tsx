@@ -10,10 +10,12 @@ import { AppRouter } from './router/AppRouter'
  *
  * This is the entry point of the application.
  */
-export default function App() {
+const App = () => {
   return (
     <AppProviders>
       <AppRouter />
     </AppProviders>
   )
 }
+
+export default App

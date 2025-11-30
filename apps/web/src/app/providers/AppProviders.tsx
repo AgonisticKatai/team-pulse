@@ -19,6 +19,6 @@ interface AppProvidersProps {
  * - ThemeProvider: Dark/light mode
  * - ToastProvider: Global notifications
  */
-export function AppProviders({ children }: AppProvidersProps) {
+export const AppProviders = ({ children }: AppProvidersProps) => {
   return <QueryProvider>{children}</QueryProvider>
 }

@@ -1,13 +1,13 @@
 import { Link } from 'react-router-dom'
 import { ROUTES } from '@/lib/constants/routes'
 
-export default function NotFoundPage() {
+const NotFoundPage = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="text-center">
         <h1 className="text-9xl font-bold tracking-tight">404</h1>
         <p className="mt-4 text-2xl font-semibold">Page Not Found</p>
-        <p className="mt-2 text-muted-foreground">The page you're looking for doesn't exist.</p>
+        <p className="mt-2 text-muted-f oreground">The page you're looking for doesn't exist.</p>
 
         <Link
           to={ROUTES.DASHBOARD}
@@ -19,3 +19,5 @@ export default function NotFoundPage() {
     </div>
   )
 }
+
+export default NotFoundPage

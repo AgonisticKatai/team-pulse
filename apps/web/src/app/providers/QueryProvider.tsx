@@ -32,7 +32,7 @@ interface QueryProviderProps {
  * Wraps the application with React Query context and devtools.
  * Devtools are only enabled in development mode.
  */
-export function QueryProvider({ children }: QueryProviderProps) {
+export const QueryProvider = ({ children }: QueryProviderProps) => {
   return (
     <QueryClientProvider client={queryClient}>
       {children}

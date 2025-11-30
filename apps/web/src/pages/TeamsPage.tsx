@@ -1,4 +1,4 @@
-export default function TeamsPage() {
+const TeamsPage = () => {
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="mx-auto max-w-7xl">
@@ -18,3 +18,5 @@ export default function TeamsPage() {
     </div>
   )
 }
+
+export default TeamsPage

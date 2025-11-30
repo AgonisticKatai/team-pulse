@@ -14,7 +14,7 @@ const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
  *
  * Shown while lazy-loaded pages are being fetched.
  */
-function PageLoader() {
+const PageLoader = () => {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="text-center">
@@ -31,7 +31,7 @@ function PageLoader() {
  * Defines all application routes with lazy loading and code splitting.
  * Routes are protected by authentication where needed.
  */
-export function AppRouter() {
+export const AppRouter = () => {
   return (
     <BrowserRouter>
       <Suspense fallback={<PageLoader />}>

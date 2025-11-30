@@ -1,4 +1,4 @@
-export default function UsersPage() {
+const UsersPage = () => {
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="mx-auto max-w-7xl">
@@ -18,3 +18,5 @@ export default function UsersPage() {
     </div>
   )
 }
+
+export default UsersPage
