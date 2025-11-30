@@ -1,0 +1,125 @@
+/**
+ * Dark Theme - Semantic Tokens
+ *
+ * Maps primitive tokens to semantic purposes for dark mode.
+ * Applied when .dark class is present on html or body element.
+ */
+
+.dark {
+  /* ===================================
+     SURFACES
+     =================================== */
+
+  --surface-base: var(--color-gray-950);
+  --surface-elevated: var(--color-gray-900);
+  --surface-sunken: var(--color-black);
+  --surface-overlay: var(--color-gray-800);
+
+  /* ===================================
+     TEXT
+     =================================== */
+
+  --text-primary: var(--color-gray-50);
+  --text-secondary: var(--color-gray-400);
+  --text-tertiary: var(--color-gray-500);
+  --text-disabled: var(--color-gray-600);
+  --text-inverse: var(--color-gray-900);
+  --text-link: var(--color-primary-400);
+  --text-link-hover: var(--color-primary-300);
+
+  /* ===================================
+     BORDERS
+     =================================== */
+
+  --border-default: var(--color-gray-800);
+  --border-strong: var(--color-gray-700);
+  --border-subtle: var(--color-gray-900);
+  --border-disabled: var(--color-gray-800);
+  --border-focus: var(--color-primary-500);
+
+  /* ===================================
+     INTERACTIVE STATES
+     =================================== */
+
+  --interactive-default: var(--color-primary-500);
+  --interactive-hover: var(--color-primary-400);
+  --interactive-active: var(--color-primary-300);
+  --interactive-disabled: var(--color-gray-700);
+
+  /* ===================================
+     FEEDBACK COLORS
+     =================================== */
+
+  /* Success */
+  --feedback-success-bg: oklch(0.2 0.08 145);
+  --feedback-success-border: var(--color-success-800);
+  --feedback-success-text: var(--color-success-300);
+  --feedback-success-icon: var(--color-success-400);
+
+  /* Warning */
+  --feedback-warning-bg: oklch(0.22 0.06 85);
+  --feedback-warning-border: var(--color-warning-800);
+  --feedback-warning-text: var(--color-warning-200);
+  --feedback-warning-icon: var(--color-warning-400);
+
+  /* Error */
+  --feedback-error-bg: oklch(0.2 0.08 25);
+  --feedback-error-border: var(--color-error-800);
+  --feedback-error-text: var(--color-error-300);
+  --feedback-error-icon: var(--color-error-400);
+
+  /* Info */
+  --feedback-info-bg: oklch(0.2 0.08 220);
+  --feedback-info-border: var(--color-info-800);
+  --feedback-info-text: var(--color-info-300);
+  --feedback-info-icon: var(--color-info-400);
+
+  /* ===================================
+     SHADCN/UI COMPATIBILITY
+     =================================== */
+
+  --background: var(--surface-base);
+  --foreground: var(--text-primary);
+
+  --card: var(--surface-elevated);
+  --card-foreground: var(--text-primary);
+
+  --popover: var(--surface-overlay);
+  --popover-foreground: var(--text-primary);
+
+  --primary: var(--color-primary-500);
+  --primary-foreground: var(--color-gray-950);
+
+  --secondary: var(--color-gray-800);
+  --secondary-foreground: var(--text-primary);
+
+  --muted: var(--color-gray-800);
+  --muted-foreground: var(--text-secondary);
+
+  --accent: var(--color-gray-800);
+  --accent-foreground: var(--color-primary-400);
+
+  --destructive: var(--color-error-500);
+  --destructive-foreground: var(--color-gray-950);
+
+  --border: var(--border-default);
+  --input: var(--border-default);
+  --ring: var(--border-focus);
+
+  /* Chart colors - adjusted for dark mode */
+  --chart-1: var(--color-primary-400);
+  --chart-2: var(--color-success-400);
+  --chart-3: var(--color-warning-400);
+  --chart-4: var(--color-error-400);
+  --chart-5: var(--color-info-400);
+
+  /* Sidebar (shadcn/ui) */
+  --sidebar-background: var(--surface-elevated);
+  --sidebar-foreground: var(--text-primary);
+  --sidebar-primary: var(--color-primary-500);
+  --sidebar-primary-foreground: var(--color-gray-950);
+  --sidebar-accent: var(--color-gray-800);
+  --sidebar-accent-foreground: var(--text-primary);
+  --sidebar-border: var(--border-default);
+  --sidebar-ring: var(--border-focus);
+}

@@ -1,0 +1,127 @@
+/**
+ * Light Theme - Semantic Tokens
+ *
+ * Maps primitive tokens to semantic purposes for light mode.
+ * These variables define the visual language of the application.
+ */
+
+:root {
+  /* ===================================
+     SURFACES
+     =================================== */
+
+  --surface-base: var(--color-gray-50);
+  --surface-elevated: var(--color-white);
+  --surface-sunken: var(--color-gray-100);
+  --surface-overlay: var(--color-white);
+
+  /* ===================================
+     TEXT
+     =================================== */
+
+  --text-primary: var(--color-gray-900);
+  --text-secondary: var(--color-gray-600);
+  --text-tertiary: var(--color-gray-500);
+  --text-disabled: var(--color-gray-400);
+  --text-inverse: var(--color-white);
+  --text-link: var(--color-primary-600);
+  --text-link-hover: var(--color-primary-700);
+
+  /* ===================================
+     BORDERS
+     =================================== */
+
+  --border-default: var(--color-gray-200);
+  --border-strong: var(--color-gray-300);
+  --border-subtle: var(--color-gray-100);
+  --border-disabled: var(--color-gray-200);
+  --border-focus: var(--color-primary-500);
+
+  /* ===================================
+     INTERACTIVE STATES
+     =================================== */
+
+  --interactive-default: var(--color-primary-500);
+  --interactive-hover: var(--color-primary-600);
+  --interactive-active: var(--color-primary-700);
+  --interactive-disabled: var(--color-gray-300);
+
+  /* ===================================
+     FEEDBACK COLORS
+     =================================== */
+
+  /* Success */
+  --feedback-success-bg: var(--color-success-50);
+  --feedback-success-border: var(--color-success-200);
+  --feedback-success-text: var(--color-success-700);
+  --feedback-success-icon: var(--color-success-600);
+
+  /* Warning */
+  --feedback-warning-bg: var(--color-warning-50);
+  --feedback-warning-border: var(--color-warning-200);
+  --feedback-warning-text: var(--color-warning-800);
+  --feedback-warning-icon: var(--color-warning-600);
+
+  /* Error */
+  --feedback-error-bg: var(--color-error-50);
+  --feedback-error-border: var(--color-error-200);
+  --feedback-error-text: var(--color-error-700);
+  --feedback-error-icon: var(--color-error-600);
+
+  /* Info */
+  --feedback-info-bg: var(--color-info-50);
+  --feedback-info-border: var(--color-info-200);
+  --feedback-info-text: var(--color-info-700);
+  --feedback-info-icon: var(--color-info-600);
+
+  /* ===================================
+     SHADCN/UI COMPATIBILITY
+     =================================== */
+
+  --background: var(--surface-base);
+  --foreground: var(--text-primary);
+
+  --card: var(--surface-elevated);
+  --card-foreground: var(--text-primary);
+
+  --popover: var(--surface-overlay);
+  --popover-foreground: var(--text-primary);
+
+  --primary: var(--color-primary-500);
+  --primary-foreground: var(--color-white);
+
+  --secondary: var(--color-gray-100);
+  --secondary-foreground: var(--text-primary);
+
+  --muted: var(--color-gray-100);
+  --muted-foreground: var(--text-secondary);
+
+  --accent: var(--color-primary-50);
+  --accent-foreground: var(--color-primary-700);
+
+  --destructive: var(--color-error-500);
+  --destructive-foreground: var(--color-white);
+
+  --border: var(--border-default);
+  --input: var(--border-default);
+  --ring: var(--border-focus);
+
+  --radius: var(--radius-md);
+
+  /* Chart colors */
+  --chart-1: var(--color-primary-500);
+  --chart-2: var(--color-success-500);
+  --chart-3: var(--color-warning-500);
+  --chart-4: var(--color-error-500);
+  --chart-5: var(--color-info-500);
+
+  /* Sidebar (shadcn/ui) */
+  --sidebar-background: var(--surface-elevated);
+  --sidebar-foreground: var(--text-primary);
+  --sidebar-primary: var(--color-primary-500);
+  --sidebar-primary-foreground: var(--color-white);
+  --sidebar-accent: var(--color-gray-100);
+  --sidebar-accent-foreground: var(--text-primary);
+  --sidebar-border: var(--border-default);
+  --sidebar-ring: var(--border-focus);
+}

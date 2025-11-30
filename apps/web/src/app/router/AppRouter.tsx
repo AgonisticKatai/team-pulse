@@ -18,8 +18,8 @@ const PageLoader = () => {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="text-center">
-        <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]" />
-        <p className="text-sm text-muted-foreground">Loading...</p>
+        <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-current border-r-transparent border-solid motion-reduce:animate-[spin_1.5s_linear_infinite]" />
+        <p className="text-muted-foreground text-sm">Loading...</p>
       </div>
     </div>
   )

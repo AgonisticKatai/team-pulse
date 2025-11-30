@@ -1,0 +1,235 @@
+/**
+ * Typography System
+ *
+ * Fluid typography using clamp() for responsive text scaling.
+ * Based on modular scale 1.25 with viewport-based adjustments.
+ */
+
+/* ===================================
+   HEADINGS
+   =================================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--text-primary);
+}
+
+h1 {
+  font-size: clamp(2.25rem, 5vw + 1rem, 3rem);
+  /* 36px → 48px */
+}
+
+h2 {
+  font-size: clamp(1.875rem, 4vw + 0.5rem, 2.25rem);
+  /* 30px → 36px */
+}
+
+h3 {
+  font-size: clamp(1.5rem, 3vw + 0.5rem, 1.875rem);
+  /* 24px → 30px */
+}
+
+h4 {
+  font-size: clamp(1.25rem, 2vw + 0.5rem, 1.5rem);
+  /* 20px → 24px */
+}
+
+h5 {
+  font-size: var(--font-size-lg);
+  /* 18px */
+}
+
+h6 {
+  font-size: var(--font-size-base);
+  /* 16px */
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ===================================
+   BODY TEXT
+   =================================== */
+
+p {
+  line-height: var(--line-height-relaxed);
+  color: var(--text-primary);
+}
+
+/* Lead paragraph */
+.lead {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
+  color: var(--text-secondary);
+}
+
+/* Small text */
+small,
+.text-sm {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+}
+
+/* ===================================
+   LINKS
+   =================================== */
+
+a {
+  color: var(--text-link);
+  text-decoration: none;
+  transition: color var(--duration-150) var(--ease-out);
+}
+
+a:hover {
+  color: var(--text-link-hover);
+  text-decoration: underline;
+}
+
+a:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ===================================
+   LISTS
+   =================================== */
+
+/* Restore list styles for content */
+.prose ul,
+.prose ol {
+  list-style: revert;
+  padding-left: var(--space-6);
+  margin: var(--space-4) 0;
+}
+
+.prose ul {
+  list-style-type: disc;
+}
+
+.prose ol {
+  list-style-type: decimal;
+}
+
+.prose li {
+  margin: var(--space-2) 0;
+  line-height: var(--line-height-relaxed);
+}
+
+/* ===================================
+   CODE
+   =================================== */
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  padding: 0.125rem 0.25rem;
+  background-color: var(--muted);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+}
+
+pre {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  padding: var(--space-4);
+  background-color: var(--muted);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  margin: var(--space-4) 0;
+}
+
+pre code {
+  padding: 0;
+  background: none;
+  font-size: inherit;
+}
+
+/* ===================================
+   BLOCKQUOTES
+   =================================== */
+
+blockquote {
+  padding-left: var(--space-4);
+  border-left: 4px solid var(--border-strong);
+  font-style: italic;
+  color: var(--text-secondary);
+  margin: var(--space-4) 0;
+}
+
+blockquote p {
+  margin: var(--space-2) 0;
+}
+
+/* ===================================
+   HORIZONTAL RULE
+   =================================== */
+
+hr {
+  border: none;
+  border-top: 1px solid var(--border-default);
+  margin: var(--space-8) 0;
+}
+
+/* ===================================
+   EMPHASIS
+   =================================== */
+
+strong,
+b {
+  font-weight: var(--font-weight-semibold);
+}
+
+em,
+i {
+  font-style: italic;
+}
+
+mark {
+  background-color: var(--feedback-warning-bg);
+  color: var(--feedback-warning-text);
+  padding: 0.125rem 0.25rem;
+  border-radius: var(--radius-sm);
+}
+
+/* ===================================
+   UTILITY CLASSES
+   =================================== */
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-pretty {
+  text-wrap: pretty;
+}
+
+/* Truncate text */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Line clamp */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

@@ -4,7 +4,7 @@ const TeamsPage = () => {
       <div className="mx-auto max-w-7xl">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">Teams</h1>
+            <h1 className="font-bold text-4xl tracking-tight">Teams</h1>
             <p className="mt-2 text-muted-foreground">Manage your teams and players</p>
           </div>
         </div>

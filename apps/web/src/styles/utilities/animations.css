@@ -1,0 +1,178 @@
+/**
+ * Custom Animations
+ *
+ * Respects prefers-reduced-motion for accessibility.
+ */
+
+/* ===================================
+   FADE ANIMATIONS
+   =================================== */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* ===================================
+   SLIDE ANIMATIONS
+   =================================== */
+
+@keyframes slide-in-up {
+  from {
+    transform: translateY(1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-down {
+  from {
+    transform: translateY(-1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* ===================================
+   SCALE ANIMATIONS
+   =================================== */
+
+@keyframes scale-in {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes scale-out {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+/* ===================================
+   SKELETON LOADING
+   =================================== */
+
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes skeleton-wave {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ===================================
+   SPIN ANIMATION
+   =================================== */
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===================================
+   UTILITY CLASSES
+   =================================== */
+
+.animate-fade-in {
+  animation: fade-in var(--duration-300) var(--ease-out);
+}
+
+.animate-slide-in-up {
+  animation: slide-in-up var(--duration-300) var(--ease-out);
+}
+
+.animate-slide-in-down {
+  animation: slide-in-down var(--duration-300) var(--ease-out);
+}
+
+.animate-scale-in {
+  animation: scale-in var(--duration-200) var(--ease-out);
+}
+
+.animate-skeleton-pulse {
+  animation: skeleton-pulse var(--duration-1000) var(--ease-in-out) infinite;
+}
+
+.animate-spin {
+  animation: spin var(--duration-1000) linear infinite;
+}
+
+/* Delay utilities */
+.animation-delay-75 {
+  animation-delay: var(--duration-75);
+}
+
+.animation-delay-150 {
+  animation-delay: var(--duration-150);
+}
+
+.animation-delay-300 {
+  animation-delay: var(--duration-300);
+}

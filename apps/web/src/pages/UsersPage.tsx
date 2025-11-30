@@ -4,7 +4,7 @@ const UsersPage = () => {
       <div className="mx-auto max-w-7xl">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">Users</h1>
+            <h1 className="font-bold text-4xl tracking-tight">Users</h1>
             <p className="mt-2 text-muted-foreground">Manage system users and permissions</p>
           </div>
         </div>

@@ -1,0 +1,237 @@
+/**
+ * Modern CSS Reset - 2025
+ *
+ * Based on modern best practices including:
+ * - Josh Comeau's CSS Reset
+ * - Andy Bell's Modern CSS Reset
+ * - Tailwind's Preflight
+ */
+
+/* ===================================
+   BOX SIZING
+   =================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* ===================================
+   REMOVE DEFAULT SPACING
+   =================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+/* ===================================
+   DOCUMENT & BODY
+   =================================== */
+
+html {
+  /* Smooth scrolling */
+  scroll-behavior: smooth;
+
+  /* Better text rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+
+  /* Prevent font size inflation */
+  -webkit-text-size-adjust: 100%;
+
+  /* Tab size */
+  tab-size: 4;
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  min-height: 100dvh; /* Dynamic viewport height for mobile */
+
+  /* Typography */
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+
+  /* Colors */
+  color: var(--text-primary);
+  background-color: var(--surface-base);
+
+  /* Better font rendering */
+  font-synthesis: none;
+}
+
+/* ===================================
+   MEDIA ELEMENTS
+   =================================== */
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* ===================================
+   FORM ELEMENTS
+   =================================== */
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Remove default button styles */
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Remove spinner from number inputs */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* ===================================
+   TEXT ELEMENTS
+   =================================== */
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Remove list styles */
+ul,
+ol {
+  list-style: none;
+}
+
+/* ===================================
+   LINKS
+   =================================== */
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+/* ===================================
+   FOCUS STYLES
+   =================================== */
+
+/* Remove default focus styles */
+:focus {
+  outline: none;
+}
+
+/* Add custom focus-visible styles */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ===================================
+   TABLES
+   =================================== */
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* ===================================
+   MISC
+   =================================== */
+
+/* Prevent text overflow */
+#root,
+#__next {
+  isolation: isolate;
+}
+
+/* Better default for horizontal rules */
+hr {
+  height: 0;
+  color: inherit;
+  border-top-width: 1px;
+}
+
+/* Consistent abbr styling */
+abbr[title] {
+  text-decoration: underline dotted;
+}
+
+/* Prevent sub and sup affecting line-height */
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+sup {
+  top: -0.5em;
+}
+
+/* Better default for code elements */
+code,
+kbd,
+samp,
+pre {
+  font-family: var(--font-mono);
+  font-size: 1em;
+}
+
+/* Prevent textarea resize beyond container */
+textarea {
+  resize: vertical;
+}
+
+/* Hidden attribute */
+[hidden] {
+  display: none;
+}
