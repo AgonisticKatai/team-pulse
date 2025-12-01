@@ -61,7 +61,6 @@ pnpm turbo build-storybook  # Build with turbo
 - `@storybook/addon-a11y` - Accessibility auditing
 - `@storybook/addon-themes` - Dark/light mode switcher
 - `@storybook/addon-docs` - Automatic documentation
-- `@storybook/addon-vitest` - Vitest integration
 - `@chromatic-com/storybook` - Visual regression testing
 
 ## 🎭 Available Decorators
