@@ -1,0 +1,4 @@
+{
+  "recommendations": ["biomejs.biome", "humao.rest-client", "bradlc.vscode-tailwindcss", "usernamehw.errorlens"],
+  "unwantedRecommendations": ["esbenp.prettier-vscode", "dbaeumer.vscode-eslint"]
+}

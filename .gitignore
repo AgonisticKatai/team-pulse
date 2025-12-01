@@ -26,7 +26,10 @@ npm-debug.log*
 pnpm-debug.log*
 
 # IDE
-.vscode/
+# Allow sharing workspace config, but ignore personal VSCode files
+.vscode/*.code-workspace
+.vscode/launch.json
+.vscode/tasks.json
 .idea/
 *.swp
 *.swo
