@@ -70,11 +70,20 @@
     "setup": "make setup",
     "start": "make start",
     "stop": "make stop",
+    "storybook": "make web-storybook",
     "test": "make test",
     "test:coverage": "make test-coverage",
     "test:ui": "turbo test:ui",
     "test:watch": "make test-watch",
-    "type-check": "make type-check"
+    "type-check": "make type-check",
+    "web:build": "make web-build",
+    "web:build-storybook": "make web-build-storybook",
+    "web:dev": "make web-dev",
+    "web:preview": "make web-preview",
+    "web:storybook": "make web-storybook",
+    "web:test": "make web-test",
+    "web:test:coverage": "make web-test-coverage",
+    "web:test:watch": "make web-test-watch"
   },
   "type": "module",
   "version": "1.0.0"
