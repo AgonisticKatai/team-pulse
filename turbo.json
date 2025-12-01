@@ -16,6 +16,10 @@
       ],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
+    "build-storybook": {
+      "dependsOn": ["^build"],
+      "outputs": ["storybook-static/**"]
+    },
     "dev": {
       "cache": false,
       "persistent": true
@@ -28,6 +32,10 @@
     },
     "lint:fix": {
       "cache": false
+    },
+    "storybook": {
+      "cache": false,
+      "persistent": true
     },
     "test": {
       "dependsOn": ["^build"],

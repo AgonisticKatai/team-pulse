@@ -17,7 +17,9 @@ Modern football team statistics platform with real-time match tracking, admin da
 - **Database**: PostgreSQL (with Drizzle ORM + Connection Pooling)
 - **Authentication**: JWT with Refresh Tokens + bcrypt password hashing
 - **Authorization**: Role-based access control (RBAC) with PermissionService
-- **Styling**: CSS Custom Properties (native)
+- **Styling**: Tailwind CSS v4 + OKLCH Design Tokens + Shadcn/ui
+- **Design System**: Custom token system with full Tailwind integration (spacing, typography, colors)
+- **Component Development**: Storybook 10 + React Testing Library + Vitest
 - **Testing**: Vitest (99+ tests with Docker Test Containers)
 - **Tooling**: Biome (linting + formatting)
 - **Monorepo**: Turborepo + pnpm workspaces
@@ -391,6 +393,90 @@ apps/api/src/
     ├── http/            # Fastify routes, controllers
     └── config/          # DI container, env validation
 ```
+
+## 🎨 Design System
+
+TeamPulse implements a comprehensive **design token system** with full Tailwind CSS v4 integration.
+
+### Key Features
+
+- **OKLCH Color Space**: Better accessibility and perceptual uniformity
+- **Design Tokens**: Single source of truth for spacing, typography, colors, shadows, and more
+- **Tailwind Integration**: All utilities (h-*, px-*, text-*) use design tokens automatically
+- **Component Development**: Storybook 10 for isolated component development and testing
+- **Type-Safe Variants**: CVA (class-variance-authority) for type-safe component variants
+
+### Token System Architecture
+
+```
+Tailwind Utility → Tailwind Variable → Design Token → Final Value
+h-10            → --spacing-10      → --space-10   → 2.5rem (40px)
+px-6            → --spacing-6       → --space-6    → 1.5rem (24px)
+text-xl         → --text-xl         → --font-size-xl → 1.25rem (20px)
+```
+
+### Design Scales
+
+**Spacing** (4px base grid):
+```
+0, px, 0.5, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32
+→ 0, 1px, 2px, 4px, 8px, 12px, 16px, 20px, 24px, 32px, 40px, 48px, 64px, 80px, 96px, 128px
+```
+
+**Typography** (1.25 modular scale):
+```
+xs, sm, base, lg, xl, 2xl, 3xl, 4xl, 5xl, 6xl, 7xl, 8xl, 9xl
+→ 12px, 14px, 16px, 18px, 20px, 24px, 30px, 36px, 48px, 60px, 72px, 96px, 128px
+```
+
+### Storybook
+
+Develop and test components in isolation:
+
+```bash
+pnpm storybook        # Start Storybook dev server
+pnpm build-storybook  # Build static Storybook
+```
+
+Access at: `http://localhost:6006`
+
+**Features:**
+- 🎭 Component stories with all variants
+- ♿ Accessibility testing (a11y addon)
+- 🌓 Dark/Light theme switching
+- 📖 Auto-generated documentation
+- 🧪 Integrated with Vitest for component tests
+
+### Component Development
+
+```tsx
+// Example: Button component with design tokens
+import { cva } from 'class-variance-authority'
+
+const buttonVariants = cva(
+  // All utilities use design tokens automatically
+  'h-10 px-6 gap-2 rounded-lg text-sm font-medium shadow-sm',
+  {
+    variants: {
+      variant: {
+        default: 'bg-primary text-primary-foreground',
+        destructive: 'bg-destructive text-destructive-foreground',
+      },
+      size: {
+        sm: 'h-8 px-3 text-xs',      // --space-8, --space-3, --font-size-xs
+        default: 'h-10 px-6 text-sm', // --space-10, --space-6, --font-size-sm
+        lg: 'h-12 px-8 text-base',    // --space-12, --space-8, --font-size-base
+      }
+    }
+  }
+)
+```
+
+### Documentation
+
+- [Design System](./docs/design-system/README.md) - Complete design system overview
+- [Design Tokens](./docs/design-system/tokens.md) - Token system and Tailwind integration
+- [Storybook & Testing](./docs/design-system/storybook.md) - Component development workflow
 
 ## 🔐 Authentication & Authorization
 
