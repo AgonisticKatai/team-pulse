@@ -50,13 +50,13 @@ export class RepositoryError extends ApplicationError {
 
   private constructor({ message, operation, cause }: RepositoryErrorProps) {
     super({
-      message,
-      severity: ERROR_SEVERITY.HIGH,
-      metadata: {
-        operation,
-        cause: cause?.message,
-      },
       isOperational: true,
+      message,
+      metadata: {
+        cause: cause?.message,
+        operation,
+      },
+      severity: ERROR_SEVERITY.HIGH,
     })
     this.operation = operation
     this.cause = cause
@@ -66,7 +66,7 @@ export class RepositoryError extends ApplicationError {
    * Create a repository error
    */
   static create({ message, operation, cause }: RepositoryErrorProps): RepositoryError {
-    return new RepositoryError({ message, operation, cause })
+    return new RepositoryError({ cause, message, operation })
   }
 
   /**
@@ -74,6 +74,6 @@ export class RepositoryError extends ApplicationError {
    * Convenience method that makes operation required
    */
   static forOperation({ operation, message, cause }: ForOperationProps): RepositoryError {
-    return RepositoryError.create({ message, operation, cause })
+    return RepositoryError.create({ cause, message, operation })
   }
 }

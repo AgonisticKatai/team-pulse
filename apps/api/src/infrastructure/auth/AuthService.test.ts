@@ -213,13 +213,13 @@ describe('AuthService', () => {
       it('should return true when user has exact role', () => {
         // Arrange
         const user = {
-          userId: TEST_CONSTANTS.users.johnDoe.id,
           email: TEST_CONSTANTS.users.johnDoe.email,
           role: 'USER' as const,
+          userId: TEST_CONSTANTS.users.johnDoe.id,
         }
 
         // Act
-        const result = authService.checkUserRole({ user, allowedRoles: ['USER'] })
+        const result = authService.checkUserRole({ allowedRoles: ['USER'], user })
 
         // Assert
         expect(result).toBe(true)
@@ -228,13 +228,13 @@ describe('AuthService', () => {
       it('should return true when user role is in allowed list', () => {
         // Arrange
         const user = {
-          userId: TEST_CONSTANTS.users.adminUser.id,
           email: TEST_CONSTANTS.users.adminUser.email,
           role: 'ADMIN' as const,
+          userId: TEST_CONSTANTS.users.adminUser.id,
         }
 
         // Act
-        const result = authService.checkUserRole({ user, allowedRoles: ['ADMIN', 'SUPER_ADMIN'] })
+        const result = authService.checkUserRole({ allowedRoles: ['ADMIN', 'SUPER_ADMIN'], user })
 
         // Assert
         expect(result).toBe(true)
@@ -243,13 +243,13 @@ describe('AuthService', () => {
       it('should return true for SUPER_ADMIN in multi-role list', () => {
         // Arrange
         const user = {
-          userId: TEST_CONSTANTS.users.superAdminUser.id,
           email: TEST_CONSTANTS.users.superAdminUser.email,
           role: 'SUPER_ADMIN' as const,
+          userId: TEST_CONSTANTS.users.superAdminUser.id,
         }
 
         // Act
-        const result = authService.checkUserRole({ user, allowedRoles: ['USER', 'ADMIN', 'SUPER_ADMIN'] })
+        const result = authService.checkUserRole({ allowedRoles: ['USER', 'ADMIN', 'SUPER_ADMIN'], user })
 
         // Assert
         expect(result).toBe(true)
@@ -259,7 +259,7 @@ describe('AuthService', () => {
     describe('Error cases', () => {
       it('should return false when user is undefined', () => {
         // Act
-        const result = authService.checkUserRole({ user: undefined, allowedRoles: ['USER'] })
+        const result = authService.checkUserRole({ allowedRoles: ['USER'], user: undefined })
 
         // Assert
         expect(result).toBe(false)
@@ -268,13 +268,13 @@ describe('AuthService', () => {
       it('should return false when user role is not in allowed list', () => {
         // Arrange
         const user = {
-          userId: TEST_CONSTANTS.users.johnDoe.id,
           email: TEST_CONSTANTS.users.johnDoe.email,
           role: 'USER' as const,
+          userId: TEST_CONSTANTS.users.johnDoe.id,
         }
 
         // Act
-        const result = authService.checkUserRole({ user, allowedRoles: ['ADMIN', 'SUPER_ADMIN'] })
+        const result = authService.checkUserRole({ allowedRoles: ['ADMIN', 'SUPER_ADMIN'], user })
 
         // Assert
         expect(result).toBe(false)
@@ -283,13 +283,13 @@ describe('AuthService', () => {
       it('should return false when allowed roles is empty array', () => {
         // Arrange
         const user = {
-          userId: TEST_CONSTANTS.users.johnDoe.id,
           email: TEST_CONSTANTS.users.johnDoe.email,
           role: 'USER' as const,
+          userId: TEST_CONSTANTS.users.johnDoe.id,
         }
 
         // Act
-        const result = authService.checkUserRole({ user, allowedRoles: [] })
+        const result = authService.checkUserRole({ allowedRoles: [], user })
 
         // Assert
         expect(result).toBe(false)

@@ -23,10 +23,10 @@ export class NotFoundError extends ApplicationError {
     metadata?: Record<string, unknown>
   }) {
     super({
-      message,
-      severity,
-      metadata,
       isOperational: true,
+      message,
+      metadata,
+      severity,
     })
   }
 
@@ -44,8 +44,8 @@ export class NotFoundError extends ApplicationError {
     return new NotFoundError({
       message: `${resource} not found`,
       metadata: {
-        resource,
         identifier,
+        resource,
       },
     })
   }

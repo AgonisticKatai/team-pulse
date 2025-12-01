@@ -46,11 +46,11 @@ describe('Correlation ID Middleware - Critical Integration Tests', () => {
 
     const requestPromise = app.inject({
       method: 'POST',
-      url: '/api/auth/login',
       payload: {
         email: 'test@example.com',
         password: 'any',
       },
+      url: '/api/auth/login',
     })
 
     // If this fails, the middleware is blocking the request lifecycle
@@ -63,11 +63,11 @@ describe('Correlation ID Middleware - Critical Integration Tests', () => {
   it('should generate correlation ID when not provided', async () => {
     const response = await app.inject({
       method: 'POST',
-      url: '/api/auth/login',
       payload: {
         email: 'test@example.com',
         password: 'any',
       },
+      url: '/api/auth/login',
     })
 
     expect(response.headers['x-correlation-id']).toBeDefined()
@@ -78,15 +78,15 @@ describe('Correlation ID Middleware - Critical Integration Tests', () => {
     const correlationId = randomUUID()
 
     const response = await app.inject({
-      method: 'POST',
-      url: '/api/auth/login',
       headers: {
         'x-correlation-id': correlationId,
       },
+      method: 'POST',
       payload: {
         email: 'test@example.com',
         password: 'any',
       },
+      url: '/api/auth/login',
     })
 
     expect(response.headers['x-correlation-id']).toBe(correlationId)
@@ -97,15 +97,15 @@ describe('Correlation ID Middleware - Critical Integration Tests', () => {
     const secondId = randomUUID()
 
     const response = await app.inject({
-      method: 'POST',
-      url: '/api/auth/login',
       headers: {
         'x-correlation-id': [correlationId, secondId],
       },
+      method: 'POST',
       payload: {
         email: 'test@example.com',
         password: 'any',
       },
+      url: '/api/auth/login',
     })
 
     // Fastify may return both IDs separated by comma, or just the first one
@@ -122,13 +122,13 @@ describe('Correlation ID Middleware - Critical Integration Tests', () => {
     // or deadlocks when processing multiple requests simultaneously
     const requests = Array.from({ length: 10 }, (_, i) =>
       app.inject({
-        method: 'POST',
-        url: '/api/auth/login',
         headers: i % 2 === 0 ? { 'x-correlation-id': randomUUID() } : {},
+        method: 'POST',
         payload: {
           email: 'test@example.com',
           password: 'any',
         },
+        url: '/api/auth/login',
       }),
     )
 
@@ -152,11 +152,11 @@ describe('Correlation ID Middleware - Critical Integration Tests', () => {
     const correlationId = randomUUID()
 
     const response = await app.inject({
-      method: 'GET',
-      url: '/api/teams', // Protected endpoint that requires auth
       headers: {
         'x-correlation-id': correlationId,
       },
+      method: 'GET',
+      url: '/api/teams', // Protected endpoint that requires auth
     })
 
     // Should fail auth (401) but correlation ID should still be present
@@ -168,15 +168,15 @@ describe('Correlation ID Middleware - Critical Integration Tests', () => {
     const correlationId = randomUUID()
 
     const response = await app.inject({
-      method: 'POST',
-      url: '/api/auth/login',
       headers: {
         'x-correlation-id': correlationId,
       },
+      method: 'POST',
       payload: {
         email: 'test@example.com',
         password: 'wrong-password',
       },
+      url: '/api/auth/login',
     })
 
     // Should fail (401) but correlation ID should be present

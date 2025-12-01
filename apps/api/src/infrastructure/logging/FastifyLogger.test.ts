@@ -11,15 +11,15 @@ describe('FastifyLogger', () => {
   beforeEach(() => {
     // Mock Fastify logger
     mockFastifyLogger = {
+      child: vi.fn(),
       debug: vi.fn(),
       error: vi.fn(),
       fatal: vi.fn(),
       info: vi.fn(),
-      trace: vi.fn(),
-      warn: vi.fn(),
-      child: vi.fn(),
       level: 'info',
       silent: vi.fn(),
+      trace: vi.fn(),
+      warn: vi.fn(),
     } as unknown as FastifyBaseLogger
 
     logger = FastifyLogger.create({ logger: mockFastifyLogger })
@@ -51,12 +51,12 @@ describe('FastifyLogger', () => {
       // Arrange
       const message = TEST_CONSTANTS.errorTestData.handler.logMessages.errorLogged
       const context = {
-        userId: TEST_CONSTANTS.errorTestData.handler.logContext.userId,
         operation: TEST_CONSTANTS.errorTestData.handler.logContext.operation,
+        userId: TEST_CONSTANTS.errorTestData.handler.logContext.userId,
       }
 
       // Act
-      logger.error({ message, context })
+      logger.error({ context, message })
 
       // Assert
       expect(mockFastifyLogger.error).toHaveBeenCalledWith({ context }, message)
@@ -79,12 +79,12 @@ describe('FastifyLogger', () => {
       // Arrange
       const message = TEST_CONSTANTS.errorTestData.handler.logMessages.warningLogged
       const context = {
-        retries: TEST_CONSTANTS.errorTestData.handler.logContext.retries,
         endpoint: TEST_CONSTANTS.errorTestData.handler.logContext.endpoint,
+        retries: TEST_CONSTANTS.errorTestData.handler.logContext.retries,
       }
 
       // Act
-      logger.warn({ message, context })
+      logger.warn({ context, message })
 
       // Assert
       expect(mockFastifyLogger.warn).toHaveBeenCalledWith({ context }, message)
@@ -107,12 +107,12 @@ describe('FastifyLogger', () => {
       // Arrange
       const message = TEST_CONSTANTS.errorTestData.handler.logMessages.infoLogged
       const context = {
-        userId: TEST_CONSTANTS.errorTestData.handler.logContext.userId,
         action: TEST_CONSTANTS.errorTestData.handler.logContext.action,
+        userId: TEST_CONSTANTS.errorTestData.handler.logContext.userId,
       }
 
       // Act
-      logger.info({ message, context })
+      logger.info({ context, message })
 
       // Assert
       expect(mockFastifyLogger.info).toHaveBeenCalledWith({ context }, message)
@@ -135,12 +135,12 @@ describe('FastifyLogger', () => {
       // Arrange
       const message = TEST_CONSTANTS.errorTestData.handler.logMessages.debugLogged
       const context = {
-        requestId: TEST_CONSTANTS.errorTestData.handler.logContext.requestId,
         duration: TEST_CONSTANTS.errorTestData.handler.logContext.duration,
+        requestId: TEST_CONSTANTS.errorTestData.handler.logContext.requestId,
       }
 
       // Act
-      logger.debug({ message, context })
+      logger.debug({ context, message })
 
       // Assert
       expect(mockFastifyLogger.debug).toHaveBeenCalledWith({ context }, message)

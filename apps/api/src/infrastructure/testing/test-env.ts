@@ -29,8 +29,8 @@ export const TEST_ENV: Env = {
  * - Reusable: Any Application component needing JWT config can use this
  */
 export const TEST_TOKEN_ENV: IEnvironment = {
-  JWT_SECRET: TEST_ENV.JWT_SECRET,
   JWT_REFRESH_SECRET: TEST_ENV.JWT_REFRESH_SECRET,
+  JWT_SECRET: TEST_ENV.JWT_SECRET,
 }
 
 /**
@@ -42,6 +42,6 @@ export const TEST_TOKEN_ENV: IEnvironment = {
  * Use case: Testing that AuthService rejects tokens with invalid signatures
  */
 export const TEST_INVALID_TOKEN_ENV: IEnvironment = {
-  JWT_SECRET: 'wrong-secret-at-least-32-chars-long-wrong',
   JWT_REFRESH_SECRET: 'wrong-refresh-secret-at-least-32-chars',
+  JWT_SECRET: 'wrong-secret-at-least-32-chars-long-wrong',
 }

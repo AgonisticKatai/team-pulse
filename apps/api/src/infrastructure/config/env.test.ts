@@ -20,13 +20,13 @@ describe('validateEnv', () => {
       // Arrange
       process.env = {
         DATABASE_URL: TEST_CONSTANTS.env.databaseUrls.valid,
-        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
+        FRONTEND_URL: TEST_CONSTANTS.env.frontendUrls.localhost,
+        HOST: TEST_CONSTANTS.env.hosts.allInterfaces,
         JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
+        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
+        LOG_LEVEL: TEST_CONSTANTS.env.logLevels.info,
         NODE_ENV: TEST_CONSTANTS.env.nodeEnvs.development,
         PORT: TEST_CONSTANTS.env.ports.default,
-        HOST: TEST_CONSTANTS.env.hosts.allInterfaces,
-        LOG_LEVEL: TEST_CONSTANTS.env.logLevels.info,
-        FRONTEND_URL: TEST_CONSTANTS.env.frontendUrls.localhost,
       }
 
       // Act
@@ -47,8 +47,8 @@ describe('validateEnv', () => {
     it('should validate environment with default values', () => {
       // Arrange
       process.env = {
-        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
         JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
+        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
       }
 
       // Act
@@ -65,9 +65,9 @@ describe('validateEnv', () => {
     it('should validate environment with empty FRONTEND_URL', () => {
       // Arrange
       process.env = {
-        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
-        JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
         FRONTEND_URL: TEST_CONSTANTS.env.frontendUrls.empty,
+        JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
+        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
       }
 
       // Act
@@ -80,9 +80,9 @@ describe('validateEnv', () => {
     it('should validate environment with valid FRONTEND_URL', () => {
       // Arrange
       process.env = {
-        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
-        JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
         FRONTEND_URL: TEST_CONSTANTS.env.frontendUrls.https,
+        JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
+        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
       }
 
       // Act
@@ -95,8 +95,8 @@ describe('validateEnv', () => {
     it('should validate environment in test mode', () => {
       // Arrange
       process.env = {
-        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
         JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
+        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
         NODE_ENV: TEST_CONSTANTS.env.nodeEnvs.test,
       }
 
@@ -110,10 +110,10 @@ describe('validateEnv', () => {
     it('should validate environment in production mode', () => {
       // Arrange
       process.env = {
-        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
-        JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
-        NODE_ENV: TEST_CONSTANTS.env.nodeEnvs.production,
         DATABASE_URL: TEST_CONSTANTS.env.databaseUrls.production,
+        JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
+        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
+        NODE_ENV: TEST_CONSTANTS.env.nodeEnvs.production,
       }
 
       // Act
@@ -126,8 +126,8 @@ describe('validateEnv', () => {
     it('should transform PORT from string to number', () => {
       // Arrange
       process.env = {
-        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
         JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
+        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
         PORT: TEST_CONSTANTS.env.ports.random,
       }
 
@@ -152,8 +152,8 @@ describe('validateEnv', () => {
       for (const level of logLevels) {
         // Arrange
         process.env = {
-          JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
           JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
+          JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
           LOG_LEVEL: level,
         }
 
@@ -200,8 +200,8 @@ describe('validateEnv', () => {
     it('should throw error when JWT_SECRET is too short (< 32 characters)', () => {
       // Arrange
       process.env = {
-        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.tooShort,
         JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
+        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.tooShort,
       }
 
       // Act & Assert
@@ -211,8 +211,8 @@ describe('validateEnv', () => {
     it('should throw error when JWT_REFRESH_SECRET is too short (< 32 characters)', () => {
       // Arrange
       process.env = {
-        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
         JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.tooShort,
+        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
       }
 
       // Act & Assert
@@ -222,8 +222,8 @@ describe('validateEnv', () => {
     it('should throw error when NODE_ENV is invalid', () => {
       // Arrange
       process.env = {
-        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
         JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
+        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
         NODE_ENV: TEST_CONSTANTS.env.nodeEnvs.invalid,
       }
 
@@ -234,8 +234,8 @@ describe('validateEnv', () => {
     it('should throw error when LOG_LEVEL is invalid', () => {
       // Arrange
       process.env = {
-        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
         JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
+        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
         LOG_LEVEL: TEST_CONSTANTS.env.logLevels.invalid,
       }
 
@@ -246,9 +246,9 @@ describe('validateEnv', () => {
     it('should throw error when FRONTEND_URL is not a valid URL', () => {
       // Arrange
       process.env = {
-        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
-        JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
         FRONTEND_URL: TEST_CONSTANTS.env.frontendUrls.invalid,
+        JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
+        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
       }
 
       // Act & Assert
@@ -260,8 +260,8 @@ describe('validateEnv', () => {
     it('should accept JWT_SECRET with exactly 32 characters', () => {
       // Arrange
       process.env = {
-        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.exactly32,
         JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
+        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.exactly32,
       }
 
       // Act
@@ -275,8 +275,8 @@ describe('validateEnv', () => {
     it('should accept JWT_SECRET with more than 32 characters', () => {
       // Arrange
       process.env = {
-        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.long,
         JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
+        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.long,
       }
 
       // Act
@@ -290,8 +290,8 @@ describe('validateEnv', () => {
     it('should handle PORT as string "0"', () => {
       // Arrange
       process.env = {
-        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
         JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
+        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
         PORT: TEST_CONSTANTS.env.ports.zero,
       }
 
@@ -305,8 +305,8 @@ describe('validateEnv', () => {
     it('should handle undefined FRONTEND_URL (optional)', () => {
       // Arrange
       process.env = {
-        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
         JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
+        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
         // FRONTEND_URL is not set
       }
 
@@ -325,13 +325,13 @@ describe('validateProductionEnv', () => {
       // Arrange
       const env: Env = {
         DATABASE_URL: TEST_CONSTANTS.env.databaseUrls.production,
-        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
+        FRONTEND_URL: undefined,
+        HOST: TEST_CONSTANTS.env.hosts.allInterfaces,
         JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
+        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
+        LOG_LEVEL: TEST_CONSTANTS.env.logLevels.info,
         NODE_ENV: TEST_CONSTANTS.env.nodeEnvs.production,
         PORT: 3000,
-        HOST: TEST_CONSTANTS.env.hosts.allInterfaces,
-        LOG_LEVEL: TEST_CONSTANTS.env.logLevels.info,
-        FRONTEND_URL: undefined,
       }
 
       // Act & Assert
@@ -342,13 +342,13 @@ describe('validateProductionEnv', () => {
       // Arrange
       const env: Env = {
         DATABASE_URL: TEST_CONSTANTS.env.databaseUrls.production,
-        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
+        FRONTEND_URL: TEST_CONSTANTS.env.frontendUrls.empty,
+        HOST: TEST_CONSTANTS.env.hosts.allInterfaces,
         JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
+        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
+        LOG_LEVEL: TEST_CONSTANTS.env.logLevels.info,
         NODE_ENV: TEST_CONSTANTS.env.nodeEnvs.production,
         PORT: 3000,
-        HOST: TEST_CONSTANTS.env.hosts.allInterfaces,
-        LOG_LEVEL: TEST_CONSTANTS.env.logLevels.info,
-        FRONTEND_URL: TEST_CONSTANTS.env.frontendUrls.empty,
       }
 
       // Act & Assert
@@ -359,13 +359,13 @@ describe('validateProductionEnv', () => {
       // Arrange
       const env: Env = {
         DATABASE_URL: TEST_CONSTANTS.env.databaseUrls.production,
-        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
+        FRONTEND_URL: TEST_CONSTANTS.env.frontendUrls.production,
+        HOST: TEST_CONSTANTS.env.hosts.allInterfaces,
         JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
+        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
+        LOG_LEVEL: TEST_CONSTANTS.env.logLevels.info,
         NODE_ENV: TEST_CONSTANTS.env.nodeEnvs.production,
         PORT: 3000,
-        HOST: TEST_CONSTANTS.env.hosts.allInterfaces,
-        LOG_LEVEL: TEST_CONSTANTS.env.logLevels.info,
-        FRONTEND_URL: TEST_CONSTANTS.env.frontendUrls.production,
       }
 
       // Act & Assert
@@ -378,13 +378,13 @@ describe('validateProductionEnv', () => {
       // Arrange
       const env: Env = {
         DATABASE_URL: TEST_CONSTANTS.env.databaseUrls.development,
-        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
+        FRONTEND_URL: undefined,
+        HOST: TEST_CONSTANTS.env.hosts.allInterfaces,
         JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
+        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
+        LOG_LEVEL: TEST_CONSTANTS.env.logLevels.info,
         NODE_ENV: TEST_CONSTANTS.env.nodeEnvs.development,
         PORT: 3000,
-        HOST: TEST_CONSTANTS.env.hosts.allInterfaces,
-        LOG_LEVEL: TEST_CONSTANTS.env.logLevels.info,
-        FRONTEND_URL: undefined,
       }
 
       // Act & Assert
@@ -395,13 +395,13 @@ describe('validateProductionEnv', () => {
       // Arrange
       const env: Env = {
         DATABASE_URL: TEST_CONSTANTS.env.databaseUrls.development,
-        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
+        FRONTEND_URL: undefined,
+        HOST: TEST_CONSTANTS.env.hosts.allInterfaces,
         JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
+        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
+        LOG_LEVEL: TEST_CONSTANTS.env.logLevels.info,
         NODE_ENV: TEST_CONSTANTS.env.nodeEnvs.test,
         PORT: 3000,
-        HOST: TEST_CONSTANTS.env.hosts.allInterfaces,
-        LOG_LEVEL: TEST_CONSTANTS.env.logLevels.info,
-        FRONTEND_URL: undefined,
       }
 
       // Act & Assert
@@ -412,13 +412,13 @@ describe('validateProductionEnv', () => {
       // Arrange
       const env: Env = {
         DATABASE_URL: TEST_CONSTANTS.env.databaseUrls.development,
-        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
+        FRONTEND_URL: TEST_CONSTANTS.env.frontendUrls.empty,
+        HOST: TEST_CONSTANTS.env.hosts.allInterfaces,
         JWT_REFRESH_SECRET: TEST_CONSTANTS.env.jwtRefreshSecrets.valid,
+        JWT_SECRET: TEST_CONSTANTS.env.jwtSecrets.valid,
+        LOG_LEVEL: TEST_CONSTANTS.env.logLevels.info,
         NODE_ENV: TEST_CONSTANTS.env.nodeEnvs.development,
         PORT: 3000,
-        HOST: TEST_CONSTANTS.env.hosts.allInterfaces,
-        LOG_LEVEL: TEST_CONSTANTS.env.logLevels.info,
-        FRONTEND_URL: TEST_CONSTANTS.env.frontendUrls.empty,
       }
 
       // Act & Assert

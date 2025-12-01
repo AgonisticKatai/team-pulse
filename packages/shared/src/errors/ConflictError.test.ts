@@ -51,7 +51,7 @@ describe('ConflictError', () => {
       const identifier = TEST_CONSTANTS.errorTestData.identifiers.userId
 
       // Act
-      const error = ConflictError.duplicate({ resource, identifier })
+      const error = ConflictError.duplicate({ identifier, resource })
 
       // Assert
       expect(error).toBeInstanceOf(ConflictError)
@@ -61,9 +61,9 @@ describe('ConflictError', () => {
       expect(error.severity).toBe(ERROR_SEVERITY.LOW)
       expect(error.isOperational).toBe(true)
       expect(error.metadata).toEqual({
-        resource,
         identifier,
         reason: 'duplicate',
+        resource,
       })
     })
 
@@ -73,15 +73,15 @@ describe('ConflictError', () => {
       const identifier = TEST_CONSTANTS.errorTestData.identifiers.teamId
 
       // Act
-      const error = ConflictError.duplicate({ resource, identifier })
+      const error = ConflictError.duplicate({ identifier, resource })
 
       // Assert
       expect(error).toBeInstanceOf(ConflictError)
       expect(error.message).toBe(`${resource} already exists`)
       expect(error.metadata).toEqual({
-        resource,
         identifier,
         reason: 'duplicate',
+        resource,
       })
     })
   })
@@ -140,14 +140,14 @@ describe('ConflictError', () => {
 
       // Assert
       expect(json).toEqual({
-        name: 'ConflictError',
-        message,
-        code: ERROR_CODES.CONFLICT_ERROR,
         category: ERROR_CATEGORY.CONFLICT,
+        code: ERROR_CODES.CONFLICT_ERROR,
+        isOperational: true,
+        message,
+        metadata,
+        name: 'ConflictError',
         severity: ERROR_SEVERITY.LOW,
         timestamp: error.timestamp.toISOString(),
-        isOperational: true,
-        metadata,
       })
     })
   })

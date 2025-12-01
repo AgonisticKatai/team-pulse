@@ -23,7 +23,7 @@ export class LintCheckUseCase {
   }
 
   async execute({ pkg, fix }: { pkg: LintPackageTarget; fix: boolean }): Promise<Result<string, Error>> {
-    const command = this.buildCommand({ pkg, fix })
+    const command = this.buildCommand({ fix, pkg })
 
     const result = await this.commandExecutor.execute({ command })
 
@@ -32,7 +32,7 @@ export class LintCheckUseCase {
     }
 
     const { stdout, stderr } = result.value
-    const output = this.formatOutput({ pkg, fix, stdout, stderr })
+    const output = this.formatOutput({ fix, pkg, stderr, stdout })
 
     return Ok(output)
   }

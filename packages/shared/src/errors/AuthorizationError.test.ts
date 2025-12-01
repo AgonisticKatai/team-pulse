@@ -51,7 +51,7 @@ describe('AuthorizationError', () => {
       const actual = TEST_CONSTANTS.errorTestData.permissions.read
 
       // Act
-      const error = AuthorizationError.insufficientPermissions({ required, actual })
+      const error = AuthorizationError.insufficientPermissions({ actual, required })
 
       // Assert
       expect(error).toBeInstanceOf(AuthorizationError)
@@ -61,8 +61,8 @@ describe('AuthorizationError', () => {
       expect(error.severity).toBe(ERROR_SEVERITY.MEDIUM)
       expect(error.isOperational).toBe(true)
       expect(error.metadata).toEqual({
-        required: [required],
         actual,
+        required: [required],
       })
     })
 
@@ -72,14 +72,14 @@ describe('AuthorizationError', () => {
       const actual = TEST_CONSTANTS.errorTestData.permissions.read
 
       // Act
-      const error = AuthorizationError.insufficientPermissions({ required, actual })
+      const error = AuthorizationError.insufficientPermissions({ actual, required })
 
       // Assert
       expect(error).toBeInstanceOf(AuthorizationError)
       expect(error.message).toBe('Insufficient permissions to perform this action')
       expect(error.metadata).toEqual({
-        required,
         actual,
+        required,
       })
     })
 
@@ -93,8 +93,8 @@ describe('AuthorizationError', () => {
       // Assert
       expect(error).toBeInstanceOf(AuthorizationError)
       expect(error.metadata).toEqual({
-        required: [required],
         actual: undefined,
+        required: [required],
       })
     })
   })
@@ -153,14 +153,14 @@ describe('AuthorizationError', () => {
 
       // Assert
       expect(json).toEqual({
-        name: 'AuthorizationError',
-        message,
-        code: ERROR_CODES.AUTHORIZATION_ERROR,
         category: ERROR_CATEGORY.AUTHORIZATION,
+        code: ERROR_CODES.AUTHORIZATION_ERROR,
+        isOperational: true,
+        message,
+        metadata,
+        name: 'AuthorizationError',
         severity: ERROR_SEVERITY.MEDIUM,
         timestamp: error.timestamp.toISOString(),
-        isOperational: true,
-        metadata,
       })
     })
   })

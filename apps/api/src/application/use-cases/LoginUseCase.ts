@@ -85,7 +85,7 @@ export class LoginUseCase {
       )
     }
 
-    const verifyResult = await this.passwordHasher.verify({ password: dto.password, hash: findUserResult.value.getPasswordHash() })
+    const verifyResult = await this.passwordHasher.verify({ hash: findUserResult.value.getPasswordHash(), password: dto.password })
 
     if (!verifyResult.ok) {
       return Err(verifyResult.error)

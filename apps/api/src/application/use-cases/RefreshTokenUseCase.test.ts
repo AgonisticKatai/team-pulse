@@ -68,8 +68,8 @@ describe('RefreshTokenUseCase', () => {
 
     // Create use case instance
     refreshTokenUseCase = RefreshTokenUseCase.create({
-      tokenFactory,
       refreshTokenRepository,
+      tokenFactory,
       userRepository,
     })
   })

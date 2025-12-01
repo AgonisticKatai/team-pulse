@@ -27,7 +27,7 @@ export class DeleteTeamUseCase {
     }
 
     if (!findTeamResult.value) {
-      return Err(NotFoundError.forResource({ resource: 'Team', identifier: id }))
+      return Err(NotFoundError.forResource({ identifier: id, resource: 'Team' }))
     }
 
     const deleteResult = await this.teamRepository.delete({ id })

@@ -23,7 +23,7 @@ export class RunTestsUseCase {
   }
 
   async execute({ pkg, filter }: { pkg: PackageTarget; filter?: string }): Promise<Result<string, Error>> {
-    const command = this.buildCommand({ pkg, filter })
+    const command = this.buildCommand({ filter, pkg })
 
     const result = await this.commandExecutor.execute({ command })
 
@@ -32,7 +32,7 @@ export class RunTestsUseCase {
     }
 
     const { stdout, stderr } = result.value
-    const output = this.formatOutput({ pkg, stdout, stderr })
+    const output = this.formatOutput({ pkg, stderr, stdout })
 
     return Ok(output)
   }

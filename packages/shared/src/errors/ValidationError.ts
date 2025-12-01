@@ -23,10 +23,10 @@ export class ValidationError extends ApplicationError {
     metadata?: Record<string, unknown>
   }) {
     super({
-      message,
-      severity,
-      metadata,
       isOperational: true,
+      message,
+      metadata,
+      severity,
     })
   }
 
@@ -58,8 +58,8 @@ export class ValidationError extends ApplicationError {
     return new ValidationError({
       message,
       metadata: {
-        field,
         errors: error.errors,
+        field,
       },
     })
   }

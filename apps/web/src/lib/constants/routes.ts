@@ -5,12 +5,12 @@
  * Use these constants instead of hardcoded strings.
  */
 export const ROUTES = {
+  DASHBOARD: '/dashboard',
   HOME: '/',
   LOGIN: '/login',
-  DASHBOARD: '/dashboard',
+  NOT_FOUND: '/404',
   TEAMS: '/teams',
   USERS: '/users',
-  NOT_FOUND: '/404',
 } as const
 
 export type RouteKey = keyof typeof ROUTES

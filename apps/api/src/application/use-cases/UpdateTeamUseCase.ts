@@ -34,7 +34,7 @@ export class UpdateTeamUseCase {
     }
 
     if (!findTeamResult.value) {
-      return Err(NotFoundError.forResource({ resource: 'Team', identifier: id }))
+      return Err(NotFoundError.forResource({ identifier: id, resource: 'Team' }))
     }
 
     if (dto.name && dto.name !== findTeamResult.value.name.getValue()) {
@@ -45,7 +45,7 @@ export class UpdateTeamUseCase {
       }
 
       if (findTeamResult.value && findTeamResult.value.id.getValue() !== id) {
-        return Err(ConflictError.duplicate({ resource: 'Team', identifier: dto.name }))
+        return Err(ConflictError.duplicate({ identifier: dto.name, resource: 'Team' }))
       }
     }
 

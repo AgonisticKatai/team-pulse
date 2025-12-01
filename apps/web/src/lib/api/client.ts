@@ -90,11 +90,11 @@ export class ApiClient {
     const url = this.buildURL(endpoint, params)
 
     const response = await fetch(url, {
-      method,
       headers: {
         ...this.defaultHeaders,
         ...fetchOptions.headers,
       },
+      method,
       ...fetchOptions,
     })
 

@@ -80,10 +80,10 @@ export class Pagination {
     }
 
     // Calculate derived values
-    const totalPages = Pagination.calculateTotalPages({ total, limit })
+    const totalPages = Pagination.calculateTotalPages({ limit, total })
 
     // Construct with validated and calculated values
-    return Ok(new Pagination({ page, limit, total, totalPages }))
+    return Ok(new Pagination({ limit, page, total, totalPages }))
   }
 
   /**

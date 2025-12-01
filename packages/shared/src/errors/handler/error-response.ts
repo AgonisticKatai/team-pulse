@@ -42,10 +42,10 @@ export function createSafeErrorResponse({
   // For operational errors, return full details
   if (error.isOperational) {
     return {
-      name: error.name,
-      message: error.message,
-      code: error.code,
       category: error.category,
+      code: error.code,
+      message: error.message,
+      name: error.name,
       severity: error.severity,
       timestamp: error.timestamp.toISOString(),
       ...(error.metadata && { metadata: error.metadata }),
@@ -54,10 +54,10 @@ export function createSafeErrorResponse({
 
   // For non-operational errors (programming errors), hide internal details
   return {
-    name: 'InternalError',
-    message: 'An unexpected error occurred',
-    code: error.code,
     category: error.category,
+    code: error.code,
+    message: 'An unexpected error occurred',
+    name: 'InternalError',
     severity: error.severity,
     timestamp: error.timestamp.toISOString(),
   }

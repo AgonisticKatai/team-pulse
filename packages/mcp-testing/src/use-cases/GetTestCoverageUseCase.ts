@@ -32,7 +32,7 @@ export class GetTestCoverageUseCase {
     }
 
     const { stdout, stderr } = result.value
-    const output = this.formatOutput({ pkg, stdout, stderr })
+    const output = this.formatOutput({ pkg, stderr, stdout })
 
     return Ok(output)
   }

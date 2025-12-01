@@ -27,10 +27,10 @@ describe('error-handler', () => {
 
   beforeEach(() => {
     mockLogger = {
-      error: vi.fn(),
-      warn: vi.fn(),
-      info: vi.fn(),
       debug: vi.fn(),
+      error: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
     }
     errorHandler = ErrorHandler.create({ logger: mockLogger })
   })
@@ -78,13 +78,13 @@ describe('error-handler', () => {
 
         // Assert
         expect(mockLogger.info).toHaveBeenCalledWith({
-          message: TEST_CONSTANTS.errors.validationFailed,
           context: expect.objectContaining({
-            code: ERROR_CODES.VALIDATION_ERROR,
             category: ERROR_CATEGORY.VALIDATION,
-            severity: ERROR_SEVERITY.LOW,
+            code: ERROR_CODES.VALIDATION_ERROR,
             isOperational: true,
+            severity: ERROR_SEVERITY.LOW,
           }),
+          message: TEST_CONSTANTS.errors.validationFailed,
         })
       })
     })
@@ -114,11 +114,11 @@ describe('error-handler', () => {
 
         // Assert
         expect(mockLogger.warn).toHaveBeenCalledWith({
-          message: 'Invalid or expired token',
           context: expect.objectContaining({
             code: ERROR_CODES.AUTHENTICATION_ERROR,
             severity: ERROR_SEVERITY.MEDIUM,
           }),
+          message: 'Invalid or expired token',
         })
       })
     })
@@ -127,8 +127,8 @@ describe('error-handler', () => {
       it('should handle not found error', () => {
         // Arrange
         const error = NotFoundError.forResource({
-          resource: TEST_CONSTANTS.errorTestData.resources.user,
           identifier: TEST_CONSTANTS.errorTestData.identifiers.userId,
+          resource: TEST_CONSTANTS.errorTestData.resources.user,
         })
 
         // Act
@@ -146,8 +146,8 @@ describe('error-handler', () => {
       it('should handle conflict error', () => {
         // Arrange
         const error = ConflictError.duplicate({
-          resource: TEST_CONSTANTS.errorTestData.resources.user,
           identifier: TEST_CONSTANTS.errorTestData.identifiers.userId,
+          resource: TEST_CONSTANTS.errorTestData.resources.user,
         })
 
         // Act
@@ -207,10 +207,10 @@ describe('error-handler', () => {
 
         // Assert
         expect(mockLogger.error).toHaveBeenCalledWith({
-          message: TEST_CONSTANTS.errors.externalServiceFailed,
           context: expect.objectContaining({
             severity: ERROR_SEVERITY.HIGH,
           }),
+          message: TEST_CONSTANTS.errors.externalServiceFailed,
         })
       })
     })
@@ -247,11 +247,11 @@ describe('error-handler', () => {
 
         // Assert
         expect(mockLogger.error).toHaveBeenCalledWith({
-          message: TEST_CONSTANTS.errors.internalServerError,
           context: expect.objectContaining({
-            severity: ERROR_SEVERITY.CRITICAL,
             isOperational: false,
+            severity: ERROR_SEVERITY.CRITICAL,
           }),
+          message: TEST_CONSTANTS.errors.internalServerError,
         })
       })
 
@@ -266,11 +266,11 @@ describe('error-handler', () => {
 
         // Assert
         expect(mockLogger.error).toHaveBeenCalledWith({
-          message: 'Non-operational error detected - possible programming error',
           context: {
-            errorName: 'InternalError',
             code: ERROR_CODES.INTERNAL_ERROR,
+            errorName: 'InternalError',
           },
+          message: 'Non-operational error detected - possible programming error',
         })
       })
 
@@ -278,8 +278,8 @@ describe('error-handler', () => {
         // Arrange
         const originalError = new Error('Database connection failed at line 42')
         const error = InternalError.fromError({
-          error: originalError,
           context: 'database-service',
+          error: originalError,
         })
 
         // Act
@@ -378,7 +378,7 @@ describe('error-handler', () => {
 
     it('should convert object without error properties to InternalError', () => {
       // Arrange
-      const error = { foo: 'bar', baz: 123 }
+      const error = { baz: 123, foo: 'bar' }
 
       // Act
       const result = errorHandler.handle({ error })
@@ -402,10 +402,10 @@ describe('error-handler', () => {
 
       // Assert
       expect(mockLogger.info).toHaveBeenCalledWith({
-        message: TEST_CONSTANTS.errors.validationFailed,
         context: expect.objectContaining({
           timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
         }),
+        message: TEST_CONSTANTS.errors.validationFailed,
       })
     })
 
@@ -422,10 +422,10 @@ describe('error-handler', () => {
 
       // Assert
       expect(mockLogger.info).toHaveBeenCalledWith({
-        message: TEST_CONSTANTS.errors.validationFailed,
         context: expect.objectContaining({
           metadata,
         }),
+        message: TEST_CONSTANTS.errors.validationFailed,
       })
     })
 
@@ -440,10 +440,10 @@ describe('error-handler', () => {
 
       // Assert
       expect(mockLogger.info).toHaveBeenCalledWith({
-        message: TEST_CONSTANTS.errors.validationFailed,
         context: expect.not.objectContaining({
           metadata: expect.anything(),
         }),
+        message: TEST_CONSTANTS.errors.validationFailed,
       })
     })
   })

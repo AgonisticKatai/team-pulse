@@ -83,8 +83,8 @@ describe('ValidationError', () => {
       const zodError = {
         errors: [
           {
-            path: [TEST_CONSTANTS.errorTestData.fields.email],
             message: TEST_CONSTANTS.errors.invalidFormat,
+            path: [TEST_CONSTANTS.errorTestData.fields.email],
           },
         ],
       }
@@ -100,8 +100,8 @@ describe('ValidationError', () => {
       expect(error.severity).toBe(ERROR_SEVERITY.LOW)
       expect(error.isOperational).toBe(true)
       expect(error.metadata).toEqual({
-        field: TEST_CONSTANTS.errorTestData.fields.email,
         errors: zodError.errors,
+        field: TEST_CONSTANTS.errorTestData.fields.email,
       })
     })
 
@@ -110,16 +110,16 @@ describe('ValidationError', () => {
       const zodError = {
         errors: [
           {
-            path: [TEST_CONSTANTS.errorTestData.fields.email],
             message: TEST_CONSTANTS.errors.invalidFormat,
+            path: [TEST_CONSTANTS.errorTestData.fields.email],
           },
           {
+            message: TEST_CONSTANTS.errors.fieldRequired,
             path: [TEST_CONSTANTS.errorTestData.fields.password],
-            message: TEST_CONSTANTS.errors.fieldRequired,
           },
           {
-            path: [TEST_CONSTANTS.errorTestData.fields.username],
             message: TEST_CONSTANTS.errors.fieldRequired,
+            path: [TEST_CONSTANTS.errorTestData.fields.username],
           },
         ],
       }
@@ -131,8 +131,8 @@ describe('ValidationError', () => {
       expect(error).toBeInstanceOf(ValidationError)
       expect(error.message).toBe(TEST_CONSTANTS.errors.invalidFormat)
       expect(error.metadata).toEqual({
-        field: TEST_CONSTANTS.errorTestData.fields.email,
         errors: zodError.errors,
+        field: TEST_CONSTANTS.errorTestData.fields.email,
       })
     })
 
@@ -141,8 +141,8 @@ describe('ValidationError', () => {
       const zodError = {
         errors: [
           {
-            path: ['user', TEST_CONSTANTS.errorTestData.fields.email],
             message: TEST_CONSTANTS.errors.invalidFormat,
+            path: ['user', TEST_CONSTANTS.errorTestData.fields.email],
           },
         ],
       }
@@ -153,8 +153,8 @@ describe('ValidationError', () => {
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
       expect(error.metadata).toEqual({
-        field: 'user.email',
         errors: zodError.errors,
+        field: 'user.email',
       })
     })
 
@@ -163,8 +163,8 @@ describe('ValidationError', () => {
       const zodError = {
         errors: [
           {
-            path: ['items', 0, TEST_CONSTANTS.errorTestData.fields.field],
             message: TEST_CONSTANTS.errors.fieldRequired,
+            path: ['items', 0, TEST_CONSTANTS.errorTestData.fields.field],
           },
         ],
       }
@@ -175,8 +175,8 @@ describe('ValidationError', () => {
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
       expect(error.metadata).toEqual({
-        field: 'items.0.field',
         errors: zodError.errors,
+        field: 'items.0.field',
       })
     })
 
@@ -193,8 +193,8 @@ describe('ValidationError', () => {
       expect(error).toBeInstanceOf(ValidationError)
       expect(error.message).toBe('Validation failed')
       expect(error.metadata).toEqual({
-        field: 'unknown',
         errors: [],
+        field: 'unknown',
       })
     })
   })
@@ -207,7 +207,7 @@ describe('ValidationError', () => {
       const message = TEST_CONSTANTS.errors.invalidFormat
 
       // Act
-      const error = ValidationError.invalidValue({ field, value, message })
+      const error = ValidationError.invalidValue({ field, message, value })
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
@@ -226,7 +226,7 @@ describe('ValidationError', () => {
       const message = TEST_CONSTANTS.errors.validationFailed
 
       // Act
-      const error = ValidationError.invalidValue({ field, value, message })
+      const error = ValidationError.invalidValue({ field, message, value })
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
@@ -240,7 +240,7 @@ describe('ValidationError', () => {
       const message = TEST_CONSTANTS.errors.fieldRequired
 
       // Act
-      const error = ValidationError.invalidValue({ field, value, message })
+      const error = ValidationError.invalidValue({ field, message, value })
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
@@ -254,7 +254,7 @@ describe('ValidationError', () => {
       const message = TEST_CONSTANTS.errors.fieldRequired
 
       // Act
-      const error = ValidationError.invalidValue({ field, value, message })
+      const error = ValidationError.invalidValue({ field, message, value })
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
@@ -316,14 +316,14 @@ describe('ValidationError', () => {
 
       // Assert
       expect(json).toEqual({
-        name: 'ValidationError',
-        message,
-        code: ERROR_CODES.VALIDATION_ERROR,
         category: ERROR_CATEGORY.VALIDATION,
+        code: ERROR_CODES.VALIDATION_ERROR,
+        isOperational: true,
+        message,
+        metadata,
+        name: 'ValidationError',
         severity: ERROR_SEVERITY.LOW,
         timestamp: error.timestamp.toISOString(),
-        isOperational: true,
-        metadata,
       })
     })
   })

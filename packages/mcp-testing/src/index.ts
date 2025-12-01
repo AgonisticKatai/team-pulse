@@ -48,24 +48,24 @@ class TestingMCPServer {
       {
         description: 'Run tests for a specific package or all tests in the workspace',
         inputSchema: {
-          package: z.enum(['api', 'web', 'shared', 'all']),
           filter: z.string().optional(),
+          package: z.enum(['api', 'web', 'shared', 'all']),
         },
       },
       async (args: { package: string; filter?: string }) => {
         const pkg = (args.package || 'all') as 'api' | 'web' | 'shared' | 'all'
         const filter = args.filter as string | undefined
-        const result = await this.runTestsUseCase.execute({ pkg, filter })
+        const result = await this.runTestsUseCase.execute({ filter, pkg })
 
         if (!result.ok) {
           return {
-            content: [{ type: 'text' as const, text: result.error.message }],
+            content: [{ text: result.error.message, type: 'text' as const }],
             isError: true,
           }
         }
 
         return {
-          content: [{ type: 'text' as const, text: result.value }],
+          content: [{ text: result.value, type: 'text' as const }],
         }
       },
     )
@@ -84,13 +84,13 @@ class TestingMCPServer {
 
         if (!result.ok) {
           return {
-            content: [{ type: 'text' as const, text: result.error.message }],
+            content: [{ text: result.error.message, type: 'text' as const }],
             isError: true,
           }
         }
 
         return {
-          content: [{ type: 'text' as const, text: result.value }],
+          content: [{ text: result.value, type: 'text' as const }],
         }
       },
     )
@@ -109,13 +109,13 @@ class TestingMCPServer {
 
         if (!result.ok) {
           return {
-            content: [{ type: 'text' as const, text: result.error.message }],
+            content: [{ text: result.error.message, type: 'text' as const }],
             isError: true,
           }
         }
 
         return {
-          content: [{ type: 'text' as const, text: result.value }],
+          content: [{ text: result.value, type: 'text' as const }],
         }
       },
     )
@@ -125,24 +125,24 @@ class TestingMCPServer {
       {
         description: 'Run lint checks on a specific package',
         inputSchema: {
-          package: z.enum(['api', 'web', 'shared', 'all']),
           fix: z.boolean().optional(),
+          package: z.enum(['api', 'web', 'shared', 'all']),
         },
       },
       async (args: { package: string; fix?: boolean }) => {
         const pkg = (args.package || 'all') as 'api' | 'web' | 'shared' | 'all'
         const fix = args.fix ?? false
-        const result = await this.lintCheckUseCase.execute({ pkg, fix })
+        const result = await this.lintCheckUseCase.execute({ fix, pkg })
 
         if (!result.ok) {
           return {
-            content: [{ type: 'text' as const, text: result.error.message }],
+            content: [{ text: result.error.message, type: 'text' as const }],
             isError: true,
           }
         }
 
         return {
-          content: [{ type: 'text' as const, text: result.value }],
+          content: [{ text: result.value, type: 'text' as const }],
         }
       },
     )

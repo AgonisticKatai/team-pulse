@@ -60,7 +60,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
         // Handle Result type
         if (!result.ok) {
           const logger = FastifyLogger.create({ logger: request.log })
-          return handleError({ error: result.error, reply, logger })
+          return handleError({ error: result.error, logger, reply })
         }
 
         // Return success response
@@ -70,7 +70,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
         })
       } catch (error) {
         const logger = FastifyLogger.create({ logger: request.log })
-        return handleError({ error, reply, logger })
+        return handleError({ error, logger, reply })
       }
     },
   )
@@ -90,7 +90,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
       // Handle Result type
       if (!result.ok) {
         const logger = FastifyLogger.create({ logger: request.log })
-        return handleError({ error: result.error, reply, logger })
+        return handleError({ error: result.error, logger, reply })
       }
 
       // Return success response
@@ -100,7 +100,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
       })
     } catch (error) {
       const logger = FastifyLogger.create({ logger: request.log })
-      return handleError({ error, reply, logger })
+      return handleError({ error, logger, reply })
     }
   })
 
@@ -122,7 +122,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
       return reply.code(204).send()
     } catch (error) {
       const logger = FastifyLogger.create({ logger: request.log })
-      return handleError({ error, reply, logger })
+      return handleError({ error, logger, reply })
     }
   })
 
@@ -143,7 +143,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
       })
     } catch (error) {
       const logger = FastifyLogger.create({ logger: request.log })
-      return handleError({ error, reply, logger })
+      return handleError({ error, logger, reply })
     }
   })
 }

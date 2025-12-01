@@ -18,7 +18,7 @@ describe('BusinessRuleError', () => {
       const metadata = { userId: TEST_CONSTANTS.errorTestData.identifiers.userId }
 
       // Act
-      const error = BusinessRuleError.create({ message, rule, metadata })
+      const error = BusinessRuleError.create({ message, metadata, rule })
 
       // Assert
       expect(error).toBeInstanceOf(BusinessRuleError)
@@ -124,24 +124,24 @@ describe('BusinessRuleError', () => {
       const message = TEST_CONSTANTS.errors.businessRuleViolation
       const rule = TEST_CONSTANTS.errorTestData.rules.businessRule
       const metadata = { userId: TEST_CONSTANTS.errorTestData.identifiers.userId }
-      const error = BusinessRuleError.create({ message, rule, metadata })
+      const error = BusinessRuleError.create({ message, metadata, rule })
 
       // Act
       const json = error.toJSON()
 
       // Assert
       expect(json).toEqual({
-        name: 'BusinessRuleError',
-        message,
-        code: ERROR_CODES.BUSINESS_RULE_ERROR,
         category: ERROR_CATEGORY.BUSINESS_RULE,
-        severity: ERROR_SEVERITY.MEDIUM,
-        timestamp: error.timestamp.toISOString(),
+        code: ERROR_CODES.BUSINESS_RULE_ERROR,
         isOperational: true,
+        message,
         metadata: {
           ...metadata,
           rule,
         },
+        name: 'BusinessRuleError',
+        severity: ERROR_SEVERITY.MEDIUM,
+        timestamp: error.timestamp.toISOString(),
       })
     })
   })

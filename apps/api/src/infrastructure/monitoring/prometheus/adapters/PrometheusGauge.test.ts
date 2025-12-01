@@ -13,9 +13,9 @@ describe('PrometheusGauge', () => {
   beforeEach(() => {
     promRegistry = new Registry()
     promGauge = new Gauge({
-      name: prometheus.testMetrics.gauge.name,
       help: prometheus.testMetrics.gauge.help,
       labelNames: ['method', 'route'],
+      name: prometheus.testMetrics.gauge.name,
       registers: [promRegistry],
     })
     adapter = PrometheusGauge.create({ gauge: promGauge })
@@ -43,7 +43,7 @@ describe('PrometheusGauge', () => {
         route: prometheus.labels.route,
       }
 
-      adapter.set({ value: prometheus.values.count, labels })
+      adapter.set({ labels, value: prometheus.values.count })
 
       const metrics = await promRegistry.metrics()
       expect(metrics).toContain(`method="${prometheus.labels.method}"`)

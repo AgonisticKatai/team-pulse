@@ -55,7 +55,7 @@ export class RefreshTokenUseCase {
     refreshTokenRepository: IRefreshTokenRepository
     userRepository: IUserRepository
   }): RefreshTokenUseCase {
-    return new RefreshTokenUseCase({ tokenFactory, refreshTokenRepository, userRepository })
+    return new RefreshTokenUseCase({ refreshTokenRepository, tokenFactory, userRepository })
   }
 
   async execute({

@@ -39,10 +39,10 @@ export function createLoggerConfig(env: 'development' | 'production' | 'test', l
         type: err.constructor.name,
       }),
       req: (req) => ({
+        correlationId: req.correlationId, // Injected by correlation-id middleware
         id: req.id,
         method: req.method,
         url: req.url,
-        correlationId: req.correlationId, // Injected by correlation-id middleware
       }),
       res: (res) => ({
         statusCode: res.statusCode,
@@ -54,12 +54,12 @@ export function createLoggerConfig(env: 'development' | 'production' | 'test', l
     return {
       ...baseConfig,
       transport: {
-        target: 'pino-pretty',
         options: {
           colorize: true,
-          translateTime: 'HH:MM:ss',
           ignore: 'pid,hostname',
+          translateTime: 'HH:MM:ss',
         },
+        target: 'pino-pretty',
       },
     }
   }
@@ -67,11 +67,11 @@ export function createLoggerConfig(env: 'development' | 'production' | 'test', l
   // Production: structured JSON logs for log aggregation systems
   return {
     ...baseConfig,
-    timestamp: () => `,"time":"${new Date().toISOString()}"`,
     base: {
       env: 'production',
       service: 'team-pulse-api',
     },
+    timestamp: () => `,"time":"${new Date().toISOString()}"`,
   }
 }
 

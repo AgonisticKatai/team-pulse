@@ -54,9 +54,9 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
 
   // 4. Create Fastify instance with structured logging
   const fastify = Fastify({
-    logger: createLoggerConfig(env.NODE_ENV, env.LOG_LEVEL),
     // Generate unique request IDs
     genReqId: () => crypto.randomUUID(),
+    logger: createLoggerConfig(env.NODE_ENV, env.LOG_LEVEL),
   })
 
   // 5. Register Correlation ID middleware (for distributed tracing)
@@ -84,9 +84,9 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'"],
         imgSrc: ["'self'", 'data:', 'https:'],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
       },
     },
   })
@@ -104,11 +104,11 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
   // Brotli provides best compression but more CPU intensive
   // Gzip is widely supported and good balance
   await fastify.register(compress, {
-    global: true,
-    threshold: 1024, // Only compress responses > 1KB
     encodings: ['br', 'gzip', 'deflate'], // Priority order: brotli > gzip > deflate
+    global: true,
     // Don't compress already compressed formats
     removeContentLengthHeader: true,
+    threshold: 1024, // Only compress responses > 1KB
   })
 
   // 9. Register CORS plugin
@@ -121,8 +121,6 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
   // Global rate limit: 100 requests per 15 minutes per IP
   // Protects against DDoS and brute force attacks
   await fastify.register(rateLimit, {
-    max: 100,
-    timeWindow: '15 minutes',
     errorResponseBuilder: () => ({
       error: {
         code: 'TOO_MANY_REQUESTS',
@@ -130,6 +128,8 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
       },
       success: false,
     }),
+    max: 100,
+    timeWindow: '15 minutes',
   })
 
   // 11. Register routes (HTTP adapters)
@@ -207,7 +207,7 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
   // 14. Global error handler
   fastify.setErrorHandler((error: FastifyError, request: FastifyRequest, reply: FastifyReply) => {
     const logger = FastifyLogger.create({ logger: request.log })
-    return handleError({ error, reply, logger })
+    return handleError({ error, logger, reply })
   })
 
   await fastify.ready()

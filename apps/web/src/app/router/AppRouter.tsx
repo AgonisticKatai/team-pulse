@@ -37,17 +37,17 @@ export const AppRouter = () => {
       <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* Public routes */}
-          <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+          <Route element={<LoginPage />} path={ROUTES.LOGIN} />
 
           {/* Protected routes - TODO: Add ProtectedRoute wrapper */}
-          <Route path={ROUTES.HOME} element={<Navigate to={ROUTES.DASHBOARD} replace />} />
-          <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
-          <Route path={ROUTES.TEAMS} element={<TeamsPage />} />
-          <Route path={ROUTES.USERS} element={<UsersPage />} />
+          <Route element={<Navigate replace to={ROUTES.DASHBOARD} />} path={ROUTES.HOME} />
+          <Route element={<DashboardPage />} path={ROUTES.DASHBOARD} />
+          <Route element={<TeamsPage />} path={ROUTES.TEAMS} />
+          <Route element={<UsersPage />} path={ROUTES.USERS} />
 
           {/* 404 */}
-          <Route path={ROUTES.NOT_FOUND} element={<NotFoundPage />} />
-          <Route path="*" element={<Navigate to={ROUTES.NOT_FOUND} replace />} />
+          <Route element={<NotFoundPage />} path={ROUTES.NOT_FOUND} />
+          <Route element={<Navigate replace to={ROUTES.NOT_FOUND} />} path="*" />
         </Routes>
       </Suspense>
     </BrowserRouter>

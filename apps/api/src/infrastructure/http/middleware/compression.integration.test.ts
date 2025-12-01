@@ -51,11 +51,11 @@ describe('HTTP Compression Middleware', () => {
     await buildTestApp()
 
     const response = await app.inject({
-      method: 'GET',
-      url: '/api/health',
       headers: {
         'accept-encoding': 'gzip, deflate, br',
       },
+      method: 'GET',
+      url: '/api/health',
     })
 
     expect(response.statusCode).toBe(200)
@@ -74,11 +74,11 @@ describe('HTTP Compression Middleware', () => {
     await buildTestApp()
 
     const response = await app.inject({
-      method: 'GET',
-      url: '/api/health',
       headers: {
         'accept-encoding': 'br, gzip, deflate',
       },
+      method: 'GET',
+      url: '/api/health',
     })
 
     expect(response.statusCode).toBe(200)
@@ -108,11 +108,11 @@ describe('HTTP Compression Middleware', () => {
     await buildTestApp()
 
     const response = await app.inject({
-      method: 'GET',
-      url: '/api/health',
       headers: {
         'accept-encoding': 'identity',
       },
+      method: 'GET',
+      url: '/api/health',
     })
 
     expect(response.statusCode).toBe(200)
@@ -123,11 +123,11 @@ describe('HTTP Compression Middleware', () => {
     await buildTestApp()
 
     const response = await app.inject({
-      method: 'GET',
-      url: '/api/health',
       headers: {
         'accept-encoding': 'deflate',
       },
+      method: 'GET',
+      url: '/api/health',
     })
 
     expect(response.statusCode).toBe(200)
@@ -142,12 +142,12 @@ describe('HTTP Compression Middleware', () => {
     await buildTestApp()
 
     const response = await app.inject({
+      headers: {
+        accept: 'application/json',
+        'accept-encoding': 'gzip',
+      },
       method: 'GET',
       url: '/api/health',
-      headers: {
-        'accept-encoding': 'gzip',
-        accept: 'application/json',
-      },
     })
 
     expect(response.statusCode).toBe(200)
@@ -163,11 +163,11 @@ describe('HTTP Compression Middleware', () => {
 
     // Test that compression doesn't break API functionality
     const response = await app.inject({
-      method: 'GET',
-      url: '/api',
       headers: {
         'accept-encoding': 'br, gzip, deflate',
       },
+      method: 'GET',
+      url: '/api',
     })
 
     expect(response.statusCode).toBe(200)

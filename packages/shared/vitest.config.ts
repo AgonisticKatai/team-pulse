@@ -4,9 +4,9 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   resolve: {
     alias: {
+      '@dtos': fileURLToPath(new URL('./src/dtos', import.meta.url)),
       '@errors': fileURLToPath(new URL('./src/errors', import.meta.url)),
       '@testing': fileURLToPath(new URL('./src/testing', import.meta.url)),
-      '@dtos': fileURLToPath(new URL('./src/dtos', import.meta.url)),
       '@types': fileURLToPath(new URL('./src/types', import.meta.url)),
     },
   },

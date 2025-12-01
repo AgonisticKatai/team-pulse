@@ -76,7 +76,7 @@ export class MetricsService implements IMetricsService {
    */
   recordHttpError({ errorType, method, route }: HttpErrorMetrics): void {
     // biome-ignore lint/style/useNamingConvention: Prometheus label names use snake_case
-    this.metrics.httpRequestErrors.inc({ labels: { method, route, error_type: errorType } })
+    this.metrics.httpRequestErrors.inc({ labels: { error_type: errorType, method, route } })
   }
 
   /**
@@ -93,7 +93,7 @@ export class MetricsService implements IMetricsService {
    */
   recordDbError({ errorType, operation, table }: DbErrorMetrics): void {
     // biome-ignore lint/style/useNamingConvention: Prometheus label names use snake_case
-    this.metrics.dbQueryErrors.inc({ labels: { operation, table, error_type: errorType } })
+    this.metrics.dbQueryErrors.inc({ labels: { error_type: errorType, operation, table } })
   }
 
   /**

@@ -31,7 +31,7 @@ export class ListTeamsUseCase {
 
   async execute({ dto }: { dto: PaginationQuery }): Promise<Result<TeamsListResponseDTO, RepositoryError | ValidationError>> {
     const { page = 1, limit = 10 } = dto
-    const findTeamResult = await this.teamRepository.findAllPaginated({ page, limit })
+    const findTeamResult = await this.teamRepository.findAllPaginated({ limit, page })
 
     if (!findTeamResult.ok) {
       return Err(findTeamResult.error)
@@ -43,7 +43,7 @@ export class ListTeamsUseCase {
     this.metricsService.setTeamsTotal({ count: total })
 
     // Create Pagination Value Object with validation
-    const paginationResult = Pagination.create({ page, limit, total })
+    const paginationResult = Pagination.create({ limit, page, total })
     if (!paginationResult.ok) {
       return Err(paginationResult.error)
     }

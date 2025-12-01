@@ -42,7 +42,7 @@ export class ListUsersUseCase {
 
   async execute({ dto }: { dto: PaginationQuery }): Promise<Result<UsersListResponseDTO, RepositoryError | ValidationError>> {
     const { page = 1, limit = 10 } = dto
-    const findUserResult = await this.userRepository.findAllPaginated({ page, limit })
+    const findUserResult = await this.userRepository.findAllPaginated({ limit, page })
 
     if (!findUserResult.ok) {
       return Err(findUserResult.error)
@@ -54,7 +54,7 @@ export class ListUsersUseCase {
     this.metricsService.setUsersTotal({ count: total })
 
     // Create Pagination Value Object with validation
-    const paginationResult = Pagination.create({ page, limit, total })
+    const paginationResult = Pagination.create({ limit, page, total })
     if (!paginationResult.ok) {
       return Err(paginationResult.error)
     }

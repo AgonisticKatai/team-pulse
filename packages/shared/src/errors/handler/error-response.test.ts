@@ -37,8 +37,8 @@ describe('error-response', () => {
       it('should return full error details for operational not found error', () => {
         // Arrange
         const error = NotFoundError.forResource({
-          resource: TEST_CONSTANTS.errorTestData.resources.user,
           identifier: TEST_CONSTANTS.errorTestData.identifiers.userId,
+          resource: TEST_CONSTANTS.errorTestData.resources.user,
         })
 
         // Act
@@ -51,8 +51,8 @@ describe('error-response', () => {
         expect(response.category).toBe(ERROR_CATEGORY.NOT_FOUND)
         expect(response.severity).toBe(ERROR_SEVERITY.LOW)
         expect(response.metadata).toEqual({
-          resource: TEST_CONSTANTS.errorTestData.resources.user,
           identifier: TEST_CONSTANTS.errorTestData.identifiers.userId,
+          resource: TEST_CONSTANTS.errorTestData.resources.user,
         })
       })
 
@@ -94,8 +94,8 @@ describe('error-response', () => {
         // Arrange
         const originalError = new Error(TEST_CONSTANTS.errors.testError)
         const error = InternalError.fromError({
-          error: originalError,
           context: TEST_CONSTANTS.errorTestData.context.module,
+          error: originalError,
         })
 
         // Act

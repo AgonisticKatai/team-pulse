@@ -44,10 +44,10 @@ export interface ILogger {
  * Maps error severity to logger method
  */
 export const SEVERITY_TO_LOG_LEVEL = {
+  critical: 'error',
+  high: 'error',
   low: 'info',
   medium: 'warn',
-  high: 'error',
-  critical: 'error',
 } as const
 
 /**

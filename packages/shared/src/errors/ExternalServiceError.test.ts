@@ -18,7 +18,7 @@ describe('ExternalServiceError', () => {
       const metadata = { statusCode: 503 }
 
       // Act
-      const error = ExternalServiceError.create({ message, service, metadata })
+      const error = ExternalServiceError.create({ message, metadata, service })
 
       // Assert
       expect(error).toBeInstanceOf(ExternalServiceError)
@@ -124,24 +124,24 @@ describe('ExternalServiceError', () => {
       const message = TEST_CONSTANTS.errors.externalServiceFailed
       const service = TEST_CONSTANTS.errorTestData.services.externalApi
       const metadata = { statusCode: 502 }
-      const error = ExternalServiceError.create({ message, service, metadata })
+      const error = ExternalServiceError.create({ message, metadata, service })
 
       // Act
       const json = error.toJSON()
 
       // Assert
       expect(json).toEqual({
-        name: 'ExternalServiceError',
-        message,
-        code: ERROR_CODES.EXTERNAL_SERVICE_ERROR,
         category: ERROR_CATEGORY.EXTERNAL,
-        severity: ERROR_SEVERITY.HIGH,
-        timestamp: error.timestamp.toISOString(),
+        code: ERROR_CODES.EXTERNAL_SERVICE_ERROR,
         isOperational: true,
+        message,
         metadata: {
           ...metadata,
           service,
         },
+        name: 'ExternalServiceError',
+        severity: ERROR_SEVERITY.HIGH,
+        timestamp: error.timestamp.toISOString(),
       })
     })
   })

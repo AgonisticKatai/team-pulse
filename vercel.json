@@ -4,9 +4,9 @@
   "framework": null,
   "functions": {
     "api/index.ts": {
+      "includeFiles": "apps/api/dist/drizzle/**/*.{sql,json}",
       "maxDuration": 10,
-      "memory": 1024,
-      "includeFiles": "apps/api/dist/drizzle/**/*.{sql,json}"
+      "memory": 1024
     }
   },
   "installCommand": "pnpm install",

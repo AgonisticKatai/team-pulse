@@ -158,7 +158,7 @@ describe('ScryptPasswordHasher', () => {
       const hash = expectSuccess(hashResult)
 
       // Act
-      const result = await hasher.verify({ password, hash })
+      const result = await hasher.verify({ hash, password })
 
       // Assert
       const isValid = expectSuccess(result)
@@ -173,7 +173,7 @@ describe('ScryptPasswordHasher', () => {
       const hash = expectSuccess(hashResult)
 
       // Act
-      const result = await hasher.verify({ password: wrongPassword, hash })
+      const result = await hasher.verify({ hash, password: wrongPassword })
 
       // Assert
       const isValid = expectSuccess(result)
@@ -187,7 +187,7 @@ describe('ScryptPasswordHasher', () => {
       const hash = expectSuccess(hashResult)
 
       // Act
-      const result = await hasher.verify({ password: '', hash })
+      const result = await hasher.verify({ hash, password: '' })
 
       // Assert
       const isValid = expectSuccess(result)
@@ -201,7 +201,7 @@ describe('ScryptPasswordHasher', () => {
       const hash = expectSuccess(hashResult)
 
       // Act
-      const result = await hasher.verify({ password: TEST_CONSTANTS.passwords.lowercase, hash })
+      const result = await hasher.verify({ hash, password: TEST_CONSTANTS.passwords.lowercase })
 
       // Assert
       const isValid = expectSuccess(result)
@@ -215,7 +215,7 @@ describe('ScryptPasswordHasher', () => {
       const hash = expectSuccess(hashResult)
 
       // Act
-      const result = await hasher.verify({ password, hash })
+      const result = await hasher.verify({ hash, password })
 
       // Assert
       const isValid = expectSuccess(result)
@@ -229,7 +229,7 @@ describe('ScryptPasswordHasher', () => {
       const hash = expectSuccess(hashResult)
 
       // Act
-      const result = await hasher.verify({ password, hash })
+      const result = await hasher.verify({ hash, password })
 
       // Assert
       const isValid = expectSuccess(result)
@@ -243,7 +243,7 @@ describe('ScryptPasswordHasher', () => {
       const invalidHash = 'not-a-valid-scrypt-hash'
 
       // Act
-      const result = await hasher.verify({ password, hash: invalidHash })
+      const result = await hasher.verify({ hash: invalidHash, password })
 
       // Assert
       const isValid = expectSuccess(result)
@@ -257,7 +257,7 @@ describe('ScryptPasswordHasher', () => {
       const hash = expectSuccess(hashResult)
 
       // Act
-      const result = await hasher.verify({ password, hash })
+      const result = await hasher.verify({ hash, password })
 
       // Assert
       const isValid = expectSuccess(result)
@@ -275,7 +275,7 @@ describe('ScryptPasswordHasher', () => {
       // Act
       const hashResult = await hasher1.hash({ password })
       const hash = expectSuccess(hashResult)
-      const verifyResult = await hasher2.verify({ password, hash })
+      const verifyResult = await hasher2.verify({ hash, password })
 
       // Assert
       const isValid = expectSuccess(verifyResult)
@@ -293,7 +293,7 @@ describe('ScryptPasswordHasher', () => {
       // Act - Hash with 1024 cost, verify with instance configured for 2048 cost
       const hashResult = await hasher1024.hash({ password })
       const hash = expectSuccess(hashResult)
-      const verifyResult = await hasher2048.verify({ password, hash })
+      const verifyResult = await hasher2048.verify({ hash, password })
 
       // Assert - Verification should succeed because parameters are stored in hash
       const isValid = expectSuccess(verifyResult)
@@ -311,7 +311,7 @@ describe('ScryptPasswordHasher', () => {
       const hash = expectSuccess(hashResult)
 
       // Assert - Verify long password works
-      const verifyResult = await hasher.verify({ password: longPassword, hash })
+      const verifyResult = await hasher.verify({ hash, password: longPassword })
       const isValid = expectSuccess(verifyResult)
       expect(isValid).toBe(true)
     })
@@ -323,7 +323,7 @@ describe('ScryptPasswordHasher', () => {
       // Act
       const hashResult = await hasher.hash({ password })
       const hash = expectSuccess(hashResult)
-      const verifyResult = await hasher.verify({ password, hash })
+      const verifyResult = await hasher.verify({ hash, password })
 
       // Assert
       const isValid = expectSuccess(verifyResult)
@@ -361,8 +361,8 @@ describe('ScryptPasswordHasher', () => {
       const hash = expectSuccess(hashResult)
 
       // Act - Both comparisons should take similar time (timing-safe)
-      const result1 = await hasher.verify({ password: TEST_CONSTANTS.passwords.test, hash })
-      const result2 = await hasher.verify({ password: TEST_CONSTANTS.passwords.wrong, hash })
+      const result1 = await hasher.verify({ hash, password: TEST_CONSTANTS.passwords.test })
+      const result2 = await hasher.verify({ hash, password: TEST_CONSTANTS.passwords.wrong })
 
       // Assert
       const isValid1 = expectSuccess(result1)
@@ -374,9 +374,9 @@ describe('ScryptPasswordHasher', () => {
     it('should include all parameters in hash format', async () => {
       // Arrange
       const hasher = ScryptPasswordHasher.create({
-        keyLength: 32,
-        cost: 1024,
         blockSize: 4,
+        cost: 1024,
+        keyLength: 32,
         parallelization: 2,
       })
       const password = TEST_CONSTANTS.passwords.test

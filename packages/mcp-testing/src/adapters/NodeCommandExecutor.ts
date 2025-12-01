@@ -31,14 +31,14 @@ export class NodeCommandExecutor implements ICommandExecutor {
         cwd: cwd || this.defaultCwd,
       })
 
-      return Ok({ stdout, stderr })
+      return Ok({ stderr, stdout })
     } catch (error) {
       if (error && typeof error === 'object' && 'stdout' in error && 'stderr' in error) {
         // Command executed but returned non-zero exit code
         // Still return output as it may contain useful information
         return Ok({
-          stdout: String(error.stdout || ''),
           stderr: String(error.stderr || ''),
+          stdout: String(error.stdout || ''),
         })
       }
 

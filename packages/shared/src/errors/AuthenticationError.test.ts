@@ -159,14 +159,14 @@ describe('AuthenticationError', () => {
 
       // Assert
       expect(json).toEqual({
-        name: 'AuthenticationError',
-        message,
-        code: ERROR_CODES.AUTHENTICATION_ERROR,
         category: ERROR_CATEGORY.AUTHENTICATION,
+        code: ERROR_CODES.AUTHENTICATION_ERROR,
+        isOperational: true,
+        message,
+        metadata,
+        name: 'AuthenticationError',
         severity: ERROR_SEVERITY.MEDIUM,
         timestamp: error.timestamp.toISOString(),
-        isOperational: true,
-        metadata,
       })
     })
   })

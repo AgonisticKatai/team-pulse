@@ -32,7 +32,7 @@ describe('FastifyErrorHandler', () => {
       })
 
       // Act
-      handleError({ error, reply: mockReply, logger: mockLogger })
+      handleError({ error, logger: mockLogger, reply: mockReply })
 
       // Assert
       expect(mockReply.code).toHaveBeenCalledWith(TEST_CONSTANTS.errorTestData.handler.httpStatusCodes.badRequest)
@@ -50,7 +50,7 @@ describe('FastifyErrorHandler', () => {
       const error = AuthenticationError.invalidCredentials()
 
       // Act
-      handleError({ error, reply: mockReply, logger: mockLogger })
+      handleError({ error, logger: mockLogger, reply: mockReply })
 
       // Assert
       expect(mockReply.code).toHaveBeenCalledWith(TEST_CONSTANTS.errorTestData.handler.httpStatusCodes.unauthorized)
@@ -71,7 +71,7 @@ describe('FastifyErrorHandler', () => {
       })
 
       // Act
-      handleError({ error, reply: mockReply, logger: mockLogger })
+      handleError({ error, logger: mockLogger, reply: mockReply })
 
       // Assert
       expect(mockReply.code).toHaveBeenCalledWith(TEST_CONSTANTS.errorTestData.handler.httpStatusCodes.notFound)
@@ -92,7 +92,7 @@ describe('FastifyErrorHandler', () => {
       })
 
       // Act
-      handleError({ error, reply: mockReply, logger: mockLogger })
+      handleError({ error, logger: mockLogger, reply: mockReply })
 
       // Assert
       expect(mockReply.code).toHaveBeenCalledWith(TEST_CONSTANTS.errorTestData.handler.httpStatusCodes.conflict)
@@ -110,7 +110,7 @@ describe('FastifyErrorHandler', () => {
       const error = new Error(TEST_CONSTANTS.errorTestData.handler.unexpectedError)
 
       // Act
-      handleError({ error, reply: mockReply, logger: mockLogger })
+      handleError({ error, logger: mockLogger, reply: mockReply })
 
       // Assert
       expect(mockReply.code).toHaveBeenCalledWith(TEST_CONSTANTS.errorTestData.handler.httpStatusCodes.internalServerError)
@@ -131,7 +131,7 @@ describe('FastifyErrorHandler', () => {
       })
 
       // Act
-      handleError({ error, reply: mockReply, logger: mockLogger })
+      handleError({ error, logger: mockLogger, reply: mockReply })
 
       // Assert - ValidationError has LOW severity, should log as info
       expect(mockLogger.info).toHaveBeenCalled()

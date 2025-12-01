@@ -50,7 +50,7 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        const team = expectSuccess(await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto }))
+        const team = expectSuccess(await updateTeamUseCase.execute({ dto, id: TEST_CONSTANTS.mockUuid }))
 
         // Assert
         expect(team.id).toBe(TEST_CONSTANTS.mockUuid)
@@ -68,7 +68,7 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        const team = expectSuccess(await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto }))
+        const team = expectSuccess(await updateTeamUseCase.execute({ dto, id: TEST_CONSTANTS.mockUuid }))
 
         // Assert
         expect(team).toBeDefined()
@@ -86,7 +86,7 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto })
+        await updateTeamUseCase.execute({ dto, id: TEST_CONSTANTS.mockUuid })
 
         // Assert
         expect(teamRepository.findByName).not.toHaveBeenCalled()
@@ -103,7 +103,7 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto })
+        await updateTeamUseCase.execute({ dto, id: TEST_CONSTANTS.mockUuid })
 
         // Assert
         expect(teamRepository.findByName).toHaveBeenCalledWith({ name: 'New Team Name' })
@@ -121,7 +121,7 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        const result = await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto })
+        const result = await updateTeamUseCase.execute({ dto, id: TEST_CONSTANTS.mockUuid })
 
         // Assert
         expectSuccess(result)
@@ -140,7 +140,7 @@ describe('UpdateTeamUseCase', () => {
         // Act
         const error = expectErrorType({
           errorType: NotFoundError,
-          result: await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto }),
+          result: await updateTeamUseCase.execute({ dto, id: TEST_CONSTANTS.mockUuid }),
         })
 
         // Assert
@@ -160,7 +160,7 @@ describe('UpdateTeamUseCase', () => {
         // Act
         const error = expectErrorType({
           errorType: ConflictError,
-          result: await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto }),
+          result: await updateTeamUseCase.execute({ dto, id: TEST_CONSTANTS.mockUuid }),
         })
 
         // Assert
@@ -179,7 +179,7 @@ describe('UpdateTeamUseCase', () => {
         // Act
         expectErrorType({
           errorType: ValidationError,
-          result: await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto }),
+          result: await updateTeamUseCase.execute({ dto, id: TEST_CONSTANTS.mockUuid }),
         })
 
         // Assert
@@ -197,7 +197,7 @@ describe('UpdateTeamUseCase', () => {
         // Act
         expectErrorType({
           errorType: ValidationError,
-          result: await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto }),
+          result: await updateTeamUseCase.execute({ dto, id: TEST_CONSTANTS.mockUuid }),
         })
 
         // Assert
@@ -223,7 +223,7 @@ describe('UpdateTeamUseCase', () => {
         // Act
         const error = expectErrorType({
           errorType: RepositoryError,
-          result: await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto }),
+          result: await updateTeamUseCase.execute({ dto, id: TEST_CONSTANTS.mockUuid }),
         })
 
         // Assert
@@ -248,7 +248,7 @@ describe('UpdateTeamUseCase', () => {
         // Act
         const error = expectErrorType({
           errorType: RepositoryError,
-          result: await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto }),
+          result: await updateTeamUseCase.execute({ dto, id: TEST_CONSTANTS.mockUuid }),
         })
 
         // Assert
@@ -265,7 +265,7 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        const team = expectSuccess(await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto }))
+        const team = expectSuccess(await updateTeamUseCase.execute({ dto, id: TEST_CONSTANTS.mockUuid }))
 
         // Assert
         expect(team).toBeDefined()
@@ -281,7 +281,7 @@ describe('UpdateTeamUseCase', () => {
         vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
 
         // Act
-        const team = expectSuccess(await updateTeamUseCase.execute({ id: TEST_CONSTANTS.mockUuid, dto }))
+        const team = expectSuccess(await updateTeamUseCase.execute({ dto, id: TEST_CONSTANTS.mockUuid }))
 
         // Assert
         expect(team).toBeDefined()

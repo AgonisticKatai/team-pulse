@@ -43,8 +43,8 @@ describe('RepositoryError', () => {
       expect(error.message).toBe(message)
       expect(error.operation).toBe(operation)
       expect(error.metadata).toEqual({
-        operation,
         cause: undefined,
+        operation,
       })
     })
 
@@ -54,15 +54,15 @@ describe('RepositoryError', () => {
       const cause = new Error('Connection timeout')
 
       // Act
-      const error = RepositoryError.create({ message, cause })
+      const error = RepositoryError.create({ cause, message })
 
       // Assert
       expect(error).toBeInstanceOf(RepositoryError)
       expect(error.message).toBe(message)
       expect(error.cause).toBe(cause)
       expect(error.metadata).toEqual({
-        operation: undefined,
         cause: 'Connection timeout',
+        operation: undefined,
       })
     })
 
@@ -73,7 +73,7 @@ describe('RepositoryError', () => {
       const cause = new Error('Query failed')
 
       // Act
-      const error = RepositoryError.create({ message, operation, cause })
+      const error = RepositoryError.create({ cause, message, operation })
 
       // Assert
       expect(error).toBeInstanceOf(RepositoryError)
@@ -81,8 +81,8 @@ describe('RepositoryError', () => {
       expect(error.operation).toBe(operation)
       expect(error.cause).toBe(cause)
       expect(error.metadata).toEqual({
-        operation,
         cause: 'Query failed',
+        operation,
       })
     })
   })
@@ -94,7 +94,7 @@ describe('RepositoryError', () => {
       const message = TEST_CONSTANTS.errors.databaseConnectionLost
 
       // Act
-      const error = RepositoryError.forOperation({ operation, message })
+      const error = RepositoryError.forOperation({ message, operation })
 
       // Assert
       expect(error).toBeInstanceOf(RepositoryError)
@@ -113,7 +113,7 @@ describe('RepositoryError', () => {
       const cause = new Error('Deadlock detected')
 
       // Act
-      const error = RepositoryError.forOperation({ operation, message, cause })
+      const error = RepositoryError.forOperation({ cause, message, operation })
 
       // Assert
       expect(error).toBeInstanceOf(RepositoryError)
@@ -121,8 +121,8 @@ describe('RepositoryError', () => {
       expect(error.operation).toBe(operation)
       expect(error.cause).toBe(cause)
       expect(error.metadata).toEqual({
-        operation,
         cause: 'Deadlock detected',
+        operation,
       })
     })
   })
@@ -175,24 +175,24 @@ describe('RepositoryError', () => {
       const message = TEST_CONSTANTS.errors.databaseConnectionLost
       const operation = 'save'
       const cause = new Error('Constraint violation')
-      const error = RepositoryError.create({ message, operation, cause })
+      const error = RepositoryError.create({ cause, message, operation })
 
       // Act
       const json = error.toJSON()
 
       // Assert
       expect(json).toEqual({
-        name: 'RepositoryError',
-        message,
-        code: ERROR_CODES.REPOSITORY_ERROR,
         category: ERROR_CATEGORY.INTERNAL,
+        code: ERROR_CODES.REPOSITORY_ERROR,
+        isOperational: true,
+        message,
+        metadata: {
+          cause: 'Constraint violation',
+          operation,
+        },
+        name: 'RepositoryError',
         severity: ERROR_SEVERITY.HIGH,
         timestamp: error.timestamp.toISOString(),
-        isOperational: true,
-        metadata: {
-          operation,
-          cause: 'Constraint violation',
-        },
       })
     })
 
@@ -206,17 +206,17 @@ describe('RepositoryError', () => {
 
       // Assert
       expect(json).toEqual({
-        name: 'RepositoryError',
-        message,
-        code: ERROR_CODES.REPOSITORY_ERROR,
         category: ERROR_CATEGORY.INTERNAL,
+        code: ERROR_CODES.REPOSITORY_ERROR,
+        isOperational: true,
+        message,
+        metadata: {
+          cause: undefined,
+          operation: undefined,
+        },
+        name: 'RepositoryError',
         severity: ERROR_SEVERITY.HIGH,
         timestamp: error.timestamp.toISOString(),
-        isOperational: true,
-        metadata: {
-          operation: undefined,
-          cause: undefined,
-        },
       })
     })
   })

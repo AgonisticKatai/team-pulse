@@ -51,7 +51,7 @@ describe('NotFoundError', () => {
       const identifier = TEST_CONSTANTS.errorTestData.identifiers.userId
 
       // Act
-      const error = NotFoundError.forResource({ resource, identifier })
+      const error = NotFoundError.forResource({ identifier, resource })
 
       // Assert
       expect(error).toBeInstanceOf(NotFoundError)
@@ -61,8 +61,8 @@ describe('NotFoundError', () => {
       expect(error.severity).toBe(ERROR_SEVERITY.LOW)
       expect(error.isOperational).toBe(true)
       expect(error.metadata).toEqual({
-        resource,
         identifier,
+        resource,
       })
     })
 
@@ -72,14 +72,14 @@ describe('NotFoundError', () => {
       const identifier = TEST_CONSTANTS.errorTestData.identifiers.teamId
 
       // Act
-      const error = NotFoundError.forResource({ resource, identifier })
+      const error = NotFoundError.forResource({ identifier, resource })
 
       // Assert
       expect(error).toBeInstanceOf(NotFoundError)
       expect(error.message).toBe(`${resource} not found`)
       expect(error.metadata).toEqual({
-        resource,
         identifier,
+        resource,
       })
     })
   })
@@ -138,14 +138,14 @@ describe('NotFoundError', () => {
 
       // Assert
       expect(json).toEqual({
-        name: 'NotFoundError',
-        message,
-        code: ERROR_CODES.NOT_FOUND_ERROR,
         category: ERROR_CATEGORY.NOT_FOUND,
+        code: ERROR_CODES.NOT_FOUND_ERROR,
+        isOperational: true,
+        message,
+        metadata,
+        name: 'NotFoundError',
         severity: ERROR_SEVERITY.LOW,
         timestamp: error.timestamp.toISOString(),
-        isOperational: true,
-        metadata,
       })
     })
   })

@@ -49,7 +49,7 @@ export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserR
       // Handle Result type
       if (!result.ok) {
         const logger = FastifyLogger.create({ logger: request.log })
-        return handleError({ error: result.error, reply, logger })
+        return handleError({ error: result.error, logger, reply })
       }
 
       // Return success response
@@ -59,7 +59,7 @@ export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserR
       })
     } catch (error) {
       const logger = FastifyLogger.create({ logger: request.log })
-      return handleError({ error, reply, logger })
+      return handleError({ error, logger, reply })
     }
   })
 
@@ -78,12 +78,12 @@ export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserR
       // Parse and validate pagination query params
       const { page, limit } = PaginationQuerySchema.parse(request.query)
 
-      const result = await listUsersUseCase.execute({ dto: { page, limit } })
+      const result = await listUsersUseCase.execute({ dto: { limit, page } })
 
       // Handle Result type
       if (!result.ok) {
         const logger = FastifyLogger.create({ logger: request.log })
-        return handleError({ error: result.error, reply, logger })
+        return handleError({ error: result.error, logger, reply })
       }
 
       return reply.code(200).send({
@@ -92,7 +92,7 @@ export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserR
       })
     } catch (error) {
       const logger = FastifyLogger.create({ logger: request.log })
-      return handleError({ error, reply, logger })
+      return handleError({ error, logger, reply })
     }
   })
 }

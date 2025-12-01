@@ -23,10 +23,10 @@ export class AuthorizationError extends ApplicationError {
     metadata?: Record<string, unknown>
   }) {
     super({
-      message,
-      severity,
-      metadata,
       isOperational: true,
+      message,
+      metadata,
+      severity,
     })
   }
 
@@ -46,8 +46,8 @@ export class AuthorizationError extends ApplicationError {
     return new AuthorizationError({
       message: 'Insufficient permissions to perform this action',
       metadata: {
-        required: requiredPermissions,
         actual,
+        required: requiredPermissions,
       },
     })
   }

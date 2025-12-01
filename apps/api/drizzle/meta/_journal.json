@@ -1,20 +1,20 @@
 {
-  "version": "7",
   "dialect": "postgresql",
   "entries": [
     {
+      "breakpoints": true,
       "idx": 0,
-      "version": "7",
-      "when": 1763381775258,
       "tag": "0000_productive_ultimates",
-      "breakpoints": true
+      "version": "7",
+      "when": 1763381775258
     },
     {
+      "breakpoints": true,
       "idx": 1,
-      "version": "7",
-      "when": 1763490240794,
       "tag": "0001_burly_landau",
-      "breakpoints": true
+      "version": "7",
+      "when": 1763490240794
     }
-  ]
+  ],
+  "version": "7"
 }

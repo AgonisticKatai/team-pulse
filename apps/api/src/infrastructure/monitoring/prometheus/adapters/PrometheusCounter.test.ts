@@ -13,9 +13,9 @@ describe('PrometheusCounter', () => {
   beforeEach(() => {
     promRegistry = new Registry()
     promCounter = new Counter({
-      name: prometheus.testMetrics.counter.name,
       help: prometheus.testMetrics.counter.help,
       labelNames: ['method', 'route'],
+      name: prometheus.testMetrics.counter.name,
       registers: [promRegistry],
     })
     adapter = PrometheusCounter.create({ counter: promCounter })

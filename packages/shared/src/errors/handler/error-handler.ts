@@ -60,8 +60,8 @@ export class ErrorHandler {
     const statusCode = getHttpStatusForCategory({ category: appError.category })
 
     return {
-      statusCode,
       response,
+      statusCode,
     }
   }
 
@@ -104,10 +104,10 @@ export class ErrorHandler {
   private logError({ error }: { error: IApplicationError }): void {
     const logLevel = getLogLevelForSeverity({ severity: error.severity })
     const context = {
-      code: error.code,
       category: error.category,
-      severity: error.severity,
+      code: error.code,
       isOperational: error.isOperational,
+      severity: error.severity,
       timestamp: error.timestamp.toISOString(),
       ...(error.metadata && { metadata: error.metadata }),
     }
@@ -115,27 +115,27 @@ export class ErrorHandler {
     // Log based on severity
     switch (logLevel) {
       case 'error':
-        this.logger.error({ message: error.message, context })
+        this.logger.error({ context, message: error.message })
         break
       case 'warn':
-        this.logger.warn({ message: error.message, context })
+        this.logger.warn({ context, message: error.message })
         break
       case 'info':
-        this.logger.info({ message: error.message, context })
+        this.logger.info({ context, message: error.message })
         break
       case 'debug':
-        this.logger.debug({ message: error.message, context })
+        this.logger.debug({ context, message: error.message })
         break
     }
 
     // For non-operational errors, log additional warning
     if (!error.isOperational) {
       this.logger.error({
-        message: 'Non-operational error detected - possible programming error',
         context: {
-          errorName: error.name,
           code: error.code,
+          errorName: error.name,
         },
+        message: 'Non-operational error detected - possible programming error',
       })
     }
   }

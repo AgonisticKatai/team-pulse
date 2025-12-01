@@ -13,10 +13,10 @@ describe('PrometheusHistogram', () => {
   beforeEach(() => {
     promRegistry = new Registry()
     promHistogram = new Histogram({
-      name: prometheus.testMetrics.histogram.name,
+      buckets: [...prometheus.testMetrics.histogram.buckets],
       help: prometheus.testMetrics.histogram.help,
       labelNames: ['method', 'route'],
-      buckets: [...prometheus.testMetrics.histogram.buckets],
+      name: prometheus.testMetrics.histogram.name,
       registers: [promRegistry],
     })
     adapter = PrometheusHistogram.create({ histogram: promHistogram })

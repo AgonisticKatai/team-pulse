@@ -78,7 +78,7 @@ export class ScryptPasswordHasher implements IPasswordHasher {
     blockSize?: number
     parallelization?: number
   } = {}): ScryptPasswordHasher {
-    return new ScryptPasswordHasher({ keyLength, cost, blockSize, parallelization })
+    return new ScryptPasswordHasher({ blockSize, cost, keyLength, parallelization })
   }
 
   /**
@@ -97,10 +97,10 @@ export class ScryptPasswordHasher implements IPasswordHasher {
       const derivedKey = await new Promise<Buffer>((resolve, reject) => {
         try {
           const key = scryptSync(password, salt, this.keyLength, {
-            N: this.cost,
-            r: this.blockSize,
-            p: this.parallelization,
             maxmem: 128 * this.cost * this.blockSize * 2,
+            N: this.cost,
+            p: this.parallelization,
+            r: this.blockSize,
           })
           resolve(key)
         } catch (err) {
@@ -153,10 +153,10 @@ export class ScryptPasswordHasher implements IPasswordHasher {
       const derivedKey = await new Promise<Buffer>((resolve, reject) => {
         try {
           const key = scryptSync(password, salt, this.keyLength, {
-            N: cost,
-            r: blockSize,
-            p: parallelization,
             maxmem: 128 * cost * blockSize * 2,
+            N: cost,
+            p: parallelization,
+            r: blockSize,
           })
           resolve(key)
         } catch (err) {

@@ -89,10 +89,10 @@ describe('MetricsService', () => {
   describe('recordHttpRequest', () => {
     it('should record HTTP request successfully', async () => {
       const params = {
+        durationSeconds: prometheus.http.durations.medium,
         method: prometheus.http.methods.get,
         route: prometheus.http.routes.users,
         statusCode: prometheus.http.statusCodes.ok,
-        durationSeconds: prometheus.http.durations.medium,
       }
 
       service.recordHttpRequest(params)
@@ -106,22 +106,22 @@ describe('MetricsService', () => {
 
     it('should record multiple HTTP requests', async () => {
       service.recordHttpRequest({
+        durationSeconds: prometheus.http.durations.medium,
         method: prometheus.http.methods.get,
         route: prometheus.http.routes.users,
         statusCode: prometheus.http.statusCodes.ok,
-        durationSeconds: prometheus.http.durations.medium,
       })
       service.recordHttpRequest({
+        durationSeconds: prometheus.http.durations.slow,
         method: prometheus.http.methods.post,
         route: prometheus.http.routes.teams,
         statusCode: prometheus.http.statusCodes.created,
-        durationSeconds: prometheus.http.durations.slow,
       })
       service.recordHttpRequest({
+        durationSeconds: prometheus.http.durations.fast,
         method: prometheus.http.methods.get,
         route: prometheus.http.routes.users,
         statusCode: prometheus.http.statusCodes.ok,
-        durationSeconds: prometheus.http.durations.fast,
       })
 
       const metrics = await service.getMetrics()
@@ -134,10 +134,10 @@ describe('MetricsService', () => {
 
     it('should record HTTP request duration', async () => {
       service.recordHttpRequest({
+        durationSeconds: prometheus.http.durations.verySlow,
         method: prometheus.http.methods.get,
         route: prometheus.http.routes.teams,
         statusCode: prometheus.http.statusCodes.ok,
-        durationSeconds: prometheus.http.durations.verySlow,
       })
 
       const metrics = await service.getMetrics()
@@ -156,10 +156,10 @@ describe('MetricsService', () => {
 
       for (const statusCode of statusCodes) {
         service.recordHttpRequest({
+          durationSeconds: prometheus.http.durations.fast,
           method: prometheus.http.methods.get,
           route: prometheus.http.routes.test,
           statusCode,
-          durationSeconds: prometheus.http.durations.fast,
         })
       }
 
@@ -174,9 +174,9 @@ describe('MetricsService', () => {
   describe('recordHttpError', () => {
     it('should record HTTP error successfully', async () => {
       const params = {
+        errorType: prometheus.http.errors.client,
         method: prometheus.http.methods.post,
         route: prometheus.http.routes.users,
-        errorType: prometheus.http.errors.client,
       }
 
       service.recordHttpError(params)
@@ -190,19 +190,19 @@ describe('MetricsService', () => {
 
     it('should record multiple error types', async () => {
       service.recordHttpError({
+        errorType: prometheus.http.errors.client,
         method: prometheus.http.methods.post,
         route: prometheus.http.routes.login,
-        errorType: prometheus.http.errors.client,
       })
       service.recordHttpError({
+        errorType: prometheus.http.errors.client,
         method: prometheus.http.methods.get,
         route: prometheus.http.routes.teamsById,
-        errorType: prometheus.http.errors.client,
       })
       service.recordHttpError({
+        errorType: prometheus.http.errors.client,
         method: prometheus.http.methods.put,
         route: prometheus.http.routes.usersById,
-        errorType: prometheus.http.errors.client,
       })
 
       const metrics = await service.getMetrics()
@@ -216,9 +216,9 @@ describe('MetricsService', () => {
   describe('recordDbQuery', () => {
     it('should record database query successfully', async () => {
       const params = {
+        durationSeconds: prometheus.db.durations.medium,
         operation: prometheus.db.operations.select,
         table: prometheus.db.tables.users,
-        durationSeconds: prometheus.db.durations.medium,
       }
 
       service.recordDbQuery(params)
@@ -231,24 +231,24 @@ describe('MetricsService', () => {
 
     it('should record multiple database operations', async () => {
       service.recordDbQuery({
+        durationSeconds: prometheus.db.durations.fast,
         operation: prometheus.db.operations.select,
         table: prometheus.db.tables.users,
-        durationSeconds: prometheus.db.durations.fast,
       })
       service.recordDbQuery({
+        durationSeconds: prometheus.db.durations.slow,
         operation: prometheus.db.operations.insert,
         table: prometheus.db.tables.teams,
-        durationSeconds: prometheus.db.durations.slow,
       })
       service.recordDbQuery({
+        durationSeconds: prometheus.db.durations.medium,
         operation: prometheus.db.operations.update,
         table: prometheus.db.tables.users,
-        durationSeconds: prometheus.db.durations.medium,
       })
       service.recordDbQuery({
+        durationSeconds: prometheus.db.durations.fast,
         operation: prometheus.db.operations.delete,
         table: prometheus.db.tables.teams,
-        durationSeconds: prometheus.db.durations.fast,
       })
 
       const metrics = await service.getMetrics()
@@ -261,9 +261,9 @@ describe('MetricsService', () => {
 
     it('should record query duration', async () => {
       service.recordDbQuery({
+        durationSeconds: prometheus.db.durations.medium,
         operation: prometheus.db.operations.select,
         table: prometheus.db.tables.teams,
-        durationSeconds: prometheus.db.durations.medium,
       })
 
       const metrics = await service.getMetrics()
@@ -276,9 +276,9 @@ describe('MetricsService', () => {
 
       for (const table of tables) {
         service.recordDbQuery({
+          durationSeconds: prometheus.db.durations.fast,
           operation: prometheus.db.operations.select,
           table,
-          durationSeconds: prometheus.db.durations.fast,
         })
       }
 
@@ -293,9 +293,9 @@ describe('MetricsService', () => {
   describe('recordDbError', () => {
     it('should record database error successfully', async () => {
       const params = {
+        errorType: prometheus.db.errors.uniqueConstraint,
         operation: prometheus.db.operations.insert,
         table: prometheus.db.tables.users,
-        errorType: prometheus.db.errors.uniqueConstraint,
       }
 
       service.recordDbError(params)
@@ -309,19 +309,19 @@ describe('MetricsService', () => {
 
     it('should record multiple database error types', async () => {
       service.recordDbError({
+        errorType: prometheus.db.errors.uniqueConstraint,
         operation: prometheus.db.operations.insert,
         table: prometheus.db.tables.users,
-        errorType: prometheus.db.errors.uniqueConstraint,
       })
       service.recordDbError({
+        errorType: prometheus.db.errors.connectionTimeout,
         operation: prometheus.db.operations.select,
         table: prometheus.db.tables.teams,
-        errorType: prometheus.db.errors.connectionTimeout,
       })
       service.recordDbError({
+        errorType: prometheus.db.errors.queryTimeout,
         operation: prometheus.db.operations.update,
         table: prometheus.db.tables.refreshTokens,
-        errorType: prometheus.db.errors.queryTimeout,
       })
 
       const metrics = await service.getMetrics()
@@ -434,10 +434,10 @@ describe('MetricsService', () => {
   describe('reset', () => {
     it('should reset all metrics', async () => {
       service.recordHttpRequest({
+        durationSeconds: prometheus.http.durations.medium,
         method: prometheus.http.methods.get,
         route: prometheus.http.routes.users,
         statusCode: prometheus.http.statusCodes.ok,
-        durationSeconds: prometheus.http.durations.medium,
       })
       service.setUsersTotal({ count: prometheus.business.counts.large })
       service.setTeamsTotal({ count: prometheus.business.counts.medium })
@@ -451,18 +451,18 @@ describe('MetricsService', () => {
 
     it('should allow recording new metrics after reset', async () => {
       service.recordHttpRequest({
+        durationSeconds: prometheus.http.durations.medium,
         method: prometheus.http.methods.get,
         route: prometheus.http.routes.users,
         statusCode: prometheus.http.statusCodes.ok,
-        durationSeconds: prometheus.http.durations.medium,
       })
       service.reset()
 
       service.recordHttpRequest({
+        durationSeconds: prometheus.http.durations.slow,
         method: prometheus.http.methods.post,
         route: prometheus.http.routes.teams,
         statusCode: prometheus.http.statusCodes.created,
-        durationSeconds: prometheus.http.durations.slow,
       })
       const metrics = await service.getMetrics()
 
@@ -474,26 +474,26 @@ describe('MetricsService', () => {
   describe('integration - multiple metrics', () => {
     it('should handle recording all types of metrics together', async () => {
       service.recordHttpRequest({
+        durationSeconds: prometheus.http.durations.medium,
         method: prometheus.http.methods.get,
         route: prometheus.http.routes.users,
         statusCode: prometheus.http.statusCodes.ok,
-        durationSeconds: prometheus.http.durations.medium,
       })
       service.recordHttpError({
+        errorType: prometheus.http.errors.client,
         method: prometheus.http.methods.post,
         route: prometheus.http.routes.teams,
-        errorType: prometheus.http.errors.client,
       })
 
       service.recordDbQuery({
+        durationSeconds: prometheus.db.durations.medium,
         operation: prometheus.db.operations.select,
         table: prometheus.db.tables.users,
-        durationSeconds: prometheus.db.durations.medium,
       })
       service.recordDbError({
+        errorType: prometheus.db.errors.uniqueConstraint,
         operation: prometheus.db.operations.insert,
         table: prometheus.db.tables.teams,
-        errorType: prometheus.db.errors.uniqueConstraint,
       })
 
       service.setUsersTotal({ count: prometheus.business.counts.massive })

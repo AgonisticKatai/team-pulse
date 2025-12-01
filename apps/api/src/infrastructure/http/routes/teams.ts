@@ -64,7 +64,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
       // Handle use case error
       if (!result.ok) {
         const logger = FastifyLogger.create({ logger: request.log })
-        return handleError({ error: result.error, reply, logger })
+        return handleError({ error: result.error, logger, reply })
       }
 
       // Return success response
@@ -75,7 +75,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
     } catch (error) {
       // Handle unexpected errors (Zod validation, etc.)
       const logger = FastifyLogger.create({ logger: request.log })
-      return handleError({ error, reply, logger })
+      return handleError({ error, logger, reply })
     }
   })
 
@@ -94,11 +94,11 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
       // Parse and validate pagination query params
       const { page, limit } = PaginationQuerySchema.parse(request.query)
 
-      const result = await listTeamsUseCase.execute({ dto: { page, limit } })
+      const result = await listTeamsUseCase.execute({ dto: { limit, page } })
 
       if (!result.ok) {
         const logger = FastifyLogger.create({ logger: request.log })
-        return handleError({ error: result.error, reply, logger })
+        return handleError({ error: result.error, logger, reply })
       }
 
       return reply.code(200).send({
@@ -107,7 +107,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
       })
     } catch (error) {
       const logger = FastifyLogger.create({ logger: request.log })
-      return handleError({ error, reply, logger })
+      return handleError({ error, logger, reply })
     }
   })
 
@@ -125,7 +125,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
 
       if (!result.ok) {
         const logger = FastifyLogger.create({ logger: request.log })
-        return handleError({ error: result.error, reply, logger })
+        return handleError({ error: result.error, logger, reply })
       }
 
       return reply.code(200).send({
@@ -134,7 +134,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
       })
     } catch (error) {
       const logger = FastifyLogger.create({ logger: request.log })
-      return handleError({ error, reply, logger })
+      return handleError({ error, logger, reply })
     }
   })
 
@@ -155,12 +155,12 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
         const dto = UpdateTeamDTOSchema.parse(request.body)
 
         // Execute use case - Returns Result<TeamResponseDTO, NotFoundError | ValidationError | RepositoryError>
-        const result = await updateTeamUseCase.execute({ id, dto })
+        const result = await updateTeamUseCase.execute({ dto, id })
 
         // Handle use case error
         if (!result.ok) {
           const logger = FastifyLogger.create({ logger: request.log })
-          return handleError({ error: result.error, reply, logger })
+          return handleError({ error: result.error, logger, reply })
         }
 
         return reply.code(200).send({
@@ -170,7 +170,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
       } catch (error) {
         // Handle unexpected errors (Zod validation, etc.)
         const logger = FastifyLogger.create({ logger: request.log })
-        return handleError({ error, reply, logger })
+        return handleError({ error, logger, reply })
       }
     },
   )
@@ -193,7 +193,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
         return reply.code(204).send()
       } catch (error) {
         const logger = FastifyLogger.create({ logger: request.log })
-        return handleError({ error, reply, logger })
+        return handleError({ error, logger, reply })
       }
     },
   )

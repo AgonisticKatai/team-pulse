@@ -24,10 +24,10 @@ export class InternalError extends ApplicationError {
     metadata?: Record<string, unknown>
   }) {
     super({
-      message,
-      severity,
-      metadata,
       isOperational: false, // NOT operational - should be hidden from users
+      message,
+      metadata,
+      severity,
     })
   }
 

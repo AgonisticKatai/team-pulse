@@ -23,10 +23,10 @@ export class AuthenticationError extends ApplicationError {
     metadata?: Record<string, unknown>
   }) {
     super({
-      message,
-      severity,
-      metadata,
       isOperational: true,
+      message,
+      metadata,
+      severity,
     })
   }
 

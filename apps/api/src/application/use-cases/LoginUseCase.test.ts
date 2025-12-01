@@ -26,10 +26,10 @@ describe('LoginUseCase', () => {
 
   // Mock refresh token
   const mockRefreshTokenResult = RefreshToken.create({
+    expiresAt: TEST_CONSTANTS.futureDate,
     id: TEST_CONSTANTS.mockUuid,
     token: TEST_CONSTANTS.auth.mockRefreshToken,
     userId: mockUser.id.getValue(),
-    expiresAt: TEST_CONSTANTS.futureDate,
   })
   if (!mockRefreshTokenResult.ok) throw new Error('Failed to create mock refresh token')
   const mockRefreshToken = mockRefreshTokenResult.value
@@ -151,8 +151,8 @@ describe('LoginUseCase', () => {
         // Assert
         expectSuccess(result)
         expect(passwordHasher.verify).toHaveBeenCalledWith({
-          password: TEST_CONSTANTS.users.johnDoe.password,
           hash: TEST_CONSTANTS.users.johnDoe.passwordHash,
+          password: TEST_CONSTANTS.users.johnDoe.password,
         })
         expect(passwordHasher.verify).toHaveBeenCalledTimes(1)
       })

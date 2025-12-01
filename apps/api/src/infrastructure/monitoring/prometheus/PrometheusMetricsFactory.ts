@@ -48,7 +48,7 @@ export class PrometheusMetricsFactory implements IMetricsFactory {
   createMetrics(): MetricsCollection {
     const promRegistry = this.createRegistry()
     const nativeMetrics = this.createNativeMetrics({ registry: promRegistry })
-    return this.wrapWithAdapters({ promRegistry, nativeMetrics })
+    return this.wrapWithAdapters({ nativeMetrics, promRegistry })
   }
 
   /**
@@ -65,58 +65,58 @@ export class PrometheusMetricsFactory implements IMetricsFactory {
    */
   private createNativeMetrics({ registry }: { registry: Registry }) {
     return {
-      httpRequestDuration: new promClient.Histogram({
-        name: METRIC_CONFIG.HTTP.REQUEST_DURATION.name,
-        help: METRIC_CONFIG.HTTP.REQUEST_DURATION.help,
-        labelNames: [...METRIC_CONFIG.HTTP.REQUEST_DURATION.labelNames],
-        buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5],
-        registers: [registry],
-      }),
-      httpRequestTotal: new promClient.Counter({
-        name: METRIC_CONFIG.HTTP.REQUEST_TOTAL.name,
-        help: METRIC_CONFIG.HTTP.REQUEST_TOTAL.help,
-        labelNames: [...METRIC_CONFIG.HTTP.REQUEST_TOTAL.labelNames],
-        registers: [registry],
-      }),
-      httpRequestErrors: new promClient.Counter({
-        name: METRIC_CONFIG.HTTP.REQUEST_ERRORS.name,
-        help: METRIC_CONFIG.HTTP.REQUEST_ERRORS.help,
-        labelNames: [...METRIC_CONFIG.HTTP.REQUEST_ERRORS.labelNames],
-        registers: [registry],
-      }),
       dbQueryDuration: new promClient.Histogram({
-        name: METRIC_CONFIG.DB.QUERY_DURATION.name,
+        buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1],
         help: METRIC_CONFIG.DB.QUERY_DURATION.help,
         labelNames: [...METRIC_CONFIG.DB.QUERY_DURATION.labelNames],
-        buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1],
-        registers: [registry],
-      }),
-      dbQueryTotal: new promClient.Counter({
-        name: METRIC_CONFIG.DB.QUERY_TOTAL.name,
-        help: METRIC_CONFIG.DB.QUERY_TOTAL.help,
-        labelNames: [...METRIC_CONFIG.DB.QUERY_TOTAL.labelNames],
+        name: METRIC_CONFIG.DB.QUERY_DURATION.name,
         registers: [registry],
       }),
       dbQueryErrors: new promClient.Counter({
-        name: METRIC_CONFIG.DB.QUERY_ERRORS.name,
         help: METRIC_CONFIG.DB.QUERY_ERRORS.help,
         labelNames: [...METRIC_CONFIG.DB.QUERY_ERRORS.labelNames],
+        name: METRIC_CONFIG.DB.QUERY_ERRORS.name,
         registers: [registry],
       }),
-      usersTotal: new promClient.Gauge({
-        name: METRIC_CONFIG.BUSINESS.USERS_TOTAL.name,
-        help: METRIC_CONFIG.BUSINESS.USERS_TOTAL.help,
+      dbQueryTotal: new promClient.Counter({
+        help: METRIC_CONFIG.DB.QUERY_TOTAL.help,
+        labelNames: [...METRIC_CONFIG.DB.QUERY_TOTAL.labelNames],
+        name: METRIC_CONFIG.DB.QUERY_TOTAL.name,
         registers: [registry],
       }),
-      teamsTotal: new promClient.Gauge({
-        name: METRIC_CONFIG.BUSINESS.TEAMS_TOTAL.name,
-        help: METRIC_CONFIG.BUSINESS.TEAMS_TOTAL.help,
+      httpRequestDuration: new promClient.Histogram({
+        buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5],
+        help: METRIC_CONFIG.HTTP.REQUEST_DURATION.help,
+        labelNames: [...METRIC_CONFIG.HTTP.REQUEST_DURATION.labelNames],
+        name: METRIC_CONFIG.HTTP.REQUEST_DURATION.name,
+        registers: [registry],
+      }),
+      httpRequestErrors: new promClient.Counter({
+        help: METRIC_CONFIG.HTTP.REQUEST_ERRORS.help,
+        labelNames: [...METRIC_CONFIG.HTTP.REQUEST_ERRORS.labelNames],
+        name: METRIC_CONFIG.HTTP.REQUEST_ERRORS.name,
+        registers: [registry],
+      }),
+      httpRequestTotal: new promClient.Counter({
+        help: METRIC_CONFIG.HTTP.REQUEST_TOTAL.help,
+        labelNames: [...METRIC_CONFIG.HTTP.REQUEST_TOTAL.labelNames],
+        name: METRIC_CONFIG.HTTP.REQUEST_TOTAL.name,
         registers: [registry],
       }),
       loginsTotal: new promClient.Counter({
-        name: METRIC_CONFIG.BUSINESS.LOGINS_TOTAL.name,
         help: METRIC_CONFIG.BUSINESS.LOGINS_TOTAL.help,
         labelNames: [...METRIC_CONFIG.BUSINESS.LOGINS_TOTAL.labelNames],
+        name: METRIC_CONFIG.BUSINESS.LOGINS_TOTAL.name,
+        registers: [registry],
+      }),
+      teamsTotal: new promClient.Gauge({
+        help: METRIC_CONFIG.BUSINESS.TEAMS_TOTAL.help,
+        name: METRIC_CONFIG.BUSINESS.TEAMS_TOTAL.name,
+        registers: [registry],
+      }),
+      usersTotal: new promClient.Gauge({
+        help: METRIC_CONFIG.BUSINESS.USERS_TOTAL.help,
+        name: METRIC_CONFIG.BUSINESS.USERS_TOTAL.name,
         registers: [registry],
       }),
     }
@@ -127,16 +127,16 @@ export class PrometheusMetricsFactory implements IMetricsFactory {
    */
   private wrapWithAdapters({ promRegistry, nativeMetrics }: { promRegistry: Registry; nativeMetrics: NativeMetrics }): MetricsCollection {
     return {
-      registry: PrometheusRegistry.create({ registry: promRegistry }),
-      httpRequestDuration: PrometheusHistogram.create({ histogram: nativeMetrics.httpRequestDuration }),
-      httpRequestTotal: PrometheusCounter.create({ counter: nativeMetrics.httpRequestTotal }),
-      httpRequestErrors: PrometheusCounter.create({ counter: nativeMetrics.httpRequestErrors }),
       dbQueryDuration: PrometheusHistogram.create({ histogram: nativeMetrics.dbQueryDuration }),
-      dbQueryTotal: PrometheusCounter.create({ counter: nativeMetrics.dbQueryTotal }),
       dbQueryErrors: PrometheusCounter.create({ counter: nativeMetrics.dbQueryErrors }),
-      usersTotal: PrometheusGauge.create({ gauge: nativeMetrics.usersTotal }),
-      teamsTotal: PrometheusGauge.create({ gauge: nativeMetrics.teamsTotal }),
+      dbQueryTotal: PrometheusCounter.create({ counter: nativeMetrics.dbQueryTotal }),
+      httpRequestDuration: PrometheusHistogram.create({ histogram: nativeMetrics.httpRequestDuration }),
+      httpRequestErrors: PrometheusCounter.create({ counter: nativeMetrics.httpRequestErrors }),
+      httpRequestTotal: PrometheusCounter.create({ counter: nativeMetrics.httpRequestTotal }),
       loginsTotal: PrometheusCounter.create({ counter: nativeMetrics.loginsTotal }),
+      registry: PrometheusRegistry.create({ registry: promRegistry }),
+      teamsTotal: PrometheusGauge.create({ gauge: nativeMetrics.teamsTotal }),
+      usersTotal: PrometheusGauge.create({ gauge: nativeMetrics.usersTotal }),
     }
   }
 }

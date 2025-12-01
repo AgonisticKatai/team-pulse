@@ -46,7 +46,7 @@ describe('CreateUserUseCase', () => {
     }
 
     // Create use case instance
-    createUserUseCase = CreateUserUseCase.create({ userRepository, passwordHasher })
+    createUserUseCase = CreateUserUseCase.create({ passwordHasher, userRepository })
   })
 
   describe('execute', () => {

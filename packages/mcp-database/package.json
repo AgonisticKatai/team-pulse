@@ -1,33 +1,33 @@
 {
-  "name": "@team-pulse/mcp-database",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "description": "MCP server for TeamPulse database schema access",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "bin": {
     "team-pulse-mcp-database": "./dist/index.js"
-  },
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "tsc --build",
-    "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "dev": "tsc --build --watch",
-    "start": "node dist/index.js",
-    "format": "biome format --write .",
-    "lint": "biome check .",
-    "lint:fix": "biome check --write ."
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.23.0",
     "@team-pulse/shared": "workspace:*",
     "zod": "catalog:"
   },
+  "description": "MCP server for TeamPulse database schema access",
   "devDependencies": {
     "@types/node": "catalog:",
     "typescript": "catalog:"
-  }
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "name": "@team-pulse/mcp-database",
+  "private": true,
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "dev": "tsc --build --watch",
+    "format": "biome format --write .",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "start": "node dist/index.js"
+  },
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "version": "1.0.0"
 }

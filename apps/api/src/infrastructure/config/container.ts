@@ -218,8 +218,8 @@ export class Container {
   get refreshTokenUseCase(): RefreshTokenUseCase {
     if (!this._refreshTokenUseCase) {
       this._refreshTokenUseCase = RefreshTokenUseCase.create({
-        tokenFactory: this.tokenFactory,
         refreshTokenRepository: this.refreshTokenRepository,
+        tokenFactory: this.tokenFactory,
         userRepository: this.userRepository,
       })
     }
@@ -244,8 +244,8 @@ export class Container {
   get createUserUseCase(): CreateUserUseCase {
     if (!this._createUserUseCase) {
       this._createUserUseCase = CreateUserUseCase.create({
-        userRepository: this.userRepository,
         passwordHasher: this.passwordHasher,
+        userRepository: this.userRepository,
       })
     }
     return this._createUserUseCase

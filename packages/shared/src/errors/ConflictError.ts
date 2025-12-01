@@ -23,10 +23,10 @@ export class ConflictError extends ApplicationError {
     metadata?: Record<string, unknown>
   }) {
     super({
-      message,
-      severity,
-      metadata,
       isOperational: true,
+      message,
+      metadata,
+      severity,
     })
   }
 
@@ -44,9 +44,9 @@ export class ConflictError extends ApplicationError {
     return new ConflictError({
       message: `${resource} already exists`,
       metadata: {
-        resource,
         identifier,
         reason: 'duplicate',
+        resource,
       },
     })
   }

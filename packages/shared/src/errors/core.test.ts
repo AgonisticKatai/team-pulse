@@ -29,10 +29,10 @@ class TestApplicationError extends ApplicationError {
     isOperational?: boolean
   }) {
     super({
-      message,
-      severity: severity ?? ERROR_SEVERITY.LOW,
-      metadata,
       isOperational,
+      message,
+      metadata,
+      severity: severity ?? ERROR_SEVERITY.LOW,
     })
   }
 }
@@ -154,8 +154,8 @@ describe('ApplicationError', () => {
       // Act
       const error = new TestApplicationError({
         message,
-        severity,
         metadata,
+        severity,
       })
 
       // Assert
@@ -192,8 +192,8 @@ describe('ApplicationError', () => {
       // Act
       const error = new TestApplicationError({
         message: TEST_CONSTANTS.errors.testError,
-        severity: ERROR_SEVERITY.LOW,
         metadata: { timestamp: customTimestamp },
+        severity: ERROR_SEVERITY.LOW,
       })
 
       // Assert
@@ -213,8 +213,8 @@ describe('ApplicationError', () => {
     it('should create non-operational error', () => {
       // Arrange & Act
       const error = new TestApplicationError({
-        message: TEST_CONSTANTS.errors.internalServerError,
         isOperational: false,
+        message: TEST_CONSTANTS.errors.internalServerError,
       })
 
       // Assert
@@ -243,8 +243,8 @@ describe('ApplicationError', () => {
       }
       const error = new TestApplicationError({
         message,
-        severity,
         metadata,
+        severity,
       })
 
       // Act
@@ -252,14 +252,14 @@ describe('ApplicationError', () => {
 
       // Assert
       expect(json).toEqual({
-        name: 'TestApplicationError',
-        message,
-        code: ERROR_CODES.VALIDATION_ERROR,
         category: ERROR_CATEGORY.VALIDATION,
+        code: ERROR_CODES.VALIDATION_ERROR,
+        isOperational: true,
+        message,
+        metadata,
+        name: 'TestApplicationError',
         severity,
         timestamp: error.timestamp.toISOString(),
-        isOperational: true,
-        metadata,
       })
     })
 
@@ -274,13 +274,13 @@ describe('ApplicationError', () => {
 
       // Assert
       expect(json).toEqual({
-        name: 'TestApplicationError',
-        message: TEST_CONSTANTS.errors.testError,
-        code: ERROR_CODES.VALIDATION_ERROR,
         category: ERROR_CATEGORY.VALIDATION,
+        code: ERROR_CODES.VALIDATION_ERROR,
+        isOperational: true,
+        message: TEST_CONSTANTS.errors.testError,
+        name: 'TestApplicationError',
         severity: ERROR_SEVERITY.LOW,
         timestamp: error.timestamp.toISOString(),
-        isOperational: true,
       })
     })
 
@@ -343,8 +343,8 @@ describe('isApplicationError', () => {
   it('should return false for plain objects', () => {
     // Arrange
     const obj = {
-      message: TEST_CONSTANTS.errors.testError,
       code: ERROR_CODES.VALIDATION_ERROR,
+      message: TEST_CONSTANTS.errors.testError,
     }
 
     // Act
@@ -388,13 +388,13 @@ describe('isIApplicationError', () => {
   it('should return true for plain objects with all required properties', () => {
     // Arrange
     const errorLike = {
-      name: 'ValidationError',
-      message: TEST_CONSTANTS.errors.testError,
-      code: ERROR_CODES.VALIDATION_ERROR,
       category: ERROR_CATEGORY.VALIDATION,
+      code: ERROR_CODES.VALIDATION_ERROR,
+      isOperational: true,
+      message: TEST_CONSTANTS.errors.testError,
+      name: 'ValidationError',
       severity: ERROR_SEVERITY.MEDIUM,
       timestamp: new Date(),
-      isOperational: true,
     }
 
     // Act
@@ -407,11 +407,11 @@ describe('isIApplicationError', () => {
   it('should return false for objects missing code property', () => {
     // Arrange
     const errorLike = {
-      message: TEST_CONSTANTS.errors.testError,
       category: ERROR_CATEGORY.VALIDATION,
+      isOperational: true,
+      message: TEST_CONSTANTS.errors.testError,
       severity: ERROR_SEVERITY.MEDIUM,
       timestamp: new Date(),
-      isOperational: true,
     }
 
     // Act
@@ -424,11 +424,11 @@ describe('isIApplicationError', () => {
   it('should return false for objects missing category property', () => {
     // Arrange
     const errorLike = {
-      message: TEST_CONSTANTS.errors.testError,
       code: ERROR_CODES.VALIDATION_ERROR,
+      isOperational: true,
+      message: TEST_CONSTANTS.errors.testError,
       severity: ERROR_SEVERITY.MEDIUM,
       timestamp: new Date(),
-      isOperational: true,
     }
 
     // Act
@@ -441,11 +441,11 @@ describe('isIApplicationError', () => {
   it('should return false for objects missing severity property', () => {
     // Arrange
     const errorLike = {
-      message: TEST_CONSTANTS.errors.testError,
-      code: ERROR_CODES.VALIDATION_ERROR,
       category: ERROR_CATEGORY.VALIDATION,
-      timestamp: new Date(),
+      code: ERROR_CODES.VALIDATION_ERROR,
       isOperational: true,
+      message: TEST_CONSTANTS.errors.testError,
+      timestamp: new Date(),
     }
 
     // Act
@@ -458,11 +458,11 @@ describe('isIApplicationError', () => {
   it('should return false for objects missing timestamp property', () => {
     // Arrange
     const errorLike = {
-      message: TEST_CONSTANTS.errors.testError,
-      code: ERROR_CODES.VALIDATION_ERROR,
       category: ERROR_CATEGORY.VALIDATION,
-      severity: ERROR_SEVERITY.MEDIUM,
+      code: ERROR_CODES.VALIDATION_ERROR,
       isOperational: true,
+      message: TEST_CONSTANTS.errors.testError,
+      severity: ERROR_SEVERITY.MEDIUM,
     }
 
     // Act
@@ -475,9 +475,9 @@ describe('isIApplicationError', () => {
   it('should return false for objects missing isOperational property', () => {
     // Arrange
     const errorLike = {
-      message: TEST_CONSTANTS.errors.testError,
-      code: ERROR_CODES.VALIDATION_ERROR,
       category: ERROR_CATEGORY.VALIDATION,
+      code: ERROR_CODES.VALIDATION_ERROR,
+      message: TEST_CONSTANTS.errors.testError,
       severity: ERROR_SEVERITY.MEDIUM,
       timestamp: new Date(),
     }

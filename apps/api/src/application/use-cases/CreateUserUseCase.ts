@@ -36,7 +36,7 @@ export class CreateUserUseCase {
   }
 
   static create({ userRepository, passwordHasher }: { userRepository: IUserRepository; passwordHasher: IPasswordHasher }): CreateUserUseCase {
-    return new CreateUserUseCase({ userRepository, passwordHasher })
+    return new CreateUserUseCase({ passwordHasher, userRepository })
   }
 
   async execute({ dto }: { dto: CreateUserDTO }): Promise<Result<UserResponseDTO, ConflictError | RepositoryError | ValidationError>> {
@@ -47,7 +47,7 @@ export class CreateUserUseCase {
     }
 
     if (findUserResult.value) {
-      return Err(ConflictError.duplicate({ resource: 'User', identifier: dto.email }))
+      return Err(ConflictError.duplicate({ identifier: dto.email, resource: 'User' }))
     }
 
     const hashResult = await this.passwordHasher.hash({ password: dto.password })

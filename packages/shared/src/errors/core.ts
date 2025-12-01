@@ -16,10 +16,10 @@
  * - `CRITICAL`: Critical failures requiring immediate intervention
  */
 export const ERROR_SEVERITY = {
+  CRITICAL: 'critical',
+  HIGH: 'high',
   LOW: 'low',
   MEDIUM: 'medium',
-  HIGH: 'high',
-  CRITICAL: 'critical',
 } as const
 
 /**
@@ -41,14 +41,14 @@ export type ErrorSeverity = (typeof ERROR_SEVERITY)[keyof typeof ERROR_SEVERITY]
  * - `INTERNAL`: 500 Internal Server Error
  */
 export const ERROR_CATEGORY = {
-  VALIDATION: 'validation',
   AUTHENTICATION: 'authentication',
   AUTHORIZATION: 'authorization',
-  NOT_FOUND: 'not_found',
-  CONFLICT: 'conflict',
   BUSINESS_RULE: 'business_rule',
+  CONFLICT: 'conflict',
   EXTERNAL: 'external',
   INTERNAL: 'internal',
+  NOT_FOUND: 'not_found',
+  VALIDATION: 'validation',
 } as const
 
 /**
@@ -63,15 +63,15 @@ export type ErrorCategory = (typeof ERROR_CATEGORY)[keyof typeof ERROR_CATEGORY]
  * monitoring, and error handling.
  */
 export const ERROR_CODES = {
-  VALIDATION_ERROR: 'VALIDATION_ERROR',
   AUTHENTICATION_ERROR: 'AUTHENTICATION_ERROR',
   AUTHORIZATION_ERROR: 'AUTHORIZATION_ERROR',
-  NOT_FOUND_ERROR: 'NOT_FOUND_ERROR',
-  CONFLICT_ERROR: 'CONFLICT_ERROR',
   BUSINESS_RULE_ERROR: 'BUSINESS_RULE_ERROR',
+  CONFLICT_ERROR: 'CONFLICT_ERROR',
   EXTERNAL_SERVICE_ERROR: 'EXTERNAL_SERVICE_ERROR',
-  REPOSITORY_ERROR: 'REPOSITORY_ERROR',
   INTERNAL_ERROR: 'INTERNAL_ERROR',
+  NOT_FOUND_ERROR: 'NOT_FOUND_ERROR',
+  REPOSITORY_ERROR: 'REPOSITORY_ERROR',
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
 } as const
 
 /**
@@ -192,13 +192,13 @@ export abstract class ApplicationError extends Error implements IApplicationErro
    */
   toJSON(): object {
     const result: Record<string, unknown> = {
-      name: this.name,
-      message: this.message,
-      code: this.code,
       category: this.category,
+      code: this.code,
+      isOperational: this.isOperational,
+      message: this.message,
+      name: this.name,
       severity: this.severity,
       timestamp: this.timestamp.toISOString(),
-      isOperational: this.isOperational,
     }
 
     // Only include metadata if it exists

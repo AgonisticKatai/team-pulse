@@ -45,7 +45,7 @@ export class CreateTeamUseCase {
     }
 
     if (findTeamResult.value) {
-      return Err(ConflictError.duplicate({ resource: 'Team', identifier: dto.name }))
+      return Err(ConflictError.duplicate({ identifier: dto.name, resource: 'Team' }))
     }
 
     const createTeamResult = Team.create({ city: dto.city, foundedYear: dto.foundedYear ?? undefined, id: randomUUID(), name: dto.name })

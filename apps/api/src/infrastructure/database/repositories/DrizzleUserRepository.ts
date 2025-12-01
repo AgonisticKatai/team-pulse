@@ -158,7 +158,7 @@ export class DrizzleUserRepository implements IUserRepository {
         )
       }
 
-      return Ok({ users: collectedResult.value, total })
+      return Ok({ total, users: collectedResult.value })
     } catch (error) {
       return Err(
         RepositoryError.forOperation({

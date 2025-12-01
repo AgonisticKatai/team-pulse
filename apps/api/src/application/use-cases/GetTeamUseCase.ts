@@ -28,7 +28,7 @@ export class GetTeamUseCase {
     }
 
     if (!findTeamResult.value) {
-      return Err(NotFoundError.forResource({ resource: 'Team', identifier: id }))
+      return Err(NotFoundError.forResource({ identifier: id, resource: 'Team' }))
     }
 
     return Ok(findTeamResult.value.toDTO())

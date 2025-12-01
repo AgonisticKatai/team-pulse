@@ -51,7 +51,7 @@ describe('InternalError', () => {
       const context = TEST_CONSTANTS.errorTestData.context.module
 
       // Act
-      const error = InternalError.fromError({ error: originalError, context })
+      const error = InternalError.fromError({ context, error: originalError })
 
       // Assert
       expect(error).toBeInstanceOf(InternalError)
@@ -61,9 +61,9 @@ describe('InternalError', () => {
       expect(error.severity).toBe(ERROR_SEVERITY.CRITICAL)
       expect(error.isOperational).toBe(false)
       expect(error.metadata).toEqual({
+        context,
         originalMessage: originalError.message,
         stack: originalError.stack,
-        context,
       })
     })
 
@@ -150,14 +150,14 @@ describe('InternalError', () => {
 
       // Assert
       expect(json).toEqual({
-        name: 'InternalError',
-        message,
-        code: ERROR_CODES.INTERNAL_ERROR,
         category: ERROR_CATEGORY.INTERNAL,
+        code: ERROR_CODES.INTERNAL_ERROR,
+        isOperational: false,
+        message,
+        metadata,
+        name: 'InternalError',
         severity: ERROR_SEVERITY.CRITICAL,
         timestamp: error.timestamp.toISOString(),
-        isOperational: false,
-        metadata,
       })
     })
   })

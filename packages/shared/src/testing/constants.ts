@@ -16,6 +16,47 @@ export const TEST_CONSTANTS = {
     validRefreshToken: 'valid-refresh-token',
   },
 
+  // City Test Data
+  cities: {
+    barcelona: 'Barcelona',
+    bilbao: 'Bilbao',
+    empty: '',
+    exactly100Chars: 'a'.repeat(100),
+    exceeds100Chars: 'a'.repeat(101),
+    madrid: 'Madrid',
+    newYork: 'New York',
+    saintEtienne: 'Saint-Étienne',
+    saoPaulo: 'São Paulo',
+    singleChar: 'A',
+    valencia: 'Valencia',
+    veryLong: 'a'.repeat(150),
+    whitespaceOnly: '   ',
+    withLeadingTrailingSpaces: '  London  ',
+  },
+
+  // Email Test Data
+  emails: {
+    empty: '',
+    existing: 'existing@example.com', // For duplicate email tests
+    lowercase: 'test@example.com',
+    noAt: 'notanemail.com',
+    noDomain: 'user@',
+    noExtension: 'user@domain',
+    noLocal: '@example.com',
+    nonexistent: 'nonexistent@example.com', // For user not found tests
+    tooLong: `${'a'.repeat(250)}@example.com`,
+    uppercase: 'TEST@EXAMPLE.COM',
+    valid: 'test@example.com',
+    validExactly255: `${'a'.repeat(243)}@example.com`, // 243 + '@' + 'example.com' = 255
+    whitespaceOnly: '   ',
+    withDot: 'user.name@example.com',
+    withNumbers: 'user123@test123.com',
+    withPlus: 'user+tag@example.co.uk',
+    withSpaces: '  test@example.com  ',
+    withSubdomain: 'user@mail.example.com',
+    withUnderscore: 'user_name@example-domain.com',
+  },
+
   // Environment Variables Test Data
   env: {
     databaseUrls: {
@@ -73,141 +114,126 @@ export const TEST_CONSTANTS = {
 
   // Error Messages
   errors: {
+    authenticationFailed: 'Authentication failed',
+    businessRuleViolation: 'Business rule violated',
     databaseConnectionLost: 'Database connection lost',
     databaseQueryTimeout: 'Database query timeout',
+    externalServiceFailed: 'External service failed',
     failedToDeleteTeam: 'Failed to delete team',
+    fieldRequired: 'Field is required',
+    insufficientPermissions: 'Insufficient permissions to perform this action',
+    internalServerError: 'Internal server error',
     invalidCredentials: 'Invalid credentials',
-    tokenExpired: 'Token has expired',
-    tokenNotFound: 'Refresh token not found',
+    invalidFormat: 'Invalid format',
+    resourceAlreadyExists: 'Resource already exists',
+    resourceNotFound: 'Resource not found',
     // Test error messages
     testError: 'Test error',
     testErrorMessage: 'Test error message',
+    tokenExpired: 'Token has expired',
+    tokenNotFound: 'Refresh token not found',
     validationFailed: 'Validation failed',
-    fieldRequired: 'Field is required',
-    invalidFormat: 'Invalid format',
-    authenticationFailed: 'Authentication failed',
-    insufficientPermissions: 'Insufficient permissions to perform this action',
-    resourceNotFound: 'Resource not found',
-    resourceAlreadyExists: 'Resource already exists',
-    businessRuleViolation: 'Business rule violated',
-    externalServiceFailed: 'External service failed',
-    internalServerError: 'Internal server error',
   },
 
   // Error Test Data
   errorTestData: {
+    context: {
+      module: 'test module',
+      operation: 'test operation',
+    },
     fields: {
       email: 'email',
+      field: 'field',
       password: 'password',
       username: 'username',
-      field: 'field',
     },
-    resources: {
-      user: 'User',
-      team: 'Team',
-      token: 'Token',
-      resource: 'Resource',
+    handler: {
+      httpStatusCodes: {
+        badGateway: 502,
+        badRequest: 400,
+        conflict: 409,
+        forbidden: 403,
+        internalServerError: 500,
+        notFound: 404,
+        ok: 200,
+        unauthorized: 401,
+        unprocessableEntity: 422,
+      },
+      logContext: {
+        action: 'login',
+        duration: 245,
+        endpoint: '/api/users',
+        operation: 'deleteUser',
+        requestId: 'abc-123',
+        retries: 3,
+        userId: 'user-123',
+      },
+      logMessages: {
+        debugLogged: 'Test debug logged',
+        errorLogged: 'Test error logged',
+        infoLogged: 'Test info logged',
+        warningLogged: 'Test warning logged',
+      },
+      originalError: 'Original error message',
+      unexpectedError: 'An unexpected error occurred',
     },
     identifiers: {
-      userId: 'user-123',
+      identifier: 'test-identifier',
       teamId: 'team-456',
       tokenId: 'token-789',
-      identifier: 'test-identifier',
+      userId: 'user-123',
+    },
+    permissions: {
+      admin: 'admin',
+      delete: 'delete',
+      read: 'read',
+      write: 'write',
     },
     reasons: {
+      duplicate: 'duplicate',
       invalidCredentials: 'invalid_credentials',
       invalidToken: 'invalid_token',
       missingToken: 'missing_token',
-      duplicate: 'duplicate',
     },
-    permissions: {
-      read: 'read',
-      write: 'write',
-      delete: 'delete',
-      admin: 'admin',
+    resources: {
+      resource: 'Resource',
+      team: 'Team',
+      token: 'Token',
+      user: 'User',
     },
     rules: {
+      businessRule: 'business_rule',
       maxLength: 'max_length',
       minLength: 'min_length',
       required: 'required',
-      businessRule: 'business_rule',
     },
     services: {
-      paymentService: 'PaymentService',
       emailService: 'EmailService',
       externalApi: 'ExternalAPI',
-    },
-    context: {
-      operation: 'test operation',
-      module: 'test module',
-    },
-    handler: {
-      logMessages: {
-        errorLogged: 'Test error logged',
-        warningLogged: 'Test warning logged',
-        infoLogged: 'Test info logged',
-        debugLogged: 'Test debug logged',
-      },
-      logContext: {
-        userId: 'user-123',
-        operation: 'deleteUser',
-        retries: 3,
-        endpoint: '/api/users',
-        action: 'login',
-        requestId: 'abc-123',
-        duration: 245,
-      },
-      httpStatusCodes: {
-        ok: 200,
-        badRequest: 400,
-        unauthorized: 401,
-        forbidden: 403,
-        notFound: 404,
-        conflict: 409,
-        unprocessableEntity: 422,
-        internalServerError: 500,
-        badGateway: 502,
-      },
-      unexpectedError: 'An unexpected error occurred',
-      originalError: 'Original error message',
+      paymentService: 'PaymentService',
     },
   },
 
   // Mock IDs
   existingTeamId: 'existing-123',
   existingUserId: 'existing-user-123',
+
+  // FoundedYear Test Data
+  foundedYears: {
+    currentYear: new Date().getFullYear(),
+    exactly1800: 1800,
+    futureYear: new Date().getFullYear() + 1,
+    negative: -100,
+    tooOld: 1799,
+    year1899: 1899,
+    year1900: 1900,
+    year1902: 1902,
+    year2000: 2000,
+    year2020: 2020,
+    zero: 0,
+  },
   futureDate: new Date('2025-12-31T23:59:59Z'),
   futureDateIso: '2025-12-31T23:59:59.000Z',
-
-  // Invalid Data
-  invalid: {
-    foundedYearTooOld: 1799, // Before 1800
-    weakPassword: 'weak',
-    wrongPassword: 'WrongPassword123',
-  },
-
-  // Email Test Data
-  emails: {
-    empty: '',
-    existing: 'existing@example.com', // For duplicate email tests
-    lowercase: 'test@example.com',
-    noAt: 'notanemail.com',
-    noDomain: 'user@',
-    noExtension: 'user@domain',
-    noLocal: '@example.com',
-    nonexistent: 'nonexistent@example.com', // For user not found tests
-    tooLong: `${'a'.repeat(250)}@example.com`,
-    uppercase: 'TEST@EXAMPLE.COM',
-    valid: 'test@example.com',
-    validExactly255: `${'a'.repeat(243)}@example.com`, // 243 + '@' + 'example.com' = 255
-    whitespaceOnly: '   ',
-    withDot: 'user.name@example.com',
-    withNumbers: 'user123@test123.com',
-    withPlus: 'user+tag@example.co.uk',
-    withSpaces: '  test@example.com  ',
-    withSubdomain: 'user@mail.example.com',
-    withUnderscore: 'user_name@example-domain.com',
-  },
 
   // EntityId Test Data
   ids: {
@@ -224,6 +250,124 @@ export const TEST_CONSTANTS = {
     withUpperCase: 'User-123',
   },
 
+  // Invalid Data
+  invalid: {
+    foundedYearTooOld: 1799, // Before 1800
+    weakPassword: 'weak',
+    wrongPassword: 'WrongPassword123',
+  },
+
+  // Metrics/Prometheus Test Data
+  metrics: {
+    prometheus: {
+      business: {
+        counts: {
+          huge: 200,
+          large: 100,
+          massive: 250,
+          medium: 50,
+          small: 25,
+          veryLarge: 150,
+          zero: 0,
+        },
+      },
+      contentType: 'text/plain; version=0.0.4; charset=utf-8' as const,
+      db: {
+        durations: {
+          fast: 0.01,
+          medium: 0.02,
+          slow: 0.03,
+        },
+        errors: {
+          connectionTimeout: 'ConnectionTimeout' as const,
+          queryTimeout: 'QueryTimeout' as const,
+          uniqueConstraint: 'UniqueConstraintViolation' as const,
+        },
+        operations: {
+          delete: 'delete' as const,
+          insert: 'insert' as const,
+          select: 'select' as const,
+          update: 'update' as const,
+        },
+        tables: {
+          refreshTokens: 'refresh_tokens' as const,
+          sessions: 'sessions' as const,
+          teams: 'teams' as const,
+          users: 'users' as const,
+        },
+      },
+      http: {
+        durations: {
+          fast: 0.01,
+          medium: 0.05,
+          slow: 0.1,
+          verySlow: 0.15,
+        },
+        errors: {
+          client: 'client_error' as const,
+          server: 'server_error' as const,
+        },
+        methods: {
+          get: 'GET' as const,
+          post: 'POST' as const,
+          put: 'PUT' as const,
+        },
+        routes: {
+          login: '/api/auth/login' as const,
+          teams: '/api/teams' as const,
+          teamsById: '/api/teams/123' as const,
+          test: '/api/test' as const,
+          users: '/api/users' as const,
+          usersById: '/api/users/456' as const,
+        },
+        statusCodes: {
+          badRequest: 400,
+          created: 201,
+          notFound: 404,
+          ok: 200,
+          serverError: 500,
+        },
+      },
+      labels: {
+        errorType: 'ValidationError' as const,
+        method: 'GET' as const,
+        route: '/api/test' as const,
+        statusCode: 200,
+      },
+      testMetrics: {
+        counter: {
+          help: 'Test counter metric',
+          name: 'test_counter',
+        },
+        counterForReset: {
+          help: 'Test counter for reset verification',
+          name: 'test_counter_reset',
+        },
+        gauge: {
+          help: 'Test gauge metric',
+          name: 'test_gauge',
+        },
+        histogram: {
+          buckets: [0.1, 0.5, 1, 5, 10] as const,
+          help: 'Test histogram metric',
+          name: 'test_histogram',
+        },
+      },
+      values: {
+        count: 42,
+        decrement: 1,
+        duration: 0.123,
+        increment: 1,
+      },
+    },
+  },
+
+  // Mock Dates
+  mockDate: new Date('2025-01-01T00:00:00Z'),
+  mockDateIso: '2025-01-01T00:00:00.000Z',
+  mockTokenId: 'mock-token-id',
+  mockUuid: 'mock-uuid',
+
   // Password Test Data
   passwords: {
     different: 'DifferentPassword456!',
@@ -239,6 +383,8 @@ export const TEST_CONSTANTS = {
     withNullBytes: 'test\x00password',
     wrong: 'WrongPassword456!',
   },
+  pastDate: new Date('2020-01-01T00:00:00Z'),
+  pastDateIso: '2020-01-01T00:00:00.000Z',
 
   // Refresh Token Test Data
   refreshTokens: {
@@ -248,23 +394,6 @@ export const TEST_CONSTANTS = {
     updated: 'updated-token',
     user1Token: 'user1-token',
     user2Token: 'user2-token',
-  },
-
-  // Test Emails (for integration tests)
-  testEmails: {
-    first: 'first@example.com',
-    initial: 'initial@test.com',
-    second: 'second@example.com',
-    third: 'third@example.com',
-    updated: 'updated@test.com',
-    user1: 'user1@test.com',
-    user2: 'user2@test.com',
-  },
-
-  // Test User IDs
-  testUserIds: {
-    testUser1: 'test-user-1',
-    testUser2: 'test-user-2',
   },
 
   // TeamName Test Data
@@ -284,47 +413,6 @@ export const TEST_CONSTANTS = {
     withLeadingTrailingSpaces: '  Chelsea FC  ',
     withNumbers: 'Team 123',
   },
-
-  // City Test Data
-  cities: {
-    barcelona: 'Barcelona',
-    bilbao: 'Bilbao',
-    empty: '',
-    exactly100Chars: 'a'.repeat(100),
-    exceeds100Chars: 'a'.repeat(101),
-    madrid: 'Madrid',
-    newYork: 'New York',
-    saoPaulo: 'São Paulo',
-    saintEtienne: 'Saint-Étienne',
-    singleChar: 'A',
-    valencia: 'Valencia',
-    veryLong: 'a'.repeat(150),
-    whitespaceOnly: '   ',
-    withLeadingTrailingSpaces: '  London  ',
-  },
-
-  // FoundedYear Test Data
-  foundedYears: {
-    currentYear: new Date().getFullYear(),
-    exactly1800: 1800,
-    futureYear: new Date().getFullYear() + 1,
-    negative: -100,
-    tooOld: 1799,
-    year1899: 1899,
-    year1900: 1900,
-    year1902: 1902,
-    year2000: 2000,
-    year2020: 2020,
-    zero: 0,
-  },
-
-  // Mock Dates
-  mockDate: new Date('2025-01-01T00:00:00Z'),
-  mockDateIso: '2025-01-01T00:00:00.000Z',
-  mockTokenId: 'mock-token-id',
-  mockUuid: 'mock-uuid',
-  pastDate: new Date('2020-01-01T00:00:00Z'),
-  pastDateIso: '2020-01-01T00:00:00.000Z',
 
   // Team Data
   teams: {
@@ -358,6 +446,23 @@ export const TEST_CONSTANTS = {
     },
   },
 
+  // Test Emails (for integration tests)
+  testEmails: {
+    first: 'first@example.com',
+    initial: 'initial@test.com',
+    second: 'second@example.com',
+    third: 'third@example.com',
+    updated: 'updated@test.com',
+    user1: 'user1@test.com',
+    user2: 'user2@test.com',
+  },
+
+  // Test User IDs
+  testUserIds: {
+    testUser1: 'test-user-1',
+    testUser2: 'test-user-2',
+  },
+
   // User Data
   users: {
     adminUser: {
@@ -387,111 +492,6 @@ export const TEST_CONSTANTS = {
       password: 'SuperPass123',
       passwordHash: 'hashed-superadmin-password',
       role: 'SUPER_ADMIN' as const,
-    },
-  },
-
-  // Metrics/Prometheus Test Data
-  metrics: {
-    prometheus: {
-      contentType: 'text/plain; version=0.0.4; charset=utf-8' as const,
-      testMetrics: {
-        counter: {
-          name: 'test_counter',
-          help: 'Test counter metric',
-        },
-        counterForReset: {
-          name: 'test_counter_reset',
-          help: 'Test counter for reset verification',
-        },
-        gauge: {
-          name: 'test_gauge',
-          help: 'Test gauge metric',
-        },
-        histogram: {
-          name: 'test_histogram',
-          help: 'Test histogram metric',
-          buckets: [0.1, 0.5, 1, 5, 10] as const,
-        },
-      },
-      labels: {
-        method: 'GET' as const,
-        route: '/api/test' as const,
-        statusCode: 200,
-        errorType: 'ValidationError' as const,
-      },
-      values: {
-        duration: 0.123,
-        count: 42,
-        increment: 1,
-        decrement: 1,
-      },
-      http: {
-        methods: {
-          get: 'GET' as const,
-          post: 'POST' as const,
-          put: 'PUT' as const,
-        },
-        routes: {
-          users: '/api/users' as const,
-          teams: '/api/teams' as const,
-          test: '/api/test' as const,
-          login: '/api/auth/login' as const,
-          teamsById: '/api/teams/123' as const,
-          usersById: '/api/users/456' as const,
-        },
-        statusCodes: {
-          ok: 200,
-          created: 201,
-          badRequest: 400,
-          notFound: 404,
-          serverError: 500,
-        },
-        durations: {
-          fast: 0.01,
-          medium: 0.05,
-          slow: 0.1,
-          verySlow: 0.15,
-        },
-        errors: {
-          client: 'client_error' as const,
-          server: 'server_error' as const,
-        },
-      },
-      db: {
-        operations: {
-          select: 'select' as const,
-          insert: 'insert' as const,
-          update: 'update' as const,
-          delete: 'delete' as const,
-        },
-        tables: {
-          users: 'users' as const,
-          teams: 'teams' as const,
-          refreshTokens: 'refresh_tokens' as const,
-          sessions: 'sessions' as const,
-        },
-        durations: {
-          fast: 0.01,
-          medium: 0.02,
-          slow: 0.03,
-        },
-        errors: {
-          uniqueConstraint: 'UniqueConstraintViolation' as const,
-          connectionTimeout: 'ConnectionTimeout' as const,
-          queryTimeout: 'QueryTimeout' as const,
-        },
-      },
-      business: {
-        counts: {
-          zero: 0,
-          small: 25,
-          medium: 50,
-          large: 100,
-          veryLarge: 150,
-          huge: 200,
-          massive: 250,
-        },
-      },
     },
   },
 } as const

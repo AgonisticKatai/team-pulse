@@ -100,7 +100,7 @@ describe('logger', () => {
         const context = { errorCode: ERROR_SEVERITY.CRITICAL }
 
         // Act
-        logger.error({ message, context })
+        logger.error({ context, message })
 
         // Assert
         // biome-ignore lint/suspicious/noConsole: Testing ConsoleLogger calls console.error
@@ -127,7 +127,7 @@ describe('logger', () => {
         const context = { severity: ERROR_SEVERITY.MEDIUM }
 
         // Act
-        logger.warn({ message, context })
+        logger.warn({ context, message })
 
         // Assert
         // biome-ignore lint/suspicious/noConsole: Testing ConsoleLogger calls console.warn
@@ -154,7 +154,7 @@ describe('logger', () => {
         const context = { severity: ERROR_SEVERITY.LOW }
 
         // Act
-        logger.info({ message, context })
+        logger.info({ context, message })
 
         // Assert
         // biome-ignore lint/suspicious/noConsole: Testing ConsoleLogger calls console.info
@@ -181,7 +181,7 @@ describe('logger', () => {
         const context = { requestId: TEST_CONSTANTS.errorTestData.identifiers.identifier }
 
         // Act
-        logger.debug({ message, context })
+        logger.debug({ context, message })
 
         // Assert
         // biome-ignore lint/suspicious/noConsole: Testing ConsoleLogger calls console.debug
@@ -208,7 +208,7 @@ describe('logger', () => {
       const context = { test: 'context' }
 
       // Act
-      logger.error({ message, context })
+      logger.error({ context, message })
 
       // Assert
       // biome-ignore lint/suspicious/noConsole: Testing NoOpLogger does not call console.error
@@ -221,7 +221,7 @@ describe('logger', () => {
       const context = { test: 'context' }
 
       // Act
-      logger.warn({ message, context })
+      logger.warn({ context, message })
 
       // Assert
       // biome-ignore lint/suspicious/noConsole: Testing NoOpLogger does not call console.warn
@@ -234,7 +234,7 @@ describe('logger', () => {
       const context = { test: 'context' }
 
       // Act
-      logger.info({ message, context })
+      logger.info({ context, message })
 
       // Assert
       // biome-ignore lint/suspicious/noConsole: Testing NoOpLogger does not call console.info
@@ -247,7 +247,7 @@ describe('logger', () => {
       const context = { test: 'context' }
 
       // Act
-      logger.debug({ message, context })
+      logger.debug({ context, message })
 
       // Assert
       // biome-ignore lint/suspicious/noConsole: Testing NoOpLogger does not call console.debug

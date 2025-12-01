@@ -32,8 +32,8 @@ describe('PrometheusRegistry', () => {
 
     it('should return metrics data when metrics are registered', async () => {
       const counter = new Counter({
-        name: prometheus.testMetrics.counter.name,
         help: prometheus.testMetrics.counter.help,
+        name: prometheus.testMetrics.counter.name,
         registers: [promRegistry],
       })
       counter.inc()
@@ -56,8 +56,8 @@ describe('PrometheusRegistry', () => {
   describe('resetMetrics', () => {
     it('should reset metric values to default', async () => {
       const counter = new Counter({
-        name: prometheus.testMetrics.counterForReset.name,
         help: prometheus.testMetrics.counterForReset.help,
+        name: prometheus.testMetrics.counterForReset.name,
         registers: [promRegistry],
       })
       counter.inc()

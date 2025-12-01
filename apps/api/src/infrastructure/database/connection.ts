@@ -23,13 +23,13 @@ export function createDatabase(dbUrl: string, options?: DatabaseOptions): Databa
   const defaultMax = isTest ? 5 : isProduction ? 20 : 10
 
   const client = postgres(dbUrl, {
-    max: options?.max ?? defaultMax,
-    // biome-ignore lint/style/useNamingConvention: postgres.js API uses snake_case
-    idle_timeout: options?.idleTimeout ?? 20,
-    // biome-ignore lint/style/useNamingConvention: postgres.js API uses snake_case
-    max_lifetime: options?.maxLifetime ?? 60 * 30,
     // biome-ignore lint/style/useNamingConvention: postgres.js API uses snake_case
     connect_timeout: options?.connectTimeout ?? 10,
+    // biome-ignore lint/style/useNamingConvention: postgres.js API uses snake_case
+    idle_timeout: options?.idleTimeout ?? 20,
+    max: options?.max ?? defaultMax,
+    // biome-ignore lint/style/useNamingConvention: postgres.js API uses snake_case
+    max_lifetime: options?.maxLifetime ?? 60 * 30,
     ...options?.postgres,
   })
 

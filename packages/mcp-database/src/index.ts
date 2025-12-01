@@ -82,13 +82,13 @@ class DatabaseSchemaMCPServer {
 
         if (!result.ok) {
           return {
-            content: [{ type: 'text' as const, text: `Error: ${result.error.message}` }],
+            content: [{ text: `Error: ${result.error.message}`, type: 'text' as const }],
             isError: true,
           }
         }
 
         return {
-          content: [{ type: 'text' as const, text: result.value }],
+          content: [{ text: result.value, type: 'text' as const }],
         }
       },
     )
@@ -108,13 +108,13 @@ class DatabaseSchemaMCPServer {
 
         if (!result.ok) {
           return {
-            content: [{ type: 'text' as const, text: `Error: ${result.error.message}` }],
+            content: [{ text: `Error: ${result.error.message}`, type: 'text' as const }],
             isError: true,
           }
         }
 
         return {
-          content: [{ type: 'text' as const, text: result.value }],
+          content: [{ text: result.value, type: 'text' as const }],
         }
       },
     )
@@ -130,13 +130,13 @@ class DatabaseSchemaMCPServer {
 
         if (!result.ok) {
           return {
-            content: [{ type: 'text' as const, text: `Error: ${result.error.message}` }],
+            content: [{ text: `Error: ${result.error.message}`, type: 'text' as const }],
             isError: true,
           }
         }
 
         return {
-          content: [{ type: 'text' as const, text: result.value }],
+          content: [{ text: result.value, type: 'text' as const }],
         }
       },
     )
@@ -156,13 +156,13 @@ class DatabaseSchemaMCPServer {
 
         if (!result.ok) {
           return {
-            content: [{ type: 'text' as const, text: `Error: ${result.error.message}` }],
+            content: [{ text: `Error: ${result.error.message}`, type: 'text' as const }],
             isError: true,
           }
         }
 
         return {
-          content: [{ type: 'text' as const, text: result.value }],
+          content: [{ text: result.value, type: 'text' as const }],
         }
       },
     )
