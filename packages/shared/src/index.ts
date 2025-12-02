@@ -12,6 +12,7 @@
  * - @team-pulse/shared/result         → Result<T,E>, Ok, Err, map, flatMap, etc.
  * - @team-pulse/shared/dtos           → DTOs with Zod schemas (CreateUserDTO, LoginDTO, etc.)
  * - @team-pulse/shared/types          → Common types (HealthCheckResponse, UserRole, etc.)
+ * - @team-pulse/shared/validation     → Auth validation rules and schemas
  *
  * ## Testing Utilities
  * - @team-pulse/shared/testing/helpers      → expectSuccess, expectError, assertDefined, etc.

@@ -1,3 +1,4 @@
+import { EmailSchema, LoginFormSchema, PasswordStrictSchema } from '@team-pulse/shared/validation'
 import { z } from 'zod'
 import type { UserRole } from '../types/index.js'
 import type { PaginatedResponse } from './pagination.dto.js'
@@ -15,31 +16,25 @@ import type { PaginatedResponse } from './pagination.dto.js'
  * 3. One domain model might map to multiple DTOs (different views)
  * 4. Input validation happens here, domain validation is separate
  *
- * These DTOs use Zod for runtime validation.
+ * These DTOs use Zod schemas from @team-pulse/shared/validation
+ * for consistency between frontend and backend validation.
  */
 
 /**
  * Schema for login request
+ * Uses shared LoginFormSchema to ensure FE/BE consistency
  */
-export const LoginDTOSchema = z.object({
-  email: z.string().trim().toLowerCase().email('Invalid email format'),
-  password: z.string().min(1, 'Password is required'),
-})
+export const LoginDTOSchema = LoginFormSchema
 
 export type LoginDTO = z.infer<typeof LoginDTOSchema>
 
 /**
  * Schema for creating a new user
+ * Uses shared EmailSchema and PasswordStrictSchema
  */
 export const CreateUserDTOSchema = z.object({
-  email: z.string().trim().toLowerCase().email('Invalid email format'),
-  password: z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(100, 'Password cannot exceed 100 characters')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number'),
+  email: EmailSchema,
+  password: PasswordStrictSchema,
   role: z.enum(['SUPER_ADMIN', 'ADMIN', 'USER']),
 })
 

@@ -148,7 +148,7 @@ describe('Auth DTOs', () => {
         }
 
         const result = CreateUserDTOSchema.safeParse(data)
-        expectZodError(result, 'Password cannot exceed 100 characters')
+        expectZodError(result, 'Password must not exceed 100 characters')
       })
 
       it('should reject password without uppercase letter', () => {

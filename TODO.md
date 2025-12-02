@@ -6,6 +6,53 @@ Este archivo registra mejoras pendientes y tech debt identificado durante el des
 
 ## 🔴 Alta Prioridad
 
+### 📦 WEB - Domain Refactor Pendiente
+
+#### ⏳ Aplicar Shared Validation Rules tras Refactor de Dominio FE
+**Estado:** Pendiente de refactor dominio FE
+**Ubicación FE:** `apps/web/src/domain/`, `apps/web/src/features/auth/`
+**Ubicación Shared:** `packages/shared/src/validation/`
+**Dependencias:**
+- ✅ Shared validation rules creadas (`auth.rules.ts`)
+- ✅ Backend actualizado para usar validation rules compartidas
+- ❌ Pendiente: Refactor de dominio FE a patrón BE
+
+**Contexto:**
+- El frontend actualmente tiene arquitectura hexagonal con Value Objects y Entities
+- Los VOs del FE usan patrón más simple que los del BE (ver `Email.ts`, `Role.ts`, etc.)
+- El BE tiene patrón refinado con constructores nominados, validaciones separadas
+- Se decidió NO hacer soluciones híbridas - refactorizar dominio FE primero
+
+**Tareas pendientes tras refactor de dominio FE:**
+1. [ ] Migrar VOs de FE a patrón BE (constructor nominado `{ value: string }`, validaciones protected)
+2. [ ] Actualizar imports en VOs para usar `@team-pulse/shared/errors` en lugar de local
+3. [ ] Actualizar imports en VOs para usar `@team-pulse/shared/result` en lugar de local
+4. [ ] Refactorizar `AuthService.ts` para usar `AUTH_RULES` de `@team-pulse/shared/validation`
+   - Eliminar constantes hardcoded: `MIN_PASSWORD_LENGTH`, `MAX_PASSWORD_LENGTH`
+   - Importar y usar `AUTH_RULES.PASSWORD.MIN_LENGTH`, etc.
+5. [ ] Implementar Login Form usando `LoginFormSchema` compartido
+   - React Hook Form + zodResolver
+   - Usar `@team-pulse/shared/validation` schemas
+   - NO usar VOs directamente en el formulario (solo en use cases del dominio)
+6. [ ] Verificar que validation rules funcionan igual en FE/BE
+
+**Archivos afectados (estimación):**
+- `apps/web/src/domain/value-objects/*.ts` (~7 archivos)
+- `apps/web/src/domain/entities/*.ts` (~3 archivos)
+- `apps/web/src/domain/services/AuthService.ts`
+- `apps/web/src/features/auth/` (nuevos componentes de login)
+
+**Validación final:**
+- [ ] Tests de VOs FE pasando con nuevo patrón
+- [ ] Tests de entities FE pasando
+- [ ] Login form funcional con validation rules compartidas
+- [ ] Type-check sin errores
+- [ ] Lint sin errores
+
+**Beneficio:** Consistencia arquitectural FE/BE, single source of truth para validation, código más mantenible
+
+---
+
 ### 📦 API - Violaciones de Arquitectura Hexagonal
 
 #### ✅ Application Layer importa desde Infrastructure (Env) - RESUELTO (2025-11-20)
@@ -719,4 +766,4 @@ protected static handleJwtError({ error, field }: { error: unknown; field: strin
   4. Performance
 
 **Última revisión de arquitectura:** 2025-11-20
-**Última actualización:** 2025-11-26 (Fase 3 error handling completada, Fase 4 pendiente)
+**Última actualización:** 2025-12-02 (Shared validation rules implementadas en BE, pendiente aplicación en FE tras refactor)
