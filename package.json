@@ -6,7 +6,7 @@
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
     "@types/node": "catalog:",
-    "@vercel/node": "^5.5.13",
+    "@vercel/node": "^5.5.14",
     "@vitest/coverage-v8": "catalog:",
     "@vitest/ui": "catalog:",
     "husky": "^9.1.7",
