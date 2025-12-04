@@ -494,4 +494,23 @@ export const TEST_CONSTANTS = {
       role: 'SUPER_ADMIN' as const,
     },
   },
+
+  // UUID Test Data
+  uuids: {
+    // Invalid UUIDs
+    empty: '',
+    incomplete: '123e4567-e89b-12d3-a456',
+    invalid: 'invalid-uuid',
+    invalidWithSpaces: '123e4567 e89b 12d3 a456 426614174000',
+    malformed: 'not-a-uuid-at-all',
+    team1: 'a1b2c3d4-e5f6-47a8-b9c0-d1e2f3a4b5c6',
+    team2: 'f9e8d7c6-b5a4-4938-8271-605948372615',
+    tooLong: '123e4567-e89b-12d3-a456-426614174000-extra',
+    uppercase: '123E4567-E89B-12D3-A456-426614174000',
+    user1: '123e4567-e89b-12d3-a456-426614174000',
+    user2: '987e6543-e21b-43d2-b654-624416471000',
+    // Valid UUIDs for different contexts
+    valid: '123e4567-e89b-12d3-a456-426614174000',
+    withoutDashes: '123e4567e89b12d3a456426614174000',
+  },
 } as const
