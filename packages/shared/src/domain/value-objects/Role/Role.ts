@@ -17,7 +17,7 @@ export class Role {
       return Err(
         ValidationError.invalidValue({
           field: 'role',
-          message: 'Invalid role format',
+          message: validationResult.error.message,
           value,
         }),
       )
@@ -31,9 +31,8 @@ export class Role {
 
     if (!result.success) {
       return Err(
-        ValidationError.forField({
-          field: 'role',
-          message: `Invalid role format. Expected: ${Object.values(UserRoles).join(', ')}`,
+        ValidationError.fromZodError({
+          error: result.error,
         }),
       )
     }

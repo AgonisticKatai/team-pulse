@@ -27,12 +27,6 @@ export class EntityId<Brand extends string = string> {
     this.value = value
   }
 
-  /**
-   * Create an EntityId from an existing string value
-   *
-   * @param value - A UUID v4 string
-   * @returns Result containing the EntityId or a ValidationError if the value is invalid
-   */
   static create<B extends string = string>({ value }: { value: string }): Result<EntityId<B>, ValidationError> {
     const validationResult = EntityId.validate({ value })
 
@@ -40,7 +34,7 @@ export class EntityId<Brand extends string = string> {
       return Err(
         ValidationError.invalidValue({
           field: 'id',
-          message: 'Invalid UUID format',
+          message: validationResult.error.message,
           value,
         }),
       )
@@ -49,11 +43,6 @@ export class EntityId<Brand extends string = string> {
     return Ok(new EntityId({ value: validationResult.value }) as EntityId<B>)
   }
 
-  /**
-   * Generate a new EntityId with a random UUID v4
-   *
-   * @returns Result containing a new EntityId with a freshly generated UUID
-   */
   static generate<B extends string = string>(): Result<EntityId<B>, ValidationError> {
     return EntityId.create({ value: uuidv4() })
   }
@@ -63,10 +52,8 @@ export class EntityId<Brand extends string = string> {
 
     if (!result.success) {
       return Err(
-        ValidationError.invalidValue({
-          field: 'id',
-          message: 'Invalid UUID format',
-          value,
+        ValidationError.fromZodError({
+          error: result.error,
         }),
       )
     }
@@ -78,26 +65,14 @@ export class EntityId<Brand extends string = string> {
     return entityIdSchema.safeParse(value).success
   }
 
-  /**
-   * Get the primitive value
-   */
   getValue(): EntityIdType {
     return this.value
   }
 
-  /**
-   * Check equality with another EntityId of the same brand
-   *
-   * @param other - Another EntityId to compare with (must be same brand)
-   * @returns true if both IDs have the same underlying value
-   */
   equals({ other }: { other: EntityId<Brand> }): boolean {
     return this.value === other.value
   }
 
-  /**
-   * Convert to string
-   */
   toString(): string {
     return this.value
   }

@@ -8,6 +8,7 @@ import { ERROR_CATEGORY, ERROR_CODES, ERROR_SEVERITY } from '@errors/core.js'
 import { ValidationError } from '@errors/ValidationError.js'
 import { TEST_CONSTANTS } from '@testing/constants.js'
 import { describe, expect, it } from 'vitest'
+import { ZodError, z } from 'zod'
 
 describe('ValidationError', () => {
   describe('create', () => {
@@ -80,114 +81,126 @@ describe('ValidationError', () => {
   describe('fromZodError', () => {
     it('should create validation error from Zod error with single issue', () => {
       // Arrange
-      const zodError = {
-        errors: [
-          {
-            message: TEST_CONSTANTS.errors.invalidFormat,
-            path: [TEST_CONSTANTS.errorTestData.fields.email],
-          },
-        ],
-      }
+      const schema = z.object({
+        email: z.email({ message: TEST_CONSTANTS.errors.invalidFormat }),
+      })
+
+      const result = schema.safeParse({
+        email: 'invalid-email',
+      })
+
+      if (result.success) throw new Error('Setup failed: Zod should have failed')
 
       // Act
-      const error = ValidationError.fromZodError({ error: zodError })
+      const error = ValidationError.fromZodError({ error: result.error })
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
       expect(error.message).toBe(TEST_CONSTANTS.errors.invalidFormat)
+
       expect(error.code).toBe(ERROR_CODES.VALIDATION_ERROR)
       expect(error.category).toBe(ERROR_CATEGORY.VALIDATION)
       expect(error.severity).toBe(ERROR_SEVERITY.LOW)
       expect(error.isOperational).toBe(true)
+
       expect(error.metadata).toEqual({
-        errors: zodError.errors,
-        field: TEST_CONSTANTS.errorTestData.fields.email,
+        errors: result.error.issues,
+        field: 'email',
       })
     })
 
     it('should create validation error from Zod error with multiple issues', () => {
       // Arrange
-      const zodError = {
-        errors: [
-          {
-            message: TEST_CONSTANTS.errors.invalidFormat,
-            path: [TEST_CONSTANTS.errorTestData.fields.email],
-          },
-          {
-            message: TEST_CONSTANTS.errors.fieldRequired,
-            path: [TEST_CONSTANTS.errorTestData.fields.password],
-          },
-          {
-            message: TEST_CONSTANTS.errors.fieldRequired,
-            path: [TEST_CONSTANTS.errorTestData.fields.username],
-          },
-        ],
-      }
+      const schema = z.object({
+        email: z.string().email({ message: TEST_CONSTANTS.errors.invalidFormat }),
+        password: z.string().min(1, { message: TEST_CONSTANTS.errors.fieldRequired }),
+        username: z.string().min(1, { message: TEST_CONSTANTS.errors.fieldRequired }),
+      })
+
+      const result = schema.safeParse({
+        email: 'bad-email',
+        password: '',
+        username: '',
+      })
+
+      if (result.success) throw new Error('Setup failed')
 
       // Act
-      const error = ValidationError.fromZodError({ error: zodError })
+      const error = ValidationError.fromZodError({ error: result.error })
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
       expect(error.message).toBe(TEST_CONSTANTS.errors.invalidFormat)
+
       expect(error.metadata).toEqual({
-        errors: zodError.errors,
-        field: TEST_CONSTANTS.errorTestData.fields.email,
+        errors: result.error.issues,
+        field: 'email',
       })
+
+      expect(error.metadata?.errors).toHaveLength(3)
     })
 
     it('should create validation error from Zod error with nested path', () => {
       // Arrange
-      const zodError = {
-        errors: [
-          {
-            message: TEST_CONSTANTS.errors.invalidFormat,
-            path: ['user', TEST_CONSTANTS.errorTestData.fields.email],
-          },
-        ],
-      }
+      const schema = z.object({
+        user: z.object({
+          email: z.string().email({ message: TEST_CONSTANTS.errors.invalidFormat }),
+        }),
+      })
+
+      const result = schema.safeParse({
+        user: {
+          email: 'invalid-nested',
+        },
+      })
+
+      if (result.success) throw new Error('Setup failed')
 
       // Act
-      const error = ValidationError.fromZodError({ error: zodError })
+      const error = ValidationError.fromZodError({ error: result.error })
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
       expect(error.metadata).toEqual({
-        errors: zodError.errors,
+        errors: result.error.issues,
         field: 'user.email',
       })
     })
 
     it('should create validation error from Zod error with array index in path', () => {
       // Arrange
-      const zodError = {
-        errors: [
-          {
-            message: TEST_CONSTANTS.errors.fieldRequired,
-            path: ['items', 0, TEST_CONSTANTS.errorTestData.fields.field],
-          },
-        ],
-      }
+      const schema = z.object({
+        items: z.array(
+          z.object({
+            field: z.string().min(1, { message: TEST_CONSTANTS.errors.fieldRequired }),
+          }),
+        ),
+      })
+
+      const result = schema.safeParse({
+        items: [{ field: '' }],
+      })
+
+      if (result.success) throw new Error('Setup failed')
 
       // Act
-      const error = ValidationError.fromZodError({ error: zodError })
+      const error = ValidationError.fromZodError({ error: result.error })
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)
+
       expect(error.metadata).toEqual({
-        errors: zodError.errors,
+        errors: result.error.issues,
         field: 'items.0.field',
       })
     })
 
     it('should handle empty Zod errors array', () => {
       // Arrange
-      const zodError = {
-        errors: [],
-      }
+      const emptyZodError = new ZodError([])
 
       // Act
-      const error = ValidationError.fromZodError({ error: zodError })
+      const error = ValidationError.fromZodError({ error: emptyZodError })
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError)

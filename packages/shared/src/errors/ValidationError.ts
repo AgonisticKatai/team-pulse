@@ -6,6 +6,7 @@
  * @module errors/ValidationError
  */
 
+import type { ZodError } from 'zod'
 import type { ErrorSeverity } from './core.js'
 import { ApplicationError, ERROR_CATEGORY, ERROR_CODES, ERROR_SEVERITY } from './core.js'
 
@@ -50,17 +51,15 @@ export class ValidationError extends ApplicationError {
   /**
    * Create a validation error from Zod validation error
    */
-  static fromZodError({ error }: { error: { errors: Array<{ path: (string | number)[]; message: string }> } }): ValidationError {
-    const firstError = error.errors[0]
-    const field = firstError?.path.join('.') || 'unknown'
-    const message = firstError?.message || 'Validation failed'
+  static fromZodError({ error }: { error: ZodError }): ValidationError {
+    const [firstIssue] = error.issues
+
+    const field = firstIssue?.path.join('.') || 'unknown'
+    const message = firstIssue?.message || 'Validation failed'
 
     return new ValidationError({
       message,
-      metadata: {
-        errors: error.errors,
-        field,
-      },
+      metadata: { errors: error.issues, field },
     })
   }
 
