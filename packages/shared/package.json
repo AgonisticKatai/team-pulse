@@ -16,6 +16,14 @@
       "import": "./dist/constants/index.js",
       "types": "./dist/constants/index.d.ts"
     },
+    "./constants/validation": {
+      "import": "./dist/constants/validation.constants.js",
+      "types": "./dist/constants/validation.constants.d.ts"
+    },
+    "./domain/value-objects": {
+      "import": "./dist/domain/value-objects/index.js",
+      "types": "./dist/domain/value-objects/index.d.ts"
+    },
     "./dtos": {
       "import": "./dist/dtos/index.js",
       "types": "./dist/dtos/index.d.ts"

@@ -1,3 +1,4 @@
+import { VALIDATION_MESSAGES } from '@team-pulse/shared/constants/validation'
 import { ValidationError } from '@team-pulse/shared/errors'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing/helpers'
@@ -44,7 +45,7 @@ describe('Email', () => {
 
       // Assert
       const error = expectErrorType({ errorType: ValidationError, result })
-      expect(error.message).toContain('Email address is required')
+      expect(error.message).toBe(VALIDATION_MESSAGES.SPECIFIC.EMAIL.TOO_SHORT)
     })
 
     it('should return ValidationError for whitespace only', () => {
@@ -53,8 +54,7 @@ describe('Email', () => {
 
       // Assert
       const error = expectErrorType({ errorType: ValidationError, result })
-      // Zod's email validator catches this as invalid format after trimming to empty string
-      expect(error.message).toContain('Email address is required')
+      expect(error.message).toBe(VALIDATION_MESSAGES.SPECIFIC.EMAIL.TOO_SHORT)
     })
 
     it('should return ValidationError for invalid format without @', () => {
@@ -63,7 +63,7 @@ describe('Email', () => {
 
       // Assert
       const error = expectErrorType({ errorType: ValidationError, result })
-      expect(error.message).toContain('invalid')
+      expect(error.message).toBe(VALIDATION_MESSAGES.SPECIFIC.EMAIL.INVALID_FORMAT)
     })
 
     it('should return ValidationError for missing local part', () => {
@@ -72,7 +72,7 @@ describe('Email', () => {
 
       // Assert
       const error = expectErrorType({ errorType: ValidationError, result })
-      expect(error.message).toContain('invalid')
+      expect(error.message).toBe(VALIDATION_MESSAGES.SPECIFIC.EMAIL.INVALID_FORMAT)
     })
 
     it('should return ValidationError for missing domain', () => {
@@ -81,7 +81,7 @@ describe('Email', () => {
 
       // Assert
       const error = expectErrorType({ errorType: ValidationError, result })
-      expect(error.message).toContain('invalid')
+      expect(error.message).toBe(VALIDATION_MESSAGES.SPECIFIC.EMAIL.INVALID_FORMAT)
     })
 
     it('should return ValidationError for email exceeding 255 characters', () => {
@@ -90,7 +90,7 @@ describe('Email', () => {
 
       // Assert
       const error = expectErrorType({ errorType: ValidationError, result })
-      expect(error.message).toContain('255')
+      expect(error.message).toBe(VALIDATION_MESSAGES.SPECIFIC.EMAIL.TOO_LONG)
     })
 
     it('should accept valid email with subdomain', () => {
@@ -137,7 +137,7 @@ describe('Email', () => {
 
       // Assert
       const error = expectErrorType({ errorType: ValidationError, result })
-      expect(error.message).toContain('invalid')
+      expect(error.message).toBe(VALIDATION_MESSAGES.SPECIFIC.EMAIL.INVALID_FORMAT)
     })
   })
 

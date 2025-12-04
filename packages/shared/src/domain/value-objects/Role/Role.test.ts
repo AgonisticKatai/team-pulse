@@ -1,3 +1,4 @@
+import { VALIDATION_MESSAGES } from '@team-pulse/shared/constants/validation'
 import { ValidationError } from '@team-pulse/shared/errors'
 import { expectErrorType, expectSuccess } from '@testing/helpers'
 import { describe, expect, it } from 'vitest'
@@ -24,8 +25,7 @@ describe('Role Value Object', () => {
       // Assert
       const error = expectErrorType({ errorType: ValidationError, result })
 
-      expect(error.message).toContain('Invalid role format')
-      expect(error.message).toContain('ADMIN')
+      expect(error.message).toContain(VALIDATION_MESSAGES.SPECIFIC.ROLE.INVALID_OPTION)
     })
 
     it('should fail when creating a role with empty string', () => {

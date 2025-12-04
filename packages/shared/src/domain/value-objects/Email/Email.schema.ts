@@ -11,9 +11,9 @@ import { z } from 'zod'
  */
 
 export const emailSchema = z
-  .string()
+  .string({ message: VALIDATION_MESSAGES.SPECIFIC.EMAIL.INVALID_FORMAT })
   .trim()
   .toLowerCase()
-  .min(1, { message: VALIDATION_MESSAGES.SPECIFIC.EMAIL.INVALID_FORMAT })
-  .max(255, { message: VALIDATION_MESSAGES.SPECIFIC.EMAIL.INVALID_FORMAT })
+  .min(1, { message: VALIDATION_MESSAGES.SPECIFIC.EMAIL.TOO_SHORT })
+  .max(255, { message: VALIDATION_MESSAGES.SPECIFIC.EMAIL.TOO_LONG })
   .pipe(z.email({ message: VALIDATION_MESSAGES.SPECIFIC.EMAIL.INVALID_FORMAT }))

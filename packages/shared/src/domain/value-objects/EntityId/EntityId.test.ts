@@ -1,3 +1,4 @@
+import { VALIDATION_MESSAGES } from '@team-pulse/shared/constants/validation'
 import { ValidationError } from '@team-pulse/shared/errors'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing/helpers'
@@ -40,7 +41,7 @@ describe('EntityId', () => {
       // Assert
       const error = expectErrorType({ errorType: ValidationError, result })
 
-      expect(error.message).toBe('Invalid UUID format')
+      expect(error.message).toBe(VALIDATION_MESSAGES.SPECIFIC.UUID.INVALID_FORMAT)
     })
 
     it('should return a ValidationError for empty string', () => {
@@ -50,7 +51,7 @@ describe('EntityId', () => {
       // Assert
       const error = expectErrorType({ errorType: ValidationError, result })
 
-      expect(error.message).toBe('Invalid UUID format')
+      expect(error.message).toBe(VALIDATION_MESSAGES.SPECIFIC.UUID.INVALID_FORMAT)
     })
 
     it('should return a ValidationError for UUID with wrong format', () => {
@@ -60,7 +61,7 @@ describe('EntityId', () => {
       // Assert
       const error = expectErrorType({ errorType: ValidationError, result })
 
-      expect(error.message).toBe('Invalid UUID format')
+      expect(error.message).toBe(VALIDATION_MESSAGES.SPECIFIC.UUID.INVALID_FORMAT)
     })
   })
 
@@ -119,7 +120,7 @@ describe('EntityId', () => {
 
       // Assert
       const error = expectErrorType({ errorType: ValidationError, result })
-      expect(error.message).toBe('Invalid UUID format')
+      expect(error.message).toBe(VALIDATION_MESSAGES.SPECIFIC.UUID.INVALID_FORMAT)
     })
   })
 
