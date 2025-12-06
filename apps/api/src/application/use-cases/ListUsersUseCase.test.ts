@@ -2,6 +2,7 @@ import { ListUsersUseCase } from '@application/use-cases/ListUsersUseCase.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { IMetricsService } from '@domain/services/IMetricsService.js'
 import { buildAdminUser, buildSuperAdminUser, buildUser } from '@infrastructure/testing/index.js'
+import type { UserResponseDTO } from '@team-pulse/shared/dtos'
 import { Err, Ok } from '@team-pulse/shared/result'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectError, expectFirst, expectSuccess } from '@team-pulse/shared/testing/helpers'
@@ -90,11 +91,14 @@ describe('ListUsersUseCase', () => {
         // Assert
         const data = expectSuccess(result)
         const firstUser = expectFirst(data.users)
+        const mockUser = mockUsers[0]
+        if (!mockUser) throw new Error('Mock user not found')
+
         expect(firstUser).not.toHaveProperty('passwordHash')
         expect(firstUser).toEqual({
           createdAt: TEST_CONSTANTS.mockDateIso,
           email: TEST_CONSTANTS.users.johnDoe.email,
-          id: TEST_CONSTANTS.users.johnDoe.id,
+          id: mockUser.id.getValue(),
           role: TEST_CONSTANTS.users.johnDoe.role,
           updatedAt: TEST_CONSTANTS.mockDateIso,
         })
@@ -111,7 +115,7 @@ describe('ListUsersUseCase', () => {
 
         // Assert
         const data = expectSuccess(result)
-        const firstUser = expectFirst(data.users)
+        const firstUser = expectFirst<UserResponseDTO>(data.users)
         expect(firstUser).toMatchObject({
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
@@ -147,7 +151,7 @@ describe('ListUsersUseCase', () => {
         const data = expectSuccess(result)
         expect(data.users).toHaveLength(1)
         expect(data.pagination.total).toBe(1)
-        const firstUser = expectFirst(data.users)
+        const firstUser = expectFirst<UserResponseDTO>(data.users)
         expect(firstUser.email).toBe(TEST_CONSTANTS.users.superAdminUser.email)
       })
 
@@ -174,7 +178,7 @@ describe('ListUsersUseCase', () => {
         const mockUsers = Array.from({ length: 10 }, (_, i) =>
           buildUser({
             email: `user${i}@example.com`,
-            id: `user-${i}`,
+            id: `550e8400-e29b-41d4-a716-4466555000${i.toString().padStart(2, '0')}`,
           }),
         )
         vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ total: 10, users: mockUsers }))
@@ -194,9 +198,9 @@ describe('ListUsersUseCase', () => {
       it('should maintain user order from repository', async () => {
         // Arrange
         const mockUsers = [
-          buildUser({ email: TEST_CONSTANTS.testEmails.third, id: 'user-3' }),
-          buildUser({ email: TEST_CONSTANTS.testEmails.first, id: 'user-1' }),
-          buildUser({ email: TEST_CONSTANTS.testEmails.second, id: 'user-2' }),
+          buildUser({ email: TEST_CONSTANTS.testEmails.third, id: '550e8400-e29b-41d4-a716-446655550003' }),
+          buildUser({ email: TEST_CONSTANTS.testEmails.first, id: '550e8400-e29b-41d4-a716-446655550001' }),
+          buildUser({ email: TEST_CONSTANTS.testEmails.second, id: '550e8400-e29b-41d4-a716-446655550002' }),
         ]
 
         vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ total: 3, users: mockUsers }))

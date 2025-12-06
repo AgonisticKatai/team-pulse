@@ -1,7 +1,7 @@
 import type { City } from '@domain/value-objects/City.js'
-import type { EntityId } from '@domain/value-objects/EntityId.js'
 import type { FoundedYear } from '@domain/value-objects/FoundedYear.js'
 import type { TeamName } from '@domain/value-objects/TeamName.js'
+import type { TeamId } from '@team-pulse/shared/domain/ids'
 
 /**
  * Team Factory Input
@@ -25,7 +25,7 @@ export interface TeamFactoryInput {
  * Used by fromValueObjects() to create entities without re-validation.
  */
 export interface TeamValueObjects {
-  id: EntityId
+  id: TeamId
   name: TeamName
   city: City
   foundedYear: FoundedYear | null

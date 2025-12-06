@@ -1,63 +1,52 @@
-import { randomUUID } from 'node:crypto'
 import type { IEnvironment } from '@domain/config/IEnvironment.js'
 import { RefreshToken } from '@domain/models/RefreshToken.js'
+import type { RefreshTokenId, UserId } from '@team-pulse/shared/domain/ids'
+import { IdUtils } from '@team-pulse/shared/domain/ids'
+import type { Email, Role } from '@team-pulse/shared/domain/value-objects'
 import type { ValidationError } from '@team-pulse/shared/errors'
 import { AuthenticationError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
-import type { UserRole } from '@team-pulse/shared/types'
 import jwt from 'jsonwebtoken'
 
 /**
  * Token Factory
- *
- * This is an APPLICATION LAYER FACTORY that provides a unified API for all token operations.
- *
- * Architecture:
- * - Application Layer (this factory)
- *   ├─> Domain Layer (RefreshToken entity)
- *   └─> Infrastructure Layer (jwt library)
- *
- * Responsibilities:
- * 1. LOW-LEVEL: Generate and verify JWT tokens (static methods)
- * 2. HIGH-LEVEL: Coordinate token creation with domain entities (instance methods)
- *
- * This design:
- * - Encapsulates ALL token logic in one place
- * - Respects hexagonal architecture (domain stays pure)
- * - Provides both low-level primitives and high-level coordination
- * - Enables easy testing and mocking
+ * Application Service for unified secure token operations.
  */
+
+// ==========================================
+// 1. PAYLOADS (Strict Typing)
+// ==========================================
 
 /**
  * Payload structure for access tokens
+ * USES BRANDED TYPES
  */
 export interface AccessTokenPayload {
   email: string
-  role: UserRole
-  userId: string
+  role: string
+  userId: UserId
+  iat?: number
+  exp?: number
+  aud?: string
+  iss?: string
 }
 
 /**
  * Payload structure for refresh tokens
+ * USES BRANDED TYPES
  */
 export interface RefreshTokenPayload {
-  tokenId: string
-  userId: string
+  tokenId: RefreshTokenId
+  userId: UserId
+  iat?: number
+  exp?: number
+  aud?: string
+  iss?: string
 }
 
-/**
- * Access token expiration time (15 minutes)
- */
 const ACCESS_TOKEN_EXPIRATION = '15m'
-
-/**
- * Refresh token expiration time (7 days)
- */
 const REFRESH_TOKEN_EXPIRATION = '7d'
 
-/**
- * Mapping of JWT error types to user-friendly messages
- */
 const JWT_ERROR_TYPES: Record<string, string> = {
   JsonWebTokenError: 'Invalid token',
   NotBeforeError: 'Token not yet valid',
@@ -66,31 +55,16 @@ const JWT_ERROR_TYPES: Record<string, string> = {
 
 export class TokenFactory {
   // ============================================
-  // STATIC METHODS (Low-level JWT operations)
-  // Can be used independently without creating an instance
+  // STATIC METHODS
   // ============================================
 
-  /**
-   * Handle JWT errors and convert to AuthenticationError
-   */
   protected static handleJwtError({ error, field }: { error: unknown; field: string }): AuthenticationError {
     const errorName = error instanceof Error ? error.name : 'UnknownError'
     const errorMessage = JWT_ERROR_TYPES[errorName] || 'Invalid token'
 
-    return AuthenticationError.create({
-      message: errorMessage,
-      metadata: {
-        field,
-        originalError: errorName,
-      },
-    })
+    return AuthenticationError.create({ message: errorMessage, metadata: { field, originalError: errorName } })
   }
 
-  /**
-   * Get the expiration date for a refresh token
-   *
-   * @returns Date object representing when the refresh token will expire (7 days from now)
-   */
   static getRefreshTokenExpirationDate(): Date {
     const expiresAt = new Date()
     expiresAt.setDate(expiresAt.getDate() + 7)
@@ -99,7 +73,6 @@ export class TokenFactory {
 
   // ============================================
   // INSTANCE METHODS
-  // All token operations require an instance with env injected
   // ============================================
 
   private readonly env: IEnvironment
@@ -108,66 +81,52 @@ export class TokenFactory {
     this.env = env
   }
 
-  /**
-   * Factory method to create TokenFactory instance
-   *
-   * @param env - Environment configuration
-   * @returns TokenFactory instance
-   */
   static create({ env }: { env: IEnvironment }): TokenFactory {
     return new TokenFactory({ env })
   }
 
   /**
    * Create a new refresh token
-   *
-   * High-level method that coordinates:
-   * 1. Generating a unique token ID
-   * 2. Calculating expiration date
-   * 3. Generating JWT string (infrastructure)
-   * 4. Creating RefreshToken entity (domain)
-   *
-   * @param userId - The user ID to associate with the token
-   * @returns Result with RefreshToken entity or ValidationError
+   * Includes strict typing ensuring UserId and RefreshTokenId don't mix up.
    */
-  createRefreshToken({ userId }: { userId: string }): Result<RefreshToken, ValidationError> {
-    const tokenId = randomUUID()
+  createRefreshToken({ userId }: { userId: UserId }): Result<RefreshToken, ValidationError> {
+    // 1. Generate strictly typed ID
+    const tokenId = IdUtils.generate<RefreshTokenId>()
     const expiresAt = TokenFactory.getRefreshTokenExpirationDate()
 
-    // Generate JWT string (infrastructure concern)
-    const jwtString = jwt.sign({ tokenId, userId }, this.env.JWT_REFRESH_SECRET, {
+    // 2. Prepare payload (TypeScript ensures userId is UserId type)
+    // NOTE: 'jsonwebtoken' will serialize these branded strings as normal strings.
+    const payload: Omit<RefreshTokenPayload, 'iat' | 'exp' | 'aud' | 'iss'> = { tokenId, userId }
+
+    // 3. Sign
+    const jwtString = jwt.sign(payload, this.env.JWT_REFRESH_SECRET, {
       audience: 'team-pulse-app',
       expiresIn: REFRESH_TOKEN_EXPIRATION,
       issuer: 'team-pulse-api',
     })
 
-    // Create domain entity (domain concern)
-    return RefreshToken.create({
-      expiresAt,
-      id: tokenId,
-      token: jwtString,
-      userId,
-    })
+    // 4. Create entity
+    return RefreshToken.create({ expiresAt, id: tokenId, token: jwtString, userId })
   }
 
   /**
    * Create a new access token
-   *
-   * High-level method that generates a JWT access token with the user's claims.
-   * Access tokens are stateless and not persisted.
-   *
-   * @param email - User's email
-   * @param role - User's role
-   * @param userId - User's ID
-   * @returns Result with JWT string or AuthenticationError
    */
-  createAccessToken({ email, role, userId }: { email: string; role: UserRole; userId: string }): Result<string, AuthenticationError> {
+  createAccessToken({ email, role, userId }: { email: Email; role: Role; userId: UserId }): Result<string, AuthenticationError> {
     try {
-      const token = jwt.sign({ email, role, userId }, this.env.JWT_SECRET, {
+      // Prepare strict payload
+      const payload: Omit<AccessTokenPayload, 'iat' | 'exp' | 'aud' | 'iss'> = {
+        email: email.getValue(),
+        role: role.getValue(),
+        userId,
+      }
+
+      const token = jwt.sign(payload, this.env.JWT_SECRET, {
         audience: 'team-pulse-app',
         expiresIn: ACCESS_TOKEN_EXPIRATION,
         issuer: 'team-pulse-api',
       })
+
       return Ok(token)
     } catch (error) {
       return Err(TokenFactory.handleJwtError({ error, field: 'accessToken' }))
@@ -176,16 +135,37 @@ export class TokenFactory {
 
   /**
    * Verify an access token
-   *
-   * @param token - The JWT token to verify
-   * @returns Result with decoded payload or AuthenticationError
+   * Hydrates strings back to Branded Types
    */
   verifyAccessToken({ token }: { token: string }): Result<AccessTokenPayload, AuthenticationError> {
     try {
-      const payload = jwt.verify(token, this.env.JWT_SECRET, {
+      // 1. Get the result (can be string or object)
+      const decoded = jwt.verify(token, this.env.JWT_SECRET, {
         audience: 'team-pulse-app',
         issuer: 'team-pulse-api',
-      }) as AccessTokenPayload
+      })
+
+      // 2. SAFETY CHECK: jwt.verify can return string if the payload is not JSON.
+      // This is improbable in your app, but TypeScript appreciates it.
+      if (typeof decoded === 'string') {
+        throw new Error('Invalid token payload type (string)')
+      }
+
+      // 3. CAST: Cast to 'unknown' instead of 'any'.
+      // This tells the linter: "I don't know what this is, but I promise to check it before using it"
+      const rawPayload = decoded as Record<string, unknown>
+
+      // 4. HYDRATION: Map explicitly and ensure they are strings
+      const payload: AccessTokenPayload = {
+        aud: rawPayload['aud'] as string,
+        email: rawPayload['email'] as string,
+        exp: rawPayload['exp'] as number,
+        // Standard claims (optional)
+        iat: rawPayload['iat'] as number,
+        iss: rawPayload['iss'] as string,
+        role: rawPayload['role'] as string,
+        userId: IdUtils.toId<UserId>(rawPayload['userId'] as string),
+      }
 
       return Ok(payload)
     } catch (error) {
@@ -195,16 +175,36 @@ export class TokenFactory {
 
   /**
    * Verify a refresh token
-   *
-   * @param token - The JWT token to verify
-   * @returns Result with decoded payload or AuthenticationError
+   * Hydrates strings back to Branded Types
    */
   verifyRefreshToken({ token }: { token: string }): Result<RefreshTokenPayload, AuthenticationError> {
     try {
-      const payload = jwt.verify(token, this.env.JWT_REFRESH_SECRET, {
+      // 1. Get the result (can be string or object)
+      const decoded = jwt.verify(token, this.env.JWT_REFRESH_SECRET, {
         audience: 'team-pulse-app',
         issuer: 'team-pulse-api',
-      }) as RefreshTokenPayload
+      })
+
+      // 2. SAFETY CHECK: jwt.verify can return string if the payload is not JSON.
+      // This is improbable in your app, but TypeScript appreciates it.
+      if (typeof decoded === 'string') {
+        throw new Error('Invalid token payload type (string)')
+      }
+
+      // 3. CAST: Cast to 'unknown' instead of 'any'.
+      // This tells the linter: "I don't know what this is, but I promise to check it before using it"
+      const rawPayload = decoded as Record<string, unknown>
+
+      // 4. HYDRATION: Map explicitly and ensure they are strings
+      const payload: RefreshTokenPayload = {
+        aud: rawPayload['aud'] as string,
+        exp: rawPayload['exp'] as number,
+        // Standard claims
+        iat: rawPayload['iat'] as number,
+        iss: rawPayload['iss'] as string,
+        tokenId: IdUtils.toId<RefreshTokenId>(rawPayload['tokenId'] as string),
+        userId: IdUtils.toId<UserId>(rawPayload['userId'] as string),
+      }
 
       return Ok(payload)
     } catch (error) {

@@ -1,5 +1,5 @@
 import type { RefreshTokenFactoryInput, RefreshTokenValueObjects } from '@domain/models/RefreshToken.types.js'
-import { EntityId } from '@domain/value-objects/EntityId.js'
+import { IdUtils, type RefreshTokenId, type UserId } from '@team-pulse/shared/domain/ids'
 import { ValidationError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
 
@@ -28,9 +28,9 @@ export type { RefreshTokenFactoryInput, RefreshTokenValueObjects }
  * - Returns Result for error handling
  */
 export class RefreshToken {
-  public readonly id: EntityId
+  public readonly id: RefreshTokenId
   public readonly token: string
-  public readonly userId: EntityId
+  public readonly userId: UserId
   public readonly expiresAt: Date
   public readonly createdAt: Date
 
@@ -63,45 +63,21 @@ export class RefreshToken {
    * Timestamps are optional - if not provided, will use new Date()
    */
   static create(data: RefreshTokenFactoryInput): Result<RefreshToken, ValidationError> {
-    // Validate id
-    const idResult = EntityId.create({ value: data.id })
-    if (!idResult.ok) {
-      return Err(idResult.error)
-    }
-
     // Validate token
     const tokenResult = RefreshToken.validateToken({ token: data.token })
     if (!tokenResult.ok) {
       return Err(tokenResult.error)
     }
 
-    // Validate userId
-    const userIdResult = EntityId.create({ value: data.userId })
-    if (!userIdResult.ok) {
-      return Err(userIdResult.error)
-    }
-
     return Ok(
       new RefreshToken({
         createdAt: data.createdAt ?? new Date(),
         expiresAt: data.expiresAt,
-        id: idResult.value,
+        id: IdUtils.toId<RefreshTokenId>(data.id),
         token: tokenResult.value,
-        userId: userIdResult.value,
+        userId: IdUtils.toId<UserId>(data.userId),
       }),
     )
-  }
-
-  /**
-   * Factory method to create RefreshToken from validated Value Objects
-   *
-   * Use this when you already have validated Value Objects
-   * and don't want to re-validate them.
-   *
-   * NO validation is performed (Value Objects are already validated)
-   */
-  static fromValueObjects(props: RefreshTokenValueObjects): RefreshToken {
-    return new RefreshToken(props)
   }
 
   /**
@@ -131,9 +107,9 @@ export class RefreshToken {
     return {
       createdAt: this.createdAt,
       expiresAt: this.expiresAt,
-      id: this.id.getValue(),
+      id: this.id,
       token: this.token,
-      userId: this.userId.getValue(),
+      userId: this.userId,
     }
   }
 }

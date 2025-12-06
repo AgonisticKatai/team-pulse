@@ -49,7 +49,7 @@ describe('Authentication Endpoints', () => {
     const testUser = expectSuccess(
       User.create({
         email: testUserEmail,
-        id: 'test-user',
+        id: '550e8400-e29b-41d4-a716-446655490001',
         passwordHash: userPasswordHash,
         role: 'USER',
       }),
@@ -58,7 +58,7 @@ describe('Authentication Endpoints', () => {
     const testAdmin = expectSuccess(
       User.create({
         email: testAdminEmail,
-        id: 'test-admin',
+        id: '550e8400-e29b-41d4-a716-446655490002',
         passwordHash: adminPasswordHash,
         role: 'ADMIN',
       }),

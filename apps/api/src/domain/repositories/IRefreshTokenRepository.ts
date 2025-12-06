@@ -1,4 +1,5 @@
 import type { RefreshToken } from '@domain/models/RefreshToken.js'
+import type { UserId } from '@team-pulse/shared/domain/ids'
 import type { RepositoryError } from '@team-pulse/shared/errors'
 import type { Result } from '@team-pulse/shared/result'
 
@@ -33,7 +34,7 @@ export interface IRefreshTokenRepository {
    * @param userId - The user's unique identifier
    * @returns Array of refresh tokens for the user (empty array if none exist), or RepositoryError if operation fails
    */
-  findByUserId({ userId }: { userId: string }): Promise<Result<RefreshToken[], RepositoryError>>
+  findByUserId(params: { userId: UserId }): Promise<Result<RefreshToken[], RepositoryError>>
 
   /**
    * Save a refresh token (create or update)
@@ -62,7 +63,7 @@ export interface IRefreshTokenRepository {
    * @param userId - The user's unique identifier
    * @returns Number of tokens deleted, or RepositoryError if operation fails
    */
-  deleteByUserId({ userId }: { userId: string }): Promise<Result<number, RepositoryError>>
+  deleteByUserId(params: { userId: UserId }): Promise<Result<number, RepositoryError>>
 
   /**
    * Delete all expired refresh tokens

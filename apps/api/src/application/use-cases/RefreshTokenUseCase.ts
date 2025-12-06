@@ -63,19 +63,18 @@ export class RefreshTokenUseCase {
   }: {
     dto: RefreshTokenDTO
   }): Promise<Result<RefreshTokenResponseDTO, AuthenticationError | RepositoryError | ValidationError>> {
-    const verifyRefreshTokenResult = this.tokenFactory.verifyRefreshToken({ token: dto.refreshToken })
+    // 1. Verify JWT signature
+    const verifyResult = this.tokenFactory.verifyRefreshToken({ token: dto.refreshToken })
+    if (!verifyResult.ok) return Err(verifyResult.error)
 
-    if (!verifyRefreshTokenResult.ok) {
-      return Err(verifyRefreshTokenResult.error)
-    }
+    // 2. Find in DB
+    const findResult = await this.refreshTokenRepository.findByToken({ token: dto.refreshToken })
+    if (!findResult.ok) return Err(findResult.error)
 
-    const findRefreshTokenResult = await this.refreshTokenRepository.findByToken({ token: dto.refreshToken })
+    const storedToken = findResult.value
 
-    if (!findRefreshTokenResult.ok) {
-      return Err(findRefreshTokenResult.error)
-    }
-
-    if (!findRefreshTokenResult.value) {
+    // Check for existence
+    if (!storedToken) {
       return Err(
         AuthenticationError.create({
           message: 'Invalid or expired refresh token',
@@ -84,13 +83,21 @@ export class RefreshTokenUseCase {
       )
     }
 
-    if (findRefreshTokenResult.value.isExpired()) {
-      const deleteRefreshTokenResult = await this.refreshTokenRepository.deleteByToken({ token: dto.refreshToken })
+    // 3. Integrity check
+    // verifyResult.value.tokenId is the 'jti' of the JWT
+    // storedToken.id is the Primary Key of the DB (EntityId)
+    if (storedToken.id !== verifyResult.value.tokenId) {
+      return Err(
+        AuthenticationError.create({
+          message: 'Invalid token identity',
+          metadata: { field: 'refreshToken', reason: 'integrity_check_failed' },
+        }),
+      )
+    }
 
-      if (!deleteRefreshTokenResult.ok) {
-        return Err(deleteRefreshTokenResult.error)
-      }
-
+    // 4. Check expiration (Entity logic)
+    if (storedToken.isExpired()) {
+      await this.refreshTokenRepository.deleteByToken({ token: dto.refreshToken })
       return Err(
         AuthenticationError.create({
           message: 'Refresh token has expired',
@@ -99,65 +106,54 @@ export class RefreshTokenUseCase {
       )
     }
 
-    const userResult = await this.userRepository.findById({ id: verifyRefreshTokenResult.value.userId })
+    // 5. Get User
+    const userResult = await this.userRepository.findById({ id: verifyResult.value.userId })
 
-    if (!userResult.ok) {
+    // If DB fails or user doesn't exist, kill the token for security
+    if (!(userResult.ok && userResult.value)) {
       await this.refreshTokenRepository.deleteByToken({ token: dto.refreshToken })
-      return Err(userResult.error)
-    }
+      const reason = !userResult.ok ? 'db_error' : 'user_not_found'
 
-    if (!userResult.value) {
-      await this.refreshTokenRepository.deleteByToken({ token: dto.refreshToken })
       return Err(
-        AuthenticationError.create({
-          message: 'Invalid or expired refresh token',
-          metadata: { field: 'refreshToken', reason: 'user_not_found' },
-        }),
+        userResult.ok
+          ? AuthenticationError.create({
+              message: 'User not found',
+              metadata: { field: 'refreshToken', reason },
+            })
+          : userResult.error,
       )
     }
 
-    const createAccessTokenResult = this.tokenFactory.createAccessToken({
-      email: userResult.value.email.getValue(),
-      role: userResult.value.role.getValue(),
-      userId: userResult.value.id.getValue(),
+    // 6. Generate Access Token
+    const accessTokenResult = this.tokenFactory.createAccessToken({
+      email: userResult.value.email,
+      role: userResult.value.role,
+      userId: userResult.value.id,
     })
+    if (!accessTokenResult.ok) return Err(accessTokenResult.error)
 
-    if (!createAccessTokenResult.ok) {
-      return Err(createAccessTokenResult.error)
-    }
-
-    // TOKEN ROTATION: Generate new refresh token
-    const createRefreshTokenResult = this.tokenFactory.createRefreshToken({
-      userId: userResult.value.id.getValue(),
+    // 7. ROTATION: Generate new Refresh Token (Entity)
+    const refreshTokenResult = this.tokenFactory.createRefreshToken({
+      userId: userResult.value.id,
     })
+    if (!refreshTokenResult.ok) return Err(refreshTokenResult.error)
 
-    if (!createRefreshTokenResult.ok) {
-      return Err(createRefreshTokenResult.error)
-    }
-
-    // TOKEN ROTATION: Save new refresh token
-    const saveRefreshTokenResult = await this.refreshTokenRepository.save({
-      refreshToken: createRefreshTokenResult.value,
+    // 8. ROTATION: Save new
+    const saveResult = await this.refreshTokenRepository.save({
+      refreshToken: refreshTokenResult.value,
     })
+    if (!saveResult.ok) return Err(saveResult.error)
 
-    if (!saveRefreshTokenResult.ok) {
-      return Err(saveRefreshTokenResult.error)
-    }
-
-    // TOKEN ROTATION: Delete old refresh token
-    const deleteOldTokenResult = await this.refreshTokenRepository.deleteByToken({
+    // 9. ROTATION: Delete old (Best effort)
+    await this.refreshTokenRepository.deleteByToken({
       token: dto.refreshToken,
     })
 
-    if (!deleteOldTokenResult.ok) {
-      // Don't fail the request if we can't delete the old token
-      // It will be cleaned up by the expired token cleanup job
-      // Just log the error (will be implemented with logging system)
-    }
+    // TODO: log if it fails, but don't break the request
 
     return Ok({
-      accessToken: createAccessTokenResult.value,
-      refreshToken: createRefreshTokenResult.value.token,
+      accessToken: accessTokenResult.value,
+      refreshToken: refreshTokenResult.value.token,
     })
   }
 }

@@ -2,6 +2,7 @@ import { RefreshToken } from '@domain/models/RefreshToken.js'
 import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository.js'
 import type { Database } from '@infrastructure/database/connection.js'
 import { refreshTokens as refreshTokensSchema } from '@infrastructure/database/schema.js'
+import { IdUtils, type RefreshTokenId, type UserId } from '@team-pulse/shared/domain/ids' // 👈 IMPORTS NUEVOS
 import type { ValidationError } from '@team-pulse/shared/errors'
 import { RepositoryError } from '@team-pulse/shared/errors'
 import { collect, Err, Ok, type Result } from '@team-pulse/shared/result'
@@ -9,21 +10,7 @@ import { eq, lt } from 'drizzle-orm'
 
 /**
  * Drizzle RefreshToken Repository (ADAPTER)
- *
- * This is an ADAPTER in Hexagonal Architecture:
- * - Implements the IRefreshTokenRepository PORT (defined in domain)
- * - Uses Drizzle ORM for database operations
- * - Maps between domain entities (RefreshToken) and database rows (RefreshTokenRow)
- * - Contains NO business logic (only persistence logic)
- *
- * Benefits of this pattern:
- * 1. Domain layer doesn't know about Drizzle
- * 2. Can swap Drizzle for another ORM without touching domain/application
- * 3. Easy to test domain/application with mock repositories
- * 4. Clear separation between business logic and data access
- *
- * This class is FRAMEWORK-SPECIFIC (knows about Drizzle)
- * but implements a FRAMEWORK-AGNOSTIC interface.
+ * Implements strict typing mapping between DB (strings) and Domain (Branded Types).
  */
 export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
   private readonly db: Database
@@ -48,11 +35,7 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
 
       if (!domainResult.ok) {
         return Err(
-          RepositoryError.forOperation({
-            cause: domainResult.error,
-            message: 'Failed to map refresh token to domain',
-            operation: 'findByToken',
-          }),
+          RepositoryError.forOperation({ cause: domainResult.error, message: 'Failed to map refresh token to domain', operation: 'findByToken' }),
         )
       }
 
@@ -68,8 +51,11 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
     }
   }
 
-  async findByUserId({ userId }: { userId: string }): Promise<Result<RefreshToken[], RepositoryError>> {
+  // The signature uses UserId strictly
+  async findByUserId({ userId }: { userId: UserId }): Promise<Result<RefreshToken[], RepositoryError>> {
     try {
+      // Drizzle accepts 'UserId' here because under the hood it's a string.
+      // TypeScript allows passing a "more specific" type (UserId) where a "more generic" type (string) is expected.
       const refreshTokens = await this.db.select().from(refreshTokensSchema).where(eq(refreshTokensSchema.userId, userId))
 
       const mappedResults = refreshTokens.map((row: typeof refreshTokensSchema.$inferSelect) => this.mapToDomain({ refreshToken: row }))
@@ -78,11 +64,7 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
 
       if (!collectedResult.ok) {
         return Err(
-          RepositoryError.forOperation({
-            cause: collectedResult.error,
-            message: 'Failed to map refresh token to domain',
-            operation: 'findByUserId',
-          }),
+          RepositoryError.forOperation({ cause: collectedResult.error, message: 'Failed to map refresh token to domain', operation: 'findByUserId' }),
         )
       }
 
@@ -102,7 +84,8 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
     try {
       const obj = refreshToken.toObject()
 
-      // Convert to database format
+      // 'obj.id' is RefreshTokenId.
+      // Drizzle expects string. Since RefreshTokenId extends string, this compiles without errors.
       const row = {
         createdAt: obj.createdAt,
         expiresAt: obj.expiresAt,
@@ -111,18 +94,10 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
         userId: obj.userId,
       }
 
-      // Upsert: insert or update if exists
       await this.db
         .insert(refreshTokensSchema)
         .values(row)
-        .onConflictDoUpdate({
-          set: {
-            expiresAt: row.expiresAt,
-            token: row.token,
-            userId: row.userId,
-          },
-          target: refreshTokensSchema.id,
-        })
+        .onConflictDoUpdate({ set: { expiresAt: row.expiresAt, token: row.token, userId: row.userId }, target: refreshTokensSchema.id })
 
       return Ok(refreshToken)
     } catch (error) {
@@ -151,7 +126,8 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
     }
   }
 
-  async deleteByUserId({ userId }: { userId: string }): Promise<Result<number, RepositoryError>> {
+  // The signature uses UserId strictly
+  async deleteByUserId({ userId }: { userId: UserId }): Promise<Result<number, RepositoryError>> {
     try {
       const result = await this.db.delete(refreshTokensSchema).where(eq(refreshTokensSchema.userId, userId))
       return Ok(result.count)
@@ -184,21 +160,19 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
 
   /**
    * Map database row to domain entity
-   *
-   * This is where we convert infrastructure data structures
-   * to domain entities. The domain entity validates itself.
-   *
-   * Returns Result to maintain consistency with the Result pattern.
-   * If mapping fails (should never happen with valid DB data),
-   * the error is propagated through Result.
+   * HYDRATION:
+   * Converts raw DB strings back to Branded Types using IdUtils.toId()
    */
   private mapToDomain({ refreshToken }: { refreshToken: typeof refreshTokensSchema.$inferSelect }): Result<RefreshToken, ValidationError> {
+    // If the DB has an invalid ID (corrupted data), IdUtils will throw an error.
+    // Since we are inside a try/catch in the public methods (findBy...),
     return RefreshToken.create({
       createdAt: new Date(refreshToken.createdAt),
       expiresAt: new Date(refreshToken.expiresAt),
-      id: refreshToken.id,
+      // HYDRATION
+      id: IdUtils.toId<RefreshTokenId>(refreshToken.id),
       token: refreshToken.token,
-      userId: refreshToken.userId,
+      userId: IdUtils.toId<UserId>(refreshToken.userId),
     })
   }
 }

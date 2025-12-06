@@ -2,7 +2,9 @@
  * Test Constants
  *
  * Centralizes magic values used across tests to improve maintainability
- * and make tests more readable
+ * and make tests more readable.
+ *
+ * IDs are generated via TestIds factory for consistency and maintainability.
  */
 
 export const TEST_CONSTANTS = {
@@ -214,10 +216,6 @@ export const TEST_CONSTANTS = {
     },
   },
 
-  // Mock IDs
-  existingTeamId: 'existing-123',
-  existingUserId: 'existing-user-123',
-
   // FoundedYear Test Data
   foundedYears: {
     currentYear: new Date().getFullYear(),
@@ -235,19 +233,15 @@ export const TEST_CONSTANTS = {
   futureDate: new Date('2025-12-31T23:59:59Z'),
   futureDateIso: '2025-12-31T23:59:59.000Z',
 
-  // EntityId Test Data
+  // EntityId Test Data (uses TestIds factory)
   ids: {
-    alphanumeric: 'a1b2c3',
     empty: '',
-    team123: 'team-123',
-    user123: 'user-123',
-    user456: 'user-456',
     whitespaceOnly: '   ',
     withAt: 'user@123', // invalid
     withDots: 'user.123', // invalid
     withSpaces: 'user 123', // invalid
-    withUnderscore: 'user_123',
-    withUpperCase: 'User-123',
+    withUnderscore: 'user_123', // invalid for UUID
+    withUpperCase: '550E8400-E29B-41D4-A716-446655440204', // uppercase UUID is valid
   },
 
   // Invalid Data
@@ -365,8 +359,6 @@ export const TEST_CONSTANTS = {
   // Mock Dates
   mockDate: new Date('2025-01-01T00:00:00Z'),
   mockDateIso: '2025-01-01T00:00:00.000Z',
-  mockTokenId: 'mock-token-id',
-  mockUuid: 'mock-uuid',
 
   // Password Test Data
   passwords: {
@@ -414,24 +406,21 @@ export const TEST_CONSTANTS = {
     withNumbers: 'Team 123',
   },
 
-  // Team Data
+  // Team Data (IDs from TestIds factory)
   teams: {
     athleticBilbao: {
       city: 'Bilbao',
       foundedYear: null,
-      id: 'team-athletic',
       name: 'Athletic Bilbao',
     },
     fcBarcelona: {
       city: 'Barcelona',
       foundedYear: 1899,
-      id: 'team-fc-barcelona',
       name: 'FC Barcelona',
     },
     realMadrid: {
       city: 'Madrid',
       foundedYear: 1902,
-      id: 'team-real-madrid',
       name: 'Real Madrid',
     },
     sevillaFc: {
@@ -457,38 +446,28 @@ export const TEST_CONSTANTS = {
     user2: 'user2@test.com',
   },
 
-  // Test User IDs
-  testUserIds: {
-    testUser1: 'test-user-1',
-    testUser2: 'test-user-2',
-  },
-
-  // User Data
+  // User Data (IDs from TestIds factory)
   users: {
     adminUser: {
       email: 'admin@example.com',
-      id: 'admin-123',
       password: 'AdminPass123',
       passwordHash: 'hashed-admin-password',
       role: 'ADMIN' as const,
     },
     janeAdmin: {
       email: 'jane.admin@example.com',
-      id: 'user-2',
       password: 'AdminPass456',
       passwordHash: 'hashed-admin-password-2',
       role: 'ADMIN' as const,
     },
     johnDoe: {
       email: 'john.doe@example.com',
-      id: 'user-123',
       password: 'ValidPass123',
       passwordHash: 'hashed-password',
       role: 'USER' as const,
     },
     superAdminUser: {
       email: 'superadmin@example.com',
-      id: 'super-123',
       password: 'SuperPass123',
       passwordHash: 'hashed-superadmin-password',
       role: 'SUPER_ADMIN' as const,

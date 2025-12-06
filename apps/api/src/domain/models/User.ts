@@ -1,7 +1,6 @@
 import type { CreateUserData, UpdateUserData, UserConstructorProps, UserData, UserProps } from '@domain/models/User.types.js'
-import { Email } from '@domain/value-objects/Email.js'
-import { EntityId } from '@domain/value-objects/EntityId.js'
-import { Role, UserRole } from '@domain/value-objects/Role.js'
+import { IdUtils, type UserId } from '@team-pulse/shared/domain/ids'
+import { Email, Role } from '@team-pulse/shared/domain/value-objects'
 import type { UserResponseDTO } from '@team-pulse/shared/dtos'
 import { ValidationError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
@@ -32,7 +31,7 @@ export type { CreateUserData, UpdateUserData, UserData, UserProps }
  * - Self-contained DTO mapping
  */
 export class User {
-  public readonly id: EntityId
+  public readonly id: UserId
   public readonly email: Email
   private readonly passwordHash: string
   public readonly role: Role
@@ -69,19 +68,22 @@ export class User {
    * Timestamps are optional - if not provided, will use new Date()
    */
   static create(data: CreateUserData): Result<User, ValidationError> {
-    // Validate id
-    const idResult = EntityId.create({ value: data.id })
-    if (!idResult.ok) {
-      return Err(idResult.error)
+    // 1. ID Validation
+    if (!IdUtils.isValid(data.id)) {
+      return Err(
+        ValidationError.create({
+          message: 'Invalid User ID format',
+          metadata: { field: 'id', value: data.id },
+        }),
+      )
     }
-
-    // Validate email
+    // 2. Email Validation
     const emailResult = Email.create({ value: data.email })
     if (!emailResult.ok) {
       return Err(emailResult.error)
     }
 
-    // Validate password hash
+    // 3. Password Validation
     const passwordResult = User.validatePasswordHash({
       passwordHash: data.passwordHash,
     })
@@ -89,7 +91,7 @@ export class User {
       return Err(passwordResult.error)
     }
 
-    // Validate role
+    // 4. Role Validation
     const roleResult = Role.create({ value: data.role })
     if (!roleResult.ok) {
       return Err(roleResult.error)
@@ -99,7 +101,7 @@ export class User {
       new User({
         createdAt: data.createdAt ?? new Date(),
         email: emailResult.value,
-        id: idResult.value,
+        id: IdUtils.toId<UserId>(data.id),
         passwordHash: passwordResult.value,
         role: roleResult.value,
         updatedAt: data.updatedAt ?? new Date(),
@@ -147,44 +149,6 @@ export class User {
   }
 
   /**
-   * Check if user has a specific role
-   */
-  hasRole(role: string): boolean {
-    const roleResult = Role.create({ value: role })
-    if (!roleResult.ok) {
-      return false
-    }
-    return this.role.equals({ other: roleResult.value })
-  }
-
-  /**
-   * Check if user has at least the specified role level
-   * SUPER_ADMIN > ADMIN > USER
-   */
-  hasRoleLevel(minimumRole: string): boolean {
-    const roleResult = Role.create({ value: minimumRole })
-    if (!roleResult.ok) {
-      return false
-    }
-    return this.role.hasLevelOf({ other: roleResult.value })
-  }
-
-  /**
-   * Check if user is SUPER_ADMIN
-   */
-  isSuperAdmin(): boolean {
-    return this.role.getValue() === UserRole.SuperAdmin
-  }
-
-  /**
-   * Check if user is ADMIN or SUPER_ADMIN
-   */
-  isAdmin(): boolean {
-    const roleValue = this.role.getValue()
-    return roleValue === UserRole.Admin || roleValue === UserRole.SuperAdmin
-  }
-
-  /**
    * Convert to plain object for serialization
    *
    * IMPORTANT: Does NOT include passwordHash for security
@@ -193,7 +157,7 @@ export class User {
     return {
       createdAt: this.createdAt,
       email: this.email.getValue(),
-      id: this.id.getValue(),
+      id: this.id,
       role: this.role.getValue(),
       updatedAt: this.updatedAt,
     }
@@ -209,7 +173,7 @@ export class User {
     return {
       createdAt: this.createdAt.toISOString(),
       email: this.email.getValue(),
-      id: this.id.getValue(),
+      id: this.id,
       role: this.role.getValue(),
       updatedAt: this.updatedAt.toISOString(),
     }

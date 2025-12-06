@@ -1,7 +1,7 @@
 import { ValidationError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
-import { roleSchema } from './Role.schema'
-import { UserRoles, type UserRoleType } from './Role.types'
+import { roleSchema } from './Role.schema.js'
+import type { UserRoleType } from './Role.types.js'
 
 export class Role {
   private readonly value: UserRoleType
@@ -49,15 +49,15 @@ export class Role {
   }
 
   isAdmin(): boolean {
-    return this.value === UserRoles.Admin
+    return this.value === 'ADMIN'
   }
 
   isUser(): boolean {
-    return this.value === UserRoles.User
+    return this.value === 'USER'
   }
 
   isSuperAdmin(): boolean {
-    return this.value === UserRoles.SuperAdmin
+    return this.value === 'SUPER_ADMIN'
   }
 
   toString(): string {

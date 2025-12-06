@@ -44,7 +44,7 @@ describe('Protected Routes and RBAC', () => {
     const superAdmin = expectSuccess(
       User.create({
         email: superAdminEmail,
-        id: 'super-admin',
+        id: '550e8400-e29b-41d4-a716-446655440010',
         passwordHash: expectSuccess(await passwordHasher.hash({ password: 'SuperAdmin123!' })),
         role: 'SUPER_ADMIN',
       }),
@@ -53,7 +53,7 @@ describe('Protected Routes and RBAC', () => {
     const admin = expectSuccess(
       User.create({
         email: adminEmail,
-        id: 'admin',
+        id: '550e8400-e29b-41d4-a716-446655440011',
         passwordHash: expectSuccess(await passwordHasher.hash({ password: 'Admin123!' })),
         role: 'ADMIN',
       }),
@@ -62,7 +62,7 @@ describe('Protected Routes and RBAC', () => {
     const user = expectSuccess(
       User.create({
         email: userEmail,
-        id: 'user',
+        id: '550e8400-e29b-41d4-a716-446655440012',
         passwordHash: expectSuccess(await passwordHasher.hash({ password: 'User123!' })),
         role: 'USER',
       }),

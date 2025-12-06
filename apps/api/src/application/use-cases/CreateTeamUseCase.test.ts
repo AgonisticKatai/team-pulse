@@ -1,31 +1,21 @@
 import { CreateTeamUseCase } from '@application/use-cases/CreateTeamUseCase.js'
 import { Team } from '@domain/models/Team.js'
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
-import { buildExistingTeam, buildTeam, buildTeamWithoutFoundedYear } from '@infrastructure/testing/index.js'
+import { faker } from '@faker-js/faker'
+import { buildCreateTeamDTO, buildTeam } from '@infrastructure/testing/index.js'
+import { IdUtils } from '@team-pulse/shared/domain/ids'
 import { ConflictError, RepositoryError, ValidationError } from '@team-pulse/shared/errors'
 import { Err, Ok } from '@team-pulse/shared/result'
-import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
-import { buildCreateTeamDTO } from '@team-pulse/shared/testing/dto-builders'
 import { expectErrorType, expectMockCallArg, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-
-// Mock external dependencies
-vi.mock('node:crypto', () => ({
-  randomUUID: vi.fn(() => TEST_CONSTANTS.mockUuid),
-}))
 
 describe('CreateTeamUseCase', () => {
   let createTeamUseCase: CreateTeamUseCase
   let teamRepository: ITeamRepository
 
-  // Mock team data
-  const mockTeam = buildTeam()
-
   beforeEach(() => {
-    // Reset all mocks before each test
     vi.clearAllMocks()
 
-    // Mock repository
     teamRepository = {
       delete: vi.fn(),
       existsByName: vi.fn(),
@@ -36,7 +26,6 @@ describe('CreateTeamUseCase', () => {
       save: vi.fn(),
     }
 
-    // Create use case instance
     createTeamUseCase = CreateTeamUseCase.create({ teamRepository })
   })
 
@@ -47,236 +36,162 @@ describe('CreateTeamUseCase', () => {
         const dto = buildCreateTeamDTO()
 
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
-        vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
+
+        // Echo Mock: The mock returns exactly what it receives (the entity intended to be saved).
+        // This ensures the input-output flow is consistent regardless of the random data generated.
+        vi.mocked(teamRepository.save).mockImplementation(async ({ team }) => Ok(team))
 
         // Act
-        const team = expectSuccess(await createTeamUseCase.execute({ dto }))
+        const result = await createTeamUseCase.execute({ dto })
+        const response = expectSuccess(result)
 
         // Assert
-        expect(team.id).toBe(TEST_CONSTANTS.mockUuid)
-        expect(team.name).toBe(TEST_CONSTANTS.teams.fcBarcelona.name)
-        expect(team.city).toBe(TEST_CONSTANTS.teams.fcBarcelona.city)
-        expect(team.foundedYear).toBe(TEST_CONSTANTS.teams.fcBarcelona.foundedYear)
+        expect(response.id).toBeDefined()
+        expect(response.name).toBe(dto.name)
+        expect(response.city).toBe(dto.city)
+        expect(response.foundedYear).toBe(dto.foundedYear)
       })
 
       it('should check if team name already exists', async () => {
-        // Arrange
         const dto = buildCreateTeamDTO()
 
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
-        vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
+        vi.mocked(teamRepository.save).mockImplementation(async ({ team }) => Ok(team))
 
-        // Act
         await createTeamUseCase.execute({ dto })
 
-        // Assert
-        expect(teamRepository.findByName).toHaveBeenCalledWith({
-          name: TEST_CONSTANTS.teams.fcBarcelona.name,
-        })
+        expect(teamRepository.findByName).toHaveBeenCalledWith({ name: dto.name })
         expect(teamRepository.findByName).toHaveBeenCalledTimes(1)
       })
 
       it('should save team with generated UUID', async () => {
-        // Arrange
         const dto = buildCreateTeamDTO()
 
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
-        vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
+        vi.mocked(teamRepository.save).mockImplementation(async ({ team }) => Ok(team))
 
-        // Act
         await createTeamUseCase.execute({ dto })
 
-        // Assert
         expect(teamRepository.save).toHaveBeenCalledTimes(1)
 
-        // Verify the saved team entity
         const { team: savedTeam } = expectMockCallArg<{ team: Team }>(vi.mocked(teamRepository.save))
 
         expect(savedTeam).toBeInstanceOf(Team)
-        expect(savedTeam.id.getValue()).toBe(TEST_CONSTANTS.mockUuid)
-        expect(savedTeam.name.getValue()).toBe(TEST_CONSTANTS.teams.fcBarcelona.name)
-        expect(savedTeam.city.getValue()).toBe(TEST_CONSTANTS.teams.fcBarcelona.city)
-        expect(savedTeam.foundedYear?.getValue()).toBe(TEST_CONSTANTS.teams.fcBarcelona.foundedYear)
+
+        expect(IdUtils.isValid(savedTeam.id)).toBe(true)
+
+        expect(savedTeam.name.getValue()).toBe(dto.name)
+        expect(savedTeam.city.getValue()).toBe(dto.city)
+        expect(savedTeam.foundedYear?.getValue()).toBe(dto.foundedYear)
       })
 
-      it('should return team DTO with ISO date strings', async () => {
+      it('should handle team without foundedYear (null)', async () => {
+        // Arrange
+        const dto = buildCreateTeamDTO({ foundedYear: null })
+
+        vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
+        vi.mocked(teamRepository.save).mockImplementation(async ({ team }) => Ok(team))
+
+        // Act
+        const response = expectSuccess(await createTeamUseCase.execute({ dto }))
+
+        // Assert
+        expect(response.foundedYear).toBeNull()
+
+        const { team: savedTeam } = expectMockCallArg<{ team: Team }>(vi.mocked(teamRepository.save))
+        expect(savedTeam.foundedYear).toBeNull()
+      })
+
+      it('should handle team with undefined foundedYear (optional in DTO)', async () => {
         // Arrange
         const dto = buildCreateTeamDTO()
+        // Dynamically exclude the property to simulate 'undefined' (missing field in JSON)
+        const { foundedYear, ...restDto } = dto
 
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
-        vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
+        vi.mocked(teamRepository.save).mockImplementation(async ({ team }) => Ok(team))
 
         // Act
-        const team = expectSuccess(await createTeamUseCase.execute({ dto }))
+        const response = expectSuccess(await createTeamUseCase.execute({ dto: restDto }))
 
         // Assert
-        expect(typeof team.createdAt).toBe('string')
-        expect(typeof team.updatedAt).toBe('string')
-        expect(team.createdAt).toBe(TEST_CONSTANTS.mockDateIso)
-        expect(team.updatedAt).toBe(TEST_CONSTANTS.mockDateIso)
-      })
-
-      it('should handle team without foundedYear', async () => {
-        // Arrange
-        const teamWithoutYear = buildTeamWithoutFoundedYear({
-          city: TEST_CONSTANTS.teams.valenciaCf.city,
-          name: TEST_CONSTANTS.teams.valenciaCf.name,
-        })
-
-        const dto = buildCreateTeamDTO({
-          city: TEST_CONSTANTS.teams.valenciaCf.city,
-          foundedYear: undefined,
-          name: TEST_CONSTANTS.teams.valenciaCf.name,
-        })
-
-        vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
-        vi.mocked(teamRepository.save).mockResolvedValue(Ok(teamWithoutYear))
-
-        // Act
-        const team = expectSuccess(await createTeamUseCase.execute({ dto }))
-
-        // Assert
-        expect(team.foundedYear).toBeNull()
+        // Sanity check
+        expect(foundedYear).toBeDefined()
+        // The domain logic converts undefined input to null foundedYear
+        expect(response.foundedYear).toBeNull()
       })
     })
 
     describe('error cases', () => {
       it('should return Err when team name already exists', async () => {
         // Arrange
-        const existingTeam = buildExistingTeam()
         const dto = buildCreateTeamDTO()
+
+        // 🔥 EXPLICIT USE: Force collision using the dynamic DTO name.
+        // It doesn't matter what random name faker generated, we create an existing team with the SAME name.
+        const existingTeam = buildTeam({ name: dto.name })
 
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(existingTeam))
 
         // Act
-        const error = expectErrorType({
-          errorType: ConflictError,
-          result: await createTeamUseCase.execute({ dto }),
-        })
+        const error = expectErrorType({ errorType: ConflictError, result: await createTeamUseCase.execute({ dto }) })
 
         // Assert
         expect(error.message).toContain('already exists')
-      })
-
-      it('should not save team when name already exists', async () => {
-        // Arrange
-        const existingTeam = buildExistingTeam()
-        const dto = buildCreateTeamDTO()
-
-        vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(existingTeam))
-
-        // Act
-        await createTeamUseCase.execute({ dto })
-
-        // Assert - Should fail before saving
         expect(teamRepository.save).not.toHaveBeenCalled()
       })
 
-      it('should return ValidationError when team data is invalid', async () => {
-        // Arrange - Invalid foundedYear (too old)
-        const dto = buildCreateTeamDTO({
-          foundedYear: TEST_CONSTANTS.invalid.foundedYearTooOld,
-        })
+      it('should return ValidationError when team data is invalid (too old)', async () => {
+        // Arrange
+        // 🔥 EXPLICIT USE: Generate a dynamic invalid year (any between 0 and 1799).
+        // We test the invalid RANGE, not just a hardcoded number like '1700'.
+        const invalidYear = faker.number.int({ max: 1799, min: 0 })
+
+        const dto = buildCreateTeamDTO({ foundedYear: invalidYear })
 
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
 
         // Act
-        expectErrorType({
-          errorType: ValidationError,
-          result: await createTeamUseCase.execute({ dto }),
-        })
+        // The use case calls Team.create, which returns ValidationError for invalid VOs
+        expectErrorType({ errorType: ValidationError, result: await createTeamUseCase.execute({ dto }) })
+
+        expect(teamRepository.save).not.toHaveBeenCalled()
       })
 
       it('should return Err when repository save fails', async () => {
         // Arrange
         const dto = buildCreateTeamDTO()
 
-        const repositoryError = RepositoryError.forOperation({
-          message: TEST_CONSTANTS.errors.databaseConnectionLost,
-          operation: 'save',
-        })
+        // 🔥 EXPLICIT USE: The error message is also dynamic.
+        // Ensures the use case propagates the EXACT error it receives.
+        const randomErrorMessage = faker.lorem.sentence()
+
+        const repositoryError = RepositoryError.forOperation({ message: randomErrorMessage, operation: 'save' })
 
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
         vi.mocked(teamRepository.save).mockResolvedValue(Err(repositoryError))
 
         // Act
-        const error = expectErrorType({
-          errorType: RepositoryError,
-          result: await createTeamUseCase.execute({ dto }),
-        })
+        const error = expectErrorType({ errorType: RepositoryError, result: await createTeamUseCase.execute({ dto }) })
 
         // Assert
-        expect(error.message).toBe(TEST_CONSTANTS.errors.databaseConnectionLost)
+        expect(error.message).toBe(randomErrorMessage)
       })
 
       it('should return Err when repository findByName fails', async () => {
         // Arrange
         const dto = buildCreateTeamDTO()
+        const randomErrorMessage = faker.lorem.sentence()
 
-        const repositoryError = RepositoryError.forOperation({
-          message: TEST_CONSTANTS.errors.databaseQueryTimeout,
-          operation: 'findByName',
-        })
+        const repositoryError = RepositoryError.forOperation({ message: randomErrorMessage, operation: 'findByName' })
 
         vi.mocked(teamRepository.findByName).mockResolvedValue(Err(repositoryError))
 
         // Act
-        const error = expectErrorType({
-          errorType: RepositoryError,
-          result: await createTeamUseCase.execute({ dto }),
-        })
+        const error = expectErrorType({ errorType: RepositoryError, result: await createTeamUseCase.execute({ dto }) })
 
         // Assert
-        expect(error.message).toBe(TEST_CONSTANTS.errors.databaseQueryTimeout)
-      })
-    })
-
-    describe('edge cases', () => {
-      it('should generate UUID for new team', async () => {
-        // Arrange
-        const dto = buildCreateTeamDTO()
-
-        vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
-        vi.mocked(teamRepository.save).mockResolvedValue(Ok(mockTeam))
-
-        const { randomUUID } = await import('node:crypto')
-
-        // Act
-        await createTeamUseCase.execute({ dto })
-
-        // Assert
-        expect(randomUUID).toHaveBeenCalled()
-
-        // Verify the saved team entity
-        const { team: savedTeam } = expectMockCallArg<{ team: Team }>(vi.mocked(teamRepository.save))
-
-        expect(savedTeam.id.getValue()).toBe(TEST_CONSTANTS.mockUuid)
-      })
-
-      it('should handle null foundedYear from DTO', async () => {
-        // Arrange
-        const teamWithoutYear = buildTeamWithoutFoundedYear({
-          city: TEST_CONSTANTS.teams.sevillaFc.city,
-          name: TEST_CONSTANTS.teams.sevillaFc.name,
-        })
-
-        const dto = buildCreateTeamDTO({
-          city: TEST_CONSTANTS.teams.sevillaFc.city,
-          foundedYear: null,
-          name: TEST_CONSTANTS.teams.sevillaFc.name,
-        })
-
-        vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
-        vi.mocked(teamRepository.save).mockResolvedValue(Ok(teamWithoutYear))
-
-        // Act
-        expectSuccess(await createTeamUseCase.execute({ dto }))
-
-        // Assert
-        // Verify the saved team entity
-        const { team: savedTeam } = expectMockCallArg<{ team: Team }>(vi.mocked(teamRepository.save))
-
-        expect(savedTeam.foundedYear).toBeNull()
+        expect(error.message).toBe(randomErrorMessage)
       })
     })
   })

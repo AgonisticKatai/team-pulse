@@ -1,52 +1,44 @@
 import { Team } from '@domain/models/Team.js'
+import { faker } from '@faker-js/faker'
+import { IdUtils, type TeamId } from '@team-pulse/shared/domain/ids'
 import type { CreateTeamDTO } from '@team-pulse/shared/dtos'
-import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 
-/**
- * Builder for CreateTeamDTO test data
- *
- * Provides sensible defaults and allows easy customization via overrides
- *
- * @example
- * // Use defaults
- * const dto = buildCreateTeamDTO()
- *
- * // Override specific fields
- * const dto = buildCreateTeamDTO({ name: 'Custom Team' })
- */
-export function buildCreateTeamDTO(overrides: Partial<CreateTeamDTO> = {}): CreateTeamDTO {
-  return {
-    city: TEST_CONSTANTS.teams.fcBarcelona.city,
-    foundedYear: TEST_CONSTANTS.teams.fcBarcelona.foundedYear,
-    name: TEST_CONSTANTS.teams.fcBarcelona.name,
-    ...overrides,
-  }
+// 1. SIMPLE DEFINITION: Only primitive types
+type TeamPrimitives = {
+  id: string
+  name: string
+  city: string
+  foundedYear: number | null
+  createdAt: Date
+  updatedAt: Date
 }
 
-/**
- * Builder for Team entity test data
- *
- * Creates a valid Team entity with sensible defaults
- * Throws if Team.create returns an error (which should never happen with valid defaults)
- *
- * @example
- * // Use defaults
- * const team = buildTeam()
- *
- * // Override specific fields
- * const team = buildTeam({ name: 'Custom Team' })
- */
-export function buildTeam(
-  overrides: { id?: string; name?: string; city?: string; foundedYear?: number | null; createdAt?: Date; updatedAt?: Date } = {},
-): Team {
-  const result = Team.create({
-    city: TEST_CONSTANTS.teams.fcBarcelona.city,
-    createdAt: TEST_CONSTANTS.mockDate,
-    foundedYear: TEST_CONSTANTS.teams.fcBarcelona.foundedYear,
-    id: TEST_CONSTANTS.mockUuid,
-    name: TEST_CONSTANTS.teams.fcBarcelona.name,
-    updatedAt: TEST_CONSTANTS.mockDate,
+// 2. DATA GENERATOR: Returns plain object with defaults
+const generateRandomTeamData = (): TeamPrimitives => ({
+  city: faker.location.city(),
+  createdAt: new Date(),
+  foundedYear: faker.number.int({ max: new Date().getFullYear(), min: 1800 }),
+  id: IdUtils.generate<TeamId>(),
+  name: faker.company.name(),
+  updatedAt: new Date(),
+})
+
+// 3. BUILDER FUNCTION
+export function buildTeam(overrides: Partial<TeamPrimitives> = {}): Team {
+  // A. Fusion of data (override wins always)
+  const raw = {
+    ...generateRandomTeamData(),
     ...overrides,
+  }
+
+  // B. DOMAIN CREATION
+  const result = Team.create({
+    city: raw.city,
+    createdAt: raw.createdAt,
+    foundedYear: raw.foundedYear,
+    id: IdUtils.toId<TeamId>(raw.id),
+    name: raw.name,
+    updatedAt: raw.updatedAt,
   })
 
   if (!result.ok) {
@@ -57,23 +49,33 @@ export function buildTeam(
 }
 
 /**
+ * Builder for CreateTeamDTO test data
+ * Provides sensible defaults and allows easy customization via overrides
+ */
+export function buildCreateTeamDTO(overrides: Partial<CreateTeamDTO> = {}): CreateTeamDTO {
+  const defaults = generateRandomTeamData()
+  return {
+    city: defaults.city,
+    foundedYear: defaults.foundedYear,
+    name: defaults.name,
+    ...overrides,
+  }
+}
+
+/**
  * Builds a Team entity without a founded year
  */
-export function buildTeamWithoutFoundedYear(overrides: { id?: string; name?: string; city?: string; createdAt?: Date; updatedAt?: Date } = {}): Team {
+export function buildTeamWithoutFoundedYear(overrides: Partial<TeamPrimitives> = {}): Team {
   return buildTeam({
-    foundedYear: undefined,
+    foundedYear: null,
     ...overrides,
   })
 }
 
 /**
- * Builds an "existing" team (with a different ID to simulate conflicts)
+ * Builds an "existing" team
+ * Wrapper for compatibility/clarity
  */
-export function buildExistingTeam(
-  overrides: { id?: string; name?: string; city?: string; foundedYear?: number; createdAt?: Date; updatedAt?: Date } = {},
-): Team {
-  return buildTeam({
-    id: TEST_CONSTANTS.existingTeamId,
-    ...overrides,
-  })
+export function buildExistingTeam(overrides: Partial<TeamPrimitives> = {}): Team {
+  return buildTeam(overrides)
 }

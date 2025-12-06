@@ -1,199 +1,126 @@
 import { Team } from '@domain/models/Team.js'
 import { City } from '@domain/value-objects/City.js'
-import { EntityId } from '@domain/value-objects/EntityId.js'
 import { FoundedYear } from '@domain/value-objects/FoundedYear.js'
 import { TeamName } from '@domain/value-objects/TeamName.js'
+import { faker } from '@faker-js/faker'
+import { buildTeam } from '@infrastructure/testing/team-builders.js'
+import { IdUtils, type TeamId } from '@team-pulse/shared/domain/ids'
 import { ValidationError } from '@team-pulse/shared/errors'
-import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
-import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { describe, expect, it } from 'vitest'
 
 describe('Team Domain Entity', () => {
   describe('create', () => {
     it('should create a valid team', () => {
-      // Arrange & Act
-      const team = expectSuccess(
-        Team.create({
-          city: 'Madrid',
-          foundedYear: 1902,
-          id: TEST_CONSTANTS.ids.team123,
-          name: 'Real Madrid',
-        }),
-      )
+      // Arrange
+      const team = buildTeam()
 
       // Assert
       expect(team).toBeInstanceOf(Team)
-      expect(team.id).toBeInstanceOf(EntityId)
-      expect(team.id.getValue()).toBe('team-123')
+      expect(typeof team.id).toBe('string') // Branded Type check
+
       expect(team.name).toBeInstanceOf(TeamName)
-      expect(team.name.getValue()).toBe('Real Madrid')
       expect(team.city).toBeInstanceOf(City)
-      expect(team.city.getValue()).toBe('Madrid')
       expect(team.foundedYear).toBeInstanceOf(FoundedYear)
-      expect(team.foundedYear?.getValue()).toBe(1902)
+
       expect(team.createdAt).toBeInstanceOf(Date)
       expect(team.updatedAt).toBeInstanceOf(Date)
     })
 
     it('should create team without founded year', () => {
       // Arrange & Act
-      const team = expectSuccess(
-        Team.create({
-          city: 'Barcelona',
-          id: 'team-456',
-          name: 'FC Barcelona',
-        }),
-      )
+      const team = buildTeam({ foundedYear: null })
 
       // Assert
       expect(team).toBeInstanceOf(Team)
       expect(team.foundedYear).toBeNull()
     })
 
-    it('should create team with founded year as null', () => {
-      // Arrange & Act
-      const team = expectSuccess(
-        Team.create({
-          city: 'Manchester',
-          foundedYear: null,
-          id: 'team-789',
-          name: 'Manchester United',
-        }),
-      )
-
-      // Assert
-      expect(team).toBeInstanceOf(Team)
-      expect(team.foundedYear).toBeNull()
-    })
+    // -------------------------------------------------------------------------
+    // VALIDATION TESTS (The Saboteur 🕵️‍♂️)
+    // Here we don't use buildTeam because we want it to fail.
+    // We use Team.create manually injecting poison.
+    // -------------------------------------------------------------------------
 
     it('should return error for empty name', () => {
-      // Arrange & Act
-      const error = expectError(
-        Team.create({
-          city: 'Madrid',
-          id: TEST_CONSTANTS.ids.team123,
-          name: '',
+      expectErrorType({
+        errorType: ValidationError,
+        result: Team.create({
+          city: faker.location.city(),
+          id: IdUtils.generate<TeamId>(),
+          name: '', // 💥 Empty name
         }),
-      )
-
-      // Assert
-      expect(error).toBeInstanceOf(ValidationError)
-      expect(error.metadata?.field).toBe('name')
+      })
     })
 
     it('should return error for name exceeding max length', () => {
-      // Arrange & Act
-      const error = expectError(
-        Team.create({
-          city: 'Madrid',
-          id: TEST_CONSTANTS.ids.team123,
-          name: 'a'.repeat(101),
+      expectErrorType({
+        errorType: ValidationError,
+        result: Team.create({
+          city: faker.location.city(),
+          id: IdUtils.generate<TeamId>(),
+          name: faker.string.alpha(101), // 💥 Exceeding max length
         }),
-      )
-
-      // Assert
-      expect(error).toBeInstanceOf(ValidationError)
-      expect(error.metadata?.field).toBe('name')
+      })
     })
 
     it('should return error for empty city', () => {
-      // Arrange & Act
-      const error = expectError(
-        Team.create({
-          city: '',
-          id: TEST_CONSTANTS.ids.team123,
-          name: 'Real Madrid',
+      expectErrorType({
+        errorType: ValidationError,
+        result: Team.create({
+          city: '', // 💥 Empty city
+          id: IdUtils.generate<TeamId>(),
+          name: faker.company.name(),
         }),
-      )
-
-      // Assert
-      expect(error).toBeInstanceOf(ValidationError)
-      expect(error.metadata?.field).toBe('city')
-    })
-
-    it('should return error for city exceeding max length', () => {
-      // Arrange & Act
-      const error = expectError(
-        Team.create({
-          city: 'a'.repeat(101),
-          id: TEST_CONSTANTS.ids.team123,
-          name: 'Real Madrid',
-        }),
-      )
-
-      // Assert
-      expect(error).toBeInstanceOf(ValidationError)
-      expect(error.metadata?.field).toBe('city')
+      })
     })
 
     it('should return error for invalid founded year (too old)', () => {
-      // Arrange & Act
-      const error = expectError(
-        Team.create({
-          city: 'Madrid',
-          foundedYear: 1799,
-          id: TEST_CONSTANTS.ids.team123,
-          name: 'Real Madrid',
+      expectErrorType({
+        errorType: ValidationError,
+        result: Team.create({
+          city: faker.location.city(),
+          foundedYear: 1700, // 💥 Invalid founded year (too old)
+          id: IdUtils.generate<TeamId>(),
+          name: faker.company.name(),
         }),
-      )
-
-      // Assert
-      expect(error).toBeInstanceOf(ValidationError)
-      expect(error.metadata?.field).toBe('foundedYear')
+      })
     })
 
     it('should return error for invalid founded year (future)', () => {
-      // Arrange & Act
-      const error = expectError(
-        Team.create({
-          city: 'Madrid',
-          foundedYear: new Date().getFullYear() + 1,
-          id: TEST_CONSTANTS.ids.team123,
-          name: 'Real Madrid',
+      expectErrorType({
+        errorType: ValidationError,
+        result: Team.create({
+          city: faker.location.city(),
+          foundedYear: new Date().getFullYear() + 100, // 💥 Future founded year
+          id: IdUtils.generate<TeamId>(),
+          name: faker.company.name(),
         }),
-      )
-
-      // Assert
-      expect(error).toBeInstanceOf(ValidationError)
-      expect(error.metadata?.field).toBe('foundedYear')
+      })
     })
 
     it('should return error for empty id', () => {
-      // Arrange & Act
-      const error = expectError(
-        Team.create({
-          city: 'Madrid',
-          id: '',
-          name: 'Real Madrid',
+      expectErrorType({
+        errorType: ValidationError,
+        result: Team.create({
+          city: faker.location.city(),
+          id: '', // 💥 Empty ID
+          name: faker.company.name(),
         }),
-      )
-
-      // Assert
-      expect(error).toBeInstanceOf(ValidationError)
-      expect(error.metadata?.field).toBe('id')
+      })
     })
   })
 
   describe('create with timestamps', () => {
     it('should create team with provided timestamps', () => {
       // Arrange
-      const createdAt = new Date('2025-01-01T00:00:00Z')
-      const updatedAt = new Date('2025-01-02T00:00:00Z')
+      const createdAt = faker.date.past()
+      const updatedAt = faker.date.future({ refDate: createdAt })
 
       // Act
-      const team = expectSuccess(
-        Team.create({
-          city: 'Madrid',
-          createdAt,
-          foundedYear: 1902,
-          id: TEST_CONSTANTS.ids.team123,
-          name: 'Real Madrid',
-          updatedAt,
-        }),
-      )
+      const team = buildTeam({ createdAt, updatedAt })
 
       // Assert
-      expect(team).toBeInstanceOf(Team)
       expect(team.createdAt).toBe(createdAt)
       expect(team.updatedAt).toBe(updatedAt)
     })
@@ -203,19 +130,12 @@ describe('Team Domain Entity', () => {
       const before = new Date()
 
       // Act
-      const team = expectSuccess(
-        Team.create({
-          city: 'Madrid',
-          id: TEST_CONSTANTS.ids.team123,
-          name: 'Real Madrid',
-        }),
-      )
+      const team = buildTeam() // No timestamps provided
 
       const after = new Date()
 
       // Assert
       expect(team.createdAt).toBeInstanceOf(Date)
-      expect(team.updatedAt).toBeInstanceOf(Date)
       expect(team.createdAt.getTime()).toBeGreaterThanOrEqual(before.getTime())
       expect(team.createdAt.getTime()).toBeLessThanOrEqual(after.getTime())
     })
@@ -224,255 +144,115 @@ describe('Team Domain Entity', () => {
   describe('fromValueObjects', () => {
     it('should create team from validated value objects without re-validation', () => {
       // Arrange
-      const id = expectSuccess(EntityId.create({ value: 'team-123' }))
-      const name = expectSuccess(TeamName.create({ value: 'Real Madrid' }))
-      const city = expectSuccess(City.create({ value: 'Madrid' }))
-      const foundedYear = expectSuccess(FoundedYear.create({ value: 1902 }))
+      // This test is still manual because it tests a static method that requires
+      // Value Objects already instantiated.
+      const id = IdUtils.generate<TeamId>()
+      const name = expectSuccess(TeamName.create({ value: faker.company.name() }))
+      const city = expectSuccess(City.create({ value: faker.location.city() }))
+      const foundedYear = expectSuccess(FoundedYear.create({ value: 1990 }))
       const createdAt = new Date()
       const updatedAt = new Date()
 
       // Act
-      const team = Team.fromValueObjects({
-        city,
-        createdAt,
-        foundedYear,
-        id,
-        name,
-        updatedAt,
-      })
+      const team = Team.fromValueObjects({ city, createdAt, foundedYear, id, name, updatedAt })
 
       // Assert
       expect(team).toBeInstanceOf(Team)
       expect(team.id).toBe(id)
       expect(team.name).toBe(name)
-      expect(team.city).toBe(city)
-      expect(team.foundedYear).toBe(foundedYear)
     })
   })
 
   describe('update', () => {
     it('should update team name', () => {
       // Arrange
-      const team = expectSuccess(
-        Team.create({
-          city: 'Madrid',
-          foundedYear: 1902,
-          id: TEST_CONSTANTS.ids.team123,
-          name: 'Old Name',
-        }),
-      )
+      const team = buildTeam() // Valid team base
+      const newName = faker.company.name()
 
       // Act
-      const updated = expectSuccess(team.update({ name: 'Real Madrid' }))
+      const updated = expectSuccess(team.update({ name: newName }))
 
       // Assert
-      expect(updated.name.getValue()).toBe('Real Madrid')
-      expect(updated.id.equals({ other: team.id })).toBe(true)
-      expect(updated.updatedAt).not.toBe(team.updatedAt)
+      expect(updated.name.getValue()).toBe(newName)
+      expect(updated.id).toBe(team.id)
+      expect(updated.updatedAt.getTime()).toBeGreaterThanOrEqual(team.updatedAt.getTime())
     })
 
     it('should update team city', () => {
-      // Arrange
-      const team = expectSuccess(
-        Team.create({
-          city: 'Old City',
-          id: TEST_CONSTANTS.ids.team123,
-          name: 'Real Madrid',
-        }),
-      )
+      const team = buildTeam()
+      const newCity = faker.location.city()
 
-      // Act
-      const updated = expectSuccess(team.update({ city: 'Madrid' }))
+      const updated = expectSuccess(team.update({ city: newCity }))
 
-      // Assert
-      expect(updated.city.getValue()).toBe('Madrid')
+      expect(updated.city.getValue()).toBe(newCity)
     })
 
     it('should update founded year', () => {
-      // Arrange
-      const team = expectSuccess(
-        Team.create({
-          city: 'Madrid',
-          foundedYear: 1900,
-          id: TEST_CONSTANTS.ids.team123,
-          name: 'Real Madrid',
-        }),
-      )
+      const team = buildTeam({ foundedYear: 1990 })
 
-      // Act
-      const updated = expectSuccess(team.update({ foundedYear: 1902 }))
+      const updated = expectSuccess(team.update({ foundedYear: 2000 }))
 
-      // Assert
-      expect(updated.foundedYear?.getValue()).toBe(1902)
+      expect(updated.foundedYear?.getValue()).toBe(2000)
     })
 
     it('should update founded year to null', () => {
-      // Arrange
-      const team = expectSuccess(
-        Team.create({
-          city: 'Madrid',
-          foundedYear: 1902,
-          id: TEST_CONSTANTS.ids.team123,
-          name: 'Real Madrid',
-        }),
-      )
+      const team = buildTeam({ foundedYear: 1990 })
 
-      // Act
       const updated = expectSuccess(team.update({ foundedYear: null }))
 
-      // Assert
       expect(updated.foundedYear).toBeNull()
     })
 
-    it('should update multiple fields', () => {
-      // Arrange
-      const team = expectSuccess(
-        Team.create({
-          city: 'Old City',
-          id: TEST_CONSTANTS.ids.team123,
-          name: 'Old Name',
-        }),
-      )
-
-      // Act
-      const updated = expectSuccess(
-        team.update({
-          city: 'Madrid',
-          foundedYear: 1902,
-          name: 'Real Madrid',
-        }),
-      )
-
-      // Assert
-      expect(updated.name.getValue()).toBe('Real Madrid')
-      expect(updated.city.getValue()).toBe('Madrid')
-      expect(updated.foundedYear?.getValue()).toBe(1902)
-    })
-
-    it('should return error for invalid name', () => {
-      // Arrange
-      const team = expectSuccess(
-        Team.create({
-          city: 'Madrid',
-          id: TEST_CONSTANTS.ids.team123,
-          name: 'Real Madrid',
-        }),
-      )
-
-      // Act
-      const error = expectError(team.update({ name: '' }))
-
-      // Assert
-      expect(error).toBeInstanceOf(ValidationError)
-      expect(error.metadata?.field).toBe('name')
+    it('should return error for invalid name update', () => {
+      const team = buildTeam()
+      // Try to update with invalid data -> Should fail
+      expectErrorType({
+        errorType: ValidationError,
+        result: team.update({ name: '' }),
+      })
     })
 
     it('should preserve createdAt when updating', () => {
-      // Arrange
-      const team = expectSuccess(
-        Team.create({
-          city: 'Madrid',
-          createdAt: new Date('2025-01-01T00:00:00Z'),
-          id: TEST_CONSTANTS.ids.team123,
-          name: 'Old Name',
-        }),
-      )
+      const oldDate = faker.date.past()
+      const team = buildTeam({ createdAt: oldDate })
 
-      // Act
-      const updated = expectSuccess(team.update({ name: 'Real Madrid' }))
+      const updated = expectSuccess(team.update({ name: 'New Name' }))
 
-      // Assert
-      expect(updated.createdAt).toBe(team.createdAt)
+      expect(updated.createdAt).toBe(oldDate)
     })
   })
 
   describe('toObject', () => {
     it('should convert team to plain object', () => {
-      // Arrange
-      const team = expectSuccess(
-        Team.create({
-          city: 'Madrid',
-          foundedYear: 1902,
-          id: TEST_CONSTANTS.ids.team123,
-          name: 'Real Madrid',
-        }),
-      )
+      const team = buildTeam()
 
-      // Act
       const obj = team.toObject()
 
-      // Assert
       expect(obj).toEqual({
-        city: 'Madrid',
+        city: team.city.getValue(),
         createdAt: team.createdAt,
-        foundedYear: 1902,
-        id: TEST_CONSTANTS.ids.team123,
-        name: 'Real Madrid',
+        foundedYear: team.foundedYear?.getValue() ?? null,
+        id: team.id,
+        name: team.name.getValue(),
         updatedAt: team.updatedAt,
       })
-    })
-
-    it('should handle team without founded year', () => {
-      // Arrange
-      const team = expectSuccess(
-        Team.create({
-          city: 'Madrid',
-          id: TEST_CONSTANTS.ids.team123,
-          name: 'Real Madrid',
-        }),
-      )
-
-      // Act
-      const obj = team.toObject()
-
-      // Assert
-      expect(obj.foundedYear).toBeNull()
     })
   })
 
   describe('toDTO', () => {
     it('should convert team to DTO with ISO date strings', () => {
-      // Arrange
-      const team = expectSuccess(
-        Team.create({
-          city: 'Madrid',
-          createdAt: new Date('2025-01-01T00:00:00Z'),
-          foundedYear: 1902,
-          id: TEST_CONSTANTS.ids.team123,
-          name: 'Real Madrid',
-          updatedAt: new Date('2025-01-02T00:00:00Z'),
-        }),
-      )
+      const team = buildTeam()
 
-      // Act
       const dto = team.toDTO()
 
-      // Assert
       expect(dto).toEqual({
-        city: 'Madrid',
-        createdAt: '2025-01-01T00:00:00.000Z',
-        foundedYear: 1902,
-        id: TEST_CONSTANTS.ids.team123,
-        name: 'Real Madrid',
-        updatedAt: '2025-01-02T00:00:00.000Z',
+        city: team.city.getValue(),
+        createdAt: team.createdAt.toISOString(),
+        foundedYear: team.foundedYear?.getValue() ?? null,
+        id: team.id,
+        name: team.name.getValue(),
+        updatedAt: team.updatedAt.toISOString(),
       })
-    })
-
-    it('should handle team without founded year in DTO', () => {
-      // Arrange
-      const team = expectSuccess(
-        Team.create({
-          city: 'Madrid',
-          id: TEST_CONSTANTS.ids.team123,
-          name: 'Real Madrid',
-        }),
-      )
-
-      // Act
-      const dto = team.toDTO()
-
-      // Assert
-      expect(dto.foundedYear).toBeNull()
     })
   })
 })

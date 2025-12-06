@@ -1,4 +1,4 @@
-import type { EntityId } from '@domain/value-objects/EntityId.js'
+import type { RefreshTokenId, UserId } from '@team-pulse/shared/domain/ids'
 
 /**
  * RefreshToken Factory Input
@@ -21,9 +21,9 @@ export interface RefreshTokenFactoryInput {
  * Used by fromValueObjects() to create entities without re-validation.
  */
 export interface RefreshTokenValueObjects {
-  id: EntityId
+  id: RefreshTokenId
   token: string
-  userId: EntityId
+  userId: UserId
   expiresAt: Date
   createdAt: Date
 }

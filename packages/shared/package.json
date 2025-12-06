@@ -20,6 +20,10 @@
       "import": "./dist/constants/validation.constants.js",
       "types": "./dist/constants/validation.constants.d.ts"
     },
+    "./domain/ids": {
+      "import": "./dist/domain/ids/index.js",
+      "types": "./dist/domain/ids/index.d.ts"
+    },
     "./domain/value-objects": {
       "import": "./dist/domain/value-objects/index.js",
       "types": "./dist/domain/value-objects/index.d.ts"
@@ -51,6 +55,10 @@
     "./testing/helpers": {
       "import": "./dist/testing/helpers.js",
       "types": "./dist/testing/helpers.d.ts"
+    },
+    "./testing/id-factory": {
+      "import": "./dist/testing/id-factory.js",
+      "types": "./dist/testing/id-factory.d.ts"
     },
     "./types": {
       "import": "./dist/types/index.js",

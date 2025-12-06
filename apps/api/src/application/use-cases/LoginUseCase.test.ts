@@ -112,7 +112,7 @@ describe('LoginUseCase', () => {
         expect(data.user).toEqual({
           createdAt: TEST_CONSTANTS.mockDateIso,
           email: TEST_CONSTANTS.users.johnDoe.email,
-          id: TEST_CONSTANTS.users.johnDoe.id,
+          id: mockUser.id.getValue(),
           role: TEST_CONSTANTS.users.johnDoe.role,
           updatedAt: TEST_CONSTANTS.mockDateIso,
         })
@@ -173,7 +173,7 @@ describe('LoginUseCase', () => {
         expect(tokenFactory.createAccessToken).toHaveBeenCalledWith({
           email: TEST_CONSTANTS.users.johnDoe.email,
           role: TEST_CONSTANTS.users.johnDoe.role,
-          userId: TEST_CONSTANTS.users.johnDoe.id,
+          userId: mockUser.id.getValue(),
         })
         expect(tokenFactory.createAccessToken).toHaveBeenCalledTimes(1)
       })
@@ -192,7 +192,7 @@ describe('LoginUseCase', () => {
         // Assert
         expectSuccess(result)
         expect(tokenFactory.createRefreshToken).toHaveBeenCalledWith({
-          userId: TEST_CONSTANTS.users.johnDoe.id,
+          userId: mockUser.id.getValue(),
         })
         expect(tokenFactory.createRefreshToken).toHaveBeenCalledTimes(1)
       })
@@ -217,7 +217,7 @@ describe('LoginUseCase', () => {
         expect(savedToken).toBeInstanceOf(RefreshToken)
         expect(savedToken.id.getValue()).toBe(TEST_CONSTANTS.mockUuid)
         expect(savedToken.token).toBe(TEST_CONSTANTS.auth.mockRefreshToken)
-        expect(savedToken.userId.getValue()).toBe(TEST_CONSTANTS.users.johnDoe.id)
+        expect(savedToken.userId.getValue()).toBe(mockUser.id.getValue())
         expect(savedToken.expiresAt).toEqual(TEST_CONSTANTS.futureDate)
       })
 
@@ -238,7 +238,7 @@ describe('LoginUseCase', () => {
         expect(data.user).toEqual({
           createdAt: TEST_CONSTANTS.mockDateIso,
           email: TEST_CONSTANTS.users.johnDoe.email,
-          id: TEST_CONSTANTS.users.johnDoe.id,
+          id: mockUser.id.getValue(),
           role: TEST_CONSTANTS.users.johnDoe.role,
           updatedAt: TEST_CONSTANTS.mockDateIso,
         })

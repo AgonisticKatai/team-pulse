@@ -1,6 +1,7 @@
 import { VALIDATION_MESSAGES } from '@team-pulse/shared/constants'
 import { z } from 'zod'
-import { UserRoles, type UserRoleType } from './Role.types'
+import { UserRoles } from './Role.constants.js'
+import type { UserRoleType } from './Role.types.js'
 
 const roleValues = Object.values(UserRoles) as [UserRoleType, ...UserRoleType[]]
 

@@ -1,4 +1,5 @@
 import type { Team } from '@domain/models/Team.js'
+import type { TeamId } from '@team-pulse/shared/domain/ids'
 import type { RepositoryError } from '@team-pulse/shared/errors'
 import type { Result } from '@team-pulse/shared/result'
 
@@ -28,7 +29,7 @@ export interface ITeamRepository {
    * @param id - The team's unique identifier
    * @returns Result with the team if found (null if not found), or RepositoryError if operation fails
    */
-  findById({ id }: { id: string }): Promise<Result<Team | null, RepositoryError>>
+  findById({ id }: { id: TeamId }): Promise<Result<Team | null, RepositoryError>>
 
   /**
    * Find all teams
@@ -71,7 +72,7 @@ export interface ITeamRepository {
    * @param id - The team's unique identifier
    * @returns Result with void if deleted successfully, or RepositoryError if operation fails
    */
-  delete({ id }: { id: string }): Promise<Result<void, RepositoryError>>
+  delete({ id }: { id: TeamId }): Promise<Result<void, RepositoryError>>
 
   /**
    * Check if a team exists by name

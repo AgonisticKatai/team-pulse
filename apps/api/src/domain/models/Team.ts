@@ -1,44 +1,23 @@
 import type { TeamFactoryInput, TeamUpdateInput, TeamValueObjects } from '@domain/models/Team.types.js'
 import { City } from '@domain/value-objects/City.js'
-import { EntityId } from '@domain/value-objects/EntityId.js'
 import { FoundedYear } from '@domain/value-objects/FoundedYear.js'
 import { TeamName } from '@domain/value-objects/TeamName.js'
+import { IdUtils, type TeamId } from '@team-pulse/shared/domain/ids'
 import type { TeamResponseDTO } from '@team-pulse/shared/dtos'
-import type { ValidationError } from '@team-pulse/shared/errors'
+import { ValidationError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
 
 // Re-export public types
 export type { TeamFactoryInput, TeamUpdateInput, TeamValueObjects }
 
-/**
- * Team Domain Entity
- *
- * Represents a football team in the business domain.
- * This is a RICH DOMAIN MODEL - it encapsulates:
- * - Business data (name, city, etc.)
- * - Business rules (validation, invariants)
- * - Business behavior (methods for domain operations)
- *
- * This entity is FRAMEWORK-AGNOSTIC:
- * - No database dependencies
- * - No HTTP dependencies
- * - Pure TypeScript/JavaScript
- *
- * The infrastructure layer is responsible for persisting this entity.
- *
- * IMPORTANT: Follows the same pattern as User:
- * - Uses separate .types.ts file
- * - NO fromPersistence() method (use create() with timestamps)
- * - update() calls create() internally
- * - Self-contained DTO mapping
- */
 export class Team {
-  public readonly id: EntityId
-  public readonly name: TeamName
-  public readonly city: City
-  public readonly foundedYear: FoundedYear | null
-  public readonly createdAt: Date
-  public readonly updatedAt: Date
+  readonly id: TeamId
+  readonly name: TeamName
+  readonly city: City
+  readonly foundedYear: FoundedYear | null
+
+  readonly createdAt: Date
+  readonly updatedAt: Date
 
   private constructor({ id, name, city, foundedYear, createdAt, updatedAt }: TeamValueObjects) {
     this.id = id
@@ -50,7 +29,7 @@ export class Team {
   }
 
   /**
-   * Validate optional foundedYear
+   * Helper internal to validate optional VOs
    */
   protected static validateOptionalFoundedYear({
     foundedYear,
@@ -71,47 +50,37 @@ export class Team {
 
   /**
    * Factory method to create a new Team from primitives
-   *
-   * Use this for:
-   * - Creating new teams
-   * - Reconstituting from database (pass timestamps)
-   * - Any scenario where you have primitive values
-   *
-   * Timestamps are optional - if not provided, will use new Date()
    */
   static create(data: TeamFactoryInput): Result<Team, ValidationError> {
-    // Validate id
-    const idResult = EntityId.create({ value: data.id })
-    if (!idResult.ok) {
-      return Err(idResult.error)
+    // 1. ID Validation
+    if (!IdUtils.isValid(data.id)) {
+      return Err(
+        ValidationError.create({
+          message: 'Invalid Team ID format',
+          metadata: { field: 'id', value: data.id },
+        }),
+      )
     }
-
-    // Validate name
+    // 2. Name Validation
     const nameResult = TeamName.create({ value: data.name })
-    if (!nameResult.ok) {
-      return Err(nameResult.error)
-    }
+    if (!nameResult.ok) return Err(nameResult.error)
 
-    // Validate city
+    // 3. City Validation
     const cityResult = City.create({ value: data.city })
-    if (!cityResult.ok) {
-      return Err(cityResult.error)
-    }
+    if (!cityResult.ok) return Err(cityResult.error)
 
-    // Validate foundedYear (optional)
+    // 4. foundedYear Validation
     const foundedYearResult = Team.validateOptionalFoundedYear({
       foundedYear: data.foundedYear,
     })
-    if (!foundedYearResult.ok) {
-      return Err(foundedYearResult.error)
-    }
+    if (!foundedYearResult.ok) return Err(foundedYearResult.error)
 
     return Ok(
       new Team({
         city: cityResult.value,
         createdAt: data.createdAt ?? new Date(),
         foundedYear: foundedYearResult.value,
-        id: idResult.value,
+        id: IdUtils.toId<TeamId>(data.id),
         name: nameResult.value,
         updatedAt: data.updatedAt ?? new Date(),
       }),
@@ -119,66 +88,49 @@ export class Team {
   }
 
   /**
-   * Factory method to create Team from validated Value Objects
-   *
-   * Use this when you already have validated Value Objects
-   * and don't want to re-validate them.
-   *
-   * NO validation is performed (Value Objects are already validated)
+   * Factory method from existing VOs (Hydration / Internal use)
    */
   static fromValueObjects(props: TeamValueObjects): Team {
     return new Team(props)
   }
 
   /**
-   * Update team information
-   *
-   * Returns a new Team instance (immutability)
-   * Internally calls create() to ensure validation
+   * Update team information (Immutability Pattern)
    */
   update(data: TeamUpdateInput): Result<Team, ValidationError> {
     return Team.create({
       city: data.city ?? this.city.getValue(),
       createdAt: this.createdAt,
       foundedYear: data.foundedYear === undefined ? (this.foundedYear?.getValue() ?? null) : data.foundedYear,
-      id: this.id.getValue(),
+      id: this.id,
       name: data.name ?? this.name.getValue(),
       updatedAt: new Date(),
     })
   }
 
   /**
-   * Convert to plain object for serialization
+   * Convert to plain object
    */
-  toObject(): {
-    id: string
-    name: string
-    city: string
-    foundedYear: number | null
-    createdAt: Date
-    updatedAt: Date
-  } {
+  toObject() {
     return {
       city: this.city.getValue(),
       createdAt: this.createdAt,
       foundedYear: this.foundedYear?.getValue() ?? null,
-      id: this.id.getValue(),
+      id: this.id,
       name: this.name.getValue(),
       updatedAt: this.updatedAt,
     }
   }
 
   /**
-   * Convert to TeamResponseDTO (for API responses)
-   *
-   * Dates are converted to ISO strings for JSON serialization
+   * Convert to DTO
    */
   toDTO(): TeamResponseDTO {
     return {
       city: this.city.getValue(),
       createdAt: this.createdAt.toISOString(),
       foundedYear: this.foundedYear?.getValue() ?? null,
-      id: this.id.getValue(),
+      id: this.id,
       name: this.name.getValue(),
       updatedAt: this.updatedAt.toISOString(),
     }

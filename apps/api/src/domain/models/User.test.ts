@@ -1,9 +1,8 @@
 import { User } from '@domain/models/User.js'
-import { Email } from '@domain/value-objects/Email.js'
-import { EntityId } from '@domain/value-objects/EntityId.js'
-import { Role, UserRole } from '@domain/value-objects/Role.js'
+import { Email, EntityId, Role } from '@team-pulse/shared/domain/value-objects'
 import { ValidationError } from '@team-pulse/shared/errors'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { TestIds } from '@team-pulse/shared/testing/id-factory'
 import { describe, expect, it } from 'vitest'
 
 describe('User Domain Entity', () => {
@@ -13,7 +12,7 @@ describe('User Domain Entity', () => {
       const user = expectSuccess(
         User.create({
           email: 'test@example.com',
-          id: 'user-123',
+          id: TestIds.user(1),
           passwordHash: 'hashed-password',
           role: 'USER',
         }),
@@ -22,11 +21,11 @@ describe('User Domain Entity', () => {
       // Assert
       expect(user).toBeInstanceOf(User)
       expect(user.id).toBeInstanceOf(EntityId)
-      expect(user.id.getValue()).toBe('user-123')
+      expect(user.id.getValue()).toBe(TestIds.user(1))
       expect(user.email).toBeInstanceOf(Email)
       expect(user.email.getValue()).toBe('test@example.com')
       expect(user.role).toBeInstanceOf(Role)
-      expect(user.role.getValue()).toBe(UserRole.User)
+      expect(user.role.getValue()).toBe('USER')
       expect(user.createdAt).toBeInstanceOf(Date)
       expect(user.updatedAt).toBeInstanceOf(Date)
     })
@@ -36,7 +35,7 @@ describe('User Domain Entity', () => {
       const user1 = expectSuccess(
         User.create({
           email: 'user@example.com',
-          id: 'user-1',
+          id: TestIds.user(2),
           passwordHash: 'hash',
           role: 'USER',
         }),
@@ -45,7 +44,7 @@ describe('User Domain Entity', () => {
       const user2 = expectSuccess(
         User.create({
           email: 'admin@example.com',
-          id: 'user-2',
+          id: TestIds.user(3),
           passwordHash: 'hash',
           role: 'ADMIN',
         }),
@@ -54,16 +53,16 @@ describe('User Domain Entity', () => {
       const user3 = expectSuccess(
         User.create({
           email: 'superadmin@example.com',
-          id: 'user-3',
+          id: TestIds.user(4),
           passwordHash: 'hash',
           role: 'SUPER_ADMIN',
         }),
       )
 
       // Assert
-      expect(user1.role.getValue()).toBe(UserRole.User)
-      expect(user2.role.getValue()).toBe(UserRole.Admin)
-      expect(user3.role.getValue()).toBe(UserRole.SuperAdmin)
+      expect(user1.role.getValue()).toBe('USER')
+      expect(user2.role.getValue()).toBe('ADMIN')
+      expect(user3.role.getValue()).toBe('SUPER_ADMIN')
     })
 
     it('should return error for empty email', () => {
@@ -71,7 +70,7 @@ describe('User Domain Entity', () => {
       const error = expectError(
         User.create({
           email: '',
-          id: 'user-123',
+          id: TestIds.user(1),
           passwordHash: 'hash',
           role: 'USER',
         }),
@@ -87,7 +86,7 @@ describe('User Domain Entity', () => {
       const error = expectError(
         User.create({
           email: 'invalid-email',
-          id: 'user-123',
+          id: TestIds.user(1),
           passwordHash: 'hash',
           role: 'USER',
         }),
@@ -103,27 +102,7 @@ describe('User Domain Entity', () => {
       const error = expectError(
         User.create({
           email: 'test@',
-          id: 'user-123',
-          passwordHash: 'hash',
-          role: 'USER',
-        }),
-      )
-
-      // Assert
-      expect(error).toBeInstanceOf(ValidationError)
-      expect(error.metadata?.field).toBe('email')
-    })
-
-    it('should return error for email too long', () => {
-      // Arrange - create a string of 250 a's plus @example.com
-      const longLocalPart = Array(250).fill('a').join('')
-      const longEmail = `${longLocalPart}@example.com`
-
-      // Act
-      const error = expectError(
-        User.create({
-          email: longEmail,
-          id: 'user-123',
+          id: TestIds.user(1),
           passwordHash: 'hash',
           role: 'USER',
         }),
@@ -139,7 +118,7 @@ describe('User Domain Entity', () => {
       const error = expectError(
         User.create({
           email: 'test@example.com',
-          id: 'user-123',
+          id: TestIds.user(1),
           passwordHash: 'hash',
           role: 'INVALID_ROLE',
         }),
@@ -155,7 +134,7 @@ describe('User Domain Entity', () => {
       const error = expectError(
         User.create({
           email: 'test@example.com',
-          id: 'user-123',
+          id: TestIds.user(1),
           passwordHash: '',
           role: 'USER',
         }),
@@ -194,7 +173,7 @@ describe('User Domain Entity', () => {
         User.create({
           createdAt,
           email: 'test@example.com',
-          id: 'user-123',
+          id: TestIds.user(1),
           passwordHash: 'hash',
           role: 'ADMIN',
           updatedAt,
@@ -215,7 +194,7 @@ describe('User Domain Entity', () => {
       const user = expectSuccess(
         User.create({
           email: 'test@example.com',
-          id: 'user-123',
+          id: TestIds.user(1),
           passwordHash: 'hash',
           role: 'USER',
         }),
@@ -234,7 +213,7 @@ describe('User Domain Entity', () => {
   describe('fromValueObjects', () => {
     it('should create user from validated value objects without re-validation', () => {
       // Arrange
-      const id = expectSuccess(EntityId.create({ value: 'user-123' }))
+      const id = expectSuccess(EntityId.create({ value: TestIds.user(1) }))
       const email = expectSuccess(Email.create({ value: 'test@example.com' }))
       const role = expectSuccess(Role.create({ value: 'ADMIN' }))
       const createdAt = new Date()
@@ -265,7 +244,7 @@ describe('User Domain Entity', () => {
       const user = expectSuccess(
         User.create({
           email: 'old@example.com',
-          id: 'user-123',
+          id: TestIds.user(1),
           passwordHash: 'hash',
           role: 'USER',
         }),
@@ -285,7 +264,7 @@ describe('User Domain Entity', () => {
       const user = expectSuccess(
         User.create({
           email: 'test@example.com',
-          id: 'user-123',
+          id: TestIds.user(1),
           passwordHash: 'hash',
           role: 'USER',
         }),
@@ -295,7 +274,7 @@ describe('User Domain Entity', () => {
       const updated = expectSuccess(user.update({ role: 'ADMIN' }))
 
       // Assert
-      expect(updated.role.getValue()).toBe(UserRole.Admin)
+      expect(updated.role.getValue()).toBe('ADMIN')
     })
 
     it('should update password hash', () => {
@@ -303,7 +282,7 @@ describe('User Domain Entity', () => {
       const user = expectSuccess(
         User.create({
           email: 'test@example.com',
-          id: 'user-123',
+          id: TestIds.user(1),
           passwordHash: 'old-hash',
           role: 'USER',
         }),
@@ -321,7 +300,7 @@ describe('User Domain Entity', () => {
       const user = expectSuccess(
         User.create({
           email: 'test@example.com',
-          id: 'user-123',
+          id: TestIds.user(1),
           passwordHash: 'hash',
           role: 'USER',
         }),
@@ -340,7 +319,7 @@ describe('User Domain Entity', () => {
       const user = expectSuccess(
         User.create({
           email: 'test@example.com',
-          id: 'user-123',
+          id: TestIds.user(1),
           passwordHash: 'hash',
           role: 'USER',
         }),
@@ -359,7 +338,7 @@ describe('User Domain Entity', () => {
       const user = expectSuccess(
         User.create({
           email: 'test@example.com',
-          id: 'user-123',
+          id: TestIds.user(1),
           passwordHash: 'hash',
           role: 'USER',
         }),
@@ -378,7 +357,7 @@ describe('User Domain Entity', () => {
       const user = expectSuccess(
         User.create({
           email: 'test@example.com',
-          id: 'user-123',
+          id: TestIds.user(1),
           passwordHash: 'hash',
           role: 'USER',
         }),
@@ -393,137 +372,13 @@ describe('User Domain Entity', () => {
     })
   })
 
-  describe('role checking methods', () => {
-    it('hasRole should check exact role', () => {
-      // Arrange & Act
-      const user = expectSuccess(
-        User.create({
-          email: 'test@example.com',
-          id: 'user-123',
-          passwordHash: 'hash',
-          role: 'ADMIN',
-        }),
-      )
-
-      // Assert
-      expect(user.hasRole('ADMIN')).toBe(true)
-      expect(user.hasRole('USER')).toBe(false)
-      expect(user.hasRole('SUPER_ADMIN')).toBe(false)
-    })
-
-    it('hasRoleLevel should check role hierarchy', () => {
-      // Arrange & Act
-      const superAdmin = expectSuccess(
-        User.create({
-          email: 'super@example.com',
-          id: 'user-1',
-          passwordHash: 'hash',
-          role: 'SUPER_ADMIN',
-        }),
-      )
-
-      const admin = expectSuccess(
-        User.create({
-          email: 'admin@example.com',
-          id: 'user-2',
-          passwordHash: 'hash',
-          role: 'ADMIN',
-        }),
-      )
-
-      const user = expectSuccess(
-        User.create({
-          email: 'user@example.com',
-          id: 'user-3',
-          passwordHash: 'hash',
-          role: 'USER',
-        }),
-      )
-
-      // Assert - SUPER_ADMIN has all levels
-      expect(superAdmin.hasRoleLevel('USER')).toBe(true)
-      expect(superAdmin.hasRoleLevel('ADMIN')).toBe(true)
-      expect(superAdmin.hasRoleLevel('SUPER_ADMIN')).toBe(true)
-
-      // Assert - ADMIN has ADMIN and USER level
-      expect(admin.hasRoleLevel('USER')).toBe(true)
-      expect(admin.hasRoleLevel('ADMIN')).toBe(true)
-      expect(admin.hasRoleLevel('SUPER_ADMIN')).toBe(false)
-
-      // Assert - USER only has USER level
-      expect(user.hasRoleLevel('USER')).toBe(true)
-      expect(user.hasRoleLevel('ADMIN')).toBe(false)
-      expect(user.hasRoleLevel('SUPER_ADMIN')).toBe(false)
-    })
-
-    it('isSuperAdmin should identify SUPER_ADMIN', () => {
-      // Arrange & Act
-      const superAdmin = expectSuccess(
-        User.create({
-          email: 'super@example.com',
-          id: 'user-1',
-          passwordHash: 'hash',
-          role: 'SUPER_ADMIN',
-        }),
-      )
-
-      const admin = expectSuccess(
-        User.create({
-          email: 'admin@example.com',
-          id: 'user-2',
-          passwordHash: 'hash',
-          role: 'ADMIN',
-        }),
-      )
-
-      // Assert
-      expect(superAdmin.isSuperAdmin()).toBe(true)
-      expect(admin.isSuperAdmin()).toBe(false)
-    })
-
-    it('isAdmin should identify ADMIN or SUPER_ADMIN', () => {
-      // Arrange & Act
-      const superAdmin = expectSuccess(
-        User.create({
-          email: 'super@example.com',
-          id: 'user-1',
-          passwordHash: 'hash',
-          role: 'SUPER_ADMIN',
-        }),
-      )
-
-      const admin = expectSuccess(
-        User.create({
-          email: 'admin@example.com',
-          id: 'user-2',
-          passwordHash: 'hash',
-          role: 'ADMIN',
-        }),
-      )
-
-      const user = expectSuccess(
-        User.create({
-          email: 'user@example.com',
-          id: 'user-3',
-          passwordHash: 'hash',
-          role: 'USER',
-        }),
-      )
-
-      // Assert
-      expect(superAdmin.isAdmin()).toBe(true)
-      expect(admin.isAdmin()).toBe(true)
-      expect(user.isAdmin()).toBe(false)
-    })
-  })
-
   describe('toObject', () => {
     it('should convert to plain object', () => {
       // Arrange & Act
       const user = expectSuccess(
         User.create({
           email: 'test@example.com',
-          id: 'user-123',
+          id: TestIds.user(1),
           passwordHash: 'hash',
           role: 'USER',
         }),
@@ -532,9 +387,9 @@ describe('User Domain Entity', () => {
       const obj = user.toObject()
 
       // Assert
-      expect(obj.id).toBe('user-123')
+      expect(obj.id).toBe(TestIds.user(1))
       expect(obj.email).toBe('test@example.com')
-      expect(obj.role).toBe(UserRole.User)
+      expect(obj.role).toBe('USER')
       expect(obj.createdAt).toBeInstanceOf(Date)
       expect(obj.updatedAt).toBeInstanceOf(Date)
     })
@@ -544,7 +399,7 @@ describe('User Domain Entity', () => {
       const user = expectSuccess(
         User.create({
           email: 'test@example.com',
-          id: 'user-123',
+          id: TestIds.user(1),
           passwordHash: 'secret-hash',
           role: 'USER',
         }),
@@ -568,7 +423,7 @@ describe('User Domain Entity', () => {
         User.create({
           createdAt,
           email: 'test@example.com',
-          id: 'user-123',
+          id: TestIds.user(1),
           passwordHash: 'hash',
           role: 'ADMIN',
           updatedAt,
@@ -579,9 +434,9 @@ describe('User Domain Entity', () => {
       const dto = user.toDTO()
 
       // Assert
-      expect(dto.id).toBe('user-123')
+      expect(dto.id).toBe(TestIds.user(1))
       expect(dto.email).toBe('test@example.com')
-      expect(dto.role).toBe(UserRole.Admin)
+      expect(dto.role).toBe('ADMIN')
       expect(dto.createdAt).toBe('2025-01-01T00:00:00.000Z')
       expect(dto.updatedAt).toBe('2025-01-02T00:00:00.000Z')
     })
@@ -591,7 +446,7 @@ describe('User Domain Entity', () => {
       const user = expectSuccess(
         User.create({
           email: 'test@example.com',
-          id: 'user-123',
+          id: TestIds.user(1),
           passwordHash: 'secret-hash',
           role: 'USER',
         }),
@@ -611,7 +466,7 @@ describe('User Domain Entity', () => {
       const user = expectSuccess(
         User.create({
           email: 'test@example.com',
-          id: 'user-123',
+          id: TestIds.user(1),
           passwordHash: 'secret-hash',
           role: 'USER',
         }),

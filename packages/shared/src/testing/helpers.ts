@@ -5,7 +5,8 @@ import type { Result } from '../types/Result.js'
  * Testing Helpers
  *
  * Centralized collection of all testing utilities for assertion and validation.
- * These helpers provide type-safe operations for common testing patterns.
+ * These helpers provide type-safe operations for common testing patterns,
+ * eliminating the need for 'as any', '!', or '?' in your tests.
  */
 
 // ============================================================================
@@ -20,37 +21,28 @@ import type { Result } from '../types/Result.js'
  *
  * @example
  * const tokens = expectSuccess(result)
- * expect(tokens).toHaveLength(1)
  * const [firstToken] = tokens
  * assertDefined(firstToken) // TypeScript now knows firstToken is defined
- * expect(firstToken.userId.getValue()).toBe('user-1')
- *
- * @param value - The value to check
- * @param message - Optional custom error message
+ * expect(firstToken.userId).toBe('user-1')
  */
 export function assertDefined<T>(value: T, message?: string): asserts value is NonNullable<T> {
   expect(value, message).toBeDefined()
+  expect(value, message).not.toBeNull()
 }
 
 // ============================================================================
-// RESULT HELPERS
+// RESULT PATTERN HELPERS
 // ============================================================================
 
 /**
  * Test helper to assert a Result is successful and extract the value type-safely
  *
  * With the discriminated union Result type, TypeScript automatically narrows the type
- * after checking result.ok, eliminating the need for non-null assertions (!)
+ * after checking result.ok, eliminating the need for non-null assertions (!).
  *
  * @example
- * // Before (tuple):
- * const [error, team] = await useCase.execute(dto)
- * expect(error).toBeNull()
- * expect(team!.id).toBe('123') // ← needs !
- *
- * // After (discriminated union):
  * const team = expectSuccess(await useCase.execute(dto))
- * expect(team.id).toBe('123') // ← no ! needed, TypeScript knows team is T
+ * expect(team.id).toBe('123') // TypeScript knows team is T
  */
 export function expectSuccess<T, E>(result: Result<T, E>): T {
   expect(result.ok).toBe(true)
@@ -67,19 +59,9 @@ export function expectSuccess<T, E>(result: Result<T, E>): T {
 /**
  * Test helper to assert a Result is an error and extract the error type-safely
  *
- * With the discriminated union Result type, TypeScript automatically narrows the type
- * after checking !result.ok, eliminating the need for non-null assertions (!)
- *
  * @example
- * // Before (tuple):
- * const [error, team] = await useCase.execute(dto)
- * expect(error).toBeInstanceOf(ValidationError)
- * expect(error!.message).toBe('Invalid') // ← needs !
- *
- * // After (discriminated union):
  * const error = expectError(await useCase.execute(dto))
- * expect(error).toBeInstanceOf(ValidationError)
- * expect(error.message).toBe('Invalid') // ← no ! needed, TypeScript knows error is E
+ * expect(error.message).toBe('Invalid') // TypeScript knows error is E
  */
 export function expectError<T, E>(result: Result<T, E>): E {
   expect(result.ok).toBe(false)
@@ -94,33 +76,33 @@ export function expectError<T, E>(result: Result<T, E>): E {
 }
 
 /**
- * Test helper to assert a Result is successful and the value is defined
+ * Test helper to assert a Result is successful and the value is STRICTLY defined
  *
- * Similar to expectSuccess but also checks that value is defined (not just non-null)
+ * Similar to expectSuccess but also checks that value is not null/undefined.
+ * Use this when the success value implies an object/value presence.
  */
 export function expectDefined<T, E>(result: Result<T, E>): NonNullable<T> {
   const value = expectSuccess(result)
   expect(value).toBeDefined()
+  expect(value).not.toBeNull()
   return value as NonNullable<T>
 }
 
 /**
- * Test helper to assert a Result contains a specific error type
+ * Test helper to assert a Result contains a specific error type (Class Instance)
  *
- * This helper allows type-safe extraction of specific error types from union types.
- * It automatically narrows the error type using instanceof check.
- * Works with both public and private constructors.
+ * Automatically narrows the error type using instanceof check.
  *
  * @example
  * const error = expectErrorType({ result, errorType: ValidationError })
- * expect(error.field).toBe('name') // ← TypeScript knows error is ValidationError
+ * expect(error.field).toBe('name')
  */
 export function expectErrorType<E extends Error>({
   result,
   errorType,
 }: {
   result: Result<unknown, unknown>
-  // biome-ignore lint/complexity/noBannedTypes: Function type required to support both public and private constructors
+  // biome-ignore lint/complexity/noBannedTypes: Needed for constructor type inference
   errorType: Function & { prototype: E }
 }): E {
   const error = expectError(result)
@@ -129,68 +111,29 @@ export function expectErrorType<E extends Error>({
 }
 
 /**
- * Test helper to assert a Result contains an array with exactly one element
- *
- * This helper combines expectSuccess, length assertion, and element extraction
- * into a single, type-safe operation. Perfect for repository queries that should
- * return a single result.
- *
- * @example
- * // Before:
- * const tokens = expectSuccess(result)
- * expect(tokens).toHaveLength(1)
- * const [firstToken] = tokens
- * assertDefined(firstToken)
- * expect(firstToken.userId).toBe('user-1')
- *
- * // After:
- * const token = expectSingle(result)
- * expect(token.userId).toBe('user-1')
+ * Test helper to assert a Result contains an array with EXACTLY one element
+ * Returns that single element.
  */
 export function expectSingle<T, E>(result: Result<T[], E>): T {
   const array = expectSuccess(result)
   expect(array).toHaveLength(1)
   const [first] = array
-  expect(first).toBeDefined()
-  return first as T
+  assertDefined(first, 'Expected single element to be defined')
+  return first
 }
 
 /**
  * Test helper to assert a Result contains a non-empty array and return the first element
- *
- * This helper extracts the first element of an array result with proper type safety.
- * Use this when you need to assert properties of the first item in a list.
- *
- * @example
- * // Before:
- * const teams = expectSuccess(result)
- * expect(teams[0]?.name).toBe('FC Barcelona')
- *
- * // After:
- * const teams = expectSuccess(result)
- * const firstTeam = expectFirst(teams)
- * expect(firstTeam.name).toBe('FC Barcelona')
  */
 export function expectFirst<T>(array: T[]): T {
   expect(array.length).toBeGreaterThan(0)
   const [first] = array
-  expect(first).toBeDefined()
-  return first as T
+  assertDefined(first, 'Expected first element to be defined')
+  return first
 }
 
 /**
  * Test helper to assert a Result contains an array of specific length
- *
- * This helper combines expectSuccess with a length assertion, returning the
- * type-safe array for further assertions.
- *
- * @example
- * // Before:
- * const teams = expectSuccess(result)
- * expect(teams).toHaveLength(3)
- *
- * // After:
- * const teams = expectArrayOfLength(result, 3)
  */
 export function expectArrayOfLength<T, E>(result: Result<T[], E>, length: number): T[] {
   const array = expectSuccess(result)
@@ -205,62 +148,41 @@ export function expectArrayOfLength<T, E>(result: Result<T[], E>, length: number
 /**
  * Type-safe helper to get an argument from a mock function call
  *
- * This helper properly handles TypeScript's `noUncheckedIndexedAccess` config
- * by explicitly checking that the call and argument exist before returning them.
+ * Checks array length instead of value truthiness.
+ * This allows safe testing of calls where 'null' is a valid argument.
  *
  * @param mockFn - The mocked function (typically from vi.mocked())
  * @param callIndex - The index of the call to check (0-based, defaults to 0)
  * @param argIndex - The index of the argument to retrieve (0-based, defaults to 0)
- * @returns The argument value at the specified indices
- *
- * @example
- * ```typescript
- * // Get first argument of first call (most common case)
- * const dto = expectMockCallArg<CreateUserDTO>(vi.mocked(useCase.execute))
- * expect(dto.email).toBe('test@example.com')
- *
- * // Get second argument of first call
- * const options = expectMockCallArg<Options>(vi.mocked(someFunction), 0, 1)
- *
- * // Get first argument of second call
- * const secondCallArg = expectMockCallArg<Dto>(vi.mocked(someFunction), 1, 0)
- * ```
  */
+
 export function expectMockCallArg<T>(mockFn: { mock: { calls: unknown[][] } }, callIndex = 0, argIndex = 0): T {
-  const call = mockFn.mock.calls[callIndex]
-  expect(call).toBeDefined()
+  const calls = mockFn.mock.calls
 
-  const arg = call?.[argIndex]
-  expect(arg).toBeDefined()
+  // 1. Verify the function was actually called enough times
+  expect(calls.length, `Expected mock to be called at least ${callIndex + 1} times, but was called ${calls.length} times`).toBeGreaterThan(callIndex)
 
-  return arg as T
+  const args = calls[callIndex]
+
+  // 2. SAFETY CHECK & NARROWING:
+  // We use our helper to tell TypeScript: "If we pass this line, args is defined".
+  // This satisfies the linter and removes the need for '!' later.
+  assertDefined(args, `Mock call #${callIndex} arguments structure is undefined`)
+
+  // Now TypeScript knows 'args' is 'unknown[]' (not undefined)
+  expect(args.length, `Expected mock call #${callIndex} to have at least ${argIndex + 1} arguments`).toBeGreaterThan(argIndex)
+
+  // 3. Return the argument
+  // No '!' needed because TS knows 'args' exists.
+  return args[argIndex] as T
 }
 
 /**
  * Type-safe helper to get the invocation order of a mock function call
- *
- * This helper properly handles TypeScript's `noUncheckedIndexedAccess` config
- * by explicitly checking that the invocation order exists before returning it.
- *
- * @param mockFn - The mocked function (typically from vi.mocked())
- * @param callIndex - The index of the call to check (0-based, defaults to 0)
- * @returns The invocation order number
- *
- * @example
- * ```typescript
- * // Verify that findById is called before delete (most common case - first call)
- * const findByIdOrder = expectMockInvocationOrder(vi.mocked(repository.findById))
- * const deleteOrder = expectMockInvocationOrder(vi.mocked(repository.delete))
- * expect(findByIdOrder).toBeLessThan(deleteOrder)
- *
- * // Check second call's invocation order
- * const secondCallOrder = expectMockInvocationOrder(vi.mocked(someFunction), 1)
- * ```
  */
 export function expectMockInvocationOrder(mockFn: { mock: { invocationCallOrder: number[] } }, callIndex = 0): number {
   const order = mockFn.mock.invocationCallOrder[callIndex]
   expect(order).toBeDefined()
-
   return order as number
 }
 
@@ -270,27 +192,12 @@ export function expectMockInvocationOrder(mockFn: { mock: { invocationCallOrder:
 
 /**
  * Type-safe helper to validate Zod schema errors
- *
- * This helper properly handles TypeScript's `noUncheckedIndexedAccess` config
- * by explicitly checking that issues array has elements before accessing them.
- *
- * @param result - The result from a Zod schema.safeParse() call
- * @param expectedMessage - The expected error message from the first issue
- *
- * @example
- * ```typescript
- * const result = LoginDTOSchema.safeParse({ email: 'invalid' })
- * expectZodError(result, 'Invalid email format')
- * ```
  */
 export function expectZodError(result: { success: boolean; error?: { issues: Array<{ message: string }> } }, expectedMessage: string): void {
   expect(result.success).toBe(false)
 
   if (!result.success && result.error) {
-    // Verify that Zod generated at least one issue
     expect(result.error.issues.length).toBeGreaterThan(0)
-
-    // Get first issue (safe because we verified length > 0)
     const firstIssue = result.error.issues[0]
     expect(firstIssue).toBeDefined()
     expect(firstIssue?.message).toBe(expectedMessage)

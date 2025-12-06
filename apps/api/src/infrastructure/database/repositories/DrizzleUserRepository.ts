@@ -2,29 +2,15 @@ import { User } from '@domain/models/User.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { Database } from '@infrastructure/database/connection.js'
 import { users as usersSchema } from '@infrastructure/database/schema.js'
+import { IdUtils, type UserId } from '@team-pulse/shared/domain/ids' // 👈 NEW IMPORT
 import type { ValidationError } from '@team-pulse/shared/errors'
 import { RepositoryError } from '@team-pulse/shared/errors'
 import { collect, Err, Ok, type Result } from '@team-pulse/shared/result'
-import type { UserRole } from '@team-pulse/shared/types'
 import { eq, sql } from 'drizzle-orm'
 
 /**
  * Drizzle User Repository (ADAPTER)
- *
- * This is an ADAPTER in Hexagonal Architecture:
- * - Implements the IUserRepository PORT (defined in domain)
- * - Uses Drizzle ORM for database operations
- * - Maps between domain entities (User) and database rows (UserRow)
- * - Contains NO business logic (only persistence logic)
- *
- * Benefits of this pattern:
- * 1. Domain layer doesn't know about Drizzle
- * 2. Can swap Drizzle for another ORM without touching domain/application
- * 3. Easy to test domain/application with mock repositories
- * 4. Clear separation between business logic and data access
- *
- * This class is FRAMEWORK-SPECIFIC (knows about Drizzle)
- * but implements a FRAMEWORK-AGNOSTIC interface.
+ * Implements strict typing mapping between DB (strings) and Domain (Branded Types).
  */
 export class DrizzleUserRepository implements IUserRepository {
   private readonly db: Database
@@ -37,7 +23,8 @@ export class DrizzleUserRepository implements IUserRepository {
     return new DrizzleUserRepository({ db })
   }
 
-  async findById({ id }: { id: string }): Promise<Result<User | null, RepositoryError>> {
+  // Accepts strict UserId
+  async findById({ id }: { id: UserId }): Promise<Result<User | null, RepositoryError>> {
     try {
       const [user] = await this.db.select().from(usersSchema).where(eq(usersSchema.id, id)).limit(1)
 
@@ -71,7 +58,7 @@ export class DrizzleUserRepository implements IUserRepository {
 
   async findByEmail({ email }: { email: string }): Promise<Result<User | null, RepositoryError>> {
     try {
-      // Case-insensitive email search using SQL LOWER
+      // Case-insensitive email search
       const [user] = await this.db.select().from(usersSchema).where(sql`LOWER(${usersSchema.email}) = LOWER(${email})`).limit(1)
 
       if (!user) {
@@ -136,7 +123,6 @@ export class DrizzleUserRepository implements IUserRepository {
     try {
       const offset = (page - 1) * limit
 
-      // Execute both queries in parallel
       const [rows, totalResult] = await Promise.all([
         this.db.select().from(usersSchema).limit(limit).offset(offset),
         this.db.select({ count: sql<number>`count(*)` }).from(usersSchema),
@@ -174,17 +160,16 @@ export class DrizzleUserRepository implements IUserRepository {
     try {
       const obj = user.toObject()
 
-      // Convert to database format
+      // Drizzle handles object mapping implicit as UserId extends string
       const row = {
         createdAt: obj.createdAt,
         email: obj.email,
         id: obj.id,
-        passwordHash: user.getPasswordHash(), // Access private field via getter
+        passwordHash: user.getPasswordHash(),
         role: obj.role,
         updatedAt: obj.updatedAt,
       }
 
-      // Upsert: insert or update if exists
       await this.db
         .insert(usersSchema)
         .values(row)
@@ -210,7 +195,8 @@ export class DrizzleUserRepository implements IUserRepository {
     }
   }
 
-  async delete({ id }: { id: string }): Promise<Result<boolean, RepositoryError>> {
+  // Accepts strict UserId
+  async delete({ id }: { id: UserId }): Promise<Result<boolean, RepositoryError>> {
     try {
       const result = await this.db.delete(usersSchema).where(eq(usersSchema.id, id))
       return Ok(result.count > 0)
@@ -258,21 +244,15 @@ export class DrizzleUserRepository implements IUserRepository {
 
   /**
    * Map database row to domain entity
-   *
-   * This is where we convert infrastructure data structures
-   * to domain entities. The domain entity validates itself.
-   *
-   * Returns Result to maintain consistency with the Result pattern.
-   * If mapping fails (should never happen with valid DB data),
-   * the error is propagated through Result.
+   * Explicit hydration of UserId
    */
   private mapToDomain({ user }: { user: typeof usersSchema.$inferSelect }): Result<User, ValidationError> {
     return User.create({
       createdAt: new Date(user.createdAt),
       email: user.email,
-      id: user.id,
+      id: IdUtils.toId<UserId>(user.id),
       passwordHash: user.passwordHash,
-      role: user.role as UserRole, // Type assertion safe because DB enforces valid values
+      role: user.role,
       updatedAt: new Date(user.updatedAt),
     })
   }

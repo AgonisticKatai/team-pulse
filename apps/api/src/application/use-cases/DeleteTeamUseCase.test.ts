@@ -118,7 +118,7 @@ describe('DeleteTeamUseCase', () => {
 
       it('should return NotFoundError for non-existent id', async () => {
         // Arrange
-        const nonExistentId = 'non-existent-id'
+        const nonExistentId = '550e8400-e29b-41d4-a716-446655520000'
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(null))
 
         // Act
@@ -167,7 +167,7 @@ describe('DeleteTeamUseCase', () => {
     describe('edge cases', () => {
       it('should handle deletion of team with different ids', async () => {
         // Arrange
-        const differentId = 'different-team-id'
+        const differentId = '550e8400-e29b-41d4-a716-446655459998'
         const differentTeam = buildTeam({ id: differentId })
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(differentTeam))
         vi.mocked(teamRepository.delete).mockResolvedValue(Ok(undefined))

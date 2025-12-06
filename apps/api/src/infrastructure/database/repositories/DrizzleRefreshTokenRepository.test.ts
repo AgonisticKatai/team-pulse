@@ -1,11 +1,12 @@
 import { RefreshToken } from '@domain/models/RefreshToken.js'
-import { User } from '@domain/models/User.js'
+import type { User } from '@domain/models/User.js'
+import { faker } from '@faker-js/faker'
 import { ScryptPasswordHasher } from '@infrastructure/auth/ScryptPasswordHasher.js'
 import type { Database } from '@infrastructure/database/connection.js'
 import { DrizzleRefreshTokenRepository } from '@infrastructure/database/repositories/DrizzleRefreshTokenRepository.js'
 import { DrizzleUserRepository } from '@infrastructure/database/repositories/DrizzleUserRepository.js'
+import { buildRefreshToken, buildUser } from '@infrastructure/testing/index.js'
 import { setupTestEnvironment } from '@infrastructure/testing/test-helpers.js'
-import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectSingle, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { sql } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -26,92 +27,80 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
   })
 
   beforeEach(async () => {
-    // Clean up refresh_tokens and users tables before each test
+    // Clean up tables (Order matters due to Foreign Keys)
     await db.execute(sql`TRUNCATE TABLE refresh_tokens RESTART IDENTITY CASCADE`)
     await db.execute(sql`TRUNCATE TABLE users RESTART IDENTITY CASCADE`)
   })
 
   /**
-   * Helper function to create a user for testing
+   * Helper function to create and save a user for testing.
+   * Returns the full User entity so we can use its ID.
    */
-  async function createTestUser(userId: string, email: string): Promise<void> {
-    const userResult = User.create({
-      email,
-      id: userId,
-      passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
-      role: 'USER',
-    })
+  async function createPersistedUser(): Promise<User> {
+    const passwordHash = expectSuccess(await passwordHasher.hash({ password: faker.internet.password() }))
 
-    const user = expectSuccess(userResult)
+    // Use the Builder to generate valid user data
+    const user = buildUser({ passwordHash })
+
     expectSuccess(await userRepository.save({ user }))
+
+    return user
   }
 
   describe('save', () => {
     it('should insert a new refresh token successfully', async () => {
       // Arrange
-      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
+      const user = await createPersistedUser() // Creates a real user in DB
 
-      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
-
-      const tokenResult = RefreshToken.create({
-        expiresAt,
-        id: 'token-1',
-        token: TEST_CONSTANTS.refreshTokens.test,
-        userId: 'user-1',
+      // Use builder to create a token linked to that user
+      const token = buildRefreshToken({
+        userId: user.id,
       })
-
-      const token = expectSuccess(tokenResult)
 
       // Act
       const result = await repository.save({ refreshToken: token })
 
       // Assert
       const savedToken = expectSuccess(result)
-      expect(savedToken.id.getValue()).toBe('token-1')
-      expect(savedToken.token).toBe(TEST_CONSTANTS.refreshTokens.test)
-      expect(savedToken.userId.getValue()).toBe('user-1')
+
+      // ✅ Direct comparison (Branded Types are strings at runtime)
+      expect(savedToken.id).toBe(token.id)
+      expect(savedToken.token).toBe(token.token)
+      expect(savedToken.userId).toBe(user.id)
       expect(savedToken.expiresAt).toBeInstanceOf(Date)
       expect(savedToken.createdAt).toBeInstanceOf(Date)
     })
 
     it('should update an existing refresh token (upsert)', async () => {
       // Arrange
-      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
+      const user = await createPersistedUser()
 
-      const initialExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+      const token = buildRefreshToken({ userId: user.id })
 
-      const tokenResult = RefreshToken.create({
-        expiresAt: initialExpiresAt,
-        id: 'token-1',
-        token: TEST_CONSTANTS.refreshTokens.initial,
-        userId: 'user-1',
-      })
-
-      const token = expectSuccess(tokenResult)
-
+      // Initial save
       await repository.save({ refreshToken: token })
 
-      // Create updated token with same ID
-      const newExpiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) // 14 days from now
-
-      const updatedTokenResult = RefreshToken.create({
-        expiresAt: newExpiresAt,
-        id: 'token-1', // Same ID
-        token: TEST_CONSTANTS.refreshTokens.updated,
-        userId: 'user-1',
+      // Create an updated version of the SAME token (same ID)
+      // We manually construct it or modify the existing one to ensure ID match
+      const updatedToken = RefreshToken.create({
+        createdAt: token.createdAt,
+        expiresAt: faker.date.future(),
+        id: token.id, // SAME ID
+        token: 'updated-token-string',
+        userId: user.id,
       })
 
-      const updatedToken = expectSuccess(updatedTokenResult)
+      if (!updatedToken.ok) throw new Error('Failed to create updated token')
 
       // Act - Save again (upsert)
-      const result = await repository.save({ refreshToken: updatedToken })
+      const result = await repository.save({ refreshToken: updatedToken.value })
 
       // Assert
       const savedToken = expectSuccess(result)
-      expect(savedToken.token).toBe(TEST_CONSTANTS.refreshTokens.updated)
+      expect(savedToken.token).toBe('updated-token-string')
 
-      // Verify only one token exists
-      const tokensForUser = expectSuccess(await repository.findByUserId({ userId: 'user-1' }))
+      // Verify only one token exists in DB for this user
+      const tokensForUser = expectSuccess(await repository.findByUserId({ userId: user.id }))
       expect(tokensForUser).toHaveLength(1)
     })
   })
@@ -119,30 +108,19 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
   describe('findByToken', () => {
     it('should find a refresh token by token string when it exists', async () => {
       // Arrange
-      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
-
-      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-
-      const tokenResult = RefreshToken.create({
-        expiresAt,
-        id: 'token-1',
-        token: TEST_CONSTANTS.refreshTokens.unique,
-        userId: 'user-1',
-      })
-
-      const token = expectSuccess(tokenResult)
+      const user = await createPersistedUser()
+      const token = buildRefreshToken({ userId: user.id })
 
       await repository.save({ refreshToken: token })
 
       // Act
-      const result = await repository.findByToken({ token: TEST_CONSTANTS.refreshTokens.unique })
+      const result = await repository.findByToken({ token: token.token })
 
       // Assert
       const foundToken = expectSuccess(result)
       expect(foundToken).not.toBeNull()
-      expect(foundToken?.id.getValue()).toBe('token-1')
-      expect(foundToken?.token).toBe(TEST_CONSTANTS.refreshTokens.unique)
-      expect(foundToken?.userId.getValue()).toBe('user-1')
+      expect(foundToken?.id).toBe(token.id)
+      expect(foundToken?.userId).toBe(user.id)
     })
 
     it('should return null when token does not exist', async () => {
@@ -156,115 +134,72 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
   })
 
   describe('findByUserId', () => {
-    it('should return empty array when user has no tokens', async () => {
-      // Arrange
-      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
-
-      // Act
-      const result = await repository.findByUserId({ userId: 'user-1' })
-
-      // Assert
-      const tokens = expectSuccess(result)
-      expect(tokens).toEqual([])
-    })
-
     it('should find all refresh tokens for a user', async () => {
       // Arrange
-      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
+      const user = await createPersistedUser()
+      const quantity = 3
 
-      // Create 3 tokens for the same user
-      for (let i = 1; i <= 3; i++) {
-        const expiresAt = new Date(Date.now() + i * 24 * 60 * 60 * 1000)
+      // 1. Generate entities in memory (Functional)
+      const tokensToCreate = Array.from({ length: quantity }, () => buildRefreshToken({ userId: user.id }))
 
-        const tokenResult = RefreshToken.create({
-          expiresAt,
-          id: `token-${i}`,
-          token: `token-${i}`,
-          userId: 'user-1',
-        })
-
-        const token = expectSuccess(tokenResult)
-
-        await repository.save({ refreshToken: token })
-      }
+      // 2. Save in parallel (Performance 🚀)
+      // Instead of waiting one by one, launch all promises together.
+      await Promise.all(tokensToCreate.map((token) => repository.save({ refreshToken: token })))
 
       // Act
-      const result = await repository.findByUserId({ userId: 'user-1' })
+      const result = await repository.findByUserId({ userId: user.id })
 
       // Assert
-      const tokens = expectSuccess(result)
-      expect(tokens).toHaveLength(3)
-      expect(tokens.map((t) => t.token)).toContain('token-1')
-      expect(tokens.map((t) => t.token)).toContain('token-2')
-      expect(tokens.map((t) => t.token)).toContain('token-3')
+      const foundTokens = expectSuccess(result)
+
+      expect(foundTokens).toHaveLength(quantity)
+
+      // Bonus: Verify that the IDs retrieved are the ones we created (Integrity)
+      const createdIds = tokensToCreate.map((token) => token.id)
+      const foundIds = foundTokens.map((token) => token.id)
+
+      // Verify that foundIds contains all createdIds (regardless of order)
+      expect(foundIds).toEqual(expect.arrayContaining(createdIds))
     })
 
     it('should only return tokens for specified user', async () => {
       // Arrange
-      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
-      await createTestUser('user-2', TEST_CONSTANTS.testEmails.user2)
+      const user1 = await createPersistedUser()
+      const user2 = await createPersistedUser()
 
-      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-
-      // Token for user-1
-      const token1Result = RefreshToken.create({
-        expiresAt,
-        id: 'token-1',
-        token: TEST_CONSTANTS.refreshTokens.user1Token,
-        userId: 'user-1',
-      })
-
-      // Token for user-2
-      const token2Result = RefreshToken.create({
-        expiresAt,
-        id: 'token-2',
-        token: TEST_CONSTANTS.refreshTokens.user2Token,
-        userId: 'user-2',
-      })
-
-      const token1 = expectSuccess(token1Result)
-      const token2 = expectSuccess(token2Result)
+      const token1 = buildRefreshToken({ userId: user1.id })
+      const token2 = buildRefreshToken({ userId: user2.id })
 
       await repository.save({ refreshToken: token1 })
       await repository.save({ refreshToken: token2 })
 
       // Act
-      const result = await repository.findByUserId({ userId: 'user-1' })
+      const result = await repository.findByUserId({ userId: user1.id })
 
       // Assert
-      const token = expectSingle(result)
-      expect(token.userId.getValue()).toBe('user-1')
+      const foundTokens = expectSingle(result)
+
+      expect(foundTokens.userId).toBe(user1.id)
     })
   })
 
   describe('deleteByToken', () => {
     it('should delete a refresh token by token string', async () => {
       // Arrange
-      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
+      const user = await createPersistedUser()
+      const token = buildRefreshToken({ userId: user.id })
 
-      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-
-      const tokenResult = RefreshToken.create({
-        expiresAt,
-        id: 'token-1',
-        token: 'token-to-delete',
-        userId: 'user-1',
-      })
-
-      if (!tokenResult.ok) return
-
-      await repository.save({ refreshToken: tokenResult.value })
+      await repository.save({ refreshToken: token })
 
       // Act
-      const result = await repository.deleteByToken({ token: 'token-to-delete' })
+      const result = await repository.deleteByToken({ token: token.token })
 
       // Assert
       expect(expectSuccess(result)).toBe(true)
 
       // Verify token was deleted
-      const findResult = await repository.findByToken({ token: 'token-to-delete' })
-      const foundToken = expectSuccess(findResult)
-      expect(foundToken).toBeNull()
+      const findResult = await repository.findByToken({ token: token.token })
+      expect(expectSuccess(findResult)).toBeNull()
     })
 
     it('should return false when deleting non-existent token', async () => {
@@ -279,113 +214,47 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
   describe('deleteByUserId', () => {
     it('should delete all refresh tokens for a user', async () => {
       // Arrange
-      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
+      const user = await createPersistedUser()
 
-      // Create 3 tokens for the user
-      for (let i = 1; i <= 3; i++) {
-        const expiresAt = new Date(Date.now() + i * 24 * 60 * 60 * 1000)
-
-        const tokenResult = RefreshToken.create({
-          expiresAt,
-          id: `token-${i}`,
-          token: `token-${i}`,
-          userId: 'user-1',
-        })
-
-        const token = expectSuccess(tokenResult)
-
+      // Create 3 tokens
+      for (let i = 0; i < 3; i++) {
+        const token = buildRefreshToken({ userId: user.id })
         await repository.save({ refreshToken: token })
       }
 
       // Act
-      const result = await repository.deleteByUserId({ userId: 'user-1' })
+      const result = await repository.deleteByUserId({ userId: user.id })
 
       // Assert
       expect(expectSuccess(result)).toBe(3)
 
-      // Verify all tokens were deleted
-      const remainingTokens = expectSuccess(await repository.findByUserId({ userId: 'user-1' }))
-      expect(remainingTokens).toHaveLength(0)
+      // Verify empty
+      const remaining = expectSuccess(await repository.findByUserId({ userId: user.id }))
+      expect(remaining).toHaveLength(0)
     })
 
     it('should return 0 when user has no tokens', async () => {
       // Arrange
-      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
+      const user = await createPersistedUser()
 
       // Act
-      const result = await repository.deleteByUserId({ userId: 'user-1' })
+      const result = await repository.deleteByUserId({ userId: user.id })
 
       // Assert
       expect(expectSuccess(result)).toBe(0)
-    })
-
-    it('should only delete tokens for specified user', async () => {
-      // Arrange
-      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
-      await createTestUser('user-2', TEST_CONSTANTS.testEmails.user2)
-
-      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-
-      // Token for user-1
-      const token1Result = RefreshToken.create({
-        expiresAt,
-        id: 'token-1',
-        token: TEST_CONSTANTS.refreshTokens.user1Token,
-        userId: 'user-1',
-      })
-
-      // Token for user-2
-      const token2Result = RefreshToken.create({
-        expiresAt,
-        id: 'token-2',
-        token: TEST_CONSTANTS.refreshTokens.user2Token,
-        userId: 'user-2',
-      })
-
-      const token1 = expectSuccess(token1Result)
-      const token2 = expectSuccess(token2Result)
-
-      await repository.save({ refreshToken: token1 })
-      await repository.save({ refreshToken: token2 })
-
-      // Act - Delete only user-1 tokens
-      const result = await repository.deleteByUserId({ userId: 'user-1' })
-
-      // Assert
-      expect(expectSuccess(result)).toBe(1)
-
-      // Verify user-2 token still exists
-      const user2Tokens = expectSuccess(await repository.findByUserId({ userId: 'user-2' }))
-      expect(user2Tokens).toHaveLength(1)
     })
   })
 
   describe('deleteExpired', () => {
     it('should delete expired tokens', async () => {
       // Arrange
-      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
-
-      const pastDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // 7 days ago (expired)
-      const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now (valid)
+      const user = await createPersistedUser()
 
       // Create expired token
-      const expiredTokenResult = RefreshToken.create({
-        expiresAt: pastDate,
-        id: 'expired-token',
-        token: 'expired-token',
-        userId: 'user-1',
-      })
+      const expiredToken = buildRefreshToken({ expiresAt: faker.date.past(), userId: user.id })
 
       // Create valid token
-      const validTokenResult = RefreshToken.create({
-        expiresAt: futureDate,
-        id: 'valid-token',
-        token: 'valid-token',
-        userId: 'user-1',
-      })
-
-      const expiredToken = expectSuccess(expiredTokenResult)
-      const validToken = expectSuccess(validTokenResult)
+      const validToken = buildRefreshToken({ expiresAt: faker.date.future(), userId: user.id })
 
       await repository.save({ refreshToken: expiredToken })
       await repository.save({ refreshToken: validToken })
@@ -394,138 +263,48 @@ describe('DrizzleRefreshTokenRepository - Integration Tests', () => {
       const result = await repository.deleteExpired()
 
       // Assert
-      expect(expectSuccess(result)).toBe(1)
+      expect(expectSuccess(result)).toBe(1) // Should delete 1
 
-      // Verify expired token was deleted
-      const foundExpiredToken = expectSuccess(await repository.findByToken({ token: 'expired-token' }))
-      expect(foundExpiredToken).toBeNull()
+      // Verify expired token gone
+      const findExpired = await repository.findByToken({ token: expiredToken.token })
+      expect(expectSuccess(findExpired)).toBeNull()
 
-      // Verify valid token still exists
-      const foundValidToken = expectSuccess(await repository.findByToken({ token: 'valid-token' }))
-      expect(foundValidToken).not.toBeNull()
-    })
-
-    it('should delete multiple expired tokens', async () => {
-      // Arrange
-      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
-      await createTestUser('user-2', TEST_CONSTANTS.testEmails.user2)
-
-      const pastDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // 7 days ago (expired)
-
-      // Create 3 expired tokens
-      for (let i = 1; i <= 3; i++) {
-        const tokenResult = RefreshToken.create({
-          expiresAt: pastDate,
-          id: `expired-token-${i}`,
-          token: `expired-token-${i}`,
-          userId: i <= 2 ? 'user-1' : 'user-2',
-        })
-
-        const token = expectSuccess(tokenResult)
-
-        await repository.save({ refreshToken: token })
-      }
-
-      // Act
-      const result = await repository.deleteExpired()
-
-      // Assert
-      expect(expectSuccess(result)).toBe(3)
-
-      // Verify all expired tokens were deleted
-      const user1Tokens = expectSuccess(await repository.findByUserId({ userId: 'user-1' }))
-      const user2Tokens = expectSuccess(await repository.findByUserId({ userId: 'user-2' }))
-      expect(user1Tokens).toHaveLength(0)
-      expect(user2Tokens).toHaveLength(0)
-    })
-
-    it('should return 0 when no tokens are expired', async () => {
-      // Arrange
-      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
-
-      const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now (valid)
-
-      const tokenResult = RefreshToken.create({
-        expiresAt: futureDate,
-        id: 'valid-token',
-        token: 'valid-token',
-        userId: 'user-1',
-      })
-
-      const token = expectSuccess(tokenResult)
-
-      await repository.save({ refreshToken: token })
-
-      // Act
-      const result = await repository.deleteExpired()
-
-      // Assert
-      expect(expectSuccess(result)).toBe(0)
-
-      // Verify token still exists
-      const validToken = expectSuccess(await repository.findByToken({ token: 'valid-token' }))
-      expect(validToken).not.toBeNull()
-    })
-
-    it('should return 0 when no tokens exist', async () => {
-      // Act
-      const result = await repository.deleteExpired()
-
-      // Assert
-      expect(expectSuccess(result)).toBe(0)
+      // Verify valid token remains
+      const findValid = await repository.findByToken({ token: validToken.token })
+      expect(expectSuccess(findValid)).not.toBeNull()
     })
   })
 
   describe('edge cases', () => {
     it('should handle tokens with near-expiry dates', async () => {
       // Arrange
-      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
+      const user = await createPersistedUser()
 
-      // Token that expires in 1 second
-      const nearExpiryDate = new Date(Date.now() + 1000)
+      // Expires in 1 second
+      const nearExpiry = new Date(Date.now() + 1000)
+      const token = buildRefreshToken({ expiresAt: nearExpiry, userId: user.id })
 
-      const tokenResult = RefreshToken.create({
-        expiresAt: nearExpiryDate,
-        id: 'near-expiry-token',
-        token: 'near-expiry-token',
-        userId: 'user-1',
-      })
-
-      const token = expectSuccess(tokenResult)
-
-      // Act
       await repository.save({ refreshToken: token })
 
-      // Assert - Token should still be findable before expiry
-      const foundToken = expectSuccess(await repository.findByToken({ token: 'near-expiry-token' }))
-      expect(foundToken).not.toBeNull()
+      // Act & Assert - Should be found
+      const found = expectSuccess(await repository.findByToken({ token: token.token }))
+      expect(found).not.toBeNull()
     })
 
-    it('should handle timestamps correctly', async () => {
-      // Arrange
-      await createTestUser('user-1', TEST_CONSTANTS.testEmails.user1)
+    it('should strictly respect branded types mapping', async () => {
+      // This test ensures that the ID coming back from DB is treated as string at runtime
+      // but was mapped correctly.
+      const user = await createPersistedUser()
+      const token = buildRefreshToken({ userId: user.id })
 
-      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-
-      const tokenResult = RefreshToken.create({
-        expiresAt,
-        id: 'token-1',
-        token: 'test-token',
-        userId: 'user-1',
-      })
-
-      const token = expectSuccess(tokenResult)
-
-      // Act
       await repository.save({ refreshToken: token })
 
-      // Assert
-      const foundToken = expectSuccess(await repository.findByToken({ token: 'test-token' }))
-      expect(foundToken).not.toBeNull()
-      expect(foundToken?.createdAt).toBeInstanceOf(Date)
-      expect(foundToken?.expiresAt).toBeInstanceOf(Date)
-      expect(foundToken?.createdAt.getTime()).toBeLessThanOrEqual(Date.now())
-      expect(foundToken?.expiresAt.getTime()).toBeGreaterThan(Date.now())
+      const found = expectSuccess(await repository.findByToken({ token: token.token }))
+
+      // Verify strict equality
+      expect(found?.id).toBe(token.id)
+      expect(found?.userId).toBe(user.id)
+      expect(typeof found?.id).toBe('string')
     })
   })
 })

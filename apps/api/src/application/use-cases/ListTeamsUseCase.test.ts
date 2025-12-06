@@ -21,7 +21,7 @@ describe('ListTeamsUseCase', () => {
   })
   const mockTeam3 = buildTeamWithoutFoundedYear({
     city: 'Bilbao',
-    id: 'team-3',
+    id: '550e8400-e29b-41d4-a716-446655510003',
     name: 'Athletic Bilbao',
   })
 
@@ -187,7 +187,7 @@ describe('ListTeamsUseCase', () => {
         // Assert
         expect(result.teams).toHaveLength(1)
         expect(result.pagination.total).toBe(1)
-        expect(result.teams[0]?.id).toBe(TEST_CONSTANTS.mockUuid)
+        expect(result.teams[0]?.id).toBe(mockTeam1.id.getValue())
       })
     })
 
@@ -210,7 +210,7 @@ describe('ListTeamsUseCase', () => {
         const manyTeams = Array.from({ length: 10 }, (_, i) =>
           buildTeam({
             city: `City ${i}`,
-            id: `team-${i}`,
+            id: `550e8400-e29b-41d4-a716-4466555200${i.toString().padStart(2, '0')}`,
             name: `Team ${i}`,
           }),
         )
@@ -252,7 +252,7 @@ describe('ListTeamsUseCase', () => {
         const result = expectSuccess(await listTeamsUseCase.execute({ dto: { limit: 10, page: 1 } }))
 
         // Assert
-        result.teams.forEach((team) => {
+        result.teams.forEach((team: (typeof result.teams)[number]) => {
           expect(typeof team.id).toBe('string')
           expect(typeof team.name).toBe('string')
           expect(typeof team.city).toBe('string')

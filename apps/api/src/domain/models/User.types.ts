@@ -1,13 +1,12 @@
-import type { Email } from '@domain/value-objects/Email.js'
-import type { EntityId } from '@domain/value-objects/EntityId.js'
-import type { Role } from '@domain/value-objects/Role.js'
+import type { UserId } from '@team-pulse/shared/domain/ids'
+import type { Email, Role } from '@team-pulse/shared/domain/value-objects'
 
 /**
  * Base User properties with Value Objects
  * This is the single source of truth for User shape
  */
 export interface UserProps {
-  id: EntityId
+  id: UserId
   email: Email
   passwordHash: string
   role: Role

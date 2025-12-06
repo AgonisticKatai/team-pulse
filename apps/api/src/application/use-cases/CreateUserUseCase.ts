@@ -1,7 +1,7 @@
-import { randomUUID } from 'node:crypto'
 import { User } from '@domain/models/User.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { IPasswordHasher } from '@domain/services/IPasswordHasher.js'
+import { IdUtils, type UserId } from '@team-pulse/shared/domain/ids'
 import type { CreateUserDTO, UserResponseDTO } from '@team-pulse/shared/dtos'
 import type { RepositoryError, ValidationError } from '@team-pulse/shared/errors'
 import { ConflictError } from '@team-pulse/shared/errors'
@@ -56,7 +56,7 @@ export class CreateUserUseCase {
       return Err(hashResult.error)
     }
 
-    const createUserResult = User.create({ email: dto.email, id: randomUUID(), passwordHash: hashResult.value, role: dto.role })
+    const createUserResult = User.create({ email: dto.email, id: IdUtils.generate<UserId>(), passwordHash: hashResult.value, role: dto.role })
 
     if (!createUserResult.ok) {
       return Err(createUserResult.error)

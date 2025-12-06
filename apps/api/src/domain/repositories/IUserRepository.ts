@@ -1,4 +1,5 @@
 import type { User } from '@domain/models/User.js'
+import type { UserId } from '@team-pulse/shared/domain/ids'
 import type { RepositoryError } from '@team-pulse/shared/errors'
 import type { Result } from '@team-pulse/shared/result'
 
@@ -25,7 +26,7 @@ export interface IUserRepository {
    * @param id - The user's unique identifier
    * @returns The user if found, null otherwise, or RepositoryError if operation fails
    */
-  findById({ id }: { id: string }): Promise<Result<User | null, RepositoryError>>
+  findById({ id }: { id: UserId }): Promise<Result<User | null, RepositoryError>>
 
   /**
    * Find a user by their email address
@@ -68,7 +69,7 @@ export interface IUserRepository {
    * @param id - The user's unique identifier
    * @returns true if deleted, false if user didn't exist, or RepositoryError if operation fails
    */
-  delete({ id }: { id: string }): Promise<Result<boolean, RepositoryError>>
+  delete({ id }: { id: UserId }): Promise<Result<boolean, RepositoryError>>
 
   /**
    * Check if a user exists by email

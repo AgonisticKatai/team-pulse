@@ -2,8 +2,8 @@ import { VALIDATION_MESSAGES } from '@team-pulse/shared/constants/validation'
 import { ValidationError } from '@team-pulse/shared/errors'
 import { expectErrorType, expectSuccess } from '@testing/helpers'
 import { describe, expect, it } from 'vitest'
-import { Role } from './Role'
-import { UserRoles } from './Role.types'
+import { UserRoles } from './Role.constants.js'
+import { Role } from './Role.js'
 
 describe('Role Value Object', () => {
   describe('create', () => {

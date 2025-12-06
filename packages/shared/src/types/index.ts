@@ -5,9 +5,6 @@
  * NOTE: DTOs with validation schemas are in dtos/ folder
  */
 
-// User types
-export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'USER'
-
 // Health check
 export interface HealthCheckResponse {
   status: 'ok' | 'error'

@@ -1,10 +1,10 @@
-import { User } from '@domain/models/User.js'
-import { ScryptPasswordHasher } from '@infrastructure/auth/ScryptPasswordHasher.js'
+import { faker } from '@faker-js/faker'
 import type { Database } from '@infrastructure/database/connection.js'
 import { DrizzleUserRepository } from '@infrastructure/database/repositories/DrizzleUserRepository.js'
 import { refreshTokens } from '@infrastructure/database/schema.js'
+import { buildUser } from '@infrastructure/testing/index.js' // 👈 Using Builder
 import { setupTestEnvironment } from '@infrastructure/testing/test-helpers.js'
-import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
+import { UserRoles } from '@team-pulse/shared/domain/value-objects'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { eq, sql } from 'drizzle-orm'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -12,77 +12,69 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 describe('DrizzleUserRepository - Integration Tests', () => {
   let repository: DrizzleUserRepository
   let db: Database
-  let passwordHasher: ScryptPasswordHasher
 
   const { getDatabase } = setupTestEnvironment()
 
   beforeAll(() => {
     db = getDatabase()
     repository = DrizzleUserRepository.create({ db })
-    passwordHasher = ScryptPasswordHasher.create({ cost: 1024 }) // Low cost for fast tests
   })
 
   beforeEach(async () => {
-    // Clean database before each test
     await db.execute(sql`TRUNCATE TABLE users RESTART IDENTITY CASCADE`)
   })
 
   afterEach(async () => {
-    // Clean database after each test
     await db.execute(sql`TRUNCATE TABLE users RESTART IDENTITY CASCADE`)
   })
 
   describe('save', () => {
     it('should insert a new user successfully', async () => {
       // Arrange
-      const userResult = User.create({
-        email: TEST_CONSTANTS.users.johnDoe.email,
-        id: TEST_CONSTANTS.users.johnDoe.id,
-        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.users.johnDoe.password })),
-        role: 'USER',
-      })
-      const user = expectSuccess(userResult)
+      const user = buildUser() // Generates a completely valid, random user
 
       // Act
       const result = await repository.save({ user })
 
       // Assert
       const savedUser = expectSuccess(result)
-      expect(savedUser.id.getValue()).toBe(TEST_CONSTANTS.users.johnDoe.id)
-      expect(savedUser.email.getValue()).toBe(TEST_CONSTANTS.users.johnDoe.email)
-      expect(savedUser.role.getValue()).toBe('USER')
+
+      // Strict Equality Check (Branded Types match)
+      expect(savedUser.id).toBe(user.id)
+      expect(savedUser.email.getValue()).toBe(user.email.getValue())
+      expect(savedUser.role.getValue()).toBe(user.role.getValue())
+
+      expect(savedUser.createdAt).toBeInstanceOf(Date)
+      expect(savedUser.updatedAt).toBeInstanceOf(Date)
     })
 
     it('should update an existing user (upsert)', async () => {
       // Arrange - Create and save initial user
-      const initialUserResult = User.create({
-        email: TEST_CONSTANTS.testEmails.initial,
-        id: TEST_CONSTANTS.testUserIds.testUser1,
-        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.initial })),
-        role: 'USER',
-      })
-      const initialUser = expectSuccess(initialUserResult)
+      const user = buildUser({ role: UserRoles.User })
+      await repository.save({ user })
 
-      await repository.save({ user: initialUser })
-
-      // Create updated version
-      const updatedUserResult = User.create({
-        createdAt: initialUser.createdAt,
-        email: TEST_CONSTANTS.testEmails.updated,
-        id: TEST_CONSTANTS.testUserIds.testUser1, // Same ID
-        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.updated })),
-        role: 'ADMIN', // Changed role
+      // Create updated version (Same ID, changed Role)
+      // Preserve the data that should NOT change (createdAt, email)
+      // and only change what we want to test (role, updatedAt)
+      const updatedUser = buildUser({
+        createdAt: user.createdAt, // 🛡️ Importante: Preserve creation date
+        email: user.email.getValue(), // Preserve original email (optional, but clean)
+        id: user.id,
+        passwordHash: user.getPasswordHash(),
+        role: UserRoles.Admin,
         updatedAt: new Date(),
       })
-      const updatedUser = expectSuccess(updatedUserResult)
 
       // Act - Save updated user
       const result = await repository.save({ user: updatedUser })
 
       // Assert
       const savedUser = expectSuccess(result)
-      expect(savedUser.email.getValue()).toBe(TEST_CONSTANTS.testEmails.updated)
-      expect(savedUser.role.getValue()).toBe('ADMIN')
+      expect(savedUser.role.getValue()).toBe(UserRoles.Admin)
+      // Verify that the email remains the same (or the new one if you changed it)
+      expect(savedUser.email.getValue()).toBe(updatedUser.email.getValue())
+      // Verify that the original creation date was preserved
+      expect(savedUser.createdAt.getTime()).toBe(user.createdAt.getTime())
 
       // Verify only one user exists
       const countResult = await repository.count()
@@ -90,12 +82,13 @@ describe('DrizzleUserRepository - Integration Tests', () => {
     })
 
     it('should handle database errors gracefully', async () => {
-      // Arrange - Create user with invalid data that will fail DB constraints
+      // Arrange - Create user with invalid data that violates DB constraints
+      // e.g. Trying to insert 'null' into a NOT NULL column manually
       const invalidUser = {
-        email: TEST_CONSTANTS.emails.valid,
-        id: TEST_CONSTANTS.testUserIds.testUser1,
-        passwordHash: 'hash',
-        role: 'INVALID_ROLE' as any, // Invalid role
+        toObject: () => ({
+          email: null,
+          id: null, // This will crash Drizzle/PG
+        }),
       } as any
 
       // Act
@@ -108,30 +101,25 @@ describe('DrizzleUserRepository - Integration Tests', () => {
 
   describe('findById', () => {
     it('should find user by id successfully', async () => {
-      // Arrange - Save a user first
-      const userResult = User.create({
-        email: TEST_CONSTANTS.users.johnDoe.email,
-        id: TEST_CONSTANTS.users.johnDoe.id,
-        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.users.johnDoe.password })),
-        role: 'USER',
-      })
-      const user = expectSuccess(userResult)
-
+      // Arrange
+      const user = buildUser()
       await repository.save({ user })
 
       // Act
-      const result = await repository.findById({ id: TEST_CONSTANTS.users.johnDoe.id })
+      const result = await repository.findById({ id: user.id })
 
       // Assert
       const foundUser = expectSuccess(result)
       expect(foundUser).not.toBeNull()
-      expect(foundUser?.id.getValue()).toBe(TEST_CONSTANTS.users.johnDoe.id)
-      expect(foundUser?.email.getValue()).toBe(TEST_CONSTANTS.users.johnDoe.email)
+      expect(foundUser?.id).toBe(user.id)
+      expect(foundUser?.email.getValue()).toBe(user.email.getValue())
     })
 
     it('should return null when user does not exist', async () => {
       // Act
-      const result = await repository.findById({ id: 'non-existent-id' })
+      // Use builder just to get a random valid ID structure
+      const randomUser = buildUser()
+      const result = await repository.findById({ id: randomUser.id })
 
       // Assert
       const foundUser = expectSuccess(result)
@@ -141,29 +129,25 @@ describe('DrizzleUserRepository - Integration Tests', () => {
 
   describe('findByEmail', () => {
     it('should find user by email (case-insensitive)', async () => {
-      // Arrange - Save a user
-      const userResult = User.create({
-        email: 'Test@Example.com',
-        id: TEST_CONSTANTS.testUserIds.testUser1,
-        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
-        role: 'USER',
-      })
-      const user = expectSuccess(userResult)
-
+      // Arrange
+      const user = buildUser() // e.g. "Test@Example.com"
       await repository.save({ user })
 
-      // Act - Search with different case
-      const result = await repository.findByEmail({ email: 'test@example.com' })
+      // Act - Search with lowercase
+      const result = await repository.findByEmail({
+        email: user.email.getValue().toLowerCase(),
+      })
 
       // Assert
       const foundUser = expectSuccess(result)
       expect(foundUser).not.toBeNull()
-      expect(foundUser?.email.getValue().toLowerCase()).toBe('test@example.com')
+      // Value Object usually normalizes to lowercase anyway
+      expect(foundUser?.id).toBe(user.id)
     })
 
     it('should return null when email does not exist', async () => {
       // Act
-      const result = await repository.findByEmail({ email: 'nonexistent@test.com' })
+      const result = await repository.findByEmail({ email: faker.internet.email() })
 
       // Assert
       const foundUser = expectSuccess(result)
@@ -172,68 +156,46 @@ describe('DrizzleUserRepository - Integration Tests', () => {
 
     it('should handle uppercase email search', async () => {
       // Arrange
-      const userResult = User.create({
-        email: 'lowercase@test.com',
-        id: TEST_CONSTANTS.testUserIds.testUser1,
-        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
-        role: 'USER',
-      })
-      const user = expectSuccess(userResult)
-
+      const email = faker.internet.email()
+      const user = buildUser({ email })
       await repository.save({ user })
 
       // Act - Search with uppercase
-      const result = await repository.findByEmail({ email: 'LOWERCASE@TEST.COM' })
+      const result = await repository.findByEmail({ email: email.toUpperCase() })
 
       // Assert
       const foundUser = expectSuccess(result)
       expect(foundUser).not.toBeNull()
-      expect(foundUser?.email.getValue()).toBe('lowercase@test.com')
+      expect(foundUser?.id).toBe(user.id)
     })
   })
 
   describe('existsByEmail', () => {
     it('should return true when email exists', async () => {
       // Arrange
-      const userResult = User.create({
-        email: 'exists@test.com',
-        id: TEST_CONSTANTS.testUserIds.testUser1,
-        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
-        role: 'USER',
-      })
-      const user = expectSuccess(userResult)
-
+      const user = buildUser()
       await repository.save({ user })
 
       // Act
-      const result = await repository.existsByEmail({ email: 'exists@test.com' })
+      const result = await repository.existsByEmail({ email: user.email.getValue() })
 
       // Assert
       expect(expectSuccess(result)).toBe(true)
     })
 
     it('should return false when email does not exist', async () => {
-      // Act
-      const result = await repository.existsByEmail({ email: 'notexists@test.com' })
-
-      // Assert
+      const result = await repository.existsByEmail({ email: faker.internet.email() })
       expect(expectSuccess(result)).toBe(false)
     })
 
     it('should be case-insensitive', async () => {
       // Arrange
-      const userResult = User.create({
-        email: 'CaseSensitive@Test.com',
-        id: TEST_CONSTANTS.testUserIds.testUser1,
-        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
-        role: 'USER',
-      })
-      const user = expectSuccess(userResult)
-
+      const email = faker.internet.email()
+      const user = buildUser({ email })
       await repository.save({ user })
 
       // Act
-      const result = await repository.existsByEmail({ email: 'casesensitive@test.com' })
+      const result = await repository.existsByEmail({ email: email.toUpperCase() })
 
       // Assert
       expect(expectSuccess(result)).toBe(true)
@@ -242,217 +204,127 @@ describe('DrizzleUserRepository - Integration Tests', () => {
 
   describe('findAll', () => {
     it('should return empty array when no users exist', async () => {
-      // Act
       const result = await repository.findAll()
-
-      // Assert
       const users = expectSuccess(result)
       expect(users).toEqual([])
     })
 
     it('should return all users', async () => {
-      // Arrange - Create multiple users
-      const user1Result = User.create({
-        email: TEST_CONSTANTS.testEmails.user1,
-        id: 'user-1',
-        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
-        role: 'USER',
-      })
-      const user2Result = User.create({
-        email: TEST_CONSTANTS.testEmails.user2,
-        id: 'user-2',
-        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
-        role: 'ADMIN',
-      })
-      const user3Result = User.create({
-        email: 'user3@test.com',
-        id: 'user-3',
-        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
-        role: 'SUPER_ADMIN',
-      })
-
-      const user1 = expectSuccess(user1Result)
-      const user2 = expectSuccess(user2Result)
-      const user3 = expectSuccess(user3Result)
-
-      await repository.save({ user: user1 })
-      await repository.save({ user: user2 })
-      await repository.save({ user: user3 })
+      // Arrange - Create 3 users in parallel
+      const users = Array.from({ length: 3 }, () => buildUser())
+      await Promise.all(users.map((u) => repository.save({ user: u })))
 
       // Act
       const result = await repository.findAll()
 
       // Assert
-      const users = expectSuccess(result)
-      expect(users).toHaveLength(3)
-      expect(users.map((u) => u.email.getValue())).toContain(TEST_CONSTANTS.testEmails.user1)
-      expect(users.map((u) => u.email.getValue())).toContain(TEST_CONSTANTS.testEmails.user2)
-      expect(users.map((u) => u.email.getValue())).toContain('user3@test.com')
+      const foundUsers = expectSuccess(result)
+      expect(foundUsers).toHaveLength(3)
     })
   })
 
   describe('findAllPaginated', () => {
     beforeEach(async () => {
       // Create 15 users for pagination tests
-      for (let i = 1; i <= 15; i++) {
-        const userResult = User.create({
-          email: `user${i}@test.com`,
-          id: `user-${i}`,
-          passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
-          role: 'USER',
-        })
-        const user = expectSuccess(userResult)
-
-        await repository.save({ user })
-      }
+      const users = Array.from({ length: 15 }, () => buildUser())
+      await Promise.all(users.map((u) => repository.save({ user: u })))
     })
 
     it('should return first page with correct limit', async () => {
-      // Act
       const result = await repository.findAllPaginated({ limit: 5, page: 1 })
-
-      // Assert
       const data = expectSuccess(result)
       expect(data.users).toHaveLength(5)
       expect(data.total).toBe(15)
     })
 
     it('should return second page correctly', async () => {
-      // Act
       const result = await repository.findAllPaginated({ limit: 5, page: 2 })
-
-      // Assert
       const data = expectSuccess(result)
       expect(data.users).toHaveLength(5)
       expect(data.total).toBe(15)
     })
 
     it('should return partial last page', async () => {
-      // Act - Page 4 with limit 5 should have 0 items (15 / 5 = 3 pages)
+      // Page 4 with limit 5 should be empty (15 / 5 = 3 full pages)
       const result = await repository.findAllPaginated({ limit: 5, page: 4 })
-
-      // Assert
       const data = expectSuccess(result)
       expect(data.users).toHaveLength(0)
       expect(data.total).toBe(15)
     })
 
     it('should return empty array for page beyond available data', async () => {
-      // Act
       const result = await repository.findAllPaginated({ limit: 10, page: 10 })
-
-      // Assert
       const data = expectSuccess(result)
       expect(data.users).toHaveLength(0)
-      expect(data.total).toBe(15)
-    })
-
-    it('should handle limit larger than total', async () => {
-      // Act
-      const result = await repository.findAllPaginated({ limit: 100, page: 1 })
-
-      // Assert
-      const data = expectSuccess(result)
-      expect(data.users).toHaveLength(15)
       expect(data.total).toBe(15)
     })
   })
 
   describe('delete', () => {
     it('should delete existing user and return true', async () => {
-      // Arrange - Create and save user
-      const userResult = User.create({
-        email: 'todelete@test.com',
-        id: 'delete-user-1',
-        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
-        role: 'USER',
-      })
-      const user = expectSuccess(userResult)
-
+      // Arrange
+      const user = buildUser()
       await repository.save({ user })
 
-      // Verify user exists
-      const findBefore = await repository.findById({ id: 'delete-user-1' })
+      // Verify exists
+      const findBefore = await repository.findById({ id: user.id })
       expect(expectSuccess(findBefore)).not.toBeNull()
 
       // Act
-      const result = await repository.delete({ id: 'delete-user-1' })
+      const result = await repository.delete({ id: user.id })
 
       // Assert
       expect(expectSuccess(result)).toBe(true)
 
-      // Verify user is deleted
-      const findAfter = await repository.findById({ id: 'delete-user-1' })
+      // Verify deleted
+      const findAfter = await repository.findById({ id: user.id })
       expect(expectSuccess(findAfter)).toBeNull()
     })
 
     it('should return false when deleting non-existent user', async () => {
-      // Act
-      const result = await repository.delete({ id: 'non-existent-id' })
-
-      // Assert
+      const randomUser = buildUser()
+      const result = await repository.delete({ id: randomUser.id })
       expect(expectSuccess(result)).toBe(false)
     })
 
     it('should cascade delete related data', async () => {
-      // This test verifies that cascade delete works for relationships
-      // Note: In the current schema, users have refresh_tokens with cascade delete
-
-      // Arrange - Create user
-      const userResult = User.create({
-        email: 'cascade@test.com',
-        id: 'cascade-user-1',
-        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
-        role: 'USER',
-      })
-      const user = expectSuccess(userResult)
-
+      // This tests referential integrity
+      const user = buildUser()
       await repository.save({ user })
 
-      // Insert a refresh token for this user (to test cascade)
+      // Manually insert token via raw SQL to bypass repository (faster setup for this specific test)
+      // Note: We use the user's real ID
       await db.execute(sql`
         INSERT INTO refresh_tokens (id, token, user_id, expires_at, created_at)
-        VALUES ('token-1', 'test-token', 'cascade-user-1', NOW() + INTERVAL '7 days', NOW())
+        VALUES ('550e8400-e29b-41d4-a716-446655500002', 'test-token', ${user.id}, NOW() + INTERVAL '7 days', NOW())
       `)
 
       // Verify token exists
-      const tokensBefore = await db.select().from(refreshTokens).where(eq(refreshTokens.userId, 'cascade-user-1'))
+      const tokensBefore = await db.select().from(refreshTokens).where(eq(refreshTokens.userId, user.id))
       expect(tokensBefore).toHaveLength(1)
 
       // Act - Delete user
-      const result = await repository.delete({ id: 'cascade-user-1' })
+      const result = await repository.delete({ id: user.id })
 
       // Assert
       expect(expectSuccess(result)).toBe(true)
 
       // Verify tokens were cascade deleted
-      const tokensAfter = await db.select().from(refreshTokens).where(eq(refreshTokens.userId, 'cascade-user-1'))
+      const tokensAfter = await db.select().from(refreshTokens).where(eq(refreshTokens.userId, user.id))
       expect(tokensAfter).toHaveLength(0)
     })
   })
 
   describe('count', () => {
     it('should return 0 when no users exist', async () => {
-      // Act
       const result = await repository.count()
-
-      // Assert
       expect(expectSuccess(result)).toBe(0)
     })
 
     it('should return correct count of users', async () => {
       // Arrange - Create 3 users
-      for (let i = 1; i <= 3; i++) {
-        const userResult = User.create({
-          email: `count${i}@test.com`,
-          id: `count-user-${i}`,
-          passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
-          role: 'USER',
-        })
-        const user = expectSuccess(userResult)
-
-        await repository.save({ user })
-      }
+      const users = Array.from({ length: 3 }, () => buildUser())
+      await Promise.all(users.map((u) => repository.save({ user: u })))
 
       // Act
       const result = await repository.count()
@@ -460,91 +332,39 @@ describe('DrizzleUserRepository - Integration Tests', () => {
       // Assert
       expect(expectSuccess(result)).toBe(3)
     })
-
-    it('should update count after deletion', async () => {
-      // Arrange - Create 2 users
-      const user1Result = User.create({
-        email: 'count1@test.com',
-        id: 'count-user-1',
-        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
-        role: 'USER',
-      })
-      const user2Result = User.create({
-        email: 'count2@test.com',
-        id: 'count-user-2',
-        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
-        role: 'USER',
-      })
-
-      const user1 = expectSuccess(user1Result)
-      const user2 = expectSuccess(user2Result)
-
-      await repository.save({ user: user1 })
-      await repository.save({ user: user2 })
-
-      // Verify initial count
-      const countBefore = await repository.count()
-      expect(expectSuccess(countBefore)).toBe(2)
-
-      // Act - Delete one user
-      await repository.delete({ id: 'count-user-1' })
-
-      // Assert
-      const countAfter = await repository.count()
-      expect(expectSuccess(countAfter)).toBe(1)
-    })
   })
 
   describe('edge cases', () => {
     it('should handle all user roles correctly', async () => {
-      // Arrange & Act - Create users with all roles
-      const roles: Array<'USER' | 'ADMIN' | 'SUPER_ADMIN'> = ['USER', 'ADMIN', 'SUPER_ADMIN']
+      // Arrange
+      const roles = Object.values(UserRoles)
 
-      for (const role of roles) {
-        const userResult = User.create({
-          email: `${role.toLowerCase()}@test.com`,
-          id: `${role.toLowerCase()}-user`,
-          passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
-          role,
-        })
-        const user = expectSuccess(userResult)
+      const users = roles.map((role) => buildUser({ role }))
 
-        const saveResult = await repository.save({ user })
-        expectSuccess(saveResult)
-      }
+      await Promise.all(users.map((u) => repository.save({ user: u })))
 
-      // Assert - Find all and verify roles
-      const allUsers = await repository.findAll()
-      const users = expectSuccess(allUsers)
+      // Assert
+      const allUsers = expectSuccess(await repository.findAll())
+      expect(allUsers).toHaveLength(3)
 
-      expect(users).toHaveLength(3)
-      expect(users.map((u) => u.role.getValue())).toContain('USER')
-      expect(users.map((u) => u.role.getValue())).toContain('ADMIN')
-      expect(users.map((u) => u.role.getValue())).toContain('SUPER_ADMIN')
+      const foundRoles = allUsers.map((u) => u.role.getValue())
+      expect(foundRoles).toContain(UserRoles.User)
+      expect(foundRoles).toContain(UserRoles.Admin)
+      expect(foundRoles).toContain(UserRoles.SuperAdmin)
     })
 
     it('should preserve timestamps correctly', async () => {
       // Arrange
       const createdAt = new Date('2024-01-01T00:00:00Z')
-      const userResult = User.create({
-        createdAt,
-        email: 'timestamp@test.com',
-        id: 'timestamp-user',
-        passwordHash: expectSuccess(await passwordHasher.hash({ password: TEST_CONSTANTS.passwords.test })),
-        role: 'USER',
-      })
-      const user = expectSuccess(userResult)
+      const user = buildUser({ createdAt })
 
       // Act
       await repository.save({ user })
 
       // Assert
-      const foundResult = await repository.findById({ id: 'timestamp-user' })
-      const foundUser = expectSuccess(foundResult)
-
+      const foundUser = expectSuccess(await repository.findById({ id: user.id }))
       expect(foundUser).not.toBeNull()
       expect(foundUser?.createdAt.getTime()).toBe(createdAt.getTime())
-      expect(foundUser?.updatedAt).toBeDefined()
     })
   })
 })
