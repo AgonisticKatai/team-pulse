@@ -15,7 +15,6 @@ export class Team {
   readonly name: TeamName
   readonly city: City
   readonly foundedYear: FoundedYear | null
-
   readonly createdAt: Date
   readonly updatedAt: Date
 

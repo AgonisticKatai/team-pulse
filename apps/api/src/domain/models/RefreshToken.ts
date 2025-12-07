@@ -28,11 +28,11 @@ export type { RefreshTokenFactoryInput, RefreshTokenValueObjects }
  * - Returns Result for error handling
  */
 export class RefreshToken {
-  public readonly id: RefreshTokenId
-  public readonly token: string
-  public readonly userId: UserId
-  public readonly expiresAt: Date
-  public readonly createdAt: Date
+  readonly id: RefreshTokenId
+  readonly token: string
+  readonly userId: UserId
+  readonly expiresAt: Date
+  readonly createdAt: Date
 
   private constructor({ id, token, userId, expiresAt, createdAt }: RefreshTokenValueObjects) {
     this.id = id

@@ -31,20 +31,20 @@ export type { CreateUserData, UpdateUserData, UserData, UserProps }
  * - Self-contained DTO mapping
  */
 export class User {
-  public readonly id: UserId
-  public readonly email: Email
+  readonly id: UserId
+  readonly email: Email
+  readonly role: Role
+  readonly createdAt: Date
+  readonly updatedAt: Date
   private readonly passwordHash: string
-  public readonly role: Role
-  public readonly createdAt: Date
-  public readonly updatedAt: Date
 
-  private constructor({ id, email, passwordHash, role, createdAt, updatedAt }: UserConstructorProps) {
+  private constructor({ id, email, role, createdAt, updatedAt, passwordHash }: UserConstructorProps) {
     this.id = id
     this.email = email
-    this.passwordHash = passwordHash
     this.role = role
     this.createdAt = createdAt
     this.updatedAt = updatedAt
+    this.passwordHash = passwordHash
   }
 
   /**
