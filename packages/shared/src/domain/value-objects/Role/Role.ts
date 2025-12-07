@@ -1,5 +1,6 @@
 import { ValidationError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
+import { UserRoles } from './Role.constants.js'
 import { roleSchema } from './Role.schema.js'
 import type { UserRoleType } from './Role.types.js'
 
@@ -49,15 +50,15 @@ export class Role {
   }
 
   isAdmin(): boolean {
-    return this.value === 'ADMIN'
+    return this.value === UserRoles.Admin
   }
 
   isUser(): boolean {
-    return this.value === 'USER'
+    return this.value === UserRoles.User
   }
 
   isSuperAdmin(): boolean {
-    return this.value === 'SUPER_ADMIN'
+    return this.value === UserRoles.SuperAdmin
   }
 
   toString(): string {
