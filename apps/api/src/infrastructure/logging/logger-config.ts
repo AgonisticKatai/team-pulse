@@ -20,7 +20,10 @@ import type { PinoLoggerOptions } from 'fastify/types/logger.js'
  * @param logLevel - Minimum log level to output (trace, debug, info, warn, error, fatal)
  * @returns Pino logger options or boolean (false disables logging)
  */
-export function createLoggerConfig(env: 'development' | 'production' | 'test', logLevel: string): PinoLoggerOptions | boolean {
+export function createLoggerConfig(
+  env: 'development' | 'production' | 'test',
+  logLevel: string,
+): PinoLoggerOptions | boolean {
   // Test environment: silent logger to avoid polluting test output
   // Cannot return false - Fastify's inject() and lifecycle depend on logger infrastructure
   if (env === 'test') {

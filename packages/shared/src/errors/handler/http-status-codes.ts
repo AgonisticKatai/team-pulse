@@ -49,5 +49,8 @@ export const ERROR_CATEGORY_TO_HTTP_STATUS = {
  * Get HTTP status code for an error category
  */
 export function getHttpStatusForCategory({ category }: { category: string }): HttpStatus {
-  return ERROR_CATEGORY_TO_HTTP_STATUS[category as keyof typeof ERROR_CATEGORY_TO_HTTP_STATUS] ?? HTTP_STATUS.INTERNAL_SERVER_ERROR
+  return (
+    ERROR_CATEGORY_TO_HTTP_STATUS[category as keyof typeof ERROR_CATEGORY_TO_HTTP_STATUS] ??
+    HTTP_STATUS.INTERNAL_SERVER_ERROR
+  )
 }

@@ -30,7 +30,13 @@ export class DrizzleTeamRepository implements ITeamRepository {
       const domainResult = this.mapToDomain({ team })
 
       if (!domainResult.ok) {
-        return Err(RepositoryError.forOperation({ cause: domainResult.error, message: 'Failed to map team to domain', operation: 'findById' }))
+        return Err(
+          RepositoryError.forOperation({
+            cause: domainResult.error,
+            message: 'Failed to map team to domain',
+            operation: 'findById',
+          }),
+        )
       }
 
       return Ok(domainResult.value)
@@ -54,7 +60,13 @@ export class DrizzleTeamRepository implements ITeamRepository {
       const collectedResult = collect(mappedResults)
 
       if (!collectedResult.ok) {
-        return Err(RepositoryError.forOperation({ cause: collectedResult.error, message: 'Failed to map team to domain', operation: 'findAll' }))
+        return Err(
+          RepositoryError.forOperation({
+            cause: collectedResult.error,
+            message: 'Failed to map team to domain',
+            operation: 'findAll',
+          }),
+        )
       }
 
       return Ok(collectedResult.value)
@@ -69,7 +81,13 @@ export class DrizzleTeamRepository implements ITeamRepository {
     }
   }
 
-  async findAllPaginated({ page, limit }: { page: number; limit: number }): Promise<Result<{ teams: Team[]; total: number }, RepositoryError>> {
+  async findAllPaginated({
+    page,
+    limit,
+  }: {
+    page: number
+    limit: number
+  }): Promise<Result<{ teams: Team[]; total: number }, RepositoryError>> {
     try {
       const offset = (page - 1) * limit
 
@@ -86,7 +104,11 @@ export class DrizzleTeamRepository implements ITeamRepository {
 
       if (!collectedResult.ok) {
         return Err(
-          RepositoryError.forOperation({ cause: collectedResult.error, message: 'Failed to map team to domain', operation: 'findAllPaginated' }),
+          RepositoryError.forOperation({
+            cause: collectedResult.error,
+            message: 'Failed to map team to domain',
+            operation: 'findAllPaginated',
+          }),
         )
       }
 
@@ -113,7 +135,13 @@ export class DrizzleTeamRepository implements ITeamRepository {
       const domainResult = this.mapToDomain({ team })
 
       if (!domainResult.ok) {
-        return Err(RepositoryError.forOperation({ cause: domainResult.error, message: 'Failed to map team to domain', operation: 'findByName' }))
+        return Err(
+          RepositoryError.forOperation({
+            cause: domainResult.error,
+            message: 'Failed to map team to domain',
+            operation: 'findByName',
+          }),
+        )
       }
 
       return Ok(domainResult.value)
@@ -178,7 +206,11 @@ export class DrizzleTeamRepository implements ITeamRepository {
 
   async existsByName({ name }: { name: string }): Promise<Result<boolean, RepositoryError>> {
     try {
-      const teams = await this.db.select({ id: teamsSchema.id }).from(teamsSchema).where(eq(teamsSchema.name, name)).limit(1)
+      const teams = await this.db
+        .select({ id: teamsSchema.id })
+        .from(teamsSchema)
+        .where(eq(teamsSchema.name, name))
+        .limit(1)
 
       return Ok(teams.length > 0)
     } catch (error) {

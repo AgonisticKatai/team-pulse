@@ -46,9 +46,8 @@ export class RefreshToken {
    * Validate token is not empty
    */
   protected static validateToken({ token }: { token: string }): Result<string, ValidationError> {
-    if (!token || token.trim().length === 0) {
+    if (!token || token.trim().length === 0)
       return Err(ValidationError.forField({ field: 'token', message: 'Refresh token cannot be empty' }))
-    }
     return Ok(token)
   }
 
@@ -65,9 +64,7 @@ export class RefreshToken {
   static create(data: RefreshTokenFactoryInput): Result<RefreshToken, ValidationError> {
     // Validate token
     const tokenResult = RefreshToken.validateToken({ token: data.token })
-    if (!tokenResult.ok) {
-      return Err(tokenResult.error)
-    }
+    if (!tokenResult.ok) return Err(tokenResult.error)
 
     return Ok(
       new RefreshToken({

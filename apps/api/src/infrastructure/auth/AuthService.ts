@@ -57,7 +57,11 @@ export class AuthService {
    * @param authHeader - Authorization header value
    * @returns Result with JWT payload or ValidationError (header format) or AuthenticationError (JWT validation)
    */
-  verifyAuthHeader({ authHeader }: { authHeader: string | undefined }): Result<AccessTokenPayload, AuthenticationError | ValidationError> {
+  verifyAuthHeader({
+    authHeader,
+  }: {
+    authHeader: string | undefined
+  }): Result<AccessTokenPayload, AuthenticationError | ValidationError> {
     // Validate header exists
     if (!authHeader || authHeader.trim() === '') {
       return Err(

@@ -104,7 +104,12 @@ class TestingMCPServer {
         },
       },
       (args: { category?: string }) => {
-        const category = (args.category || 'all') as 'all' | 'unit-tests' | 'integration-tests' | 'test-data' | 'mocking'
+        const category = (args.category || 'all') as
+          | 'all'
+          | 'unit-tests'
+          | 'integration-tests'
+          | 'test-data'
+          | 'mocking'
         const result = this.getTestPatternsUseCase.execute({ category })
 
         if (!result.ok) {

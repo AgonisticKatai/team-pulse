@@ -6,7 +6,14 @@
  */
 
 import type { ErrorCategory, ErrorCode, ErrorSeverity } from '@errors/core.js'
-import { ApplicationError, ERROR_CATEGORY, ERROR_CODES, ERROR_SEVERITY, isApplicationError, isIApplicationError } from '@errors/core.js'
+import {
+  ApplicationError,
+  ERROR_CATEGORY,
+  ERROR_CODES,
+  ERROR_SEVERITY,
+  isApplicationError,
+  isIApplicationError,
+} from '@errors/core.js'
 import { TEST_CONSTANTS } from '@testing/constants.js'
 import { describe, expect, it } from 'vitest'
 

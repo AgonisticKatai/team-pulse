@@ -33,7 +33,15 @@ export class BusinessRuleError extends ApplicationError {
   /**
    * Create a business rule error
    */
-  static create({ message, rule, metadata }: { message: string; rule?: string; metadata?: Record<string, unknown> }): BusinessRuleError {
+  static create({
+    message,
+    rule,
+    metadata,
+  }: {
+    message: string
+    rule?: string
+    metadata?: Record<string, unknown>
+  }): BusinessRuleError {
     return new BusinessRuleError({
       message,
       metadata: {

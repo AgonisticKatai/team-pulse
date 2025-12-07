@@ -76,7 +76,10 @@ export class RefreshTokenUseCase {
     // Check for existence
     if (!storedToken) {
       return Err(
-        AuthenticationError.create({ message: 'Invalid or expired refresh token', metadata: { field: 'refreshToken', reason: 'token_not_found' } }),
+        AuthenticationError.create({
+          message: 'Invalid or expired refresh token',
+          metadata: { field: 'refreshToken', reason: 'token_not_found' },
+        }),
       )
     }
 
@@ -85,14 +88,22 @@ export class RefreshTokenUseCase {
     // storedToken.id is the Primary Key of the DB (EntityId)
     if (storedToken.id !== verifyResult.value.tokenId) {
       return Err(
-        AuthenticationError.create({ message: 'Invalid token identity', metadata: { field: 'refreshToken', reason: 'integrity_check_failed' } }),
+        AuthenticationError.create({
+          message: 'Invalid token identity',
+          metadata: { field: 'refreshToken', reason: 'integrity_check_failed' },
+        }),
       )
     }
 
     // 4. Check expiration (Entity logic)
     if (storedToken.isExpired()) {
       await this.refreshTokenRepository.deleteByToken({ token: dto.refreshToken })
-      return Err(AuthenticationError.create({ message: 'Refresh token has expired', metadata: { field: 'refreshToken', reason: 'token_expired' } }))
+      return Err(
+        AuthenticationError.create({
+          message: 'Refresh token has expired',
+          metadata: { field: 'refreshToken', reason: 'token_expired' },
+        }),
+      )
     }
 
     // 5. Get User
@@ -104,7 +115,9 @@ export class RefreshTokenUseCase {
       const reason = !userResult.ok ? 'db_error' : 'user_not_found'
 
       return Err(
-        userResult.ok ? AuthenticationError.create({ message: 'User not found', metadata: { field: 'refreshToken', reason } }) : userResult.error,
+        userResult.ok
+          ? AuthenticationError.create({ message: 'User not found', metadata: { field: 'refreshToken', reason } })
+          : userResult.error,
       )
     }
 

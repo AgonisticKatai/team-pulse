@@ -42,7 +42,12 @@ export class Pagination {
    * IMPORTANT: Constructor does NO validation or calculation.
    * All logic happens in the factory method.
    */
-  private constructor({ page, limit, total, totalPages }: { page: number; limit: number; total: number; totalPages: number }) {
+  private constructor({
+    page,
+    limit,
+    total,
+    totalPages,
+  }: { page: number; limit: number; total: number; totalPages: number }) {
     this.page = page
     this.limit = limit
     this.total = total
@@ -62,7 +67,15 @@ export class Pagination {
    * @param total - Total number of items (must be >= 0)
    * @returns Result<Pagination, ValidationError>
    */
-  static create({ page, limit, total }: { page: number; limit: number; total: number }): Result<Pagination, ValidationError> {
+  static create({
+    page,
+    limit,
+    total,
+  }: {
+    page: number
+    limit: number
+    total: number
+  }): Result<Pagination, ValidationError> {
     // Validate each parameter
     const pageValidation = Pagination.validatePage({ page })
     if (!pageValidation.ok) {
@@ -119,7 +132,9 @@ export class Pagination {
     }
 
     if (limit < Pagination.MIN_LIMIT) {
-      return Err(ValidationError.forField({ field: 'limit', message: `Limit must be at least ${Pagination.MIN_LIMIT}` }))
+      return Err(
+        ValidationError.forField({ field: 'limit', message: `Limit must be at least ${Pagination.MIN_LIMIT}` }),
+      )
     }
 
     if (limit > Pagination.MAX_LIMIT) {
@@ -142,7 +157,9 @@ export class Pagination {
     }
 
     if (total < Pagination.MIN_TOTAL) {
-      return Err(ValidationError.forField({ field: 'total', message: `Total must be at least ${Pagination.MIN_TOTAL}` }))
+      return Err(
+        ValidationError.forField({ field: 'total', message: `Total must be at least ${Pagination.MIN_TOTAL}` }),
+      )
     }
 
     return Ok(undefined)

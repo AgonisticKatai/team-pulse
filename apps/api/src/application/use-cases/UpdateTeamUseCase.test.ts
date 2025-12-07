@@ -172,7 +172,9 @@ describe('UpdateTeamUseCase', () => {
         const dto: UpdateTeamDTO = { city: `${team.city.getValue()}_Changed` }
 
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(team))
-        vi.mocked(teamRepository.save).mockResolvedValue(Err(RepositoryError.forOperation({ message: 'DB Error', operation: 'save' })))
+        vi.mocked(teamRepository.save).mockResolvedValue(
+          Err(RepositoryError.forOperation({ message: 'DB Error', operation: 'save' })),
+        )
 
         // Act
         const result = await updateTeamUseCase.execute({ dto, id: team.id })

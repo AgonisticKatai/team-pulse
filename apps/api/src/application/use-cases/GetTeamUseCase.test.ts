@@ -84,7 +84,9 @@ describe('GetTeamUseCase', () => {
         const id = IdUtils.generate<TeamId>()
         const errorMessage = faker.lorem.sentence()
 
-        vi.mocked(teamRepository.findById).mockResolvedValue(Err(RepositoryError.forOperation({ message: errorMessage, operation: 'findById' })))
+        vi.mocked(teamRepository.findById).mockResolvedValue(
+          Err(RepositoryError.forOperation({ message: errorMessage, operation: 'findById' })),
+        )
 
         // Act
         const result = await getTeamUseCase.execute({ id })

@@ -52,7 +52,12 @@ export const UpdateTeamDTOSchema = z.object({
     .max(new Date().getFullYear(), 'Founded year cannot be in the future')
     .optional()
     .nullable(),
-  name: z.string().trim().min(1, 'Team name cannot be empty').max(100, 'Team name cannot exceed 100 characters').optional(),
+  name: z
+    .string()
+    .trim()
+    .min(1, 'Team name cannot be empty')
+    .max(100, 'Team name cannot exceed 100 characters')
+    .optional(),
 })
 
 export type UpdateTeamDTO = z.infer<typeof UpdateTeamDTOSchema>

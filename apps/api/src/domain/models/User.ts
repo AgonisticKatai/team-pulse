@@ -1,4 +1,10 @@
-import type { CreateUserData, UpdateUserData, UserConstructorProps, UserData, UserProps } from '@domain/models/User.types.js'
+import type {
+  CreateUserData,
+  UpdateUserData,
+  UserConstructorProps,
+  UserData,
+  UserProps,
+} from '@domain/models/User.types.js'
 import { IdUtils, type UserId } from '@team-pulse/shared/domain/ids'
 import { Email, Role } from '@team-pulse/shared/domain/value-objects'
 import type { UserResponseDTO } from '@team-pulse/shared/dtos'
@@ -51,9 +57,8 @@ export class User {
    * Validate password hash
    */
   protected static validatePasswordHash({ passwordHash }: { passwordHash: string }): Result<string, ValidationError> {
-    if (!passwordHash || passwordHash.trim().length === 0) {
+    if (!passwordHash || passwordHash.trim().length === 0)
       return Err(ValidationError.forField({ field: 'password', message: 'Password hash is required' }))
-    }
     return Ok(passwordHash)
   }
 
@@ -69,33 +74,22 @@ export class User {
    */
   static create(data: CreateUserData): Result<User, ValidationError> {
     // 1. ID Validation
-    if (!IdUtils.isValid(data.id)) {
+    if (!IdUtils.isValid(data.id))
       return Err(
-        ValidationError.create({
-          message: 'Invalid User ID format',
-          metadata: { field: 'id', value: data.id },
-        }),
+        ValidationError.create({ message: 'Invalid User ID format', metadata: { field: 'id', value: data.id } }),
       )
-    }
+
     // 2. Email Validation
     const emailResult = Email.create({ value: data.email })
-    if (!emailResult.ok) {
-      return Err(emailResult.error)
-    }
+    if (!emailResult.ok) return Err(emailResult.error)
 
     // 3. Password Validation
-    const passwordResult = User.validatePasswordHash({
-      passwordHash: data.passwordHash,
-    })
-    if (!passwordResult.ok) {
-      return Err(passwordResult.error)
-    }
+    const passwordResult = User.validatePasswordHash({ passwordHash: data.passwordHash })
+    if (!passwordResult.ok) return Err(passwordResult.error)
 
     // 4. Role Validation
     const roleResult = Role.create({ value: data.role })
-    if (!roleResult.ok) {
-      return Err(roleResult.error)
-    }
+    if (!roleResult.ok) return Err(roleResult.error)
 
     return Ok(
       new User({

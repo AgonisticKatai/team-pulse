@@ -50,7 +50,13 @@ export interface IUserRepository {
    * @param limit - Number of items per page
    * @returns Result with paginated users and total count, or RepositoryError if operation fails
    */
-  findAllPaginated({ page, limit }: { page: number; limit: number }): Promise<Result<{ users: User[]; total: number }, RepositoryError>>
+  findAllPaginated({
+    page,
+    limit,
+  }: {
+    page: number
+    limit: number
+  }): Promise<Result<{ users: User[]; total: number }, RepositoryError>>
 
   /**
    * Save a user (create or update)

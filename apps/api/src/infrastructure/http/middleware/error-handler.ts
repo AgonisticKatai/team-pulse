@@ -33,7 +33,15 @@ import type { FastifyReply } from 'fastify'
  * @param reply - Fastify reply object
  * @param logger - Logger instance (ILogger interface)
  */
-export function handleError({ error, reply, logger }: { error: unknown; reply: FastifyReply; logger: ILogger }): FastifyReply {
+export function handleError({
+  error,
+  reply,
+  logger,
+}: {
+  error: unknown
+  reply: FastifyReply
+  logger: ILogger
+}): FastifyReply {
   // Use framework-agnostic ErrorHandler from shared package
   const errorHandler = ErrorHandler.create({ logger })
   const result = errorHandler.handle({ error })

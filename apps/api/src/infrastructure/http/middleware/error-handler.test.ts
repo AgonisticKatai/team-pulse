@@ -113,7 +113,9 @@ describe('FastifyErrorHandler', () => {
       handleError({ error, logger: mockLogger, reply: mockReply })
 
       // Assert
-      expect(mockReply.code).toHaveBeenCalledWith(TEST_CONSTANTS.errorTestData.handler.httpStatusCodes.internalServerError)
+      expect(mockReply.code).toHaveBeenCalledWith(
+        TEST_CONSTANTS.errorTestData.handler.httpStatusCodes.internalServerError,
+      )
       expect(mockReply.send).toHaveBeenCalledWith({
         error: {
           code: 'INTERNAL_ERROR',

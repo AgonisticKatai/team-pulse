@@ -69,44 +69,45 @@ export class LoginUseCase {
     return new LoginUseCase({ metricsService, passwordHasher, refreshTokenRepository, tokenFactory, userRepository })
   }
 
-  async execute({ dto }: { dto: LoginDTO }): Promise<Result<LoginResponseDTO, AuthenticationError | RepositoryError | ValidationError>> {
+  async execute({
+    dto,
+  }: {
+    dto: LoginDTO
+  }): Promise<Result<LoginResponseDTO, AuthenticationError | RepositoryError | ValidationError>> {
     const findUserResult = await this.userRepository.findByEmail({ email: dto.email })
 
-    if (!findUserResult.ok) {
-      return Err(findUserResult.error)
-    }
+    if (!findUserResult.ok) return Err(findUserResult.error)
 
-    if (!findUserResult.value) {
+    if (!findUserResult.value)
       return Err(
-        AuthenticationError.create({ message: 'Invalid email or password', metadata: { field: 'credentials', reason: 'invalid_credentials' } }),
+        AuthenticationError.create({
+          message: 'Invalid email or password',
+          metadata: { field: 'credentials', reason: 'invalid_credentials' },
+        }),
       )
-    }
 
-    const verifyResult = await this.passwordHasher.verify({ hash: findUserResult.value.getPasswordHash(), password: dto.password })
+    const verifyResult = await this.passwordHasher.verify({
+      hash: findUserResult.value.getPasswordHash(),
+      password: dto.password,
+    })
 
-    if (!verifyResult.ok) {
-      return Err(verifyResult.error)
-    }
+    if (!verifyResult.ok) return Err(verifyResult.error)
 
-    if (!verifyResult.value) {
+    if (!verifyResult.value)
       return Err(
-        AuthenticationError.create({ message: 'Invalid email or password', metadata: { field: 'credentials', reason: 'invalid_credentials' } }),
+        AuthenticationError.create({
+          message: 'Invalid email or password',
+          metadata: { field: 'credentials', reason: 'invalid_credentials' },
+        }),
       )
-    }
 
     const refreshTokenResult = this.tokenFactory.createRefreshToken({ userId: findUserResult.value.id })
 
-    if (!refreshTokenResult.ok) {
-      return Err(refreshTokenResult.error)
-    }
+    if (!refreshTokenResult.ok) return Err(refreshTokenResult.error)
 
-    const refreshToken = refreshTokenResult.value
+    const saveResult = await this.refreshTokenRepository.save({ refreshToken: refreshTokenResult.value })
 
-    const saveResult = await this.refreshTokenRepository.save({ refreshToken })
-
-    if (!saveResult.ok) {
-      return Err(saveResult.error)
-    }
+    if (!saveResult.ok) return Err(saveResult.error)
 
     const accessTokenResult = this.tokenFactory.createAccessToken({
       email: findUserResult.value.email,
@@ -114,15 +115,13 @@ export class LoginUseCase {
       userId: findUserResult.value.id,
     })
 
-    if (!accessTokenResult.ok) {
-      return Err(accessTokenResult.error)
-    }
+    if (!accessTokenResult.ok) return Err(accessTokenResult.error)
 
     this.metricsService.recordLogin({ role: findUserResult.value.role.getValue() })
 
     return Ok({
       accessToken: accessTokenResult.value,
-      refreshToken: refreshToken.token,
+      refreshToken: refreshTokenResult.value.token,
       user: findUserResult.value.toDTO(),
     })
   }

@@ -25,7 +25,11 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
 
   async findByToken({ token }: { token: string }): Promise<Result<RefreshToken | null, RepositoryError>> {
     try {
-      const [refreshToken] = await this.db.select().from(refreshTokensSchema).where(eq(refreshTokensSchema.token, token)).limit(1)
+      const [refreshToken] = await this.db
+        .select()
+        .from(refreshTokensSchema)
+        .where(eq(refreshTokensSchema.token, token))
+        .limit(1)
 
       if (!refreshToken) {
         return Ok(null)
@@ -35,7 +39,11 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
 
       if (!domainResult.ok) {
         return Err(
-          RepositoryError.forOperation({ cause: domainResult.error, message: 'Failed to map refresh token to domain', operation: 'findByToken' }),
+          RepositoryError.forOperation({
+            cause: domainResult.error,
+            message: 'Failed to map refresh token to domain',
+            operation: 'findByToken',
+          }),
         )
       }
 
@@ -56,15 +64,24 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
     try {
       // Drizzle accepts 'UserId' here because under the hood it's a string.
       // TypeScript allows passing a "more specific" type (UserId) where a "more generic" type (string) is expected.
-      const refreshTokens = await this.db.select().from(refreshTokensSchema).where(eq(refreshTokensSchema.userId, userId))
+      const refreshTokens = await this.db
+        .select()
+        .from(refreshTokensSchema)
+        .where(eq(refreshTokensSchema.userId, userId))
 
-      const mappedResults = refreshTokens.map((row: typeof refreshTokensSchema.$inferSelect) => this.mapToDomain({ refreshToken: row }))
+      const mappedResults = refreshTokens.map((row: typeof refreshTokensSchema.$inferSelect) =>
+        this.mapToDomain({ refreshToken: row }),
+      )
 
       const collectedResult = collect(mappedResults)
 
       if (!collectedResult.ok) {
         return Err(
-          RepositoryError.forOperation({ cause: collectedResult.error, message: 'Failed to map refresh token to domain', operation: 'findByUserId' }),
+          RepositoryError.forOperation({
+            cause: collectedResult.error,
+            message: 'Failed to map refresh token to domain',
+            operation: 'findByUserId',
+          }),
         )
       }
 
@@ -97,7 +114,10 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
       await this.db
         .insert(refreshTokensSchema)
         .values(row)
-        .onConflictDoUpdate({ set: { expiresAt: row.expiresAt, token: row.token, userId: row.userId }, target: refreshTokensSchema.id })
+        .onConflictDoUpdate({
+          set: { expiresAt: row.expiresAt, token: row.token, userId: row.userId },
+          target: refreshTokensSchema.id,
+        })
 
       return Ok(refreshToken)
     } catch (error) {
@@ -163,7 +183,11 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
    * HYDRATION:
    * Converts raw DB strings back to Branded Types using IdUtils.toId()
    */
-  private mapToDomain({ refreshToken }: { refreshToken: typeof refreshTokensSchema.$inferSelect }): Result<RefreshToken, ValidationError> {
+  private mapToDomain({
+    refreshToken,
+  }: {
+    refreshToken: typeof refreshTokensSchema.$inferSelect
+  }): Result<RefreshToken, ValidationError> {
     // If the DB has an invalid ID (corrupted data), IdUtils will throw an error.
     // Since we are inside a try/catch in the public methods (findBy...),
     return RefreshToken.create({

@@ -171,7 +171,10 @@ export class Container {
    */
   get listTeamsUseCase(): ListTeamsUseCase {
     if (!this._listTeamsUseCase) {
-      this._listTeamsUseCase = ListTeamsUseCase.create({ metricsService: this.metricsService, teamRepository: this.teamRepository })
+      this._listTeamsUseCase = ListTeamsUseCase.create({
+        metricsService: this.metricsService,
+        teamRepository: this.teamRepository,
+      })
     }
     return this._listTeamsUseCase
   }
@@ -256,7 +259,10 @@ export class Container {
    */
   get listUsersUseCase(): ListUsersUseCase {
     if (!this._listUsersUseCase) {
-      this._listUsersUseCase = ListUsersUseCase.create({ metricsService: this.metricsService, userRepository: this.userRepository })
+      this._listUsersUseCase = ListUsersUseCase.create({
+        metricsService: this.metricsService,
+        userRepository: this.userRepository,
+      })
     }
     return this._listUsersUseCase
   }

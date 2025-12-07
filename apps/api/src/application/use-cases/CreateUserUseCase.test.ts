@@ -20,7 +20,12 @@ describe('CreateUserUseCase', () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
-    userRepository = { existsByEmail: vi.fn(), findAllPaginated: vi.fn(), findByEmail: vi.fn(), save: vi.fn() } as unknown as IUserRepository
+    userRepository = {
+      existsByEmail: vi.fn(),
+      findAllPaginated: vi.fn(),
+      findByEmail: vi.fn(),
+      save: vi.fn(),
+    } as unknown as IUserRepository
     passwordHasher = {
       hash: vi.fn(() => Promise.resolve(Ok(TEST_CONSTANTS.users.johnDoe.passwordHash))),
       verify: vi.fn(),
@@ -177,7 +182,10 @@ describe('CreateUserUseCase', () => {
       it('should return RepositoryError when findByEmail fails', async () => {
         // Arrange
         const dto = buildCreateUserDTO()
-        const repositoryError = RepositoryError.forOperation({ message: 'Database connection lost', operation: 'findByEmail' })
+        const repositoryError = RepositoryError.forOperation({
+          message: 'Database connection lost',
+          operation: 'findByEmail',
+        })
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Err(repositoryError))
 

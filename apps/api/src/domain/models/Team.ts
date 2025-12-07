@@ -35,14 +35,10 @@ export class Team {
   }: {
     foundedYear: number | null | undefined
   }): Result<FoundedYear | null, ValidationError> {
-    if (foundedYear === null || foundedYear === undefined) {
-      return Ok(null)
-    }
+    if (foundedYear === null || foundedYear === undefined) return Ok(null)
 
     const result = FoundedYear.create({ value: foundedYear })
-    if (!result.ok) {
-      return Err(result.error)
-    }
+    if (!result.ok) return Err(result.error)
 
     return Ok(result.value)
   }
@@ -52,14 +48,11 @@ export class Team {
    */
   static create(data: TeamFactoryInput): Result<Team, ValidationError> {
     // 1. ID Validation
-    if (!IdUtils.isValid(data.id)) {
+    if (!IdUtils.isValid(data.id))
       return Err(
-        ValidationError.create({
-          message: 'Invalid Team ID format',
-          metadata: { field: 'id', value: data.id },
-        }),
+        ValidationError.create({ message: 'Invalid Team ID format', metadata: { field: 'id', value: data.id } }),
       )
-    }
+
     // 2. Name Validation
     const nameResult = TeamName.create({ value: data.name })
     if (!nameResult.ok) return Err(nameResult.error)
@@ -69,9 +62,7 @@ export class Team {
     if (!cityResult.ok) return Err(cityResult.error)
 
     // 4. foundedYear Validation
-    const foundedYearResult = Team.validateOptionalFoundedYear({
-      foundedYear: data.foundedYear,
-    })
+    const foundedYearResult = Team.validateOptionalFoundedYear({ foundedYear: data.foundedYear })
     if (!foundedYearResult.ok) return Err(foundedYearResult.error)
 
     return Ok(

@@ -160,7 +160,10 @@ export function expectMockCallArg<T>(mockFn: { mock: { calls: unknown[][] } }, c
   const calls = mockFn.mock.calls
 
   // 1. Verify the function was actually called enough times
-  expect(calls.length, `Expected mock to be called at least ${callIndex + 1} times, but was called ${calls.length} times`).toBeGreaterThan(callIndex)
+  expect(
+    calls.length,
+    `Expected mock to be called at least ${callIndex + 1} times, but was called ${calls.length} times`,
+  ).toBeGreaterThan(callIndex)
 
   const args = calls[callIndex]
 
@@ -170,7 +173,9 @@ export function expectMockCallArg<T>(mockFn: { mock: { calls: unknown[][] } }, c
   assertDefined(args, `Mock call #${callIndex} arguments structure is undefined`)
 
   // Now TypeScript knows 'args' is 'unknown[]' (not undefined)
-  expect(args.length, `Expected mock call #${callIndex} to have at least ${argIndex + 1} arguments`).toBeGreaterThan(argIndex)
+  expect(args.length, `Expected mock call #${callIndex} to have at least ${argIndex + 1} arguments`).toBeGreaterThan(
+    argIndex,
+  )
 
   // 3. Return the argument
   // No '!' needed because TS knows 'args' exists.
@@ -193,7 +198,10 @@ export function expectMockInvocationOrder(mockFn: { mock: { invocationCallOrder:
 /**
  * Type-safe helper to validate Zod schema errors
  */
-export function expectZodError(result: { success: boolean; error?: { issues: Array<{ message: string }> } }, expectedMessage: string): void {
+export function expectZodError(
+  result: { success: boolean; error?: { issues: Array<{ message: string }> } },
+  expectedMessage: string,
+): void {
   expect(result.success).toBe(false)
 
   if (!result.success && result.error) {

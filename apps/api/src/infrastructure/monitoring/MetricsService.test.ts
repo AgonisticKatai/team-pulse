@@ -272,7 +272,12 @@ describe('MetricsService', () => {
     })
 
     it('should handle queries on different tables', async () => {
-      const tables = [prometheus.db.tables.users, prometheus.db.tables.teams, prometheus.db.tables.refreshTokens, prometheus.db.tables.refreshTokens]
+      const tables = [
+        prometheus.db.tables.users,
+        prometheus.db.tables.teams,
+        prometheus.db.tables.refreshTokens,
+        prometheus.db.tables.refreshTokens,
+      ]
 
       for (const table of tables) {
         service.recordDbQuery({
@@ -352,7 +357,9 @@ describe('MetricsService', () => {
 
       expect(metrics).toContain(`${METRIC_CONFIG.BUSINESS.USERS_TOTAL.name} ${prometheus.business.counts.huge}`)
       expect(metrics).not.toContain(`${METRIC_CONFIG.BUSINESS.USERS_TOTAL.name} ${prometheus.business.counts.large}`)
-      expect(metrics).not.toContain(`${METRIC_CONFIG.BUSINESS.USERS_TOTAL.name} ${prometheus.business.counts.veryLarge}`)
+      expect(metrics).not.toContain(
+        `${METRIC_CONFIG.BUSINESS.USERS_TOTAL.name} ${prometheus.business.counts.veryLarge}`,
+      )
     })
 
     it('should handle zero users', async () => {
@@ -445,8 +452,12 @@ describe('MetricsService', () => {
       service.reset()
       const metricsAfterReset = await service.getMetrics()
 
-      expect(metricsAfterReset).toContain(`${METRIC_CONFIG.BUSINESS.USERS_TOTAL.name} ${prometheus.business.counts.zero}`)
-      expect(metricsAfterReset).toContain(`${METRIC_CONFIG.BUSINESS.TEAMS_TOTAL.name} ${prometheus.business.counts.zero}`)
+      expect(metricsAfterReset).toContain(
+        `${METRIC_CONFIG.BUSINESS.USERS_TOTAL.name} ${prometheus.business.counts.zero}`,
+      )
+      expect(metricsAfterReset).toContain(
+        `${METRIC_CONFIG.BUSINESS.TEAMS_TOTAL.name} ${prometheus.business.counts.zero}`,
+      )
     })
 
     it('should allow recording new metrics after reset', async () => {

@@ -125,7 +125,13 @@ export class PrometheusMetricsFactory implements IMetricsFactory {
   /**
    * Wrap Prometheus metrics with our domain adapters
    */
-  private wrapWithAdapters({ promRegistry, nativeMetrics }: { promRegistry: Registry; nativeMetrics: NativeMetrics }): MetricsCollection {
+  private wrapWithAdapters({
+    promRegistry,
+    nativeMetrics,
+  }: {
+    promRegistry: Registry
+    nativeMetrics: NativeMetrics
+  }): MetricsCollection {
     return {
       dbQueryDuration: PrometheusHistogram.create({ histogram: nativeMetrics.dbQueryDuration }),
       dbQueryErrors: PrometheusCounter.create({ counter: nativeMetrics.dbQueryErrors }),

@@ -71,7 +71,9 @@ describe('Correlation ID Middleware - Critical Integration Tests', () => {
     })
 
     expect(response.headers['x-correlation-id']).toBeDefined()
-    expect(response.headers['x-correlation-id']).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
+    expect(response.headers['x-correlation-id']).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+    )
   })
 
   it('should preserve client-provided correlation ID', async () => {

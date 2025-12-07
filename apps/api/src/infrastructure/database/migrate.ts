@@ -50,7 +50,9 @@ export async function runMigrations(dbUrl: string): Promise<void> {
     // Verify migrations folder exists before attempting to run migrations
     // This prevents obscure errors in production if the folder wasn't copied to the build
     if (!existsSync(migrationsPath)) {
-      throw new Error(`Migrations folder not found: ${migrationsPath}. Ensure the drizzle/ folder is copied to your build output.`)
+      throw new Error(
+        `Migrations folder not found: ${migrationsPath}. Ensure the drizzle/ folder is copied to your build output.`,
+      )
     }
 
     // biome-ignore lint/suspicious/noConsole: migrations need console output for debugging

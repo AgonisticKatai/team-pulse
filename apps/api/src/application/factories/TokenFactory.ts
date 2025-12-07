@@ -112,7 +112,15 @@ export class TokenFactory {
   /**
    * Create a new access token
    */
-  createAccessToken({ email, role, userId }: { email: Email; role: Role; userId: UserId }): Result<string, AuthenticationError> {
+  createAccessToken({
+    email,
+    role,
+    userId,
+  }: {
+    email: Email
+    role: Role
+    userId: UserId
+  }): Result<string, AuthenticationError> {
     try {
       // Prepare strict payload
       const payload: Omit<AccessTokenPayload, 'iat' | 'exp' | 'aud' | 'iss'> = {
@@ -147,9 +155,7 @@ export class TokenFactory {
 
       // 2. SAFETY CHECK: jwt.verify can return string if the payload is not JSON.
       // This is improbable in your app, but TypeScript appreciates it.
-      if (typeof decoded === 'string') {
-        throw new Error('Invalid token payload type (string)')
-      }
+      if (typeof decoded === 'string') throw new Error('Invalid token payload type (string)')
 
       // 3. CAST: Cast to 'unknown' instead of 'any'.
       // This tells the linter: "I don't know what this is, but I promise to check it before using it"
@@ -187,9 +193,7 @@ export class TokenFactory {
 
       // 2. SAFETY CHECK: jwt.verify can return string if the payload is not JSON.
       // This is improbable in your app, but TypeScript appreciates it.
-      if (typeof decoded === 'string') {
-        throw new Error('Invalid token payload type (string)')
-      }
+      if (typeof decoded === 'string') throw new Error('Invalid token payload type (string)')
 
       // 3. CAST: Cast to 'unknown' instead of 'any'.
       // This tells the linter: "I don't know what this is, but I promise to check it before using it"

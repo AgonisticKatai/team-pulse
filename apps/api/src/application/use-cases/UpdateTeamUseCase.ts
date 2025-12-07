@@ -30,37 +30,26 @@ export class UpdateTeamUseCase {
   }): Promise<Result<TeamResponseDTO, ConflictError | NotFoundError | ValidationError | RepositoryError>> {
     const findTeamResult = await this.teamRepository.findById({ id })
 
-    if (!findTeamResult.ok) {
-      return Err(findTeamResult.error)
-    }
+    if (!findTeamResult.ok) return Err(findTeamResult.error)
 
-    if (!findTeamResult.value) {
-      return Err(NotFoundError.forResource({ identifier: id, resource: 'Team' }))
-    }
+    if (!findTeamResult.value) return Err(NotFoundError.forResource({ identifier: id, resource: 'Team' }))
 
     if (dto.name && dto.name !== findTeamResult.value.name.getValue()) {
       const findTeamResult = await this.teamRepository.findByName({ name: dto.name })
 
-      if (!findTeamResult.ok) {
-        return Err(findTeamResult.error)
-      }
+      if (!findTeamResult.ok) return Err(findTeamResult.error)
 
-      if (findTeamResult.value && findTeamResult.value.id !== id) {
+      if (findTeamResult.value && findTeamResult.value.id !== id)
         return Err(ConflictError.duplicate({ identifier: dto.name, resource: 'Team' }))
-      }
     }
 
     const updateResult = findTeamResult.value.update({ city: dto.city, foundedYear: dto.foundedYear, name: dto.name })
 
-    if (!updateResult.ok) {
-      return Err(updateResult.error)
-    }
+    if (!updateResult.ok) return Err(updateResult.error)
 
     const saveResult = await this.teamRepository.save({ team: updateResult.value })
 
-    if (!saveResult.ok) {
-      return Err(saveResult.error)
-    }
+    if (!saveResult.ok) return Err(saveResult.error)
 
     return Ok(saveResult.value.toDTO())
   }

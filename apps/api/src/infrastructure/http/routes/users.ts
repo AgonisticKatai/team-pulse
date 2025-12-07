@@ -38,30 +38,34 @@ export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserR
    *
    * Requires: SUPER_ADMIN or ADMIN role
    */
-  fastify.post('/api/users', { preHandler: [requireAuth({ tokenFactory }), requireRole(['SUPER_ADMIN', 'ADMIN'])] }, async (request, reply) => {
-    try {
-      // Validate request body using Zod
-      const dto = CreateUserDTOSchema.parse(request.body)
+  fastify.post(
+    '/api/users',
+    { preHandler: [requireAuth({ tokenFactory }), requireRole(['SUPER_ADMIN', 'ADMIN'])] },
+    async (request, reply) => {
+      try {
+        // Validate request body using Zod
+        const dto = CreateUserDTOSchema.parse(request.body)
 
-      // Execute use case
-      const result = await createUserUseCase.execute({ dto })
+        // Execute use case
+        const result = await createUserUseCase.execute({ dto })
 
-      // Handle Result type
-      if (!result.ok) {
+        // Handle Result type
+        if (!result.ok) {
+          const logger = FastifyLogger.create({ logger: request.log })
+          return handleError({ error: result.error, logger, reply })
+        }
+
+        // Return success response
+        return reply.code(201).send({
+          data: result.value,
+          success: true,
+        })
+      } catch (error) {
         const logger = FastifyLogger.create({ logger: request.log })
-        return handleError({ error: result.error, logger, reply })
+        return handleError({ error, logger, reply })
       }
-
-      // Return success response
-      return reply.code(201).send({
-        data: result.value,
-        success: true,
-      })
-    } catch (error) {
-      const logger = FastifyLogger.create({ logger: request.log })
-      return handleError({ error, logger, reply })
-    }
-  })
+    },
+  )
 
   /**
    * GET /api/users
@@ -73,26 +77,30 @@ export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserR
    *
    * Requires: SUPER_ADMIN or ADMIN role
    */
-  fastify.get('/api/users', { preHandler: [requireAuth({ tokenFactory }), requireRole(['SUPER_ADMIN', 'ADMIN'])] }, async (request, reply) => {
-    try {
-      // Parse and validate pagination query params
-      const { page, limit } = PaginationQuerySchema.parse(request.query)
+  fastify.get(
+    '/api/users',
+    { preHandler: [requireAuth({ tokenFactory }), requireRole(['SUPER_ADMIN', 'ADMIN'])] },
+    async (request, reply) => {
+      try {
+        // Parse and validate pagination query params
+        const { page, limit } = PaginationQuerySchema.parse(request.query)
 
-      const result = await listUsersUseCase.execute({ dto: { limit, page } })
+        const result = await listUsersUseCase.execute({ dto: { limit, page } })
 
-      // Handle Result type
-      if (!result.ok) {
+        // Handle Result type
+        if (!result.ok) {
+          const logger = FastifyLogger.create({ logger: request.log })
+          return handleError({ error: result.error, logger, reply })
+        }
+
+        return reply.code(200).send({
+          data: result.value,
+          success: true,
+        })
+      } catch (error) {
         const logger = FastifyLogger.create({ logger: request.log })
-        return handleError({ error: result.error, logger, reply })
+        return handleError({ error, logger, reply })
       }
-
-      return reply.code(200).send({
-        data: result.value,
-        success: true,
-      })
-    } catch (error) {
-      const logger = FastifyLogger.create({ logger: request.log })
-      return handleError({ error, logger, reply })
-    }
-  })
+    },
+  )
 }

@@ -40,7 +40,13 @@ export class AuthorizationError extends ApplicationError {
   /**
    * Create an error for insufficient permissions
    */
-  static insufficientPermissions({ required, actual }: { required: string | string[]; actual?: string }): AuthorizationError {
+  static insufficientPermissions({
+    required,
+    actual,
+  }: {
+    required: string | string[]
+    actual?: string
+  }): AuthorizationError {
     const requiredPermissions = Array.isArray(required) ? required : [required]
 
     return new AuthorizationError({

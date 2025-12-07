@@ -47,7 +47,17 @@ export class LintCheckUseCase {
     return `pnpm --filter @team-pulse/${pkg} ${lintCommand}`
   }
 
-  private formatOutput({ pkg, fix, stdout, stderr }: { pkg: LintPackageTarget; fix: boolean; stdout: string; stderr: string }): string {
+  private formatOutput({
+    pkg,
+    fix,
+    stdout,
+    stderr,
+  }: {
+    pkg: LintPackageTarget
+    fix: boolean
+    stdout: string
+    stderr: string
+  }): string {
     const action = fix ? 'Lint Fix' : 'Lint Check'
     let output = `${action} Results for ${pkg}:\n\n`
     output += stdout

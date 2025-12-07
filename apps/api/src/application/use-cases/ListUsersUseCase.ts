@@ -31,39 +31,43 @@ export class ListUsersUseCase {
   private readonly metricsService: IMetricsService
   private readonly userRepository: IUserRepository
 
-  private constructor({ metricsService, userRepository }: { metricsService: IMetricsService; userRepository: IUserRepository }) {
+  private constructor({
+    metricsService,
+    userRepository,
+  }: { metricsService: IMetricsService; userRepository: IUserRepository }) {
     this.metricsService = metricsService
     this.userRepository = userRepository
   }
 
-  static create({ metricsService, userRepository }: { metricsService: IMetricsService; userRepository: IUserRepository }): ListUsersUseCase {
+  static create({
+    metricsService,
+    userRepository,
+  }: {
+    metricsService: IMetricsService
+    userRepository: IUserRepository
+  }): ListUsersUseCase {
     return new ListUsersUseCase({ metricsService, userRepository })
   }
 
-  async execute({ dto }: { dto: PaginationQuery }): Promise<Result<UsersListResponseDTO, RepositoryError | ValidationError>> {
+  async execute({
+    dto,
+  }: {
+    dto: PaginationQuery
+  }): Promise<Result<UsersListResponseDTO, RepositoryError | ValidationError>> {
     const { page = 1, limit = 10 } = dto
 
     const findUserResult = await this.userRepository.findAllPaginated({ limit, page })
 
-    if (!findUserResult.ok) {
-      return Err(findUserResult.error)
-    }
+    if (!findUserResult.ok) return Err(findUserResult.error)
 
     const { users, total } = findUserResult.value
 
-    // Update users_total metric
     this.metricsService.setUsersTotal({ count: total })
 
-    // Create Pagination Value Object with validation
     const paginationResult = Pagination.create({ limit, page, total })
 
-    if (!paginationResult.ok) {
-      return Err(paginationResult.error)
-    }
+    if (!paginationResult.ok) return Err(paginationResult.error)
 
-    return Ok({
-      pagination: paginationResult.value.toDTO(),
-      users: users.map((user) => user.toDTO()),
-    })
+    return Ok({ pagination: paginationResult.value.toDTO(), users: users.map((user) => user.toDTO()) })
   }
 }

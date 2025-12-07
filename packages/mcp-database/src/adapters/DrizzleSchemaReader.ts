@@ -79,7 +79,9 @@ export class DrizzleSchemaReader implements ISchemaReader {
 
       return Ok(journal)
     } catch (error) {
-      return Err(new Error(`Failed to read migrations history: ${error instanceof Error ? error.message : String(error)}`))
+      return Err(
+        new Error(`Failed to read migrations history: ${error instanceof Error ? error.message : String(error)}`),
+      )
     }
   }
 }

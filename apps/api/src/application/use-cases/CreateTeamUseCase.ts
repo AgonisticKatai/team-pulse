@@ -37,28 +37,29 @@ export class CreateTeamUseCase {
     return new CreateTeamUseCase({ teamRepository })
   }
 
-  async execute({ dto }: { dto: CreateTeamDTO }): Promise<Result<TeamResponseDTO, ConflictError | RepositoryError | ValidationError>> {
+  async execute({
+    dto,
+  }: {
+    dto: CreateTeamDTO
+  }): Promise<Result<TeamResponseDTO, ConflictError | RepositoryError | ValidationError>> {
     const findTeamResult = await this.teamRepository.findByName({ name: dto.name })
 
-    if (!findTeamResult.ok) {
-      return Err(findTeamResult.error)
-    }
+    if (!findTeamResult.ok) return Err(findTeamResult.error)
 
-    if (findTeamResult.value) {
-      return Err(ConflictError.duplicate({ identifier: dto.name, resource: 'Team' }))
-    }
+    if (findTeamResult.value) return Err(ConflictError.duplicate({ identifier: dto.name, resource: 'Team' }))
 
-    const createTeamResult = Team.create({ city: dto.city, foundedYear: dto.foundedYear ?? undefined, id: randomUUID(), name: dto.name })
+    const createTeamResult = Team.create({
+      city: dto.city,
+      foundedYear: dto.foundedYear ?? undefined,
+      id: randomUUID(),
+      name: dto.name,
+    })
 
-    if (!createTeamResult.ok) {
-      return Err(createTeamResult.error)
-    }
+    if (!createTeamResult.ok) return Err(createTeamResult.error)
 
     const saveTeamResult = await this.teamRepository.save({ team: createTeamResult.value })
 
-    if (!saveTeamResult.ok) {
-      return Err(saveTeamResult.error)
-    }
+    if (!saveTeamResult.ok) return Err(saveTeamResult.error)
 
     return Ok(saveTeamResult.value.toDTO())
   }

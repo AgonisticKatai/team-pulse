@@ -41,7 +41,15 @@ export class GetTestCoverageUseCase {
     return `pnpm --filter @team-pulse/${pkg} test:coverage`
   }
 
-  private formatOutput({ pkg, stdout, stderr }: { pkg: CoveragePackageTarget; stdout: string; stderr: string }): string {
+  private formatOutput({
+    pkg,
+    stdout,
+    stderr,
+  }: {
+    pkg: CoveragePackageTarget
+    stdout: string
+    stderr: string
+  }): string {
     let output = `Coverage Report for ${pkg}:\n\n`
     output += stdout
 

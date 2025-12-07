@@ -33,7 +33,15 @@ export class ExternalServiceError extends ApplicationError {
   /**
    * Create an external service error
    */
-  static create({ message, service, metadata }: { message: string; service?: string; metadata?: Record<string, unknown> }): ExternalServiceError {
+  static create({
+    message,
+    service,
+    metadata,
+  }: {
+    message: string
+    service?: string
+    metadata?: Record<string, unknown>
+  }): ExternalServiceError {
     return new ExternalServiceError({
       message,
       metadata: {

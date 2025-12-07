@@ -59,7 +59,11 @@ export class DrizzleUserRepository implements IUserRepository {
   async findByEmail({ email }: { email: string }): Promise<Result<User | null, RepositoryError>> {
     try {
       // Case-insensitive email search
-      const [user] = await this.db.select().from(usersSchema).where(sql`LOWER(${usersSchema.email}) = LOWER(${email})`).limit(1)
+      const [user] = await this.db
+        .select()
+        .from(usersSchema)
+        .where(sql`LOWER(${usersSchema.email}) = LOWER(${email})`)
+        .limit(1)
 
       if (!user) {
         return Ok(null)
@@ -119,7 +123,13 @@ export class DrizzleUserRepository implements IUserRepository {
     }
   }
 
-  async findAllPaginated({ page, limit }: { page: number; limit: number }): Promise<Result<{ users: User[]; total: number }, RepositoryError>> {
+  async findAllPaginated({
+    page,
+    limit,
+  }: {
+    page: number
+    limit: number
+  }): Promise<Result<{ users: User[]; total: number }, RepositoryError>> {
     try {
       const offset = (page - 1) * limit
 
@@ -213,7 +223,11 @@ export class DrizzleUserRepository implements IUserRepository {
 
   async existsByEmail({ email }: { email: string }): Promise<Result<boolean, RepositoryError>> {
     try {
-      const rows = await this.db.select({ id: usersSchema.id }).from(usersSchema).where(sql`LOWER(${usersSchema.email}) = LOWER(${email})`).limit(1)
+      const rows = await this.db
+        .select({ id: usersSchema.id })
+        .from(usersSchema)
+        .where(sql`LOWER(${usersSchema.email}) = LOWER(${email})`)
+        .limit(1)
 
       return Ok(rows.length > 0)
     } catch (error) {

@@ -3,7 +3,13 @@ import { RefreshTokenUseCase } from '@application/use-cases/RefreshTokenUseCase.
 import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import { faker } from '@faker-js/faker'
-import { buildAdminUser, buildExpiredRefreshToken, buildSuperAdminUser, buildUser, buildValidRefreshToken } from '@infrastructure/testing/index.js'
+import {
+  buildAdminUser,
+  buildExpiredRefreshToken,
+  buildSuperAdminUser,
+  buildUser,
+  buildValidRefreshToken,
+} from '@infrastructure/testing/index.js'
 import { IdUtils, type RefreshTokenId } from '@team-pulse/shared/domain/ids'
 import { AuthenticationError, RepositoryError } from '@team-pulse/shared/errors'
 import { Err, Ok } from '@team-pulse/shared/result'
@@ -116,7 +122,11 @@ describe('RefreshTokenUseCase', () => {
         const result = await refreshTokenUseCase.execute({ dto })
 
         expectSuccess(result)
-        expect(tokenFactory.createAccessToken).toHaveBeenCalledWith({ email: mockUser.email, role: mockUser.role, userId: mockUser.id })
+        expect(tokenFactory.createAccessToken).toHaveBeenCalledWith({
+          email: mockUser.email,
+          role: mockUser.role,
+          userId: mockUser.id,
+        })
       })
     })
 
@@ -164,7 +174,11 @@ describe('RefreshTokenUseCase', () => {
         vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
         vi.mocked(refreshTokenRepository.deleteByToken).mockResolvedValue(
           Err(
-            RepositoryError.forOperation({ cause: new Error('Database error'), message: 'Failed to delete old token', operation: 'deleteByToken' }),
+            RepositoryError.forOperation({
+              cause: new Error('Database error'),
+              message: 'Failed to delete old token',
+              operation: 'deleteByToken',
+            }),
           ),
         )
 
@@ -191,7 +205,9 @@ describe('RefreshTokenUseCase', () => {
 
         // Mocks
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(storedEntity))
-        vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(Ok({ tokenId: maliciousPayloadId, userId: mockUser.id }))
+        vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(
+          Ok({ tokenId: maliciousPayloadId, userId: mockUser.id }),
+        )
 
         // Act
         const result = await refreshTokenUseCase.execute({ dto })
@@ -204,7 +220,12 @@ describe('RefreshTokenUseCase', () => {
         const dto = buildRefreshTokenDTO()
 
         vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(
-          Err(AuthenticationError.create({ message: 'Invalid token signature', metadata: { field: 'refreshToken', reason: 'invalid_signature' } })),
+          Err(
+            AuthenticationError.create({
+              message: 'Invalid token signature',
+              metadata: { field: 'refreshToken', reason: 'invalid_signature' },
+            }),
+          ),
         )
 
         const result = await refreshTokenUseCase.execute({ dto })
@@ -253,7 +274,12 @@ describe('RefreshTokenUseCase', () => {
         const dto = buildRefreshTokenDTO()
 
         vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(
-          Err(AuthenticationError.create({ message: 'Invalid token format', metadata: { field: 'refreshToken', reason: 'invalid_format' } })),
+          Err(
+            AuthenticationError.create({
+              message: 'Invalid token format',
+              metadata: { field: 'refreshToken', reason: 'invalid_format' },
+            }),
+          ),
         )
 
         const result = await refreshTokenUseCase.execute({ dto })
@@ -267,7 +293,9 @@ describe('RefreshTokenUseCase', () => {
         const adminUser = buildAdminUser()
         const dto = buildRefreshTokenDTO()
 
-        vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(Ok({ tokenId: mockRefreshTokenEntity.id, userId: adminUser.id }))
+        vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(
+          Ok({ tokenId: mockRefreshTokenEntity.id, userId: adminUser.id }),
+        )
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshTokenEntity))
         vi.mocked(userRepository.findById).mockResolvedValue(Ok(adminUser))
 
@@ -280,7 +308,9 @@ describe('RefreshTokenUseCase', () => {
         const superAdminUser = buildSuperAdminUser()
         const dto = buildRefreshTokenDTO()
 
-        vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(Ok({ tokenId: mockRefreshTokenEntity.id, userId: superAdminUser.id }))
+        vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(
+          Ok({ tokenId: mockRefreshTokenEntity.id, userId: superAdminUser.id }),
+        )
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshTokenEntity))
         vi.mocked(userRepository.findById).mockResolvedValue(Ok(superAdminUser))
 
@@ -301,7 +331,12 @@ describe('RefreshTokenUseCase', () => {
 
         // Simulate signature failure (JWT invalid, logically not expired)
         vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(
-          Err(AuthenticationError.create({ message: 'Invalid access token', metadata: { field: 'refreshToken', reason: 'invalid_token' } })),
+          Err(
+            AuthenticationError.create({
+              message: 'Invalid access token',
+              metadata: { field: 'refreshToken', reason: 'invalid_token' },
+            }),
+          ),
         )
 
         // Act

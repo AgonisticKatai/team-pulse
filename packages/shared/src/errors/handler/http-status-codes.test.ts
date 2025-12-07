@@ -25,12 +25,16 @@ describe('http-status-codes', () => {
       expect(HTTP_STATUS.FORBIDDEN).toBe(TEST_CONSTANTS.errorTestData.handler.httpStatusCodes.forbidden)
       expect(HTTP_STATUS.NOT_FOUND).toBe(TEST_CONSTANTS.errorTestData.handler.httpStatusCodes.notFound)
       expect(HTTP_STATUS.CONFLICT).toBe(TEST_CONSTANTS.errorTestData.handler.httpStatusCodes.conflict)
-      expect(HTTP_STATUS.UNPROCESSABLE_ENTITY).toBe(TEST_CONSTANTS.errorTestData.handler.httpStatusCodes.unprocessableEntity)
+      expect(HTTP_STATUS.UNPROCESSABLE_ENTITY).toBe(
+        TEST_CONSTANTS.errorTestData.handler.httpStatusCodes.unprocessableEntity,
+      )
     })
 
     it('should define server error status codes', () => {
       // Assert
-      expect(HTTP_STATUS.INTERNAL_SERVER_ERROR).toBe(TEST_CONSTANTS.errorTestData.handler.httpStatusCodes.internalServerError)
+      expect(HTTP_STATUS.INTERNAL_SERVER_ERROR).toBe(
+        TEST_CONSTANTS.errorTestData.handler.httpStatusCodes.internalServerError,
+      )
       expect(HTTP_STATUS.BAD_GATEWAY).toBe(TEST_CONSTANTS.errorTestData.handler.httpStatusCodes.badGateway)
       expect(HTTP_STATUS.SERVICE_UNAVAILABLE).toBe(503)
     })

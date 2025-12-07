@@ -102,7 +102,11 @@ describe('TokenFactory', () => {
   describe('verifyAccessToken', () => {
     it('should verify a valid access token', () => {
       // Arrange
-      const createResult = tokenFactory.createAccessToken({ email: testUser.email, role: testUser.role, userId: testUser.id })
+      const createResult = tokenFactory.createAccessToken({
+        email: testUser.email,
+        role: testUser.role,
+        userId: testUser.id,
+      })
 
       const token = expectSuccess(createResult)
 
@@ -148,7 +152,11 @@ describe('TokenFactory', () => {
   describe('integration', () => {
     it('should work end-to-end for access tokens', () => {
       // Create token
-      const createResult = tokenFactory.createAccessToken({ email: testUser.email, role: testUser.role, userId: testUser.id })
+      const createResult = tokenFactory.createAccessToken({
+        email: testUser.email,
+        role: testUser.role,
+        userId: testUser.id,
+      })
 
       expect(createResult).toEqual(Ok(expect.any(String)))
 
@@ -205,7 +213,11 @@ describe('TokenFactory', () => {
 
     it('should not allow using access token as refresh token', () => {
       // Create access token
-      const createResult = tokenFactory.createAccessToken({ email: testUser.email, role: testUser.role, userId: testUser.id })
+      const createResult = tokenFactory.createAccessToken({
+        email: testUser.email,
+        role: testUser.role,
+        userId: testUser.id,
+      })
 
       const accessToken = expectSuccess(createResult)
 
