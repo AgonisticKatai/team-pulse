@@ -18,28 +18,14 @@ describe('CreateUserUseCase', () => {
   const mockUser = buildUser({ createdAt: TEST_CONSTANTS.mockDate, updatedAt: TEST_CONSTANTS.mockDate })
 
   beforeEach(() => {
-    // Reset all mocks before each test
     vi.clearAllMocks()
 
-    // Mock repository
-    userRepository = {
-      count: vi.fn(),
-      delete: vi.fn(),
-      existsByEmail: vi.fn(),
-      findAll: vi.fn(),
-      findAllPaginated: vi.fn(),
-      findByEmail: vi.fn(),
-      findById: vi.fn(),
-      save: vi.fn(),
-    }
-
-    // Mock password hasher
+    userRepository = { existsByEmail: vi.fn(), findAllPaginated: vi.fn(), findByEmail: vi.fn(), save: vi.fn() } as unknown as IUserRepository
     passwordHasher = {
       hash: vi.fn(() => Promise.resolve(Ok(TEST_CONSTANTS.users.johnDoe.passwordHash))),
       verify: vi.fn(),
-    }
+    } as unknown as IPasswordHasher
 
-    // Create use case instance
     createUserUseCase = CreateUserUseCase.create({ passwordHasher, userRepository })
   })
 

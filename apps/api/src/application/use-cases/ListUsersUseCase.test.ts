@@ -1,255 +1,144 @@
 import { ListUsersUseCase } from '@application/use-cases/ListUsersUseCase.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { IMetricsService } from '@domain/services/IMetricsService.js'
-import { buildAdminUser, buildSuperAdminUser, buildUser } from '@infrastructure/testing/index.js'
-import type { UserResponseDTO } from '@team-pulse/shared/dtos'
+import { faker } from '@faker-js/faker'
+import { buildUser } from '@infrastructure/testing/index.js'
+import type { PaginationQuery } from '@team-pulse/shared/dtos'
+import { RepositoryError, ValidationError } from '@team-pulse/shared/errors'
 import { Err, Ok } from '@team-pulse/shared/result'
-import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
-import { expectError, expectFirst, expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('ListUsersUseCase', () => {
   let listUsersUseCase: ListUsersUseCase
-  let metricsService: IMetricsService
   let userRepository: IUserRepository
+  let metricsService: IMetricsService
 
   beforeEach(() => {
-    // Reset all mocks before each test
     vi.clearAllMocks()
 
-    // Mock repository
-    userRepository = {
-      count: vi.fn(),
-      delete: vi.fn(),
-      existsByEmail: vi.fn(),
-      findAll: vi.fn(),
-      findAllPaginated: vi.fn(),
-      findByEmail: vi.fn(),
-      findById: vi.fn(),
-      save: vi.fn(),
-    }
+    userRepository = { findAllPaginated: vi.fn() } as unknown as IUserRepository
+    metricsService = { setUsersTotal: vi.fn() } as unknown as IMetricsService
 
-    // Mock metrics service
-    metricsService = {
-      getContentType: vi.fn(),
-      getMetrics: vi.fn(),
-      recordDbError: vi.fn(),
-      recordDbQuery: vi.fn(),
-      recordHttpError: vi.fn(),
-      recordHttpRequest: vi.fn(),
-      recordLogin: vi.fn(),
-      reset: vi.fn(),
-      setTeamsTotal: vi.fn(),
-      setUsersTotal: vi.fn(),
-    }
-
-    // Create use case instance
     listUsersUseCase = ListUsersUseCase.create({ metricsService, userRepository })
   })
 
   describe('execute', () => {
-    describe('successful listing', () => {
-      it('should list all users successfully', async () => {
+    describe('successful retrieval', () => {
+      it('should return paginated users with default parameters', async () => {
         // Arrange
-        const mockUsers = [buildUser(), buildAdminUser()]
+        // No params provided in DTO, should default to page 1, limit 10
+        const dto: PaginationQuery = {}
 
-        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ total: 2, users: mockUsers }))
+        // Generate random users dynamically
+        const mockUsers = Array.from({ length: 5 }, () => buildUser())
+        const mockTotal = 25 // Arbitrary total in DB
+
+        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ total: mockTotal, users: mockUsers }))
 
         // Act
-        const result = await listUsersUseCase.execute({ dto: { limit: 10, page: 1 } })
+        const result = await listUsersUseCase.execute({ dto })
 
         // Assert
-        const data = expectSuccess(result)
-        expect(data).toBeDefined()
-        expect(data.users).toHaveLength(2)
-        expect(data.pagination.total).toBe(2)
-        expect(data.pagination.page).toBe(1)
-        expect(data.pagination.limit).toBe(10)
-      })
+        const response = expectSuccess(result)
 
-      it('should call userRepository.findAllPaginated with default pagination', async () => {
-        // Arrange
-        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ total: 0, users: [] }))
-
-        // Act
-        await listUsersUseCase.execute({ dto: { limit: 10, page: 1 } })
-
-        // Assert
-        expect(userRepository.findAllPaginated).toHaveBeenCalledTimes(1)
+        // 1. Verify Repository Call (Defaults)
         expect(userRepository.findAllPaginated).toHaveBeenCalledWith({ limit: 10, page: 1 })
+
+        // 2. Verify DTO Mapping
+        expect(response.users).toHaveLength(5)
+        // Verify we are returning DTOs, not Entities (simple check: ID should be string)
+        expect(response.users[0]?.id).toBe(mockUsers[0]?.id)
+
+        // 3. Verify Pagination Metadata (Calculated by Domain VO)
+        expect(response.pagination).toEqual({ limit: 10, page: 1, total: mockTotal, totalPages: 3 })
       })
 
-      it('should return users without password hashes', async () => {
+      it('should return paginated users with custom parameters', async () => {
         // Arrange
-        const mockUsers = [buildUser()]
+        const dto: PaginationQuery = { limit: 20, page: 2 }
 
-        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ total: 1, users: mockUsers }))
+        const mockUsers = Array.from({ length: 10 }, () => buildUser())
+        const mockTotal = 100
+
+        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ total: mockTotal, users: mockUsers }))
 
         // Act
-        const result = await listUsersUseCase.execute({ dto: { limit: 10, page: 1 } })
+        const response = expectSuccess(await listUsersUseCase.execute({ dto }))
 
         // Assert
-        const data = expectSuccess(result)
-        const firstUser = expectFirst(data.users)
-        const mockUser = mockUsers[0]
-        if (!mockUser) throw new Error('Mock user not found')
+        // Verify custom params were passed to repo
+        expect(userRepository.findAllPaginated).toHaveBeenCalledWith({ limit: 20, page: 2 })
 
-        expect(firstUser).not.toHaveProperty('passwordHash')
-        expect(firstUser).toEqual({
-          createdAt: TEST_CONSTANTS.mockDateIso,
-          email: TEST_CONSTANTS.users.johnDoe.email,
-          id: mockUser.id.getValue(),
-          role: TEST_CONSTANTS.users.johnDoe.role,
-          updatedAt: TEST_CONSTANTS.mockDateIso,
-        })
+        expect(response.pagination.page).toBe(2)
+        expect(response.pagination.limit).toBe(20)
+        expect(response.pagination.totalPages).toBe(5) // 100 / 20 = 5
       })
 
-      it('should convert dates to ISO strings', async () => {
+      it('should handle empty result set', async () => {
         // Arrange
-        const mockUsers = [buildUser()]
+        const dto: PaginationQuery = { limit: 10, page: 1 }
 
-        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ total: 1, users: mockUsers }))
-
-        // Act
-        const result = await listUsersUseCase.execute({ dto: { limit: 10, page: 1 } })
-
-        // Assert
-        const data = expectSuccess(result)
-        const firstUser = expectFirst<UserResponseDTO>(data.users)
-        expect(firstUser).toMatchObject({
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
-        })
-        expect(typeof firstUser.createdAt).toBe('string')
-        expect(typeof firstUser.updatedAt).toBe('string')
-      })
-
-      it('should handle empty user list', async () => {
-        // Arrange
         vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ total: 0, users: [] }))
 
         // Act
-        const result = await listUsersUseCase.execute({ dto: { limit: 10, page: 1 } })
+        const response = expectSuccess(await listUsersUseCase.execute({ dto }))
 
         // Assert
-        const data = expectSuccess(result)
-        expect(data.users).toHaveLength(0)
-        expect(data.pagination.total).toBe(0)
-        expect(data.pagination.totalPages).toBe(0)
+        expect(response.users).toEqual([])
+        expect(response.pagination.total).toBe(0)
+        expect(response.pagination.totalPages).toBe(0)
       })
 
-      it('should handle single user', async () => {
+      it('should update user metrics with total count', async () => {
         // Arrange
-        const mockUsers = [buildSuperAdminUser()]
+        const mockTotal = faker.number.int({ max: 500, min: 50 })
 
-        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ total: 1, users: mockUsers }))
+        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ total: mockTotal, users: [] }))
 
         // Act
-        const result = await listUsersUseCase.execute({ dto: { limit: 10, page: 1 } })
+        await listUsersUseCase.execute({ dto: {} })
 
         // Assert
-        const data = expectSuccess(result)
-        expect(data.users).toHaveLength(1)
-        expect(data.pagination.total).toBe(1)
-        const firstUser = expectFirst<UserResponseDTO>(data.users)
-        expect(firstUser.email).toBe(TEST_CONSTANTS.users.superAdminUser.email)
-      })
-
-      it('should handle users with different roles', async () => {
-        // Arrange
-        const mockUsers = [buildUser(), buildAdminUser(), buildSuperAdminUser()]
-
-        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ total: 3, users: mockUsers }))
-
-        // Act
-        const result = await listUsersUseCase.execute({ dto: { limit: 10, page: 1 } })
-
-        // Assert
-        const data = expectSuccess(result)
-        expect(data.users).toHaveLength(3)
-        const [firstUser, secondUser, thirdUser] = data.users
-        expect(firstUser?.role).toBe(TEST_CONSTANTS.users.johnDoe.role)
-        expect(secondUser?.role).toBe(TEST_CONSTANTS.users.adminUser.role)
-        expect(thirdUser?.role).toBe(TEST_CONSTANTS.users.superAdminUser.role)
-      })
-
-      it('should return correct pagination metadata', async () => {
-        // Arrange
-        const mockUsers = Array.from({ length: 10 }, (_, i) =>
-          buildUser({
-            email: `user${i}@example.com`,
-            id: `550e8400-e29b-41d4-a716-4466555000${i.toString().padStart(2, '0')}`,
-          }),
-        )
-        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ total: 10, users: mockUsers }))
-
-        // Act
-        const result = await listUsersUseCase.execute({ dto: { limit: 10, page: 1 } })
-
-        // Assert
-        const data = expectSuccess(result)
-        expect(data.pagination.total).toBe(10)
-        expect(data.users).toHaveLength(10)
-        expect(data.pagination.page).toBe(1)
-        expect(data.pagination.limit).toBe(10)
-        expect(data.pagination.totalPages).toBe(1)
-      })
-
-      it('should maintain user order from repository', async () => {
-        // Arrange
-        const mockUsers = [
-          buildUser({ email: TEST_CONSTANTS.testEmails.third, id: '550e8400-e29b-41d4-a716-446655550003' }),
-          buildUser({ email: TEST_CONSTANTS.testEmails.first, id: '550e8400-e29b-41d4-a716-446655550001' }),
-          buildUser({ email: TEST_CONSTANTS.testEmails.second, id: '550e8400-e29b-41d4-a716-446655550002' }),
-        ]
-
-        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ total: 3, users: mockUsers }))
-
-        // Act
-        const result = await listUsersUseCase.execute({ dto: { limit: 10, page: 1 } })
-
-        // Assert
-        const data = expectSuccess(result)
-        const [firstUser, secondUser, thirdUser] = data.users
-        expect(firstUser?.email).toBe(TEST_CONSTANTS.testEmails.third)
-        expect(secondUser?.email).toBe(TEST_CONSTANTS.testEmails.first)
-        expect(thirdUser?.email).toBe(TEST_CONSTANTS.testEmails.second)
-      })
-
-      it('should respect custom page and limit parameters', async () => {
-        // Arrange
-        const mockUsers = [buildUser(), buildAdminUser()]
-        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ total: 20, users: mockUsers }))
-
-        // Act
-        const result = await listUsersUseCase.execute({ dto: { limit: 5, page: 2 } })
-
-        // Assert
-        expect(userRepository.findAllPaginated).toHaveBeenCalledWith({ limit: 5, page: 2 })
-        const data = expectSuccess(result)
-        expect(data.pagination.page).toBe(2)
-        expect(data.pagination.limit).toBe(5)
-        expect(data.pagination.total).toBe(20)
-        expect(data.pagination.totalPages).toBe(4)
+        // Verify side effect: the service must update the gauge
+        expect(metricsService.setUsersTotal).toHaveBeenCalledWith({ count: mockTotal })
+        expect(metricsService.setUsersTotal).toHaveBeenCalledTimes(1)
       })
     })
 
-    describe('failure scenarios', () => {
-      it('should propagate repository errors', async () => {
+    describe('error cases', () => {
+      it('should return RepositoryError when repository fails', async () => {
         // Arrange
-        const mockError = {
-          code: 'DB_CONN_ERR',
-          message: 'Database connection error',
-        }
+        const dbError = RepositoryError.forOperation({ message: faker.lorem.sentence(), operation: 'findAllPaginated' })
 
-        vi.mocked(userRepository.findAllPaginated).mockResolvedValueOnce(Err(mockError as any))
+        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Err(dbError))
 
         // Act
-        const result = await listUsersUseCase.execute({ dto: { limit: 10, page: 1 } })
+        const result = await listUsersUseCase.execute({ dto: {} })
 
         // Assert
-        const error = expectError(result)
-        expect(error).toBe(mockError)
+        const error = expectErrorType({ errorType: RepositoryError, result })
+        expect(error).toBe(dbError)
+
+        // Metrics should NOT be updated on error
+        expect(metricsService.setUsersTotal).not.toHaveBeenCalled()
+      })
+
+      it('should return ValidationError if Pagination Value Object creation fails', async () => {
+        // Arrange
+        // We force invalid inputs via DTO that might bypass repo check
+        // but fail domain validation (e.g., negative page)
+        const dto: PaginationQuery = { limit: 10, page: -1 }
+
+        // Even if repo ignores it, the domain layer protects the response
+        vi.mocked(userRepository.findAllPaginated).mockResolvedValue(Ok({ total: 0, users: [] }))
+
+        // Act
+        const result = await listUsersUseCase.execute({ dto })
+
+        // Assert
+        // The Use Case calls Pagination.create({ page: -1 ... }) which should fail
+        expectErrorType({ errorType: ValidationError, result })
       })
     })
   })

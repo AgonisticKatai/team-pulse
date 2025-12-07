@@ -1,7 +1,8 @@
 import { LogoutUseCase } from '@application/use-cases/LogoutUseCase.js'
 import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository.js'
-import { Ok } from '@team-pulse/shared/result'
-import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
+import { faker } from '@faker-js/faker'
+import { RepositoryError } from '@team-pulse/shared/errors'
+import { Err, Ok } from '@team-pulse/shared/result'
 import { expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -10,90 +11,65 @@ describe('LogoutUseCase', () => {
   let refreshTokenRepository: IRefreshTokenRepository
 
   beforeEach(() => {
-    // Reset all mocks before each test
     vi.clearAllMocks()
 
-    // Mock repository
-    refreshTokenRepository = {
-      deleteByToken: vi.fn(),
-      deleteByUserId: vi.fn(),
-      deleteExpired: vi.fn(),
-      findByToken: vi.fn(),
-      findByUserId: vi.fn(),
-      save: vi.fn(),
-    }
+    refreshTokenRepository = { deleteByToken: vi.fn() } as unknown as IRefreshTokenRepository
 
-    // Create use case instance
     logoutUseCase = LogoutUseCase.create({ refreshTokenRepository })
   })
 
   describe('execute', () => {
-    it('should delete refresh token from database', async () => {
+    it('should successfully delete the refresh token', async () => {
       // Arrange
-      const refreshToken = TEST_CONSTANTS.auth.validRefreshToken
+      const token = faker.string.uuid()
+
+      // Mock repository success (deleted = true)
+      vi.mocked(refreshTokenRepository.deleteByToken).mockResolvedValue(Ok(true))
 
       // Act
-      const result = await logoutUseCase.execute({ refreshToken })
+      const result = await logoutUseCase.execute({ refreshToken: token })
 
       // Assert
       expectSuccess(result)
-      expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith({ token: refreshToken })
+      expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith({ token })
       expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledTimes(1)
     })
 
-    it('should complete successfully even if token does not exist', async () => {
+    it('should return Ok even if token does not exist (Idempotency)', async () => {
       // Arrange
-      const refreshToken = 'non-existent-token'
+      const token = faker.string.uuid()
+
+      // Mock repository: token not found (deleted = false), but operation succeeded
       vi.mocked(refreshTokenRepository.deleteByToken).mockResolvedValue(Ok(false))
 
       // Act
-      const result = await logoutUseCase.execute({ refreshToken })
+      const result = await logoutUseCase.execute({ refreshToken: token })
 
       // Assert
+      // User should receive a "Logout successful" message even if the token no longer exists
       expectSuccess(result)
-      expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith({ token: refreshToken })
+      expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith({ token })
     })
 
-    it('should return void (no return value)', async () => {
+    it('should return Ok even if repository fails (Fire and Forget)', async () => {
       // Arrange
-      const refreshToken = TEST_CONSTANTS.auth.mockRefreshToken
+      const token = faker.string.uuid()
+      const dbError = RepositoryError.forOperation({ message: 'DB Connection died', operation: 'deleteByToken' })
+
+      // Mock repository failure
+      vi.mocked(refreshTokenRepository.deleteByToken).mockResolvedValue(Err(dbError))
 
       // Act
-      const result = await logoutUseCase.execute({ refreshToken })
+      const result = await logoutUseCase.execute({ refreshToken: token })
 
       // Assert
-      const value = expectSuccess(result)
-      expect(value).toBeUndefined()
-    })
-
-    it('should handle empty token string', async () => {
-      // Arrange
-      const refreshToken = ''
-
-      // Act
-      const result = await logoutUseCase.execute({ refreshToken })
-
-      // Assert
+      // CRITICAL: Your Use Case defines that it returns Result<void, NEVER>.
+      // This means it should never return an error, even if the database fails.
+      // The user wants to log out, not see a 500 error because we couldn't delete a token.
       expectSuccess(result)
-      expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith({ token: refreshToken })
-      expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledTimes(1)
-    })
 
-    it('should handle multiple logout attempts with same token', async () => {
-      // Arrange
-      const refreshToken = TEST_CONSTANTS.auth.mockRefreshToken
-
-      // Act - Call multiple times
-      const result1 = await logoutUseCase.execute({ refreshToken })
-      const result2 = await logoutUseCase.execute({ refreshToken })
-      const result3 = await logoutUseCase.execute({ refreshToken })
-
-      // Assert - Should be called 3 times (idempotent operation)
-      expectSuccess(result1)
-      expectSuccess(result2)
-      expectSuccess(result3)
-      expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledTimes(3)
-      expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith({ token: refreshToken })
+      // Verify that it at least tried to delete the token
+      expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith({ token })
     })
   })
 })

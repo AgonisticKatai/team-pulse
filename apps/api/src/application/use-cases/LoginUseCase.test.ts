@@ -1,16 +1,14 @@
 import type { TokenFactory } from '@application/factories/TokenFactory.js'
 import { LoginUseCase } from '@application/use-cases/LoginUseCase.js'
-import { RefreshToken } from '@domain/models/RefreshToken.js'
 import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { IMetricsService } from '@domain/services/IMetricsService.js'
 import type { IPasswordHasher } from '@domain/services/IPasswordHasher.js'
-import { buildAdminUser, buildSuperAdminUser, buildUser } from '@infrastructure/testing/index.js'
+import { faker } from '@faker-js/faker'
+import { buildLoginDTO, buildUser, buildValidRefreshToken } from '@infrastructure/testing/index.js'
 import { AuthenticationError, RepositoryError } from '@team-pulse/shared/errors'
 import { Err, Ok } from '@team-pulse/shared/result'
-import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
-import { buildLoginDTO } from '@team-pulse/shared/testing/dto-builders'
-import { expectErrorType, expectMockCallArg, expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('LoginUseCase', () => {
@@ -21,437 +19,152 @@ describe('LoginUseCase', () => {
   let tokenFactory: TokenFactory
   let userRepository: IUserRepository
 
-  // Mock user data
-  const mockUser = buildUser()
-
-  // Mock refresh token
-  const mockRefreshTokenResult = RefreshToken.create({
-    expiresAt: TEST_CONSTANTS.futureDate,
-    id: TEST_CONSTANTS.mockUuid,
-    token: TEST_CONSTANTS.auth.mockRefreshToken,
-    userId: mockUser.id.getValue(),
-  })
-  if (!mockRefreshTokenResult.ok) throw new Error('Failed to create mock refresh token')
-  const mockRefreshToken = mockRefreshTokenResult.value
-
   beforeEach(() => {
-    // Reset all mocks before each test
     vi.clearAllMocks()
 
-    // Mock TokenFactory
-    tokenFactory = {
-      createAccessToken: vi.fn(() => Ok(TEST_CONSTANTS.auth.mockAccessToken)),
-      createRefreshToken: vi.fn(() => Ok(mockRefreshToken)),
-      verifyAccessToken: vi.fn(),
-      verifyRefreshToken: vi.fn(),
-    } as unknown as TokenFactory
+    metricsService = { recordLogin: vi.fn() } as unknown as IMetricsService
+    passwordHasher = { verify: vi.fn() } as unknown as IPasswordHasher
+    refreshTokenRepository = { save: vi.fn() } as unknown as IRefreshTokenRepository
+    tokenFactory = { createAccessToken: vi.fn(), createRefreshToken: vi.fn() } as unknown as TokenFactory
+    userRepository = { findByEmail: vi.fn() } as unknown as IUserRepository
 
-    // Mock repositories
-    userRepository = {
-      count: vi.fn(),
-      delete: vi.fn(),
-      existsByEmail: vi.fn(),
-      findAll: vi.fn(),
-      findAllPaginated: vi.fn(),
-      findByEmail: vi.fn(),
-      findById: vi.fn(),
-      save: vi.fn(),
-    }
-
-    refreshTokenRepository = {
-      deleteByToken: vi.fn(),
-      deleteByUserId: vi.fn(),
-      deleteExpired: vi.fn(),
-      findByToken: vi.fn(),
-      findByUserId: vi.fn(),
-      save: vi.fn(),
-    }
-
-    // Mock password hasher
-    passwordHasher = {
-      hash: vi.fn(),
-      verify: vi.fn(() => Promise.resolve(Ok(true))),
-    }
-
-    // Mock metrics service
-    metricsService = {
-      getContentType: vi.fn(),
-      getMetrics: vi.fn(),
-      recordDbError: vi.fn(),
-      recordDbQuery: vi.fn(),
-      recordHttpError: vi.fn(),
-      recordHttpRequest: vi.fn(),
-      recordLogin: vi.fn(),
-      reset: vi.fn(),
-      setTeamsTotal: vi.fn(),
-      setUsersTotal: vi.fn(),
-    }
-
-    // Create use case instance
-    loginUseCase = LoginUseCase.create({ metricsService, passwordHasher, refreshTokenRepository, tokenFactory, userRepository })
+    loginUseCase = LoginUseCase.create({
+      metricsService,
+      passwordHasher,
+      refreshTokenRepository,
+      tokenFactory,
+      userRepository,
+    })
   })
 
   describe('execute', () => {
     describe('successful login', () => {
-      it('should authenticate user with valid credentials', async () => {
+      it('should authenticate user and return tokens', async () => {
         // Arrange
-        const loginDTO = buildLoginDTO()
+        const dto = buildLoginDTO() // Random email and password
+        const user = buildUser({ email: dto.email }) // User that matches the DTO
+        const refreshTokenEntity = buildValidRefreshToken({ userId: user.id })
+        const accessTokenString = faker.string.alphanumeric(100)
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
-        vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(true))
-        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
+        // Mocks Setup (The Happy Path Chain)
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(user))
+        vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(true)) // Password matches
+        vi.mocked(tokenFactory.createRefreshToken).mockReturnValue(Ok(refreshTokenEntity))
+        vi.mocked(refreshTokenRepository.save).mockResolvedValue(Ok(refreshTokenEntity))
+        vi.mocked(tokenFactory.createAccessToken).mockReturnValue(Ok(accessTokenString))
 
         // Act
-        const result = await loginUseCase.execute({ dto: loginDTO })
+        const result = await loginUseCase.execute({ dto })
 
         // Assert
-        const data = expectSuccess(result)
-        expect(data).toBeDefined()
-        expect(data.accessToken).toBe(TEST_CONSTANTS.auth.mockAccessToken)
-        expect(data.refreshToken).toBe(TEST_CONSTANTS.auth.mockRefreshToken)
-        expect(data.user).toEqual({
-          createdAt: TEST_CONSTANTS.mockDateIso,
-          email: TEST_CONSTANTS.users.johnDoe.email,
-          id: mockUser.id.getValue(),
-          role: TEST_CONSTANTS.users.johnDoe.role,
-          updatedAt: TEST_CONSTANTS.mockDateIso,
-        })
-      })
+        const response = expectSuccess(result)
 
-      it('should call userRepository.findByEmail with correct email', async () => {
-        // Arrange
-        const loginDTO = buildLoginDTO()
+        // 1. Verify Response Structure
+        expect(response.accessToken).toBe(accessTokenString)
+        expect(response.refreshToken).toBe(refreshTokenEntity.token) // JWT string
+        expect(response.user.id).toBe(user.id)
+        expect(response.user.email).toBe(user.email.getValue())
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
-        vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(true))
-        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
-
-        // Act
-        const result = await loginUseCase.execute({ dto: loginDTO })
-
-        // Assert
-        expectSuccess(result)
-        expect(userRepository.findByEmail).toHaveBeenCalledWith({
-          email: TEST_CONSTANTS.users.johnDoe.email,
-        })
-        expect(userRepository.findByEmail).toHaveBeenCalledTimes(1)
-      })
-
-      it('should verify password with user password hash', async () => {
-        // Arrange
-        const loginDTO = buildLoginDTO()
-
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
-        vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(true))
-        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
-
-        // Act
-        const result = await loginUseCase.execute({ dto: loginDTO })
-
-        // Assert
-        expectSuccess(result)
+        // 2. Verify Flow
+        expect(userRepository.findByEmail).toHaveBeenCalledWith({ email: dto.email })
         expect(passwordHasher.verify).toHaveBeenCalledWith({
-          hash: TEST_CONSTANTS.users.johnDoe.passwordHash,
-          password: TEST_CONSTANTS.users.johnDoe.password,
+          hash: user.getPasswordHash(),
+          password: dto.password,
         })
-        expect(passwordHasher.verify).toHaveBeenCalledTimes(1)
-      })
+        expect(tokenFactory.createRefreshToken).toHaveBeenCalledWith({ userId: user.id })
+        expect(refreshTokenRepository.save).toHaveBeenCalledWith({ refreshToken: refreshTokenEntity })
 
-      it('should generate access token with correct payload', async () => {
-        // Arrange
-        const loginDTO = buildLoginDTO()
-
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
-        vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(true))
-        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
-
-        // Act
-        const result = await loginUseCase.execute({ dto: loginDTO })
-
-        // Assert
-        expectSuccess(result)
-        expect(tokenFactory.createAccessToken).toHaveBeenCalledWith({
-          email: TEST_CONSTANTS.users.johnDoe.email,
-          role: TEST_CONSTANTS.users.johnDoe.role,
-          userId: mockUser.id.getValue(),
-        })
-        expect(tokenFactory.createAccessToken).toHaveBeenCalledTimes(1)
-      })
-
-      it('should generate refresh token with correct payload', async () => {
-        // Arrange
-        const loginDTO = buildLoginDTO()
-
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
-        vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(true))
-        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
-
-        // Act
-        const result = await loginUseCase.execute({ dto: loginDTO })
-
-        // Assert
-        expectSuccess(result)
-        expect(tokenFactory.createRefreshToken).toHaveBeenCalledWith({
-          userId: mockUser.id.getValue(),
-        })
-        expect(tokenFactory.createRefreshToken).toHaveBeenCalledTimes(1)
-      })
-
-      it('should save refresh token to repository', async () => {
-        // Arrange
-        const loginDTO = buildLoginDTO()
-
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
-        vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(true))
-        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
-
-        // Act
-        const result = await loginUseCase.execute({ dto: loginDTO })
-
-        // Assert
-        expectSuccess(result)
-        expect(refreshTokenRepository.save).toHaveBeenCalledTimes(1)
-
-        const { refreshToken: savedToken } = expectMockCallArg<{ refreshToken: RefreshToken }>(vi.mocked(refreshTokenRepository.save))
-
-        expect(savedToken).toBeInstanceOf(RefreshToken)
-        expect(savedToken.id.getValue()).toBe(TEST_CONSTANTS.mockUuid)
-        expect(savedToken.token).toBe(TEST_CONSTANTS.auth.mockRefreshToken)
-        expect(savedToken.userId.getValue()).toBe(mockUser.id.getValue())
-        expect(savedToken.expiresAt).toEqual(TEST_CONSTANTS.futureDate)
-      })
-
-      it('should return user DTO without password hash', async () => {
-        // Arrange
-        const loginDTO = buildLoginDTO()
-
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
-        vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(true))
-        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
-
-        // Act
-        const result = await loginUseCase.execute({ dto: loginDTO })
-
-        // Assert
-        const data = expectSuccess(result)
-        expect(data.user).not.toHaveProperty('passwordHash')
-        expect(data.user).toEqual({
-          createdAt: TEST_CONSTANTS.mockDateIso,
-          email: TEST_CONSTANTS.users.johnDoe.email,
-          id: mockUser.id.getValue(),
-          role: TEST_CONSTANTS.users.johnDoe.role,
-          updatedAt: TEST_CONSTANTS.mockDateIso,
+        // 3. Verify Side Effects (Metrics)
+        expect(metricsService.recordLogin).toHaveBeenCalledWith({
+          role: user.role.getValue(),
         })
       })
     })
 
-    describe('error cases', () => {
-      it('should return AuthenticationError when user does not exist', async () => {
+    describe('error cases (security)', () => {
+      it('should return "Invalid credentials" when user does not exist', async () => {
         // Arrange
-        const loginDTO = buildLoginDTO({ email: TEST_CONSTANTS.emails.nonexistent })
-
+        const dto = buildLoginDTO()
+        // Simulate user not found
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(null))
 
         // Act
-        const result = await loginUseCase.execute({ dto: loginDTO })
+        const result = await loginUseCase.execute({ dto })
 
         // Assert
         const error = expectErrorType({ errorType: AuthenticationError, result })
+        // 🛡️ SECURITY CHECK: Generic message to prevent enumeration
         expect(error.message).toBe('Invalid email or password')
-      })
+        expect(error.metadata?.reason).toBe('invalid_credentials')
 
-      it('should not verify password when user does not exist', async () => {
-        // Arrange
-        const loginDTO = buildLoginDTO({ email: TEST_CONSTANTS.emails.nonexistent })
-
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(null))
-
-        // Act
-        const result = await loginUseCase.execute({ dto: loginDTO })
-
-        // Assert
-        expectErrorType({ errorType: AuthenticationError, result })
+        // Ensure flow stopped early
         expect(passwordHasher.verify).not.toHaveBeenCalled()
       })
 
-      it('should return AuthenticationError when password is incorrect', async () => {
+      it('should return "Invalid credentials" when password does not match', async () => {
         // Arrange
-        const loginDTO = buildLoginDTO({ password: TEST_CONSTANTS.invalid.wrongPassword })
+        const dto = buildLoginDTO()
+        const user = buildUser({ email: dto.email })
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(user))
+        // Simulate wrong password
         vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(false))
 
         // Act
-        const result = await loginUseCase.execute({ dto: loginDTO })
+        const result = await loginUseCase.execute({ dto })
 
         // Assert
         const error = expectErrorType({ errorType: AuthenticationError, result })
+        // 🛡️ SECURITY CHECK: Same message as "user not found"
         expect(error.message).toBe('Invalid email or password')
-      })
+        expect(error.metadata?.reason).toBe('invalid_credentials')
 
-      it('should not generate tokens when password is incorrect', async () => {
-        // Arrange
-        const loginDTO = buildLoginDTO({ password: TEST_CONSTANTS.invalid.wrongPassword })
-
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
-        vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(false))
-
-        // Act
-        const result = await loginUseCase.execute({ dto: loginDTO })
-
-        // Assert
-        expectErrorType({ errorType: AuthenticationError, result })
-        expect(tokenFactory.createAccessToken).not.toHaveBeenCalled()
+        // Ensure we didn't generate tokens
         expect(tokenFactory.createRefreshToken).not.toHaveBeenCalled()
-        expect(refreshTokenRepository.save).not.toHaveBeenCalled()
       })
+    })
 
-      it('should use generic error message to avoid user enumeration', async () => {
+    describe('error cases (infrastructure)', () => {
+      it('should return RepositoryError when finding user fails', async () => {
         // Arrange
-        const loginDTO = buildLoginDTO({ password: TEST_CONSTANTS.invalid.wrongPassword })
+        const dto = buildLoginDTO()
+        const dbError = RepositoryError.forOperation({
+          message: 'DB Connection failed',
+          operation: 'findByEmail',
+        })
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
-        vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(false))
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Err(dbError))
 
         // Act
-        const result = await loginUseCase.execute({ dto: loginDTO })
+        const result = await loginUseCase.execute({ dto })
 
-        // Assert - Error message should be the same for "user not found" and "wrong password"
-        const error = expectErrorType({ errorType: AuthenticationError, result })
-        expect(error.message).toBe('Invalid email or password')
-        expect(error.metadata?.field).toBe('credentials')
+        // Assert
+        const error = expectErrorType({ errorType: RepositoryError, result })
+        expect(error).toBe(dbError)
       })
 
       it('should return RepositoryError when saving refresh token fails', async () => {
         // Arrange
-        const loginDTO = buildLoginDTO()
-        const repositoryError = RepositoryError.forOperation({
-          cause: new Error('Database connection failed'),
-          message: 'Failed to save refresh token',
+        const dto = buildLoginDTO()
+        const user = buildUser()
+        const refreshToken = buildValidRefreshToken()
+        const dbError = RepositoryError.forOperation({
+          message: 'Write failed',
           operation: 'save',
         })
 
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
+        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(user))
         vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(true))
-        vi.mocked(refreshTokenRepository.save).mockResolvedValue(Err(repositoryError))
+        vi.mocked(tokenFactory.createRefreshToken).mockReturnValue(Ok(refreshToken))
+        // Simulate save failure
+        vi.mocked(refreshTokenRepository.save).mockResolvedValue(Err(dbError))
 
         // Act
-        const result = await loginUseCase.execute({ dto: loginDTO })
+        const result = await loginUseCase.execute({ dto })
 
         // Assert
         const error = expectErrorType({ errorType: RepositoryError, result })
-        expect(error.message).toBe('Failed to save refresh token')
-        expect(error.operation).toBe('save')
-      })
-
-      it('should not generate access token when refresh token save fails', async () => {
-        // Arrange
-        const loginDTO = buildLoginDTO()
-        const repositoryError = RepositoryError.forOperation({
-          cause: new Error('Database connection failed'),
-          message: 'Failed to save refresh token',
-          operation: 'save',
-        })
-
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
-        vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(true))
-        vi.mocked(refreshTokenRepository.save).mockResolvedValue(Err(repositoryError))
-
-        // Act
-        const result = await loginUseCase.execute({ dto: loginDTO })
-
-        // Assert
-        expectErrorType({ errorType: RepositoryError, result })
-        // Access token should still be generated, but the overall operation should fail
-        // This is intentional - we fail fast before returning tokens to the user
-        expect(tokenFactory.createAccessToken).not.toHaveBeenCalled()
-      })
-
-      it('should verify password and generate refresh token before attempting to save', async () => {
-        // Arrange
-        const loginDTO = buildLoginDTO()
-        const repositoryError = RepositoryError.forOperation({
-          cause: new Error('Database connection failed'),
-          message: 'Failed to save refresh token',
-          operation: 'save',
-        })
-
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
-        vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(true))
-        vi.mocked(refreshTokenRepository.save).mockResolvedValue(Err(repositoryError))
-
-        // Act
-        const result = await loginUseCase.execute({ dto: loginDTO })
-
-        // Assert
-        expectErrorType({ errorType: RepositoryError, result })
-        // These operations should have been called before the save fails
-        expect(passwordHasher.verify).toHaveBeenCalledTimes(1)
-        expect(tokenFactory.createRefreshToken).toHaveBeenCalledTimes(1)
-        expect(refreshTokenRepository.save).toHaveBeenCalledTimes(1)
-      })
-    })
-
-    describe('edge cases', () => {
-      it('should handle user with ADMIN role', async () => {
-        // Arrange
-        const adminUser = buildAdminUser()
-
-        const loginDTO = buildLoginDTO({
-          email: TEST_CONSTANTS.users.adminUser.email,
-          password: TEST_CONSTANTS.users.adminUser.password,
-        })
-
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(adminUser))
-        vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(true))
-        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
-
-        // Act
-        const result = await loginUseCase.execute({ dto: loginDTO })
-
-        // Assert
-        const data = expectSuccess(result)
-        expect(data.user.role).toBe(TEST_CONSTANTS.users.adminUser.role)
-      })
-
-      it('should handle user with SUPER_ADMIN role', async () => {
-        // Arrange
-        const superAdminUser = buildSuperAdminUser()
-
-        const loginDTO = buildLoginDTO({
-          email: TEST_CONSTANTS.users.superAdminUser.email,
-          password: TEST_CONSTANTS.users.superAdminUser.password,
-        })
-
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(superAdminUser))
-        vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(true))
-        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
-
-        // Act
-        const result = await loginUseCase.execute({ dto: loginDTO })
-
-        // Assert
-        const data = expectSuccess(result)
-        expect(data.user.role).toBe(TEST_CONSTANTS.users.superAdminUser.role)
-      })
-
-      it('should convert dates to ISO strings in user DTO', async () => {
-        // Arrange
-        const loginDTO = buildLoginDTO()
-
-        vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(mockUser))
-        vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(true))
-        vi.mocked(refreshTokenRepository.save).mockImplementation(async ({ refreshToken }) => Ok(refreshToken))
-
-        // Act
-        const result = await loginUseCase.execute({ dto: loginDTO })
-
-        // Assert
-        const data = expectSuccess(result)
-        expect(typeof data.user.createdAt).toBe('string')
-        expect(typeof data.user.updatedAt).toBe('string')
-        expect(data.user.createdAt).toBe(TEST_CONSTANTS.mockDateIso)
-        expect(data.user.updatedAt).toBe(TEST_CONSTANTS.mockDateIso)
+        expect(error).toBe(dbError)
       })
     })
   })

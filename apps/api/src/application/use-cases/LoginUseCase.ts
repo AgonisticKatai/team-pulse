@@ -78,10 +78,7 @@ export class LoginUseCase {
 
     if (!findUserResult.value) {
       return Err(
-        AuthenticationError.create({
-          message: 'Invalid email or password',
-          metadata: { field: 'credentials', reason: 'invalid_credentials' },
-        }),
+        AuthenticationError.create({ message: 'Invalid email or password', metadata: { field: 'credentials', reason: 'invalid_credentials' } }),
       )
     }
 
@@ -93,14 +90,11 @@ export class LoginUseCase {
 
     if (!verifyResult.value) {
       return Err(
-        AuthenticationError.create({
-          message: 'Invalid email or password',
-          metadata: { field: 'credentials', reason: 'invalid_credentials' },
-        }),
+        AuthenticationError.create({ message: 'Invalid email or password', metadata: { field: 'credentials', reason: 'invalid_credentials' } }),
       )
     }
 
-    const refreshTokenResult = this.tokenFactory.createRefreshToken({ userId: findUserResult.value.id.getValue() })
+    const refreshTokenResult = this.tokenFactory.createRefreshToken({ userId: findUserResult.value.id })
 
     if (!refreshTokenResult.ok) {
       return Err(refreshTokenResult.error)
@@ -115,9 +109,9 @@ export class LoginUseCase {
     }
 
     const accessTokenResult = this.tokenFactory.createAccessToken({
-      email: findUserResult.value.email.getValue(),
-      role: findUserResult.value.role.getValue(),
-      userId: findUserResult.value.id.getValue(),
+      email: findUserResult.value.email,
+      role: findUserResult.value.role,
+      userId: findUserResult.value.id,
     })
 
     if (!accessTokenResult.ok) {

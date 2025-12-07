@@ -1,4 +1,5 @@
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
+import type { TeamId } from '@team-pulse/shared/domain/ids'
 import type { RepositoryError } from '@team-pulse/shared/errors'
 import { NotFoundError } from '@team-pulse/shared/errors'
 import { Err, Ok, type Result } from '@team-pulse/shared/result'
@@ -19,7 +20,7 @@ export class DeleteTeamUseCase {
     return new DeleteTeamUseCase({ teamRepository })
   }
 
-  async execute({ id }: { id: string }): Promise<Result<void, NotFoundError | RepositoryError>> {
+  async execute({ id }: { id: TeamId }): Promise<Result<void, NotFoundError | RepositoryError>> {
     const findTeamResult = await this.teamRepository.findById({ id })
 
     if (!findTeamResult.ok) {

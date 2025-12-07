@@ -1,4 +1,5 @@
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
+import type { TeamId } from '@team-pulse/shared/domain/ids'
 import type { TeamResponseDTO } from '@team-pulse/shared/dtos'
 import type { RepositoryError } from '@team-pulse/shared/errors'
 import { NotFoundError } from '@team-pulse/shared/errors'
@@ -20,7 +21,7 @@ export class GetTeamUseCase {
     return new GetTeamUseCase({ teamRepository })
   }
 
-  async execute({ id }: { id: string }): Promise<Result<TeamResponseDTO, NotFoundError | RepositoryError>> {
+  async execute({ id }: { id: TeamId }): Promise<Result<TeamResponseDTO, NotFoundError | RepositoryError>> {
     const findTeamResult = await this.teamRepository.findById({ id })
 
     if (!findTeamResult.ok) {

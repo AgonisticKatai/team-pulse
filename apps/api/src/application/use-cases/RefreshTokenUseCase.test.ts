@@ -39,34 +39,19 @@ describe('RefreshTokenUseCase', () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
-    // Mock TokenFactory
     tokenFactory = {
       createAccessToken: vi.fn(() => Ok(mockNewAccessToken)),
       createRefreshToken: vi.fn(() => Ok(mockNewRefreshTokenEntity)),
-      verifyAccessToken: vi.fn(),
       verifyRefreshToken: vi.fn(() => Ok(mockPayload)),
     } as unknown as TokenFactory
 
-    // Mock repositories
-    userRepository = {
-      count: vi.fn(),
-      delete: vi.fn(),
-      existsByEmail: vi.fn(),
-      findAll: vi.fn(),
-      findAllPaginated: vi.fn(),
-      findByEmail: vi.fn(),
-      findById: vi.fn(),
-      save: vi.fn(),
-    }
+    userRepository = { findById: vi.fn() } as unknown as IUserRepository
 
     refreshTokenRepository = {
       deleteByToken: vi.fn(() => Promise.resolve(Ok(true))),
-      deleteByUserId: vi.fn(),
-      deleteExpired: vi.fn(),
       findByToken: vi.fn(),
-      findByUserId: vi.fn(),
       save: vi.fn(() => Promise.resolve(Ok(mockNewRefreshTokenEntity))),
-    }
+    } as unknown as IRefreshTokenRepository
 
     refreshTokenUseCase = RefreshTokenUseCase.create({ refreshTokenRepository, tokenFactory, userRepository })
   })

@@ -76,10 +76,7 @@ export class RefreshTokenUseCase {
     // Check for existence
     if (!storedToken) {
       return Err(
-        AuthenticationError.create({
-          message: 'Invalid or expired refresh token',
-          metadata: { field: 'refreshToken', reason: 'token_not_found' },
-        }),
+        AuthenticationError.create({ message: 'Invalid or expired refresh token', metadata: { field: 'refreshToken', reason: 'token_not_found' } }),
       )
     }
 
@@ -88,22 +85,14 @@ export class RefreshTokenUseCase {
     // storedToken.id is the Primary Key of the DB (EntityId)
     if (storedToken.id !== verifyResult.value.tokenId) {
       return Err(
-        AuthenticationError.create({
-          message: 'Invalid token identity',
-          metadata: { field: 'refreshToken', reason: 'integrity_check_failed' },
-        }),
+        AuthenticationError.create({ message: 'Invalid token identity', metadata: { field: 'refreshToken', reason: 'integrity_check_failed' } }),
       )
     }
 
     // 4. Check expiration (Entity logic)
     if (storedToken.isExpired()) {
       await this.refreshTokenRepository.deleteByToken({ token: dto.refreshToken })
-      return Err(
-        AuthenticationError.create({
-          message: 'Refresh token has expired',
-          metadata: { field: 'refreshToken', reason: 'token_expired' },
-        }),
-      )
+      return Err(AuthenticationError.create({ message: 'Refresh token has expired', metadata: { field: 'refreshToken', reason: 'token_expired' } }))
     }
 
     // 5. Get User
@@ -115,12 +104,7 @@ export class RefreshTokenUseCase {
       const reason = !userResult.ok ? 'db_error' : 'user_not_found'
 
       return Err(
-        userResult.ok
-          ? AuthenticationError.create({
-              message: 'User not found',
-              metadata: { field: 'refreshToken', reason },
-            })
-          : userResult.error,
+        userResult.ok ? AuthenticationError.create({ message: 'User not found', metadata: { field: 'refreshToken', reason } }) : userResult.error,
       )
     }
 
@@ -133,27 +117,18 @@ export class RefreshTokenUseCase {
     if (!accessTokenResult.ok) return Err(accessTokenResult.error)
 
     // 7. ROTATION: Generate new Refresh Token (Entity)
-    const refreshTokenResult = this.tokenFactory.createRefreshToken({
-      userId: userResult.value.id,
-    })
+    const refreshTokenResult = this.tokenFactory.createRefreshToken({ userId: userResult.value.id })
     if (!refreshTokenResult.ok) return Err(refreshTokenResult.error)
 
     // 8. ROTATION: Save new
-    const saveResult = await this.refreshTokenRepository.save({
-      refreshToken: refreshTokenResult.value,
-    })
+    const saveResult = await this.refreshTokenRepository.save({ refreshToken: refreshTokenResult.value })
     if (!saveResult.ok) return Err(saveResult.error)
 
     // 9. ROTATION: Delete old (Best effort)
-    await this.refreshTokenRepository.deleteByToken({
-      token: dto.refreshToken,
-    })
+    await this.refreshTokenRepository.deleteByToken({ token: dto.refreshToken })
 
     // TODO: log if it fails, but don't break the request
 
-    return Ok({
-      accessToken: accessTokenResult.value,
-      refreshToken: refreshTokenResult.value.token,
-    })
+    return Ok({ accessToken: accessTokenResult.value, refreshToken: refreshTokenResult.value.token })
   }
 }
