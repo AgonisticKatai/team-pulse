@@ -1,4 +1,4 @@
-import type { RefreshTokenId, UserId } from '@team-pulse/shared/domain/ids'
+import type { RefreshTokenId, UserId } from '@team-pulse/shared'
 
 /**
  * RefreshToken Factory Input

@@ -1,7 +1,5 @@
 import type { User } from '@domain/models/User.js'
-import type { UserId } from '@team-pulse/shared/domain/ids'
-import type { RepositoryError } from '@team-pulse/shared/errors'
-import type { Result } from '@team-pulse/shared/result'
+import type { RepositoryError, Result, UserId } from '@team-pulse/shared'
 
 /**
  * User Repository Interface (PORT)

@@ -2,9 +2,8 @@ import { TokenFactory } from '@application/factories/TokenFactory.js'
 import { faker } from '@faker-js/faker'
 import { TEST_TOKEN_ENV } from '@infrastructure/testing/test-env.js'
 import { buildUser } from '@infrastructure/testing/user-builders.js'
-import { AuthenticationError } from '@team-pulse/shared/errors'
-import { Ok } from '@team-pulse/shared/result'
-import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { AuthenticationError, Ok } from '@team-pulse/shared'
+import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing'
 import { beforeEach, describe, expect, it } from 'vitest'
 
 describe('TokenFactory', () => {

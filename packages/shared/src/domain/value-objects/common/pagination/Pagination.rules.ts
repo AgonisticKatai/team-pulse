@@ -1,0 +1,9 @@
+export const PAGINATION_RULES = {
+  DEFAULT_LIMIT: 20,
+  DEFAULT_PAGE: 1,
+  DEFAULT_TOTAL: 0,
+  MAX_LIMIT: 100, // DDoS protection
+  MIN_LIMIT: 1,
+  MIN_PAGE: 1,
+  MIN_TOTAL: 0,
+}

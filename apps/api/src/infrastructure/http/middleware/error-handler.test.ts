@@ -1,5 +1,5 @@
-import { AuthenticationError, ConflictError, NotFoundError, ValidationError } from '@team-pulse/shared/errors'
-import type { ILogger } from '@team-pulse/shared/errors/handler'
+import { AuthenticationError, ConflictError, NotFoundError, ValidationError } from '@team-pulse/shared'
+import type { ILogger } from '@team-pulse/shared/handler'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import type { FastifyReply } from 'fastify'
 import { beforeEach, describe, expect, it, vi } from 'vitest'

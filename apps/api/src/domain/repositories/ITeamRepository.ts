@@ -1,7 +1,5 @@
 import type { Team } from '@domain/models/Team.js'
-import type { TeamId } from '@team-pulse/shared/domain/ids'
-import type { RepositoryError } from '@team-pulse/shared/errors'
-import type { Result } from '@team-pulse/shared/result'
+import type { RepositoryError, Result, TeamId } from '@team-pulse/shared'
 
 /**
  * Team Repository Interface (PORT)

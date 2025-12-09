@@ -1,7 +1,5 @@
 import type { RefreshTokenFactoryInput, RefreshTokenValueObjects } from '@domain/models/RefreshToken.types.js'
-import { IdUtils, type RefreshTokenId, type UserId } from '@team-pulse/shared/domain/ids'
-import { ValidationError } from '@team-pulse/shared/errors'
-import { Err, Ok, type Result } from '@team-pulse/shared/result'
+import { Err, IdUtils, Ok, type RefreshTokenId, type Result, type UserId, ValidationError } from '@team-pulse/shared'
 
 // Re-export public types
 export type { RefreshTokenFactoryInput, RefreshTokenValueObjects }

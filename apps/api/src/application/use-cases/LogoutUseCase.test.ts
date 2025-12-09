@@ -1,8 +1,7 @@
 import { LogoutUseCase } from '@application/use-cases/LogoutUseCase.js'
 import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository.js'
 import { faker } from '@faker-js/faker'
-import { RepositoryError } from '@team-pulse/shared/errors'
-import { Err, Ok } from '@team-pulse/shared/result'
+import { Err, Ok, RepositoryError } from '@team-pulse/shared'
 import { expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 

@@ -4,7 +4,7 @@ import type { ListUsersUseCase } from '@application/use-cases/ListUsersUseCase.j
 import { requireAuth, requireRole } from '@infrastructure/http/middleware/auth.js'
 import { handleError } from '@infrastructure/http/middleware/error-handler.js'
 import { FastifyLogger } from '@infrastructure/logging/FastifyLogger.js'
-import { CreateUserDTOSchema, PaginationQuerySchema } from '@team-pulse/shared/dtos'
+import { CreateUserDTOSchema, PaginationQuerySchema } from '@team-pulse/shared'
 import type { FastifyInstance } from 'fastify'
 
 /**

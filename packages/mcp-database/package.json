@@ -3,7 +3,7 @@
     "team-pulse-mcp-database": "./dist/index.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.24.2",
+    "@modelcontextprotocol/sdk": "1.24.3",
     "@team-pulse/shared": "workspace:*",
     "zod": "catalog:"
   },

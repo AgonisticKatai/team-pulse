@@ -2,10 +2,8 @@ import { Team } from '@domain/models/Team.js'
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import type { Database } from '@infrastructure/database/connection.js'
 import { teams as teamsSchema } from '@infrastructure/database/schema.js'
-import { IdUtils, type TeamId } from '@team-pulse/shared/domain/ids' // ✅ Ahora sí lo usamos
-import type { ValidationError } from '@team-pulse/shared/errors'
-import { RepositoryError } from '@team-pulse/shared/errors'
-import { collect, Err, Ok, type Result } from '@team-pulse/shared/result'
+import type { ValidationError } from '@team-pulse/shared'
+import { collect, Err, IdUtils, Ok, RepositoryError, type Result, type TeamId } from '@team-pulse/shared' // ✅ Ahora sí lo usamos
 import { eq, sql } from 'drizzle-orm'
 
 export class DrizzleTeamRepository implements ITeamRepository {

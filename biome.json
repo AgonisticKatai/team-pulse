@@ -229,7 +229,15 @@
       }
     },
     {
-      "includes": ["**/env.ts", "**/test-env.ts", "**/config/env.ts", "**/*env*.test.ts", "**/jwt-utils.test.ts", "**/vite-env.d.ts", "apps/web/**"],
+      "includes": [
+        "**/env.ts",
+        "**/test-env.ts",
+        "**/config/env.ts",
+        "**/*env*.test.ts",
+        "**/jwt-utils.test.ts",
+        "**/vite-env.d.ts",
+        "apps/web/**"
+      ],
       "linter": {
         "rules": {
           "style": {
@@ -238,6 +246,20 @@
           }
         }
       }
+    },
+    {
+      "assist": {
+        "actions": {
+          "source": {
+            "useSortedKeys": "off"
+          }
+        },
+        "enabled": true
+      },
+      "formatter": {
+        "enabled": false
+      },
+      "includes": ["**/package.json", "node_modules", "dist", "build"]
     }
   ],
   "vcs": {

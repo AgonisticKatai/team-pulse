@@ -1,6 +1,5 @@
-import { ValidationError } from '@team-pulse/shared/errors'
-import type { Result } from '@team-pulse/shared/result'
-import { Err, Ok } from '@team-pulse/shared/result'
+import type { Result } from '@team-pulse/shared'
+import { Err, Ok, ValidationError } from '@team-pulse/shared'
 
 /**
  * TeamName Value Object

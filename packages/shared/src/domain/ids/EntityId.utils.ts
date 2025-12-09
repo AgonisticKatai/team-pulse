@@ -1,5 +1,5 @@
 import { v4 as uuid, validate as uuidValidate } from 'uuid'
-import type { EntityId } from './EntityId'
+import type { EntityId } from './EntityId.js'
 
 export const IdUtils = {
   generate: <T extends EntityId<string>>(): T => uuid() as T,

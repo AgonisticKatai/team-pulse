@@ -1,84 +1,38 @@
 {
   "dependencies": {
-    "uuid": "^13.0.0",
+    "uuid": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@types/uuid": "^11.0.0",
-    "typescript": "catalog:"
+    "@faker-js/faker": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-dts": "catalog:",
+    "vite-tsconfig-paths": "catalog:",
+    "vitest": "catalog:"
   },
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
-    "./constants": {
-      "import": "./dist/constants/index.js",
-      "types": "./dist/constants/index.d.ts"
-    },
-    "./constants/validation": {
-      "import": "./dist/constants/validation.constants.js",
-      "types": "./dist/constants/validation.constants.d.ts"
-    },
-    "./domain/ids": {
-      "import": "./dist/domain/ids/index.js",
-      "types": "./dist/domain/ids/index.d.ts"
-    },
-    "./domain/value-objects": {
-      "import": "./dist/domain/value-objects/index.js",
-      "types": "./dist/domain/value-objects/index.d.ts"
-    },
-    "./dtos": {
-      "import": "./dist/dtos/index.js",
-      "types": "./dist/dtos/index.d.ts"
-    },
-    "./errors": {
-      "import": "./dist/errors/index.js",
-      "types": "./dist/errors/index.d.ts"
-    },
-    "./errors/handler": {
-      "import": "./dist/errors/handler/index.js",
-      "types": "./dist/errors/handler/index.d.ts"
-    },
-    "./result": {
-      "import": "./dist/types/Result.js",
-      "types": "./dist/types/Result.d.ts"
-    },
-    "./testing/constants": {
-      "import": "./dist/testing/constants.js",
-      "types": "./dist/testing/constants.d.ts"
-    },
-    "./testing/dto-builders": {
-      "import": "./dist/testing/dto-builders.js",
-      "types": "./dist/testing/dto-builders.d.ts"
-    },
-    "./testing/helpers": {
-      "import": "./dist/testing/helpers.js",
-      "types": "./dist/testing/helpers.d.ts"
-    },
-    "./testing/id-factory": {
-      "import": "./dist/testing/id-factory.js",
-      "types": "./dist/testing/id-factory.d.ts"
-    },
-    "./types": {
-      "import": "./dist/types/index.js",
-      "types": "./dist/types/index.d.ts"
-    },
-    "./validation": {
-      "import": "./dist/validation/index.js",
-      "types": "./dist/validation/index.d.ts"
+    "./testing": {
+      "types": "./dist/testing.d.ts",
+      "import": "./dist/testing.js"
     }
   },
   "files": [
     "dist"
   ],
   "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "name": "@team-pulse/shared",
   "private": true,
   "scripts": {
-    "build": "tsc --build",
+    "build": "vite build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "dev": "tsc --build --watch",
+    "dev": "vite build --watch",
     "format": "biome format --write .",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",

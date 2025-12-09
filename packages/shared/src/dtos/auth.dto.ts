@@ -1,6 +1,6 @@
+import type { UserId } from '@domain/ids'
+import type { EmailType, UserRoleType } from '@domain/value-objects'
 import { z } from 'zod'
-import type { UserId } from '../domain/ids/index.js'
-import type { EmailType, UserRoleType } from '../domain/value-objects/index.js'
 import type { PaginatedResponse } from './pagination.dto.js'
 
 /**

@@ -1,10 +1,8 @@
 import type { TokenFactory } from '@application/factories/TokenFactory.js'
 import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
-import type { RefreshTokenDTO, RefreshTokenResponseDTO } from '@team-pulse/shared/dtos'
-import type { RepositoryError, ValidationError } from '@team-pulse/shared/errors'
-import { AuthenticationError } from '@team-pulse/shared/errors'
-import { Err, Ok, type Result } from '@team-pulse/shared/result'
+import type { RefreshTokenDTO, RefreshTokenResponseDTO, RepositoryError, ValidationError } from '@team-pulse/shared'
+import { AuthenticationError, Err, Ok, type Result } from '@team-pulse/shared'
 
 /**
  * Refresh Token Use Case

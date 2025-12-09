@@ -1,7 +1,7 @@
-import { ValidationError } from '@team-pulse/shared/errors'
-import { Err, Ok, type Result } from '@team-pulse/shared/result'
-import { emailSchema } from './Email.schema'
-import type { EmailType } from './Email.types'
+import { ValidationError } from '@errors/ValidationError'
+import { Err, Ok, type Result } from '@result'
+import { UserEmailSchema } from './UserEmail.schema.js'
+import type { EmailType } from './UserEmail.types.js'
 
 /**
  * Email Value Object
@@ -33,7 +33,7 @@ export class Email {
   }
 
   static validate({ value }: { value: string }): Result<EmailType, ValidationError> {
-    const result = emailSchema.safeParse(value)
+    const result = UserEmailSchema.safeParse(value)
 
     if (!result.success) {
       return Err(ValidationError.fromZodError({ error: result.error }))
@@ -43,7 +43,7 @@ export class Email {
   }
 
   static isValid({ value }: { value: string }): boolean {
-    return emailSchema.safeParse(value).success
+    return UserEmailSchema.safeParse(value).success
   }
 
   getValue(): EmailType {

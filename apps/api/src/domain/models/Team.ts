@@ -2,10 +2,8 @@ import type { TeamFactoryInput, TeamUpdateInput, TeamValueObjects } from '@domai
 import { City } from '@domain/value-objects/City.js'
 import { FoundedYear } from '@domain/value-objects/FoundedYear.js'
 import { TeamName } from '@domain/value-objects/TeamName.js'
-import { IdUtils, type TeamId } from '@team-pulse/shared/domain/ids'
-import type { TeamResponseDTO } from '@team-pulse/shared/dtos'
-import { ValidationError } from '@team-pulse/shared/errors'
-import { Err, Ok, type Result } from '@team-pulse/shared/result'
+import type { TeamResponseDTO } from '@team-pulse/shared'
+import { Err, IdUtils, Ok, type Result, type TeamId, ValidationError } from '@team-pulse/shared'
 
 // Re-export public types
 export type { TeamFactoryInput, TeamUpdateInput, TeamValueObjects }

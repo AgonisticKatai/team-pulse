@@ -10,9 +10,7 @@ import {
   buildUser,
   buildValidRefreshToken,
 } from '@infrastructure/testing/index.js'
-import { IdUtils, type RefreshTokenId } from '@team-pulse/shared/domain/ids'
-import { AuthenticationError, RepositoryError } from '@team-pulse/shared/errors'
-import { Err, Ok } from '@team-pulse/shared/result'
+import { AuthenticationError, Err, IdUtils, Ok, type RefreshTokenId, RepositoryError } from '@team-pulse/shared'
 import { buildRefreshTokenDTO } from '@team-pulse/shared/testing/dto-builders'
 import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'

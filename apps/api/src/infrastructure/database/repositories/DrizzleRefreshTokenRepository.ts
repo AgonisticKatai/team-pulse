@@ -2,10 +2,17 @@ import { RefreshToken } from '@domain/models/RefreshToken.js'
 import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository.js'
 import type { Database } from '@infrastructure/database/connection.js'
 import { refreshTokens as refreshTokensSchema } from '@infrastructure/database/schema.js'
-import { IdUtils, type RefreshTokenId, type UserId } from '@team-pulse/shared/domain/ids' // 👈 IMPORTS NUEVOS
-import type { ValidationError } from '@team-pulse/shared/errors'
-import { RepositoryError } from '@team-pulse/shared/errors'
-import { collect, Err, Ok, type Result } from '@team-pulse/shared/result'
+import type { ValidationError } from '@team-pulse/shared'
+import {
+  collect,
+  Err,
+  IdUtils,
+  Ok,
+  type RefreshTokenId,
+  RepositoryError,
+  type Result,
+  type UserId,
+} from '@team-pulse/shared' // 👈 IMPORTS NUEVOS
 import { eq, lt } from 'drizzle-orm'
 
 /**

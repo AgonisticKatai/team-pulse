@@ -5,11 +5,9 @@ import type {
   UserData,
   UserProps,
 } from '@domain/models/User.types.js'
-import { IdUtils, type UserId } from '@team-pulse/shared/domain/ids'
+import type { UserResponseDTO } from '@team-pulse/shared'
+import { Err, IdUtils, Ok, type Result, type UserId, ValidationError } from '@team-pulse/shared'
 import { Email, Role } from '@team-pulse/shared/domain/value-objects'
-import type { UserResponseDTO } from '@team-pulse/shared/dtos'
-import { ValidationError } from '@team-pulse/shared/errors'
-import { Err, Ok, type Result } from '@team-pulse/shared/result'
 
 // Re-export public types
 export type { CreateUserData, UpdateUserData, UserData, UserProps }

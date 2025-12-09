@@ -1,5 +1,4 @@
-import type { RepositoryError } from '@team-pulse/shared/errors'
-import type { Result } from '@team-pulse/shared/result'
+import type { RepositoryError, Result } from '@team-pulse/shared'
 
 /**
  * Password Hasher Interface (DOMAIN SERVICE)

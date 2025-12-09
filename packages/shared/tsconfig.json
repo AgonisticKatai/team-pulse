@@ -6,10 +6,13 @@
     "declarationMap": true,
     "outDir": "./dist",
     "paths": {
+      "@domain/*": ["./src/domain/*"],
       "@dtos/*": ["./src/dtos/*"],
       "@errors/*": ["./src/errors/*"],
+      "@result": ["./src/types/Result"],
       "@testing/*": ["./src/testing/*"],
-      "@types/*": ["./src/types/*"]
+      "@types/*": ["./src/types/*"],
+      "@value-objects/*": ["./src/domain/value-objects/*"]
     },
     "rootDir": "./src"
   },

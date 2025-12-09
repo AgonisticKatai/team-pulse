@@ -1,5 +1,5 @@
+import type { Result } from '@result'
 import { expect } from 'vitest'
-import type { Result } from '../types/Result.js'
 
 /**
  * Testing Helpers

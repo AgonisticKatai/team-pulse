@@ -21,3 +21,5 @@ export interface Match {
   date: Date
   status: 'scheduled' | 'in-progress' | 'finished'
 }
+
+export * from './Result.js'

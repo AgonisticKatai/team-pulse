@@ -1,4 +1,4 @@
-import type { UserId } from '@team-pulse/shared/domain/ids'
+import type { UserId } from '@team-pulse/shared'
 import type { Email, Role } from '@team-pulse/shared/domain/value-objects'
 
 /**

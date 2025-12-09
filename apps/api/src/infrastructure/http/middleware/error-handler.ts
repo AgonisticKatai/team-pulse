@@ -1,4 +1,4 @@
-import { ErrorHandler, type ILogger } from '@team-pulse/shared/errors/handler'
+import { ErrorHandler, type ILogger } from '@team-pulse/shared/handler'
 import type { FastifyReply } from 'fastify'
 
 /**

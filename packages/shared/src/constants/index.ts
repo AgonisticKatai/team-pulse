@@ -1,1 +1,1 @@
-export * from './validation.constants'
+export * from './validation.constants.js'

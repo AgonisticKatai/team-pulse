@@ -1,6 +1,6 @@
 import { exec } from 'node:child_process'
 import { promisify } from 'node:util'
-import { Err, Ok, type Result } from '@team-pulse/shared/result'
+import { Err, Ok, type Result } from '@team-pulse/shared'
 import type { CommandOutput, ICommandExecutor } from '../domain/ICommandExecutor.js'
 
 const execAsync = promisify(exec)

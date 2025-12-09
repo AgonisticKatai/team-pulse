@@ -1,7 +1,7 @@
 import { RefreshToken } from '@domain/models/RefreshToken.js'
 import { faker } from '@faker-js/faker'
-import { IdUtils, type RefreshTokenId, type UserId } from '@team-pulse/shared/domain/ids'
-import type { LoginDTO, RefreshTokenDTO } from '@team-pulse/shared/dtos'
+import type { LoginDTO, RefreshTokenDTO } from '@team-pulse/shared'
+import { IdUtils, type RefreshTokenId, type UserId } from '@team-pulse/shared'
 
 // ==========================================
 // DTO BUILDERS (Simple data containers)

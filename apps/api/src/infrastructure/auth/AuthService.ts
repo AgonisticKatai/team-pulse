@@ -1,7 +1,6 @@
 import type { AccessTokenPayload, TokenFactory } from '@application/factories/TokenFactory.js'
-import type { AuthenticationError } from '@team-pulse/shared/errors'
-import { ValidationError } from '@team-pulse/shared/errors'
-import { Err, Ok, type Result } from '@team-pulse/shared/result'
+import type { AuthenticationError } from '@team-pulse/shared'
+import { Err, Ok, type Result, ValidationError } from '@team-pulse/shared'
 import type { UserRole } from '@team-pulse/shared/types'
 
 /**

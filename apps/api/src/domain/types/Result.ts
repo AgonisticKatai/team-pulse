@@ -6,5 +6,5 @@
  *
  * The Result type is now defined in the shared package and can be used across the monorepo.
  */
-export type { Result } from '@team-pulse/shared/result'
-export { collect, Err, flatMap, isError, isOk, map, Ok, unwrap, unwrapOr } from '@team-pulse/shared/result'
+export type { Result } from '@team-pulse/shared'
+export { collect, Err, flatMap, isError, isOk, map, Ok, unwrap, unwrapOr } from '@team-pulse/shared'

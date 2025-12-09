@@ -1,7 +1,6 @@
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto'
 import type { IPasswordHasher } from '@domain/services/IPasswordHasher.js'
-import { RepositoryError } from '@team-pulse/shared/errors'
-import { Err, Ok, type Result } from '@team-pulse/shared/result'
+import { Err, Ok, RepositoryError, type Result } from '@team-pulse/shared'
 
 /**
  * Scrypt Password Hasher Implementation (INFRASTRUCTURE ADAPTER)

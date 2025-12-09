@@ -1,8 +1,8 @@
 import { User } from '@domain/models/User.js'
 import { faker } from '@faker-js/faker'
-import { IdUtils, type UserId } from '@team-pulse/shared/domain/ids'
+import type { CreateUserDTO } from '@team-pulse/shared'
+import { IdUtils, type UserId } from '@team-pulse/shared'
 import { UserRoles } from '@team-pulse/shared/domain/value-objects'
-import type { CreateUserDTO } from '@team-pulse/shared/dtos'
 
 // 1. SIMPLE DEFINITION: Only primitive types
 type UserPrimitives = {

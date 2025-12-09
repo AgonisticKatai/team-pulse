@@ -1,4 +1,4 @@
-import type { Result } from '@team-pulse/shared/result'
+import type { Result } from '@team-pulse/shared'
 import type { ISchemaReader } from '../domain/ISchemaReader.js'
 
 /**

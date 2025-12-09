@@ -2,10 +2,8 @@ import { User } from '@domain/models/User.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { Database } from '@infrastructure/database/connection.js'
 import { users as usersSchema } from '@infrastructure/database/schema.js'
-import { IdUtils, type UserId } from '@team-pulse/shared/domain/ids' // 👈 NEW IMPORT
-import type { ValidationError } from '@team-pulse/shared/errors'
-import { RepositoryError } from '@team-pulse/shared/errors'
-import { collect, Err, Ok, type Result } from '@team-pulse/shared/result'
+import type { ValidationError } from '@team-pulse/shared'
+import { collect, Err, IdUtils, Ok, RepositoryError, type Result, type UserId } from '@team-pulse/shared' // 👈 NEW IMPORT
 import { eq, sql } from 'drizzle-orm'
 
 /**

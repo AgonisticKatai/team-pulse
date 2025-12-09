@@ -1,7 +1,6 @@
 import { RefreshToken } from '@domain/models/RefreshToken.js'
 import { faker } from '@faker-js/faker'
-import { IdUtils, type RefreshTokenId, type UserId } from '@team-pulse/shared/domain/ids'
-import { ValidationError } from '@team-pulse/shared/errors'
+import { IdUtils, type RefreshTokenId, type UserId, ValidationError } from '@team-pulse/shared'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { describe, expect, it } from 'vitest'
 

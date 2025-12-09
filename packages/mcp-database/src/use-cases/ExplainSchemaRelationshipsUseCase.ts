@@ -1,4 +1,4 @@
-import { Err, Ok, type Result } from '@team-pulse/shared/result'
+import { Err, Ok, type Result } from '@team-pulse/shared'
 import type { ColumnSchema, ForeignKeyData, ISchemaReader, TableSchema } from '../domain/ISchemaReader.js'
 
 /**

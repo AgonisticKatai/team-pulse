@@ -1,5 +1,5 @@
 import { FoundedYear } from '@domain/value-objects/FoundedYear.js'
-import { ValidationError } from '@team-pulse/shared/errors'
+import { ValidationError } from '@team-pulse/shared'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { describe, expect, it } from 'vitest'

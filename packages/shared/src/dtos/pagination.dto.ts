@@ -36,11 +36,13 @@ export type PaginationQuery = z.infer<typeof PaginationQuerySchema>
  * Pagination Metadata
  * Contains information about the current page, total items, etc.
  */
-export interface PaginationMetadata {
+export interface PaginationDTO {
   page: number
   limit: number
   total: number
   totalPages: number
+  hasNext: boolean
+  hasPrev: boolean
 }
 
 /**
@@ -65,5 +67,5 @@ export interface PaginationMetadata {
 export type PaginatedResponse<TData, TKey extends string = 'data'> = {
   [K in TKey]: TData[]
 } & {
-  pagination: PaginationMetadata
+  pagination: PaginationDTO
 }

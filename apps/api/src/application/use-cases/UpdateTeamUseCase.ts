@@ -1,9 +1,6 @@
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
-import type { TeamId } from '@team-pulse/shared/domain/ids'
-import type { TeamResponseDTO, UpdateTeamDTO } from '@team-pulse/shared/dtos'
-import type { RepositoryError, ValidationError } from '@team-pulse/shared/errors'
-import { ConflictError, NotFoundError } from '@team-pulse/shared/errors'
-import { Err, Ok, type Result } from '@team-pulse/shared/result'
+import type { RepositoryError, TeamId, TeamResponseDTO, UpdateTeamDTO, ValidationError } from '@team-pulse/shared'
+import { ConflictError, Err, NotFoundError, Ok, type Result } from '@team-pulse/shared'
 
 /**
  * Update Team Use Case

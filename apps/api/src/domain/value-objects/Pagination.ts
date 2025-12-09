@@ -1,6 +1,5 @@
-import type { PaginationMetadata } from '@team-pulse/shared/dtos'
-import { ValidationError } from '@team-pulse/shared/errors'
-import { Err, Ok, type Result } from '@team-pulse/shared/result'
+import type { PaginationMetadata } from '@team-pulse/shared'
+import { Err, Ok, type Result, ValidationError } from '@team-pulse/shared'
 
 /**
  * Pagination Value Object (DOMAIN MODEL)

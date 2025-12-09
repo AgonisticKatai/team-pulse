@@ -3,10 +3,17 @@ import type { Team } from '@domain/models/Team.js'
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import { faker } from '@faker-js/faker'
 import { buildCreateTeamDTO, buildTeam } from '@infrastructure/testing/index.js'
-import { IdUtils, type TeamId } from '@team-pulse/shared/domain/ids'
-import type { UpdateTeamDTO } from '@team-pulse/shared/dtos'
-import { ConflictError, NotFoundError, RepositoryError, ValidationError } from '@team-pulse/shared/errors'
-import { Err, Ok } from '@team-pulse/shared/result'
+import type { UpdateTeamDTO } from '@team-pulse/shared'
+import {
+  ConflictError,
+  Err,
+  IdUtils,
+  NotFoundError,
+  Ok,
+  RepositoryError,
+  type TeamId,
+  ValidationError,
+} from '@team-pulse/shared'
 import { expectErrorType, expectMockCallArg, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 

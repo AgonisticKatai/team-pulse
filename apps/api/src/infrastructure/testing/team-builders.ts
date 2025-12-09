@@ -1,7 +1,7 @@
 import { Team } from '@domain/models/Team.js'
 import { faker } from '@faker-js/faker'
-import { IdUtils, type TeamId } from '@team-pulse/shared/domain/ids'
-import type { CreateTeamDTO } from '@team-pulse/shared/dtos'
+import type { CreateTeamDTO } from '@team-pulse/shared'
+import { IdUtils, type TeamId } from '@team-pulse/shared'
 
 // 1. SIMPLE DEFINITION: Only primitive types
 type TeamPrimitives = {

@@ -1,6 +1,6 @@
 import { User } from '@domain/models/User.js'
+import { ValidationError } from '@team-pulse/shared'
 import { Email, EntityId, Role } from '@team-pulse/shared/domain/value-objects'
-import { ValidationError } from '@team-pulse/shared/errors'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
 import { TestIds } from '@team-pulse/shared/testing/id-factory'
 import { describe, expect, it } from 'vitest'

@@ -1,13 +1,12 @@
-import { VALIDATION_MESSAGES } from '@team-pulse/shared/constants/validation'
-import { ValidationError } from '@team-pulse/shared/errors'
+import { ValidationError } from '@errors/ValidationError'
 import { expectErrorType, expectSuccess } from '@testing/helpers'
 import { describe, expect, it } from 'vitest'
-import { UserRoles } from './Role.constants.js'
-import { Role } from './Role.js'
+import { USER_ROLE_VALIDATION_MESSAGES, USER_ROLES } from './UserRole.constants.js'
+import { Role } from './UserRole.js'
 
 describe('Role Value Object', () => {
   describe('create', () => {
-    it.each(Object.values(UserRoles))('should create a valid role for %s', (roleValue) => {
+    it.each(Object.values(USER_ROLES))('should create a valid role for %s', (roleValue) => {
       // Act
       const result = Role.create({ value: roleValue })
 
@@ -25,7 +24,7 @@ describe('Role Value Object', () => {
       // Assert
       const error = expectErrorType({ errorType: ValidationError, result })
 
-      expect(error.message).toContain(VALIDATION_MESSAGES.SPECIFIC.ROLE.INVALID_OPTION)
+      expect(error.message).toContain(USER_ROLE_VALIDATION_MESSAGES.INVALID_OPTION)
     })
 
     it('should fail when creating a role with empty string', () => {
@@ -37,8 +36,8 @@ describe('Role Value Object', () => {
   describe('equals', () => {
     it('should return true for different instances with same value', () => {
       // Act
-      const role1Result = Role.create({ value: UserRoles.Admin })
-      const role2Result = Role.create({ value: UserRoles.Admin })
+      const role1Result = Role.create({ value: USER_ROLES.Admin })
+      const role2Result = Role.create({ value: USER_ROLES.Admin })
 
       const role1 = expectSuccess(role1Result)
       const role2 = expectSuccess(role2Result)
@@ -49,8 +48,8 @@ describe('Role Value Object', () => {
 
     it('should return false for different values', () => {
       // Act
-      const adminResult = Role.create({ value: UserRoles.Admin })
-      const userResult = Role.create({ value: UserRoles.User })
+      const adminResult = Role.create({ value: USER_ROLES.Admin })
+      const userResult = Role.create({ value: USER_ROLES.User })
 
       if (!(adminResult.ok && userResult.ok)) throw new Error('Setup failed')
 
@@ -62,30 +61,30 @@ describe('Role Value Object', () => {
   describe('utilities', () => {
     it('toString should return the raw string value', () => {
       // Act
-      const result = Role.create({ value: UserRoles.SuperAdmin })
+      const result = Role.create({ value: USER_ROLES.SuperAdmin })
       const role = expectSuccess(result)
 
       // Assert
-      expect(role.toString()).toBe(UserRoles.SuperAdmin)
+      expect(role.toString()).toBe(USER_ROLES.SuperAdmin)
     })
 
     it('getValue should return the strict UserRoleType', () => {
       // Act
-      const result = Role.create({ value: UserRoles.SuperAdmin })
+      const result = Role.create({ value: USER_ROLES.SuperAdmin })
       const role = expectSuccess(result)
 
       // Assert
       const value = role.getValue()
-      expect(value).toBe(UserRoles.SuperAdmin)
+      expect(value).toBe(USER_ROLES.SuperAdmin)
     })
   })
 
   describe('business logic', () => {
     it('isAdmin should return true only for Admin', () => {
       // Act
-      const admin = expectSuccess(Role.create({ value: UserRoles.Admin }))
-      const superAdmin = expectSuccess(Role.create({ value: UserRoles.SuperAdmin }))
-      const user = expectSuccess(Role.create({ value: UserRoles.User }))
+      const admin = expectSuccess(Role.create({ value: USER_ROLES.Admin }))
+      const superAdmin = expectSuccess(Role.create({ value: USER_ROLES.SuperAdmin }))
+      const user = expectSuccess(Role.create({ value: USER_ROLES.User }))
 
       // Assert
       expect(admin.isAdmin()).toBe(true)
@@ -95,9 +94,9 @@ describe('Role Value Object', () => {
 
     it('isSuperAdmin should return true only for SuperAdmin', () => {
       // Act
-      const admin = expectSuccess(Role.create({ value: UserRoles.Admin }))
-      const superAdmin = expectSuccess(Role.create({ value: UserRoles.SuperAdmin }))
-      const user = expectSuccess(Role.create({ value: UserRoles.User }))
+      const admin = expectSuccess(Role.create({ value: USER_ROLES.Admin }))
+      const superAdmin = expectSuccess(Role.create({ value: USER_ROLES.SuperAdmin }))
+      const user = expectSuccess(Role.create({ value: USER_ROLES.User }))
 
       // Assert
       expect(superAdmin.isSuperAdmin()).toBe(true)
@@ -107,9 +106,9 @@ describe('Role Value Object', () => {
 
     it('isUser should return true only for User', () => {
       // Act
-      const admin = expectSuccess(Role.create({ value: UserRoles.Admin }))
-      const superAdmin = expectSuccess(Role.create({ value: UserRoles.SuperAdmin }))
-      const user = expectSuccess(Role.create({ value: UserRoles.User }))
+      const admin = expectSuccess(Role.create({ value: USER_ROLES.Admin }))
+      const superAdmin = expectSuccess(Role.create({ value: USER_ROLES.SuperAdmin }))
+      const user = expectSuccess(Role.create({ value: USER_ROLES.User }))
 
       // Assert
       expect(user.isUser()).toBe(true)

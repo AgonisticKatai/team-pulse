@@ -1,11 +1,8 @@
 import { User } from '@domain/models/User.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { IPasswordHasher } from '@domain/services/IPasswordHasher.js'
-import { IdUtils, type UserId } from '@team-pulse/shared/domain/ids'
-import type { CreateUserDTO, UserResponseDTO } from '@team-pulse/shared/dtos'
-import type { RepositoryError, ValidationError } from '@team-pulse/shared/errors'
-import { ConflictError } from '@team-pulse/shared/errors'
-import { Err, Ok, type Result } from '@team-pulse/shared/result'
+import type { CreateUserDTO, RepositoryError, UserResponseDTO, ValidationError } from '@team-pulse/shared'
+import { ConflictError, Err, IdUtils, Ok, type Result, type UserId } from '@team-pulse/shared'
 
 /**
  * Create User Use Case

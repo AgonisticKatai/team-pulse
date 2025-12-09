@@ -1,9 +1,8 @@
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import type { IMetricsService } from '@domain/services/IMetricsService.js'
 import { Pagination } from '@domain/value-objects/index.js'
-import type { PaginationQuery, TeamsListResponseDTO } from '@team-pulse/shared/dtos'
-import type { RepositoryError, ValidationError } from '@team-pulse/shared/errors'
-import { Err, Ok, type Result } from '@team-pulse/shared/result'
+import type { PaginationQuery, RepositoryError, TeamsListResponseDTO, ValidationError } from '@team-pulse/shared'
+import { Err, Ok, type Result } from '@team-pulse/shared'
 
 /**
  * List Teams Use Case

@@ -1,11 +1,7 @@
 import type { IEnvironment } from '@domain/config/IEnvironment.js'
 import { RefreshToken } from '@domain/models/RefreshToken.js'
-import type { RefreshTokenId, UserId } from '@team-pulse/shared/domain/ids'
-import { IdUtils } from '@team-pulse/shared/domain/ids'
-import type { Email, Role } from '@team-pulse/shared/domain/value-objects'
-import type { ValidationError } from '@team-pulse/shared/errors'
-import { AuthenticationError } from '@team-pulse/shared/errors'
-import { Err, Ok, type Result } from '@team-pulse/shared/result'
+import type { Email, RefreshTokenId, Result, Role, UserId, ValidationError } from '@team-pulse/shared'
+import { AuthenticationError, Err, IdUtils, Ok } from '@team-pulse/shared'
 import jwt from 'jsonwebtoken'
 
 /**

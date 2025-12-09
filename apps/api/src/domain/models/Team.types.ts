@@ -1,7 +1,7 @@
 import type { City } from '@domain/value-objects/City.js'
 import type { FoundedYear } from '@domain/value-objects/FoundedYear.js'
 import type { TeamName } from '@domain/value-objects/TeamName.js'
-import type { TeamId } from '@team-pulse/shared/domain/ids'
+import type { TeamId } from '@team-pulse/shared'
 
 /**
  * Team Factory Input

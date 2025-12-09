@@ -3,10 +3,8 @@ import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshToken
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { IMetricsService } from '@domain/services/IMetricsService.js'
 import type { IPasswordHasher } from '@domain/services/IPasswordHasher.js'
-import type { LoginDTO, LoginResponseDTO } from '@team-pulse/shared/dtos'
-import type { RepositoryError, ValidationError } from '@team-pulse/shared/errors'
-import { AuthenticationError } from '@team-pulse/shared/errors'
-import { Err, Ok, type Result } from '@team-pulse/shared/result'
+import type { LoginDTO, LoginResponseDTO, RepositoryError, ValidationError } from '@team-pulse/shared'
+import { AuthenticationError, Err, Ok, type Result } from '@team-pulse/shared'
 
 /**
  * Login Use Case
