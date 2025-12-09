@@ -3,3 +3,12 @@ export type PaginationProps = {
   limit: number
   total: number
 }
+
+export type PaginationPrimitives = {
+  hasNext: boolean
+  hasPrev: boolean
+  limit: number
+  page: number
+  total: number
+  totalPages: number
+}

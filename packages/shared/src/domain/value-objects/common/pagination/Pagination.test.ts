@@ -132,7 +132,7 @@ describe('Pagination Value Object', () => {
   })
 
   // -------------------------------------------------------------------------
-  // MAPPING TESTS (DTOs)
+  // MAPPING TESTS (DTOs & Primitives)
   // -------------------------------------------------------------------------
   describe('Mapping methods', () => {
     it('toDTO should return expected DTO structure', () => {
@@ -178,6 +178,37 @@ describe('Pagination Value Object', () => {
       expect(pagination.total).toBe(45)
       // Logic verified: totalPages is recalculated correctly (45/15 = 3), ignoring the '999' from DTO
       expect(pagination.totalPages).toBe(3)
+    })
+
+    it('should return correct primitives including calculated offset via toJSON()', () => {
+      // Arrange
+      const page = 3
+      const limit = 10
+      const pagination = expectSuccess(Pagination.create({ limit, page, total: 100 }))
+
+      // Act
+      const result = pagination.toJSON()
+
+      // Assert
+      expect(result).toEqual({
+        hasNext: true,
+        hasPrev: true,
+        limit: 10,
+        page: 3,
+        total: 100,
+        totalPages: 10,
+      })
+    })
+
+    it('should be serialized automatically by JSON.stringify', () => {
+      // Arrange
+      const pagination = expectSuccess(Pagination.create({ limit: 50, page: 1, total: 100 }))
+
+      // Act
+      const jsonString = JSON.stringify(pagination)
+
+      // Assert
+      expect(jsonString).toBe('{"hasNext":true,"hasPrev":false,"limit":50,"page":1,"total":100,"totalPages":2}')
     })
   })
 })

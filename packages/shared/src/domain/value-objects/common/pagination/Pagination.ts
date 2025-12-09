@@ -3,7 +3,7 @@ import { ValidationError } from '@errors/ValidationError'
 import { Err, Ok, type Result } from '@result'
 import { type PaginationInput, PaginationSchema } from '@value-objects/common/pagination/Pagination.schema.js'
 import { PAGINATION_RULES } from './Pagination.rules.js'
-import type { PaginationProps } from './Paginations.types.js'
+import type { PaginationPrimitives, PaginationProps } from './Paginations.types.js'
 
 export class Pagination {
   readonly page: number
@@ -49,6 +49,18 @@ export class Pagination {
   }
 
   toDTO(): PaginationDTO {
+    return {
+      hasNext: this.hasNext,
+      hasPrev: this.hasPrev,
+      limit: this.limit,
+      page: this.page,
+      total: this.total,
+      totalPages: this.totalPages,
+    }
+  }
+
+  // Needed because getters are not serialized
+  toJSON(): PaginationPrimitives {
     return {
       hasNext: this.hasNext,
       hasPrev: this.hasPrev,
