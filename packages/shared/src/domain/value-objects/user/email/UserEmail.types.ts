@@ -1,1 +1,3 @@
-export type EmailType = string
+export type UserEmailProps = {
+  address: string
+}

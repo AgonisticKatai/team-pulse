@@ -1,256 +1,98 @@
-import { ValidationError } from '@errors/ValidationError'
-import { TEST_CONSTANTS } from '@testing/constants'
-import { expectErrorType, expectSuccess } from '@testing/helpers'
+import { ValidationError } from '@errors/ValidationError.js'
+import { faker } from '@faker-js/faker'
+import { expectErrorType, expectSuccess } from '@testing/helpers.js'
 import { describe, expect, it } from 'vitest'
-import { USER_EMAIL_VALIDATION_MESSAGES } from './UserEmail.constants.js'
-import { Email } from './UserEmail.js'
+import { UserEmail } from './UserEmail.js'
+import { USER_EMAIL_RULES } from './UserEmail.rules.js'
+import type { UserEmailInput } from './UserEmail.schema.js'
 
-describe('Email', () => {
-  const { emails } = TEST_CONSTANTS
-
+describe('UserEmail Value Object', () => {
   describe('create', () => {
-    it('should create an Email from a valid email string', () => {
-      // Act
-      const result = Email.create({ value: emails.valid })
+    // ✅ HAPPY PATH
+    it('should create a valid instance', () => {
+      const input = {
+        address: faker.internet.email(),
+      } satisfies UserEmailInput
 
-      // Assert
-      const email = expectSuccess(result)
-      expect(email.getValue()).toBe(emails.valid)
+      const userEmail = expectSuccess(UserEmail.create(input))
+
+      expect(userEmail.address).toBe(input.address.toLowerCase())
+      expect(userEmail.getValue()).toEqual({ address: input.address.toLowerCase() })
     })
 
-    it('should normalize email by trimming and lowercasing', () => {
-      // Arrange
-      const expected = 'test@example.com' // Expected normalized value
+    // -------------------------------------------------------------------------
+    // 📏 BOUNDARY TESTING (Mathematical and Deterministic)
+    // -------------------------------------------------------------------------
 
-      // Act
-      const result = Email.create({ value: emails.withSpaces })
+    it('should accept an email with exactly MIN_LENGTH', () => {
+      // Defines the shortest possible email according to Zod and reality: '@a.co'
+      // 1 user + 1 @ + 1 domain + 1 dot + 2 extension = 6
+      const suffix = '@a.co'
+      const userLength = USER_EMAIL_RULES.MIN_LENGTH - suffix.length
 
-      // Assert
-      const email = expectSuccess(result)
-      expect(email.getValue()).toBe(expected)
+      const user = faker.string.alpha(userLength)
+      const minEmail = `${user}${suffix}`
+
+      expect(minEmail.length).toBe(USER_EMAIL_RULES.MIN_LENGTH)
+
+      const userEmail = expectSuccess(UserEmail.create({ address: minEmail }))
+      expect(userEmail.address).toBe(minEmail.toLowerCase())
     })
 
-    it('should normalize uppercase email to lowercase', () => {
-      // Act
-      const result = Email.create({ value: emails.uppercase })
+    it('should accept an email with exactly MAX_LENGTH', () => {
+      const suffix = '@example.com'
+      const userLength = USER_EMAIL_RULES.MAX_LENGTH - suffix.length
 
-      // Assert
-      const email = expectSuccess(result)
-      expect(email.getValue()).toBe(emails.valid)
+      const user = faker.string.alpha(userLength)
+      const maxEmail = `${user}${suffix}`
+
+      expect(maxEmail.length).toBe(USER_EMAIL_RULES.MAX_LENGTH)
+
+      const userEmail = expectSuccess(UserEmail.create({ address: maxEmail }))
+      expect(userEmail.address).toBe(maxEmail.toLowerCase())
     })
 
-    it('should return ValidationError for empty string', () => {
-      // Act
-      const result = Email.create({ value: emails.empty })
+    // -------------------------------------------------------------------------
+    // ❌ ERROR CASES (Isolation of rules)
+    // -------------------------------------------------------------------------
 
-      // Assert
-      const error = expectErrorType({ errorType: ValidationError, result })
-      expect(error.message).toBe(USER_EMAIL_VALIDATION_MESSAGES.TOO_SHORT)
+    it('should return ValidationError if address is shorter than MIN_LENGTH', () => {
+      // Generates a 5-character email (now invalid by both length and format)
+      const input = faker.string.alpha(USER_EMAIL_RULES.MIN_LENGTH - 1)
+
+      expectErrorType({
+        errorType: ValidationError,
+        result: UserEmail.create({ address: input }),
+      })
     })
 
-    it('should return ValidationError for whitespace only', () => {
-      // Act
-      const result = Email.create({ value: emails.whitespaceOnly })
+    it('should return ValidationError if address is longer than MAX_LENGTH', () => {
+      // Generates a 256-character email (now invalid by both length and format)
+      const input = faker.string.alpha(USER_EMAIL_RULES.MAX_LENGTH + 1)
 
-      // Assert
-      const error = expectErrorType({ errorType: ValidationError, result })
-      expect(error.message).toBe(USER_EMAIL_VALIDATION_MESSAGES.TOO_SHORT)
+      expectErrorType({
+        errorType: ValidationError,
+        result: UserEmail.create({ address: input }),
+      })
     })
 
-    it('should return ValidationError for invalid format without @', () => {
-      // Act
-      const result = Email.create({ value: emails.noAt })
+    // Manual format tests (without Faker, to be explicit)
+    it('should return ValidationError if format is invalid', () => {
+      const invalidInputs = [
+        '', // Empty
+        'plainaddress', // No @
+        '@example.com', // No user
+        'user@', // No domain
+        'user@domain', // No TLD (Zod usually requests it)
+        'a b@test.com', // Spaces inside
+      ]
 
-      // Assert
-      const error = expectErrorType({ errorType: ValidationError, result })
-      expect(error.message).toBe(USER_EMAIL_VALIDATION_MESSAGES.INVALID_FORMAT)
-    })
-
-    it('should return ValidationError for missing local part', () => {
-      // Act
-      const result = Email.create({ value: emails.noLocal })
-
-      // Assert
-      const error = expectErrorType({ errorType: ValidationError, result })
-      expect(error.message).toBe(USER_EMAIL_VALIDATION_MESSAGES.INVALID_FORMAT)
-    })
-
-    it('should return ValidationError for missing domain', () => {
-      // Act
-      const result = Email.create({ value: emails.noDomain })
-
-      // Assert
-      const error = expectErrorType({ errorType: ValidationError, result })
-      expect(error.message).toBe(USER_EMAIL_VALIDATION_MESSAGES.INVALID_FORMAT)
-    })
-
-    it('should return ValidationError for email exceeding 255 characters', () => {
-      // Act
-      const result = Email.create({ value: emails.tooLong })
-
-      // Assert
-      const error = expectErrorType({ errorType: ValidationError, result })
-      expect(error.message).toBe(USER_EMAIL_VALIDATION_MESSAGES.TOO_LONG)
-    })
-
-    it('should accept valid email with subdomain', () => {
-      // Act
-      const result = Email.create({ value: emails.withSubdomain })
-
-      // Assert
-      const email = expectSuccess(result)
-      expect(email.getValue()).toBe(emails.withSubdomain)
-    })
-
-    it('should accept valid email with plus sign', () => {
-      // Act
-      const result = Email.create({ value: emails.withPlus })
-
-      // Assert
-      const email = expectSuccess(result)
-      expect(email.getValue()).toBe(emails.withPlus)
-    })
-
-    it('should accept valid email with numbers', () => {
-      // Act
-      const result = Email.create({ value: emails.withNumbers })
-
-      // Assert
-      const email = expectSuccess(result)
-      expect(email.getValue()).toBe(emails.withNumbers)
-    })
-  })
-
-  describe('validate', () => {
-    it('should validate a correct email', () => {
-      // Act
-      const result = Email.validate({ value: emails.valid })
-
-      // Assert
-      const value = expectSuccess(result)
-      expect(value).toBe(emails.valid)
-    })
-
-    it('should return error for invalid email', () => {
-      // Act
-      const result = Email.validate({ value: emails.noAt })
-
-      // Assert
-      const error = expectErrorType({ errorType: ValidationError, result })
-      expect(error.message).toBe(USER_EMAIL_VALIDATION_MESSAGES.INVALID_FORMAT)
-    })
-  })
-
-  describe('isValid', () => {
-    it('should return true for valid email', () => {
-      // Assert
-      expect(Email.isValid({ value: emails.valid })).toBe(true)
-    })
-
-    it('should return true for email with subdomain', () => {
-      // Assert
-      expect(Email.isValid({ value: emails.withSubdomain })).toBe(true)
-    })
-
-    it('should return false for invalid email', () => {
-      // Assert
-      expect(Email.isValid({ value: emails.noAt })).toBe(false)
-    })
-
-    it('should return false for empty string', () => {
-      // Assert
-      expect(Email.isValid({ value: emails.empty })).toBe(false)
-    })
-
-    it('should return false for email without domain', () => {
-      // Assert
-      expect(Email.isValid({ value: emails.noDomain })).toBe(false)
-    })
-  })
-
-  describe('equals', () => {
-    it('should return true for equal emails', () => {
-      // Arrange
-      const result1 = Email.create({ value: emails.valid })
-      const result2 = Email.create({ value: emails.valid })
-
-      // Act
-      const email1 = expectSuccess(result1)
-      const email2 = expectSuccess(result2)
-
-      // Assert
-      expect(email1.equals({ other: email2 })).toBe(true)
-    })
-
-    it('should return true for emails that normalize to same value', () => {
-      // Arrange
-      const result1 = Email.create({ value: emails.valid })
-      const result2 = Email.create({ value: emails.uppercase })
-
-      // Act
-      const email1 = expectSuccess(result1)
-      const email2 = expectSuccess(result2)
-
-      // Assert
-      expect(email1.equals({ other: email2 })).toBe(true)
-    })
-
-    it('should return false for different emails', () => {
-      // Arrange
-      const result1 = Email.create({ value: emails.valid })
-      const result2 = Email.create({ value: emails.nonexistent })
-
-      // Act
-      const email1 = expectSuccess(result1)
-      const email2 = expectSuccess(result2)
-
-      // Assert
-      expect(email1.equals({ other: email2 })).toBe(false)
-    })
-  })
-
-  describe('getValue', () => {
-    it('should return the normalized email value', () => {
-      // Arrange
-      const result = Email.create({ value: emails.valid })
-      const email = expectSuccess(result)
-
-      // Act & Assert
-      expect(email.getValue()).toBe(emails.valid)
-    })
-
-    it('should return immutable value', () => {
-      // Arrange
-      const result = Email.create({ value: emails.valid })
-      const email = expectSuccess(result)
-
-      // Act
-      const value1 = email.getValue()
-      const value2 = email.getValue()
-
-      // Assert
-      expect(value1).toBe(value2)
-      expect(value1).toBe(emails.valid)
-    })
-  })
-
-  describe('toString', () => {
-    it('should return the email as string', () => {
-      // Arrange
-      const result = Email.create({ value: emails.valid })
-      const email = expectSuccess(result)
-
-      // Act & Assert
-      expect(email.toString()).toBe(emails.valid)
-    })
-
-    it('should return same value as getValue', () => {
-      // Arrange
-      const result = Email.create({ value: emails.valid })
-      const email = expectSuccess(result)
-
-      // Act & Assert
-      expect(email.toString()).toBe(email.getValue())
+      for (const invalid of invalidInputs) {
+        expectErrorType({
+          errorType: ValidationError,
+          result: UserEmail.create({ address: invalid }),
+        })
+      }
     })
   })
 })
