@@ -24,7 +24,7 @@ export class TeamCity {
     return Ok(new TeamCity(validation.data))
   }
 
-  getValue(): TeamCityInput {
+  getValue(): TeamCityProps {
     return { name: this.name }
   }
 }

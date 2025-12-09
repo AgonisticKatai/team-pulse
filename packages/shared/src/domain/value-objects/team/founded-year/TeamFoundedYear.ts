@@ -24,7 +24,7 @@ export class TeamFoundedYear {
     return Ok(new TeamFoundedYear(validation.data))
   }
 
-  getValue(): TeamFoundedYearInput {
+  getValue(): TeamFoundedYearProps {
     return { year: this.year }
   }
 }
