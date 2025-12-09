@@ -1,7 +1,7 @@
 export const USER_ROLES = {
-  Admin: 'ADMIN',
-  SuperAdmin: 'SUPER_ADMIN',
-  User: 'USER',
+  ADMIN: 'admin',
+  GUEST: 'guest',
+  SUPER_ADMIN: 'super_admin',
 } as const
 
 export const USER_ROLE_VALIDATION_MESSAGES = {

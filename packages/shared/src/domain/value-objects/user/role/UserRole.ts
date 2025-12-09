@@ -1,67 +1,48 @@
 import { ValidationError } from '@errors/ValidationError'
 import { Err, Ok, type Result } from '@result'
 import { USER_ROLES } from './UserRole.constants.js'
+import type { UserRoleInput } from './UserRole.schema.js'
 import { UserRoleSchema } from './UserRole.schema.js'
-import type { UserRoleType } from './UserRole.types.js'
+import type { UserRoleName, UserRoleProps } from './UserRole.types.js'
 
-export class Role {
-  private readonly value: UserRoleType
+export class UserRole {
+  readonly name: UserRoleName
 
-  private constructor({ value }: { value: UserRoleType }) {
-    this.value = value
+  private constructor(props: UserRoleProps) {
+    this.name = props.name
   }
 
-  static create({ value }: { value: string }): Result<Role, ValidationError> {
-    const validationResult = Role.validate({ value })
+  static create(input: UserRoleInput): Result<UserRole, ValidationError> {
+    const validation = UserRoleSchema.safeParse(input)
 
-    if (!validationResult.ok) {
-      return Err(
-        ValidationError.invalidValue({
-          field: 'role',
-          message: validationResult.error.message,
-          value,
-        }),
-      )
-    }
-
-    return Ok(new Role({ value: validationResult.value }))
-  }
-
-  static validate({ value }: { value: string }): Result<UserRoleType, ValidationError> {
-    const result = UserRoleSchema.safeParse(value)
-
-    if (!result.success) {
+    if (!validation.success) {
       return Err(
         ValidationError.fromZodError({
-          error: result.error,
+          error: validation.error,
         }),
       )
     }
 
-    return Ok(result.data)
+    return Ok(new UserRole(validation.data))
   }
 
-  getValue(): UserRoleType {
-    return this.value
-  }
-
-  equals({ other }: { other: Role }): boolean {
-    return this.value === other.value
+  equals({ other }: { other: UserRole }): boolean {
+    return this.name === other.name
   }
 
   isAdmin(): boolean {
-    return this.value === USER_ROLES.Admin
+    return this.name === USER_ROLES.ADMIN
   }
 
-  isUser(): boolean {
-    return this.value === USER_ROLES.User
+  isGuest(): boolean {
+    return this.name === USER_ROLES.GUEST
   }
 
   isSuperAdmin(): boolean {
-    return this.value === USER_ROLES.SuperAdmin
+    return this.name === USER_ROLES.SUPER_ADMIN
   }
 
-  toString(): string {
-    return this.value
+  getValue(): UserRoleProps {
+    return { name: this.name }
   }
 }
