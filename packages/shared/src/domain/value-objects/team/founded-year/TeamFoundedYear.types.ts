@@ -1,1 +1,3 @@
-export type TeamFoundedYearType = number
+export type TeamFoundedYearProps = {
+  year: number
+}

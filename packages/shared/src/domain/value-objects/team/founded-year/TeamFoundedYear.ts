@@ -1,30 +1,30 @@
 import { ValidationError } from '@errors/ValidationError'
 import { Err, Ok, type Result } from '@result'
 import { type TeamFoundedYearInput, TeamFoundedYearSchema } from './TeamFoundedYear.schema.js'
-import type { TeamFoundedYearType } from './TeamFoundedYear.types.js'
+import type { TeamFoundedYearProps } from './TeamFoundedYear.types.js'
 
 export class TeamFoundedYear {
-  private readonly value: TeamFoundedYearType
+  readonly year: number
 
-  private constructor({ value }: { value: TeamFoundedYearType }) {
-    this.value = value
+  private constructor(props: TeamFoundedYearProps) {
+    this.year = props.year
   }
 
-  static create({ value }: { value: TeamFoundedYearInput }): Result<TeamFoundedYear, ValidationError> {
-    const result = TeamFoundedYearSchema.safeParse(value)
+  static create(input: TeamFoundedYearInput): Result<TeamFoundedYear, ValidationError> {
+    const validation = TeamFoundedYearSchema.safeParse(input)
 
-    if (!result.success) {
+    if (!validation.success) {
       return Err(
         ValidationError.fromZodError({
-          error: result.error,
+          error: validation.error,
         }),
       )
     }
 
-    return Ok(new TeamFoundedYear({ value: result.data }))
+    return Ok(new TeamFoundedYear(validation.data))
   }
 
-  getValue(): TeamFoundedYearType {
-    return this.value
+  getValue(): TeamFoundedYearInput {
+    return { year: this.year }
   }
 }
