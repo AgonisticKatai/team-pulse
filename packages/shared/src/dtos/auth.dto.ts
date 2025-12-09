@@ -1,5 +1,4 @@
 import type { UserId } from '@domain/ids'
-import type { EmailType, UserRoleType } from '@domain/value-objects'
 import { z } from 'zod'
 import type { PaginatedResponse } from './pagination.dto.js'
 
@@ -62,8 +61,8 @@ export type RefreshTokenDTO = z.infer<typeof RefreshTokenDTOSchema>
  */
 export interface UserResponseDTO {
   id: UserId
-  email: EmailType
-  role: UserRoleType
+  email: string
+  role: string
   createdAt: string // ISO string for JSON serialization
   updatedAt: string // ISO string for JSON serialization
 }

@@ -1,3 +1,4 @@
+import type { TeamId } from '@domain/ids'
 import { z } from 'zod'
 import type { PaginatedResponse } from './pagination.dto.js'
 
@@ -24,7 +25,6 @@ import type { PaginatedResponse } from './pagination.dto.js'
  */
 export const CreateTeamDTOSchema = z.object({
   city: z.string().trim().min(1, 'City is required').max(100, 'City cannot exceed 100 characters'),
-
   foundedYear: z
     .number()
     .int('Founded year must be an integer')
@@ -44,7 +44,6 @@ export type CreateTeamDTO = z.infer<typeof CreateTeamDTOSchema>
  */
 export const UpdateTeamDTOSchema = z.object({
   city: z.string().trim().min(1, 'City cannot be empty').max(100, 'City cannot exceed 100 characters').optional(),
-
   foundedYear: z
     .number()
     .int('Founded year must be an integer')
@@ -68,7 +67,7 @@ export type UpdateTeamDTO = z.infer<typeof UpdateTeamDTOSchema>
  * This is what gets sent to clients
  */
 export interface TeamResponseDTO {
-  id: string
+  id: TeamId
   name: string
   city: string
   foundedYear: number | null
