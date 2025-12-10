@@ -19,7 +19,7 @@ export interface TeamProps {
   id: TeamId
   name: TeamName
   city: TeamCity
-  foundedYear: TeamFoundedYear | null
+  foundedYear: TeamFoundedYear
   createdAt: Date
   updatedAt: Date
 }

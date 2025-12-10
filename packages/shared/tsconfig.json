@@ -12,6 +12,7 @@
       "@result": ["./src/types/Result"],
       "@testing/*": ["./src/testing/*"],
       "@types/*": ["./src/types/*"],
+      "@utils/*": ["./src/utils/*"],
       "@value-objects/*": ["./src/domain/value-objects/*"]
     },
     "rootDir": "./src"

@@ -14,6 +14,9 @@
  * // TypeScript knows result.value exists here (no ! needed)
  * const user = result.value
  */
+
+/** biome-ignore-all lint/suspicious/noExplicitAny: <> */
+
 export type Result<T, E = Error> = { ok: true; value: T } | { ok: false; error: E }
 
 /**
@@ -131,20 +134,28 @@ export const collect = <T, E extends Error>(results: Result<T, E>[]): Result<T[]
  * Combine an object of Results into a Result of object
  * Similar to Promise.all but for Results and keys
  */
-type ExtractValue<T> = T extends Result<infer V, unknown> ? V : never
-type ExtractError<T> = T extends Result<unknown, infer E> ? E : never
 
-export const combine = <T extends Record<string, Result<unknown, unknown>>>(
+export const combine = <T extends Record<string, Result<any, any>>>(
   results: T,
-): Result<{ [K in keyof T]: ExtractValue<T[K]> }, ExtractError<T[keyof T]>> => {
-  const values: Record<string, unknown> = {}
+): Result<
+  // 1. Type of Success: rebuild the object { key: Value }
+  { [K in keyof T]: T[K] extends Result<infer V, any> ? V : never },
+  // 2. Type of Error: Union of all possible errors
+  { [K in keyof T]: T[K] extends Result<any, infer E> ? E : never }[keyof T]
+> => {
+  const values = {} as any
 
   for (const [key, result] of Object.entries(results)) {
     if (!result.ok) {
-      return result as Result<never, ExtractError<T[keyof T]>>
+      // If we find an error, we abort and return that error.
+      // Casting 'as any': Necessary because at runtime we cannot guarantee
+      // to TS that this specific error matches the complex union type above.
+      // But the logic guarantees it.
+      return result as any
     }
     values[key] = result.value
   }
 
-  return Ok(values as { [K in keyof T]: ExtractValue<T[K]> })
+  // If we get here, everything is Ok.
+  return Ok(values) as any
 }

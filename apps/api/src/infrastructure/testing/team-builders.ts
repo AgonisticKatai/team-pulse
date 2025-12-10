@@ -1,42 +1,26 @@
 import { Team } from '@domain/models/team/Team.js'
+import type { TeamPrimitives } from '@domain/models/team/Team.types.js'
 import { faker } from '@faker-js/faker'
 import type { CreateTeamDTO } from '@team-pulse/shared'
-import { IdUtils, type TeamId } from '@team-pulse/shared'
+import { TEAM_CITY_RULES, TEAM_FOUNDED_YEAR_RULES, TEAM_NAME_RULES, TeamId } from '@team-pulse/shared'
 
-// 1. SIMPLE DEFINITION: Only primitive types
-type TeamPrimitives = {
-  id: string
-  name: string
-  city: string
-  foundedYear: number | null
-  createdAt: Date
-  updatedAt: Date
-}
-
-// 2. DATA GENERATOR: Returns plain object with defaults
 const generateRandomTeamData = (): TeamPrimitives => ({
-  city: faker.location.city(),
+  city: faker.string.alpha({ length: { max: TEAM_CITY_RULES.MAX_LENGTH, min: TEAM_CITY_RULES.MIN_LENGTH } }),
   createdAt: new Date(),
-  foundedYear: faker.number.int({ max: new Date().getFullYear(), min: 1800 }),
-  id: IdUtils.generate<TeamId>(),
-  name: faker.company.name(),
+  foundedYear: faker.number.int({ max: TEAM_FOUNDED_YEAR_RULES.currentMaxYear, min: TEAM_FOUNDED_YEAR_RULES.MIN }),
+  id: TeamId.random(),
+  name: faker.string.alpha({ length: { max: TEAM_NAME_RULES.MAX_LENGTH, min: TEAM_NAME_RULES.MIN_LENGTH } }),
   updatedAt: new Date(),
 })
 
-// 3. BUILDER FUNCTION
 export function buildTeam(overrides: Partial<TeamPrimitives> = {}): Team {
-  // A. Fusion of data (override wins always)
-  const raw = {
-    ...generateRandomTeamData(),
-    ...overrides,
-  }
+  const raw = { ...generateRandomTeamData(), ...overrides }
 
-  // B. DOMAIN CREATION
   const result = Team.create({
     city: raw.city,
     createdAt: raw.createdAt,
     foundedYear: raw.foundedYear,
-    id: IdUtils.toId<TeamId>(raw.id),
+    id: raw.id,
     name: raw.name,
     updatedAt: raw.updatedAt,
   })
@@ -48,34 +32,7 @@ export function buildTeam(overrides: Partial<TeamPrimitives> = {}): Team {
   return result.value
 }
 
-/**
- * Builder for CreateTeamDTO test data
- * Provides sensible defaults and allows easy customization via overrides
- */
 export function buildCreateTeamDTO(overrides: Partial<CreateTeamDTO> = {}): CreateTeamDTO {
   const defaults = generateRandomTeamData()
-  return {
-    city: defaults.city,
-    foundedYear: defaults.foundedYear,
-    name: defaults.name,
-    ...overrides,
-  }
-}
-
-/**
- * Builds a Team entity without a founded year
- */
-export function buildTeamWithoutFoundedYear(overrides: Partial<TeamPrimitives> = {}): Team {
-  return buildTeam({
-    foundedYear: null,
-    ...overrides,
-  })
-}
-
-/**
- * Builds an "existing" team
- * Wrapper for compatibility/clarity
- */
-export function buildExistingTeam(overrides: Partial<TeamPrimitives> = {}): Team {
-  return buildTeam(overrides)
+  return { city: defaults.city, foundedYear: defaults.foundedYear, name: defaults.name, ...overrides }
 }

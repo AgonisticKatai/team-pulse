@@ -1,4 +1,4 @@
-import type { UserId } from '@domain/ids'
+import type { UserId } from '@value-objects/user'
 import { z } from 'zod'
 import type { PaginatedResponse } from './pagination.dto.js'
 

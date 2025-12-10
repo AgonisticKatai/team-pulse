@@ -1,11 +1,11 @@
-import type { TeamId } from '@domain/ids'
-import { TeamCityNameSchema, TeamFoundedYearYearSchema, TeamNameNameSchema } from '@value-objects/team'
+import type { TeamId } from '@value-objects/team'
+import { TeamCityNameSchema, TeamNameNameSchema, yearSchemaOptional } from '@value-objects/team'
 import { z } from 'zod'
 import type { PaginatedResponse } from './pagination.dto.js'
 
 export const CreateTeamDTOSchema = z.object({
   city: TeamCityNameSchema,
-  foundedYear: TeamFoundedYearYearSchema.optional().nullable(),
+  foundedYear: yearSchemaOptional,
   name: TeamNameNameSchema,
 })
 
@@ -13,7 +13,7 @@ export type CreateTeamDTO = z.infer<typeof CreateTeamDTOSchema>
 
 export const UpdateTeamDTOSchema = z.object({
   city: TeamCityNameSchema.optional(),
-  foundedYear: TeamFoundedYearYearSchema.optional().nullable(),
+  foundedYear: yearSchemaOptional,
   name: TeamNameNameSchema.optional(),
 })
 
