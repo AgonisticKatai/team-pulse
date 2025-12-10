@@ -1,5 +1,5 @@
 import { CreateTeamUseCase } from '@application/use-cases/CreateTeamUseCase.js'
-import { Team } from '@domain/models/Team.js'
+import { Team } from '@domain/models/team/Team.js'
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import { faker } from '@faker-js/faker'
 import { buildCreateTeamDTO, buildTeam } from '@infrastructure/testing/index.js'

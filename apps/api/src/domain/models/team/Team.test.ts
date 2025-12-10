@@ -1,4 +1,4 @@
-import { Team } from '@domain/models/Team.js'
+import { Team } from '@domain/models/team/Team.js'
 import { City } from '@domain/value-objects/City.js'
 import { FoundedYear } from '@domain/value-objects/FoundedYear.js'
 import { TeamName } from '@domain/value-objects/TeamName.js'

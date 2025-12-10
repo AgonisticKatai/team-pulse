@@ -1,4 +1,4 @@
-import { Team } from '@domain/models/Team.js'
+import { Team } from '@domain/models/team/Team.js'
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import type { Database } from '@infrastructure/database/connection.js'
 import { teams as teamsSchema } from '@infrastructure/database/schema.js'

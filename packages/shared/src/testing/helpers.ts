@@ -211,3 +211,14 @@ export function expectZodError(
     expect(firstIssue?.message).toBe(expectedMessage)
   }
 }
+
+/**
+ * Test helper to safely retrieve an item at a specific index
+ * Asserts definition and existence.
+ */
+export function expectItemAtIndex<T>(array: T[], index: number): T {
+  expect(array.length).toBeGreaterThan(index)
+  const item = array[index]
+  assertDefined(item, `Expected item at index ${index} to be defined`)
+  return item
+}

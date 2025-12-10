@@ -1,4 +1,4 @@
-import { Team } from '@domain/models/Team.js'
+import { Team } from '@domain/models/team/Team.js'
 import { faker } from '@faker-js/faker'
 import type { CreateTeamDTO } from '@team-pulse/shared'
 import { IdUtils, type TeamId } from '@team-pulse/shared'

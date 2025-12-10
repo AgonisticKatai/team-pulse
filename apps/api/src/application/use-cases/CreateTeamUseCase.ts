@@ -1,29 +1,9 @@
 import { randomUUID } from 'node:crypto'
-import { Team } from '@domain/models/Team.js'
+import { Team } from '@domain/models/team/Team.js'
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
-import type { CreateTeamDTO, RepositoryError, TeamResponseDTO, ValidationError } from '@team-pulse/shared'
-import { ConflictError, Err, Ok, type Result } from '@team-pulse/shared'
+import type { CreateTeamDTO, RepositoryError, Result, TeamResponseDTO, ValidationError } from '@team-pulse/shared'
+import { ConflictError, Err, Ok } from '@team-pulse/shared'
 
-/**
- * Create Team Use Case
- *
- * This is an APPLICATION SERVICE / USE CASE:
- * - Orchestrates domain objects to accomplish a user goal
- * - Contains application-specific logic (not domain logic)
- * - Coordinates infrastructure (repositories)
- * - Handles transactions (if needed)
- * - Maps between DTOs and domain entities
- *
- * Responsibilities:
- * 1. Validate business rules (beyond what DTOs validate)
- * 2. Check for conflicts (team name uniqueness)
- * 3. Create domain entity
- * 4. Persist via repository
- * 5. Map to response DTO
- *
- * Note: This doesn't know about HTTP, Fastify, or any framework.
- * It's PURE business logic.
- */
 export class CreateTeamUseCase {
   private readonly teamRepository: ITeamRepository
 

@@ -126,3 +126,25 @@ export const collect = <T, E extends Error>(results: Result<T, E>[]): Result<T[]
   }
   return Ok(values)
 }
+
+/**
+ * Combine an object of Results into a Result of object
+ * Similar to Promise.all but for Results and keys
+ */
+type ExtractValue<T> = T extends Result<infer V, unknown> ? V : never
+type ExtractError<T> = T extends Result<unknown, infer E> ? E : never
+
+export const combine = <T extends Record<string, Result<unknown, unknown>>>(
+  results: T,
+): Result<{ [K in keyof T]: ExtractValue<T[K]> }, ExtractError<T[keyof T]>> => {
+  const values: Record<string, unknown> = {}
+
+  for (const [key, result] of Object.entries(results)) {
+    if (!result.ok) {
+      return result as Result<never, ExtractError<T[keyof T]>>
+    }
+    values[key] = result.value
+  }
+
+  return Ok(values as { [K in keyof T]: ExtractValue<T[K]> })
+}

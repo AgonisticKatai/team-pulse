@@ -1,3 +1,3 @@
 export type TeamFoundedYearProps = {
-  year: number
+  year: number | null
 }
