@@ -18,24 +18,6 @@ export const TEST_CONSTANTS = {
     validRefreshToken: 'valid-refresh-token',
   },
 
-  // City Test Data
-  cities: {
-    barcelona: 'Barcelona',
-    bilbao: 'Bilbao',
-    empty: '',
-    exactly100Chars: 'a'.repeat(100),
-    exceeds100Chars: 'a'.repeat(101),
-    madrid: 'Madrid',
-    newYork: 'New York',
-    saintEtienne: 'Saint-Étienne',
-    saoPaulo: 'São Paulo',
-    singleChar: 'A',
-    valencia: 'Valencia',
-    veryLong: 'a'.repeat(150),
-    whitespaceOnly: '   ',
-    withLeadingTrailingSpaces: '  London  ',
-  },
-
   // Email Test Data
   emails: {
     empty: '',
@@ -216,23 +198,6 @@ export const TEST_CONSTANTS = {
     },
   },
 
-  // FoundedYear Test Data
-  foundedYears: {
-    currentYear: new Date().getFullYear(),
-    exactly1800: 1800,
-    futureYear: new Date().getFullYear() + 1,
-    negative: -100,
-    tooOld: 1799,
-    year1899: 1899,
-    year1900: 1900,
-    year1902: 1902,
-    year2000: 2000,
-    year2020: 2020,
-    zero: 0,
-  },
-  futureDate: new Date('2025-12-31T23:59:59Z'),
-  futureDateIso: '2025-12-31T23:59:59.000Z',
-
   // EntityId Test Data (uses TestIds factory)
   ids: {
     empty: '',
@@ -246,7 +211,6 @@ export const TEST_CONSTANTS = {
 
   // Invalid Data
   invalid: {
-    foundedYearTooOld: 1799, // Before 1800
     weakPassword: 'weak',
     wrongPassword: 'WrongPassword123',
   },
@@ -409,28 +373,18 @@ export const TEST_CONSTANTS = {
   // Team Data (IDs from TestIds factory)
   teams: {
     athleticBilbao: {
-      city: 'Bilbao',
-      foundedYear: null,
       name: 'Athletic Bilbao',
     },
     fcBarcelona: {
-      city: 'Barcelona',
-      foundedYear: 1899,
       name: 'FC Barcelona',
     },
     realMadrid: {
-      city: 'Madrid',
-      foundedYear: 1902,
       name: 'Real Madrid',
     },
     sevillaFc: {
-      city: 'Sevilla',
-      foundedYear: null,
       name: 'Sevilla FC',
     },
     valenciaCf: {
-      city: 'Valencia',
-      foundedYear: undefined,
       name: 'Valencia CF',
     },
   },

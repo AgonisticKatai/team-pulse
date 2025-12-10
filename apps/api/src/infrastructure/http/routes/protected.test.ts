@@ -306,8 +306,6 @@ describe('Protected Routes and RBAC', () => {
           },
           method: 'POST',
           payload: {
-            city: 'Madrid',
-            foundedYear: 1902,
             name: 'Real Madrid',
           },
           url: '/api/teams',
@@ -326,8 +324,6 @@ describe('Protected Routes and RBAC', () => {
           },
           method: 'POST',
           payload: {
-            city: 'Barcelona',
-            foundedYear: 1899,
             name: 'Barcelona',
           },
           url: '/api/teams',
@@ -345,8 +341,6 @@ describe('Protected Routes and RBAC', () => {
           },
           method: 'POST',
           payload: {
-            city: 'Madrid',
-            foundedYear: 1903,
             name: 'Atletico Madrid',
           },
           url: '/api/teams',
@@ -367,8 +361,6 @@ describe('Protected Routes and RBAC', () => {
           },
           method: 'POST',
           payload: {
-            city: 'Test City',
-            foundedYear: 2000,
             name: 'Test Team',
           },
           url: '/api/teams',
@@ -436,8 +428,6 @@ describe('Protected Routes and RBAC', () => {
           },
           method: 'POST',
           payload: {
-            city: 'City',
-            foundedYear: 2000,
             name: 'Team To Update',
           },
           url: '/api/teams',
@@ -503,8 +493,6 @@ describe('Protected Routes and RBAC', () => {
           },
           method: 'POST',
           payload: {
-            city: 'City',
-            foundedYear: 2000,
             name: 'Team To Delete',
           },
           url: '/api/teams',

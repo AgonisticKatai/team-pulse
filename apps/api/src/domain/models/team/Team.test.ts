@@ -112,7 +112,6 @@ describe('Team Entity', () => {
 
       expect(primitives.id).toBe(team.id) // Recuerda: id es string en runtime
       expect(primitives.name).toBe(team.name.name)
-      expect(primitives.foundedYear).toBe(team.foundedYear?.year ?? null)
       expect(primitives.createdAt).toBeInstanceOf(Date)
     })
   })

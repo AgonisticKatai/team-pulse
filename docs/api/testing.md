@@ -288,14 +288,10 @@ TEST_CONSTANTS.teams = {
   fcBarcelona: {
     id: 'team-fc-barcelona',
     name: 'FC Barcelona',
-    city: 'Barcelona',
-    foundedYear: 1899,
   },
   realMadrid: {
     id: 'team-real-madrid',
     name: 'Real Madrid',
-    city: 'Madrid',
-    foundedYear: 1902,
   },
   // ... more teams
 }

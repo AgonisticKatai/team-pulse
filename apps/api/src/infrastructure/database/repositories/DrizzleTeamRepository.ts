@@ -159,9 +159,7 @@ export class DrizzleTeamRepository implements ITeamRepository {
       const obj = team.toObject()
 
       const row = {
-        city: obj.city,
         createdAt: obj.createdAt,
-        foundedYear: obj.foundedYear,
         id: obj.id,
         name: obj.name,
         updatedAt: obj.updatedAt,
@@ -171,7 +169,7 @@ export class DrizzleTeamRepository implements ITeamRepository {
         .insert(teamsSchema)
         .values(row)
         .onConflictDoUpdate({
-          set: { city: row.city, foundedYear: row.foundedYear, name: row.name, updatedAt: row.updatedAt },
+          set: { name: row.name, updatedAt: row.updatedAt },
           target: teamsSchema.id,
         })
 
