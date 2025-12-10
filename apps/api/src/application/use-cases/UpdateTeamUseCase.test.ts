@@ -14,7 +14,7 @@ import {
   type TeamId,
   ValidationError,
 } from '@team-pulse/shared'
-import { expectErrorType, expectMockCallArg, expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { expectErrorType, expectMockCallArg, expectSuccess } from '@team-pulse/shared/testing'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('UpdateTeamUseCase', () => {
@@ -52,8 +52,6 @@ describe('UpdateTeamUseCase', () => {
         // Check response DTO
         expect(response.id).toBe(originalTeam.id)
         expect(response.name).toBe(dto.name)
-        expect(response.city).toBe(dto.city)
-        expect(response.foundedYear).toBe(dto.foundedYear)
 
         // Verify repository interactions
         expect(teamRepository.findByName).toHaveBeenCalledWith({ name: dto.name })
@@ -67,7 +65,7 @@ describe('UpdateTeamUseCase', () => {
         // Arrange
         const originalTeam = buildTeam()
 
-        const dto: UpdateTeamDTO = { city: faker.location.city(), name: originalTeam.name.getValue() }
+        const dto: UpdateTeamDTO = { name: originalTeam.name.getValue() }
 
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(originalTeam))
         vi.mocked(teamRepository.save).mockImplementation(async ({ team }) => Ok(team))

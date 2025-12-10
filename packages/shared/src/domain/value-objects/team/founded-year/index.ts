@@ -1,5 +1,0 @@
-export * from './TeamFoundedYear.constants.js'
-export * from './TeamFoundedYear.js'
-export * from './TeamFoundedYear.rules.js'
-export * from './TeamFoundedYear.schema.js'
-export * from './TeamFoundedYear.types.js'

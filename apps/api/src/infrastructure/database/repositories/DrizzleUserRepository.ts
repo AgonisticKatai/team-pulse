@@ -3,7 +3,7 @@ import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { Database } from '@infrastructure/database/connection.js'
 import { users as usersSchema } from '@infrastructure/database/schema.js'
 import type { ValidationError } from '@team-pulse/shared'
-import { collect, Err, IdUtils, Ok, RepositoryError, type Result, type UserId } from '@team-pulse/shared' // 👈 NEW IMPORT
+import { collect, Err, IdUtils, Ok, RepositoryError, type Result, type UserId } from '@team-pulse/shared'
 import { eq, sql } from 'drizzle-orm'
 
 /**

@@ -4,7 +4,7 @@ import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import { faker } from '@faker-js/faker'
 import { buildCreateTeamDTO, buildTeam } from '@infrastructure/testing/index.js'
 import { ConflictError, Err, IdUtils, Ok, RepositoryError, ValidationError } from '@team-pulse/shared'
-import { expectErrorType, expectMockCallArg, expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { expectErrorType, expectMockCallArg, expectSuccess } from '@team-pulse/shared/testing'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('CreateTeamUseCase', () => {
@@ -38,8 +38,6 @@ describe('CreateTeamUseCase', () => {
         // Assert
         expect(response.id).toBeDefined()
         expect(response.name).toBe(dto.name)
-        expect(response.city).toBe(dto.city)
-        expect(response.foundedYear).toBe(dto.foundedYear)
       })
 
       it('should check if team name already exists', async () => {
@@ -71,25 +69,6 @@ describe('CreateTeamUseCase', () => {
         expect(IdUtils.isValid(savedTeam.id)).toBe(true)
 
         expect(savedTeam.name.getValue()).toBe(dto.name)
-        expect(savedTeam.city.getValue()).toBe(dto.city)
-        expect(savedTeam.foundedYear?.getValue()).toBe(dto.foundedYear)
-      })
-
-      it('should handle team without foundedYear (null)', async () => {
-        // Arrange
-        const dto = buildCreateTeamDTO({ foundedYear: null })
-
-        vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
-        vi.mocked(teamRepository.save).mockImplementation(async ({ team }) => Ok(team))
-
-        // Act
-        const response = expectSuccess(await createTeamUseCase.execute({ dto }))
-
-        // Assert
-        expect(response.foundedYear).toBeNull()
-
-        const { team: savedTeam } = expectMockCallArg<{ team: Team }>(vi.mocked(teamRepository.save))
-        expect(savedTeam.foundedYear).toBeNull()
       })
 
       it('should handle team with undefined foundedYear (optional in DTO)', async () => {

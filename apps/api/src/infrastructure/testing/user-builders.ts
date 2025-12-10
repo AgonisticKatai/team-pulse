@@ -1,8 +1,7 @@
 import { User } from '@domain/models/User.js'
 import { faker } from '@faker-js/faker'
 import type { CreateUserDTO } from '@team-pulse/shared'
-import { IdUtils, type UserId } from '@team-pulse/shared'
-import { UserRoles } from '@team-pulse/shared/domain/value-objects'
+import { IdUtils, USER_ROLES, type UserId } from '@team-pulse/shared'
 
 // 1. SIMPLE DEFINITION: Only primitive types
 type UserPrimitives = {
@@ -18,9 +17,9 @@ type UserPrimitives = {
 const generateRandomUserData = (): UserPrimitives => ({
   createdAt: new Date(),
   email: faker.internet.email(),
-  id: IdUtils.generate<UserId>(),
+  id: UserId.random(),
   passwordHash: faker.internet.password(),
-  role: UserRoles.User,
+  role: USER_ROLES.ADMIN,
   updatedAt: new Date(),
 })
 
@@ -36,7 +35,7 @@ export function buildUser(overrides: Partial<UserPrimitives> = {}): User {
   const result = User.create({
     createdAt: raw.createdAt,
     email: raw.email,
-    id: IdUtils.toId<UserId>(raw.id),
+    id: UserId.create({ id: raw.id }),
     passwordHash: raw.passwordHash,
     role: raw.role,
     updatedAt: raw.updatedAt,
@@ -55,7 +54,7 @@ export function buildUser(overrides: Partial<UserPrimitives> = {}): User {
  */
 export function buildAdminUser(overrides: Partial<UserPrimitives> = {}): User {
   return buildUser({
-    role: UserRoles.Admin,
+    role: USER_ROLES.ADMIN,
     ...overrides,
   })
 }
@@ -65,7 +64,7 @@ export function buildAdminUser(overrides: Partial<UserPrimitives> = {}): User {
  */
 export function buildSuperAdminUser(overrides: Partial<UserPrimitives> = {}): User {
   return buildUser({
-    role: UserRoles.SuperAdmin,
+    role: USER_ROLES.SUPER_ADMIN,
     ...overrides,
   })
 }
@@ -79,7 +78,7 @@ export function buildCreateUserDTO(overrides: Partial<CreateUserDTO> = {}): Crea
   return {
     email: faker.internet.email(),
     password: faker.internet.password(),
-    role: UserRoles.User,
+    role: USER_ROLES.ADMIN,
     ...overrides,
   }
 }

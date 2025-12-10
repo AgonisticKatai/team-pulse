@@ -1,6 +1,6 @@
+import type { ILogger } from '@team-pulse/shared'
 import { AuthenticationError, ConflictError, NotFoundError, ValidationError } from '@team-pulse/shared'
-import type { ILogger } from '@team-pulse/shared/handler'
-import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
+import { TEST_CONSTANTS } from '@team-pulse/shared/testing'
 import type { FastifyReply } from 'fastify'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { handleError } from './error-handler.js'

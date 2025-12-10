@@ -3,7 +3,7 @@ import { ScryptPasswordHasher } from '@infrastructure/auth/ScryptPasswordHasher.
 import type { Container } from '@infrastructure/config/container.js'
 import type { Database } from '@infrastructure/database/connection.js'
 import { setupTestEnvironment } from '@infrastructure/testing/test-helpers.js'
-import { expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { expectSuccess } from '@team-pulse/shared/testing'
 import { sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'

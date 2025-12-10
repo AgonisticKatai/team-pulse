@@ -2,8 +2,7 @@ import { TokenFactory } from '@application/factories/TokenFactory.js'
 import { AuthService } from '@infrastructure/auth/AuthService.js'
 import { TEST_INVALID_TOKEN_ENV, TEST_TOKEN_ENV } from '@infrastructure/testing/test-env.js'
 import { AuthenticationError, ValidationError } from '@team-pulse/shared'
-import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
-import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { expectErrorType, expectSuccess, TEST_CONSTANTS } from '@team-pulse/shared/testing'
 import { beforeEach, describe, expect, it } from 'vitest'
 
 describe('AuthService', () => {

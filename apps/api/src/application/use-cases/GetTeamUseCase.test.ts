@@ -3,7 +3,7 @@ import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import { faker } from '@faker-js/faker'
 import { buildTeam } from '@infrastructure/testing/index.js'
 import { Err, IdUtils, NotFoundError, Ok, RepositoryError, type TeamId } from '@team-pulse/shared'
-import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('GetTeamUseCase', () => {
@@ -38,26 +38,10 @@ describe('GetTeamUseCase', () => {
         // Verify DTO Mapping
         expect(dto.id).toBe(team.id)
         expect(dto.name).toBe(team.name.getValue())
-        expect(dto.city).toBe(team.city.getValue())
-        expect(dto.foundedYear).toBe(team.foundedYear?.getValue())
 
         // Verify ISO Date conversion
         expect(dto.createdAt).toBe(team.createdAt.toISOString())
         expect(dto.updatedAt).toBe(team.updatedAt.toISOString())
-      })
-
-      it('should handle team without founded year correctly', async () => {
-        // Arrange
-        const team = buildTeam({ foundedYear: null })
-
-        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(team))
-
-        // Act
-        const result = await getTeamUseCase.execute({ id: team.id })
-
-        // Assert
-        const dto = expectSuccess(result)
-        expect(dto.foundedYear).toBeNull()
       })
     })
 

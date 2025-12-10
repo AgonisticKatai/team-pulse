@@ -5,7 +5,7 @@ import { faker } from '@faker-js/faker'
 import { buildTeam } from '@infrastructure/testing/index.js'
 import type { PaginationQuery } from '@team-pulse/shared'
 import { Err, Ok, RepositoryError, ValidationError } from '@team-pulse/shared'
-import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('ListTeamsUseCase', () => {

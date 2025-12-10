@@ -7,7 +7,7 @@ import { DrizzleRefreshTokenRepository } from '@infrastructure/database/reposito
 import { DrizzleUserRepository } from '@infrastructure/database/repositories/DrizzleUserRepository.js'
 import { buildRefreshToken, buildUser } from '@infrastructure/testing/index.js'
 import { setupTestEnvironment } from '@infrastructure/testing/test-helpers.js'
-import { expectSingle, expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { expectSingle, expectSuccess } from '@team-pulse/shared/testing'
 import { sql } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 

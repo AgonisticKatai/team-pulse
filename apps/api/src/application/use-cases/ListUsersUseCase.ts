@@ -1,8 +1,7 @@
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { IMetricsService } from '@domain/services/IMetricsService.js'
-import { Pagination } from '@domain/value-objects/index.js'
 import type { PaginationQuery, RepositoryError, UsersListResponseDTO, ValidationError } from '@team-pulse/shared'
-import { Err, Ok, type Result } from '@team-pulse/shared'
+import { Err, Ok, Pagination, type Result } from '@team-pulse/shared'
 
 /**
  * List Users Use Case

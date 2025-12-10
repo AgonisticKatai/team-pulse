@@ -6,8 +6,16 @@ import type {
   UserProps,
 } from '@domain/models/User.types.js'
 import type { UserResponseDTO } from '@team-pulse/shared'
-import { Err, IdUtils, Ok, type Result, type UserId, ValidationError } from '@team-pulse/shared'
-import { Email, Role } from '@team-pulse/shared/domain/value-objects'
+import {
+  Err,
+  IdUtils,
+  Ok,
+  type Result,
+  type UserEmail,
+  type UserId,
+  type UserRole,
+  ValidationError,
+} from '@team-pulse/shared'
 
 // Re-export public types
 export type { CreateUserData, UpdateUserData, UserData, UserProps }
@@ -36,8 +44,8 @@ export type { CreateUserData, UpdateUserData, UserData, UserProps }
  */
 export class User {
   readonly id: UserId
-  readonly email: Email
-  readonly role: Role
+  readonly email: UserEmail
+  readonly role: UserRole
   readonly createdAt: Date
   readonly updatedAt: Date
   private readonly passwordHash: string

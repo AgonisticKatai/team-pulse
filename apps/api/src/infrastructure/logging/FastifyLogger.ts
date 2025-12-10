@@ -1,4 +1,4 @@
-import type { ILogger, LogContext } from '@team-pulse/shared/handler'
+import type { ILogger, LogContext } from '@team-pulse/shared'
 import type { FastifyBaseLogger } from 'fastify'
 
 /**

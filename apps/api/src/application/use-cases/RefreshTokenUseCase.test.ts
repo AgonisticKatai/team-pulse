@@ -11,8 +11,7 @@ import {
   buildValidRefreshToken,
 } from '@infrastructure/testing/index.js'
 import { AuthenticationError, Err, IdUtils, Ok, type RefreshTokenId, RepositoryError } from '@team-pulse/shared'
-import { buildRefreshTokenDTO } from '@team-pulse/shared/testing/dto-builders'
-import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { buildRefreshTokenDTO, expectErrorType, expectSuccess } from '@team-pulse/shared/testing'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('RefreshTokenUseCase', () => {

@@ -1,5 +1,5 @@
-import type { ILogger } from '@team-pulse/shared/handler'
-import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
+import type { ILogger } from '@team-pulse/shared'
+import { TEST_CONSTANTS } from '@team-pulse/shared/testing'
 import type { FastifyBaseLogger } from 'fastify'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { FastifyLogger } from './FastifyLogger.js'

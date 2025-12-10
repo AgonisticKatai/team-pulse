@@ -7,7 +7,7 @@ import type { IPasswordHasher } from '@domain/services/IPasswordHasher.js'
 import { faker } from '@faker-js/faker'
 import { buildLoginDTO, buildUser, buildValidRefreshToken } from '@infrastructure/testing/index.js'
 import { AuthenticationError, Err, Ok, RepositoryError } from '@team-pulse/shared'
-import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('LoginUseCase', () => {

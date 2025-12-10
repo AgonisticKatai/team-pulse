@@ -97,8 +97,6 @@ export function buildCreateUserDTO(overrides: Partial<CreateUserDTO> = {}): Crea
  */
 export function buildCreateTeamDTO(overrides: Partial<CreateTeamDTO> = {}): CreateTeamDTO {
   return {
-    city: TEST_CONSTANTS.teams.fcBarcelona.city,
-    foundedYear: TEST_CONSTANTS.teams.fcBarcelona.foundedYear,
     name: TEST_CONSTANTS.teams.fcBarcelona.name,
     ...overrides,
   }

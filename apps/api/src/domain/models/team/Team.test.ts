@@ -22,21 +22,6 @@ describe('Team Entity', () => {
       expect(team).toBeInstanceOf(Team)
       expect(team.id).toBeDefined() // Verifica que TeamId es válido
       expect(team.name.name).toBe(input.name)
-      expect(team.city.name).toBe(input.city)
-      // Check VO wrapper internal state
-      expect(team.foundedYear?.year).toBe(input.foundedYear)
-    })
-
-    it('should create a valid Team instance WITHOUT optional fields (foundedYear)', () => {
-      // Arrange
-      const input = buildCreateTeamDTO({ foundedYear: null })
-
-      // Act
-      const team = expectSuccess(Team.create({ ...input, id: faker.string.uuid() }))
-
-      // Assert: foundedYear VO exists (Wrapper), but holds null
-      expect(team.foundedYear).not.toBeNull() // El objeto TeamFoundedYear existe
-      expect(team.foundedYear?.year).toBeNull() // Su valor interno es null
     })
 
     it('should fail if any inner Value Object is invalid (Fail Fast)', () => {

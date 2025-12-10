@@ -40,7 +40,7 @@ export class UpdateTeamUseCase {
         return Err(ConflictError.duplicate({ identifier: dto.name, resource: 'Team' }))
     }
 
-    const updateResult = findTeamResult.value.update({ city: dto.city, foundedYear: dto.foundedYear, name: dto.name })
+    const updateResult = findTeamResult.value.update({ name: dto.name })
 
     if (!updateResult.ok) return Err(updateResult.error)
 

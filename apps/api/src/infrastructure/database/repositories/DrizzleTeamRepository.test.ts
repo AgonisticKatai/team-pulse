@@ -1,8 +1,8 @@
 import type { Database } from '@infrastructure/database/connection.js'
 import { DrizzleTeamRepository } from '@infrastructure/database/repositories/DrizzleTeamRepository.js'
-import { buildTeam } from '@infrastructure/testing/index.js' // 👈 Using the new Builder
+import { buildTeam } from '@infrastructure/testing/index.js'
 import { setupTestEnvironment } from '@infrastructure/testing/test-helpers.js'
-import { expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { expectSuccess } from '@team-pulse/shared/testing'
 import { sql } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
@@ -36,9 +36,6 @@ describe('DrizzleTeamRepository - Integration Tests', () => {
       // Direct comparison (Branded Types are strings at runtime)
       expect(savedTeam.id).toBe(team.id)
       expect(savedTeam.name.getValue()).toBe(team.name.getValue())
-      expect(savedTeam.city.getValue()).toBe(team.city.getValue())
-      expect(savedTeam.foundedYear?.getValue()).toBe(team.foundedYear?.getValue())
-
       expect(savedTeam.createdAt).toBeInstanceOf(Date)
       expect(savedTeam.updatedAt).toBeInstanceOf(Date)
     })
@@ -58,24 +55,10 @@ describe('DrizzleTeamRepository - Integration Tests', () => {
       // Assert
       const savedTeam = expectSuccess(result)
       expect(savedTeam.name.getValue()).toBe(updatedTeam.name.getValue())
-      expect(savedTeam.city.getValue()).toBe(updatedTeam.city.getValue())
-      expect(savedTeam.foundedYear?.getValue()).toBe(updatedTeam.foundedYear?.getValue())
 
       // Verify only one team exists
       const allTeams = expectSuccess(await repository.findAll())
       expect(allTeams).toHaveLength(1)
-    })
-
-    it('should save a team without founded year', async () => {
-      // Arrange
-      const team = buildTeam({ foundedYear: null })
-
-      // Act
-      const result = await repository.save({ team })
-
-      // Assert
-      const savedTeam = expectSuccess(result)
-      expect(savedTeam.foundedYear).toBeNull()
     })
   })
 
@@ -265,25 +248,6 @@ describe('DrizzleTeamRepository - Integration Tests', () => {
   })
 
   describe('edge cases', () => {
-    it('should handle teams with and without foundedYear', async () => {
-      // Arrange
-      const teamWithYear = buildTeam({ foundedYear: 2000 })
-      const teamWithoutYear = buildTeam({ foundedYear: null })
-
-      await repository.save({ team: teamWithYear })
-      await repository.save({ team: teamWithoutYear })
-
-      // Assert
-      const allTeams = expectSuccess(await repository.findAll())
-      expect(allTeams).toHaveLength(2)
-
-      const foundWithYear = allTeams.find((team) => team.id === teamWithYear.id)
-      const foundWithoutYear = allTeams.find((team) => team.id === teamWithoutYear.id)
-
-      expect(foundWithYear?.foundedYear?.getValue()).toBe(2000)
-      expect(foundWithoutYear?.foundedYear).toBeNull()
-    })
-
     it('should handle timestamps correctly', async () => {
       // Arrange
       const team = buildTeam()
@@ -297,22 +261,6 @@ describe('DrizzleTeamRepository - Integration Tests', () => {
 
       // Basic sanity check on dates
       expect(foundTeam?.createdAt.getTime()).toBeLessThanOrEqual(Date.now())
-    })
-
-    it('should handle very old and very new founded years', async () => {
-      // Arrange
-      const oldTeam = buildTeam({ foundedYear: 1857 })
-      const newTeam = buildTeam({ foundedYear: 2023 })
-
-      await repository.save({ team: oldTeam })
-      await repository.save({ team: newTeam })
-
-      // Assert
-      const foundOldTeam = expectSuccess(await repository.findById({ id: oldTeam.id }))
-      const foundNewTeam = expectSuccess(await repository.findById({ id: newTeam.id }))
-
-      expect(foundOldTeam?.foundedYear?.getValue()).toBe(1857)
-      expect(foundNewTeam?.foundedYear?.getValue()).toBe(2023)
     })
   })
 })

@@ -4,8 +4,8 @@ import { DrizzleUserRepository } from '@infrastructure/database/repositories/Dri
 import { refreshTokens } from '@infrastructure/database/schema.js'
 import { buildUser } from '@infrastructure/testing/index.js' // 👈 Using Builder
 import { setupTestEnvironment } from '@infrastructure/testing/test-helpers.js'
-import { UserRoles } from '@team-pulse/shared/domain/value-objects'
-import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { USER_ROLES } from '@team-pulse/shared'
+import { expectError, expectSuccess } from '@team-pulse/shared/testing'
 import { eq, sql } from 'drizzle-orm'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
@@ -50,7 +50,7 @@ describe('DrizzleUserRepository - Integration Tests', () => {
 
     it('should update an existing user (upsert)', async () => {
       // Arrange - Create and save initial user
-      const user = buildUser({ role: UserRoles.User })
+      const user = buildUser({ role: USER_ROLES.GUEST })
       await repository.save({ user })
 
       // Create updated version (Same ID, changed Role)
@@ -58,10 +58,10 @@ describe('DrizzleUserRepository - Integration Tests', () => {
       // and only change what we want to test (role, updatedAt)
       const updatedUser = buildUser({
         createdAt: user.createdAt, // 🛡️ Importante: Preserve creation date
-        email: user.email.getValue(), // Preserve original email (optional, but clean)
+        email: user.email.address, // Preserve original email (optional, but clean)
         id: user.id,
         passwordHash: user.getPasswordHash(),
-        role: UserRoles.Admin,
+        role: USER_ROLES.ADMIN,
         updatedAt: new Date(),
       })
 
@@ -70,7 +70,7 @@ describe('DrizzleUserRepository - Integration Tests', () => {
 
       // Assert
       const savedUser = expectSuccess(result)
-      expect(savedUser.role.getValue()).toBe(UserRoles.Admin)
+      expect(savedUser.role.getValue()).toBe(USER_ROLES.ADMIN)
       // Verify that the email remains the same (or the new one if you changed it)
       expect(savedUser.email.getValue()).toBe(updatedUser.email.getValue())
       // Verify that the original creation date was preserved
@@ -135,7 +135,7 @@ describe('DrizzleUserRepository - Integration Tests', () => {
 
       // Act - Search with lowercase
       const result = await repository.findByEmail({
-        email: user.email.getValue().toLowerCase(),
+        email: user.email.address.toLowerCase(),
       })
 
       // Assert
@@ -177,7 +177,7 @@ describe('DrizzleUserRepository - Integration Tests', () => {
       await repository.save({ user })
 
       // Act
-      const result = await repository.existsByEmail({ email: user.email.getValue() })
+      const result = await repository.existsByEmail({ email: user.email.address })
 
       // Assert
       expect(expectSuccess(result)).toBe(true)
@@ -337,7 +337,7 @@ describe('DrizzleUserRepository - Integration Tests', () => {
   describe('edge cases', () => {
     it('should handle all user roles correctly', async () => {
       // Arrange
-      const roles = Object.values(UserRoles)
+      const roles = Object.values(USER_ROLES)
 
       const users = roles.map((role) => buildUser({ role }))
 
@@ -348,9 +348,9 @@ describe('DrizzleUserRepository - Integration Tests', () => {
       expect(allUsers).toHaveLength(3)
 
       const foundRoles = allUsers.map((u) => u.role.getValue())
-      expect(foundRoles).toContain(UserRoles.User)
-      expect(foundRoles).toContain(UserRoles.Admin)
-      expect(foundRoles).toContain(UserRoles.SuperAdmin)
+      expect(foundRoles).toContain(USER_ROLES.GUEST)
+      expect(foundRoles).toContain(USER_ROLES.ADMIN)
+      expect(foundRoles).toContain(USER_ROLES.SUPER_ADMIN)
     })
 
     it('should preserve timestamps correctly', async () => {

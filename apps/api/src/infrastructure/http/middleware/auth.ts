@@ -1,6 +1,6 @@
 import type { TokenFactory } from '@application/factories/TokenFactory.js'
 import { type AuthenticatedUser, AuthService } from '@infrastructure/auth/AuthService.js'
-import type { UserRole } from '@team-pulse/shared/types'
+import type { UserRole } from '@team-pulse/shared'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
 /**

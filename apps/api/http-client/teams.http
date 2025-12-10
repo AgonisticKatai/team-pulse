@@ -23,8 +23,6 @@ Content-Type: {{jsonContentType}}
 Authorization: Bearer {{authToken}}
 
 {
-  "city": "Barcelona",
-  "foundedYear": 1899,
   "name": "FC Barcelona"
 }
 
@@ -42,10 +40,8 @@ Content-Type: {{jsonContentType}}
 Authorization: Bearer {{authToken}}
 
 {
-  "city": "Barcelona",
-  "foundedYear": 2025,
-  "name": "FC Barcelona"
-}∏
+  "name": "Manchester United"
+}
 
 ### Delete Team
 DELETE {{protocol}}://{{host}}/api/teams/{{teamId}}

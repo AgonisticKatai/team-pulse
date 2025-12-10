@@ -4,8 +4,7 @@ import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { IPasswordHasher } from '@domain/services/IPasswordHasher.js'
 import { buildAdminUser, buildCreateUserDTO, buildSuperAdminUser, buildUser } from '@infrastructure/testing/index.js'
 import { ConflictError, Err, Ok, RepositoryError } from '@team-pulse/shared'
-import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
-import { expectErrorType, expectMockCallArg, expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { expectErrorType, expectMockCallArg, expectSuccess, TEST_CONSTANTS } from '@team-pulse/shared/testing'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('CreateUserUseCase', () => {

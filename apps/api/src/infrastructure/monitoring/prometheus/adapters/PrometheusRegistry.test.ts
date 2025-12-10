@@ -1,5 +1,5 @@
 import { PrometheusRegistry } from '@infrastructure/monitoring/prometheus/adapters/PrometheusRegistry.js'
-import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
+import { TEST_CONSTANTS } from '@team-pulse/shared/testing'
 import { Counter, Registry } from 'prom-client'
 import { beforeEach, describe, expect, it } from 'vitest'
 

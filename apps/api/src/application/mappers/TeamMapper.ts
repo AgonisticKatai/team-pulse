@@ -8,9 +8,7 @@ export class TeamMapper {
     const primitives = team.toPrimitives()
 
     return {
-      city: primitives.city,
       createdAt: primitives.createdAt.toISOString(),
-      foundedYear: primitives.foundedYear,
       id: primitives.id,
       name: primitives.name,
       updatedAt: primitives.updatedAt.toISOString(),

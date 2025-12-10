@@ -18,81 +18,68 @@ describe('TeamMapper', () => {
 
       // Assert
       expect(dto).toEqual({
-        city: team.city.name,
         createdAt: team.createdAt.toISOString(),
-        foundedYear: team.foundedYear?.year ?? null,
         id: team.id,
         name: team.name.name,
         updatedAt: team.updatedAt.toISOString(),
       })
     })
 
-    it('should handle nullable values correctly (foundedYear is null)', () => {
-      // Arrange
-      const team = buildTeam({ foundedYear: null })
+    // ---------------------------------------------------------------------------
+    // 📋 TO DTO LIST (Array Transformation)
+    // ---------------------------------------------------------------------------
+    describe('toDTOList', () => {
+      it('should map an array of Team entities to DTOs', () => {
+        // Arrange
+        const team1 = buildTeam()
+        const team2 = buildTeam()
+        const teams = [team1, team2]
 
-      // Act
-      const dto = TeamMapper.toDTO(team)
+        // Act
+        const dtos = TeamMapper.toDTOList(teams)
 
-      // Assert
-      expect(dto.foundedYear).toBeNull()
+        // Assert
+        expect(dtos).toHaveLength(2)
+
+        const [dto1, dto2] = dtos
+
+        assertDefined(dto1)
+        assertDefined(dto2)
+
+        expect(dto1.id).toBe(team1.id)
+        expect(dto2.id).toBe(team2.id)
+      })
     })
-  })
 
-  // ---------------------------------------------------------------------------
-  // 📋 TO DTO LIST (Array Transformation)
-  // ---------------------------------------------------------------------------
-  describe('toDTOList', () => {
-    it('should map an array of Team entities to DTOs', () => {
-      // Arrange
-      const team1 = buildTeam()
-      const team2 = buildTeam()
-      const teams = [team1, team2]
+    // ---------------------------------------------------------------------------
+    // 📄 TO PAGINATED LIST (Complex Response)
+    // ---------------------------------------------------------------------------
+    describe('toPaginatedList', () => {
+      it('should structure the response with teams and pagination metadata', () => {
+        // Arrange
+        const team = buildTeam()
 
-      // Act
-      const dtos = TeamMapper.toDTOList(teams)
+        const teams = [team]
 
-      // Assert
-      expect(dtos).toHaveLength(2)
+        const pagination = {
+          hasNext: true,
+          hasPrev: false,
+          limit: 10,
+          page: 1,
+          total: 50,
+          totalPages: 5,
+        } satisfies PaginationDTO
 
-      const [dto1, dto2] = dtos
+        // Act
+        const result = TeamMapper.toPaginatedList(teams, pagination)
 
-      assertDefined(dto1)
-      assertDefined(dto2)
+        // Assert
+        expect(result.pagination).toEqual(pagination)
 
-      expect(dto1.id).toBe(team1.id)
-      expect(dto2.id).toBe(team2.id)
-    })
-  })
+        const firstTeamDTO = expectFirst(result.teams)
 
-  // ---------------------------------------------------------------------------
-  // 📄 TO PAGINATED LIST (Complex Response)
-  // ---------------------------------------------------------------------------
-  describe('toPaginatedList', () => {
-    it('should structure the response with teams and pagination metadata', () => {
-      // Arrange
-      const team = buildTeam()
-
-      const teams = [team]
-
-      const pagination = {
-        hasNext: true,
-        hasPrev: false,
-        limit: 10,
-        page: 1,
-        total: 50,
-        totalPages: 5,
-      } satisfies PaginationDTO
-
-      // Act
-      const result = TeamMapper.toPaginatedList(teams, pagination)
-
-      // Assert
-      expect(result.pagination).toEqual(pagination)
-
-      const firstTeamDTO = expectFirst(result.teams)
-
-      expect(firstTeamDTO.id).toBe(team.id)
+        expect(firstTeamDTO.id).toBe(team.id)
+      })
     })
   })
 })

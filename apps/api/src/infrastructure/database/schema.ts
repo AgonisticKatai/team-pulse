@@ -1,4 +1,4 @@
-import { index, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { index, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 
 /**
  * Teams table schema
@@ -10,11 +10,9 @@ import { index, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 export const teams = pgTable(
   'teams',
   {
-    city: text('city').notNull(),
     createdAt: timestamp('created_at', { mode: 'date' })
       .notNull()
       .$defaultFn(() => new Date()),
-    foundedYear: integer('founded_year'),
     id: text('id').primaryKey(),
     name: text('name').notNull(),
     updatedAt: timestamp('updated_at', { mode: 'date' })

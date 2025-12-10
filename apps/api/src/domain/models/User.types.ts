@@ -1,5 +1,4 @@
-import type { UserId } from '@team-pulse/shared'
-import type { Email, Role } from '@team-pulse/shared/domain/value-objects'
+import type { UserEmail, UserId, UserRole } from '@team-pulse/shared'
 
 /**
  * Base User properties with Value Objects
@@ -7,9 +6,9 @@ import type { Email, Role } from '@team-pulse/shared/domain/value-objects'
  */
 export interface UserProps {
   id: UserId
-  email: Email
+  email: UserEmail
   passwordHash: string
-  role: Role
+  role: UserRole
   createdAt: Date
   updatedAt: Date
 }

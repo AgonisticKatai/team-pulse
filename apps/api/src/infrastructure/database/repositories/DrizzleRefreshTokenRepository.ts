@@ -12,7 +12,7 @@ import {
   RepositoryError,
   type Result,
   type UserId,
-} from '@team-pulse/shared' // 👈 IMPORTS NUEVOS
+} from '@team-pulse/shared'
 import { eq, lt } from 'drizzle-orm'
 
 /**

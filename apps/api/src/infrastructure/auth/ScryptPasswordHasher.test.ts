@@ -1,6 +1,5 @@
 import { ScryptPasswordHasher } from '@infrastructure/auth/ScryptPasswordHasher.js'
-import { TEST_CONSTANTS } from '@team-pulse/shared/testing/constants'
-import { expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { expectSuccess, TEST_CONSTANTS } from '@team-pulse/shared/testing'
 import { beforeAll, describe, expect, it } from 'vitest'
 
 describe('ScryptPasswordHasher', () => {

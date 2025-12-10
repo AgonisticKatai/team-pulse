@@ -3,7 +3,7 @@ import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import type { Database } from '@infrastructure/database/connection.js'
 import { teams as teamsSchema } from '@infrastructure/database/schema.js'
 import type { ValidationError } from '@team-pulse/shared'
-import { collect, Err, IdUtils, Ok, RepositoryError, type Result, type TeamId } from '@team-pulse/shared' // ✅ Ahora sí lo usamos
+import { collect, Err, IdUtils, Ok, RepositoryError, type Result, TeamId } from '@team-pulse/shared'
 import { eq, sql } from 'drizzle-orm'
 
 export class DrizzleTeamRepository implements ITeamRepository {
@@ -228,10 +228,8 @@ export class DrizzleTeamRepository implements ITeamRepository {
    */
   private mapToDomain({ team }: { team: typeof teamsSchema.$inferSelect }): Result<Team, ValidationError> {
     return Team.create({
-      city: team.city,
       createdAt: new Date(team.createdAt),
-      foundedYear: team.foundedYear,
-      id: IdUtils.toId<TeamId>(team.id),
+      id: TeamId.create({ value: team.id }),
       name: team.name,
       updatedAt: new Date(team.updatedAt),
     })

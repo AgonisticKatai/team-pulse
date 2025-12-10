@@ -1,7 +1,7 @@
 import { RefreshToken } from '@domain/models/RefreshToken.js'
 import { faker } from '@faker-js/faker'
 import { IdUtils, type RefreshTokenId, type UserId, ValidationError } from '@team-pulse/shared'
-import { expectError, expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { expectError, expectSuccess } from '@team-pulse/shared/testing'
 import { describe, expect, it } from 'vitest'
 
 function createRefreshToken(data: Parameters<typeof RefreshToken.create>[0]): RefreshToken {

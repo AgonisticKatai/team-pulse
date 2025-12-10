@@ -7,7 +7,7 @@ import type { UpdateTeamUseCase } from '@application/use-cases/UpdateTeamUseCase
 import { requireAuth, requireRole } from '@infrastructure/http/middleware/auth.js'
 import { handleError } from '@infrastructure/http/middleware/error-handler.js'
 import { FastifyLogger } from '@infrastructure/logging/FastifyLogger.js'
-import { CreateTeamDTOSchema, PaginationQuerySchema, UpdateTeamDTOSchema } from '@team-pulse/shared'
+import { CreateTeamDTOSchema, PaginationQuerySchema, UpdateTeamDTOSchema, USER_ROLES } from '@team-pulse/shared'
 import type { FastifyInstance } from 'fastify'
 
 /**
@@ -56,7 +56,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
    */
   fastify.post(
     '/api/teams',
-    { preHandler: [requireAuth({ tokenFactory }), requireRole(['ADMIN', 'SUPER_ADMIN'])] },
+    { preHandler: [requireAuth({ tokenFactory }), requireRole([USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN])] },
     async (request, reply) => {
       try {
         // Validate request body using Zod

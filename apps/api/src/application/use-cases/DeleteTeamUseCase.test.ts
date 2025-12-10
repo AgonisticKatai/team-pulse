@@ -3,7 +3,7 @@ import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import { faker } from '@faker-js/faker'
 import { buildTeam } from '@infrastructure/testing/index.js'
 import { Err, IdUtils, NotFoundError, Ok, RepositoryError, type TeamId } from '@team-pulse/shared'
-import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing/helpers'
+import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('DeleteTeamUseCase', () => {
