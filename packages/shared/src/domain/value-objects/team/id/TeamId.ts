@@ -6,8 +6,8 @@ import { TEAM_ID_BRAND, TEAM_ID_VALIDATION_ERROR } from './TeamId.constants'
 export type TeamId = EntityId<typeof TEAM_ID_BRAND>
 
 export const TeamId = {
-  create: ({ id }: { id: string }): Result<TeamId, ValidationError> => {
-    if (!IdUtils.isValid({ id })) {
+  create: (id: string): Result<TeamId, ValidationError> => {
+    if (!IdUtils.isValid(id)) {
       return Err(
         ValidationError.create({
           message: TEAM_ID_VALIDATION_ERROR,

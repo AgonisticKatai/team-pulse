@@ -1,3 +1,1 @@
-export type TeamNameProps = {
-  name: string
-}
+export type TeamNameProps = string

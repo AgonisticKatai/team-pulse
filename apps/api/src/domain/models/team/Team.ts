@@ -16,10 +16,7 @@ export class Team {
   }
 
   static create(input: TeamCreateInput): Result<Team, ValidationError> {
-    const results = combine({
-      id: TeamId.create({ id: input.id }),
-      name: TeamName.create({ name: input.name }),
-    })
+    const results = combine({ id: TeamId.create(input.id), name: TeamName.create(input.name) })
 
     if (!results.ok) {
       return Err(results.error)
@@ -45,7 +42,7 @@ export class Team {
     return {
       createdAt: this.createdAt,
       id: this.id,
-      name: this.name.name,
+      name: this.name.getValue(),
       updatedAt: this.updatedAt,
     }
   }

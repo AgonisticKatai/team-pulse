@@ -4,25 +4,23 @@ import type { PaginationDTO, TeamResponseDTO, TeamsListResponseDTO } from '@team
 export class TeamMapper {
   private constructor() {}
 
-  static toDTO(team: Team): TeamResponseDTO {
-    const primitives = team.toPrimitives()
-
+  static toDTO({ team }: { team: Team }): TeamResponseDTO {
     return {
-      createdAt: primitives.createdAt.toISOString(),
-      id: primitives.id,
-      name: primitives.name,
-      updatedAt: primitives.updatedAt.toISOString(),
+      createdAt: team.createdAt.toISOString(),
+      id: team.id,
+      name: team.name.getValue(),
+      updatedAt: team.updatedAt.toISOString(),
     }
   }
 
-  static toDTOList(teams: Team[]): TeamResponseDTO[] {
-    return teams.map((team) => TeamMapper.toDTO(team))
+  static toDTOList({ teams }: { teams: Team[] }): TeamResponseDTO[] {
+    return teams.map((team) => TeamMapper.toDTO({ team }))
   }
 
-  static toPaginatedList(teams: Team[], pagination: PaginationDTO): TeamsListResponseDTO {
+  static toPaginatedList({ teams, pagination }: { teams: Team[]; pagination: PaginationDTO }): TeamsListResponseDTO {
     return {
       pagination,
-      teams: TeamMapper.toDTOList(teams),
+      teams: TeamMapper.toDTOList({ teams }),
     }
   }
 }

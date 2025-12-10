@@ -13,22 +13,20 @@ describe('CreateTeamUseCase', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-
     teamRepository = { findAllPaginated: vi.fn(), findByName: vi.fn(), save: vi.fn() } as unknown as ITeamRepository
-
     createTeamUseCase = CreateTeamUseCase.create({ teamRepository })
   })
 
   describe('execute', () => {
-    describe('successful team creation', () => {
+    // -------------------------------------------------------------------------
+    // ✅ HAPPY PATH
+    // -------------------------------------------------------------------------
+    describe('Success Scenarios', () => {
       it('should return Ok with team data when creation succeeds', async () => {
         // Arrange
         const dto = buildCreateTeamDTO()
 
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
-
-        // Echo Mock: The mock returns exactly what it receives (the entity intended to be saved).
-        // This ensures the input-output flow is consistent regardless of the random data generated.
         vi.mocked(teamRepository.save).mockImplementation(async ({ team }) => Ok(team))
 
         // Act
@@ -40,7 +38,25 @@ describe('CreateTeamUseCase', () => {
         expect(response.name).toBe(dto.name)
       })
 
-      it('should check if team name already exists', async () => {
+      it('should save team with generated UUID and correct properties', async () => {
+        const dto = buildCreateTeamDTO()
+
+        vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
+        vi.mocked(teamRepository.save).mockImplementation(async ({ team }) => Ok(team))
+
+        await createTeamUseCase.execute({ dto })
+
+        expect(teamRepository.save).toHaveBeenCalledTimes(1)
+
+        // Check what was passed to the repository
+        const { team: savedTeam } = expectMockCallArg<{ team: Team }>(vi.mocked(teamRepository.save))
+
+        expect(savedTeam).toBeInstanceOf(Team)
+        expect(IdUtils.isValid(savedTeam.id)).toBe(true)
+        expect(savedTeam.name.getValue()).toBe(dto.name)
+      })
+
+      it('should check if team name already exists before creating', async () => {
         const dto = buildCreateTeamDTO()
 
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
@@ -51,53 +67,35 @@ describe('CreateTeamUseCase', () => {
         expect(teamRepository.findByName).toHaveBeenCalledWith({ name: dto.name })
         expect(teamRepository.findByName).toHaveBeenCalledTimes(1)
       })
+    })
 
-      it('should save team with generated UUID', async () => {
-        const dto = buildCreateTeamDTO()
-
-        vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
-        vi.mocked(teamRepository.save).mockImplementation(async ({ team }) => Ok(team))
-
-        await createTeamUseCase.execute({ dto })
-
-        expect(teamRepository.save).toHaveBeenCalledTimes(1)
-
-        const { team: savedTeam } = expectMockCallArg<{ team: Team }>(vi.mocked(teamRepository.save))
-
-        expect(savedTeam).toBeInstanceOf(Team)
-
-        expect(IdUtils.isValid(savedTeam.id)).toBe(true)
-
-        expect(savedTeam.name.getValue()).toBe(dto.name)
-      })
-
-      it('should handle team with undefined foundedYear (optional in DTO)', async () => {
+    // -------------------------------------------------------------------------
+    // ❌ DOMAIN VALIDATION ERRORS (Business Rules)
+    // -------------------------------------------------------------------------
+    describe('Validation Errors', () => {
+      it('should return ValidationError when team name is invalid (too short)', async () => {
         // Arrange
-        const dto = buildCreateTeamDTO()
-        // Dynamically exclude the property to simulate 'undefined' (missing field in JSON)
-        const { foundedYear, ...restDto } = dto
+        // Generate a DTO with a name that violates the Schema rules (e.g: "a")
+        const dto = buildCreateTeamDTO({ name: 'a' })
 
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
-        vi.mocked(teamRepository.save).mockImplementation(async ({ team }) => Ok(team))
 
         // Act
-        const response = expectSuccess(await createTeamUseCase.execute({ dto: restDto }))
+        // The error is thrown in Team.create() before calling the repository
+        expectErrorType({ errorType: ValidationError, result: await createTeamUseCase.execute({ dto }) })
 
         // Assert
-        // Sanity check
-        expect(foundedYear).toBeDefined()
-        // The domain logic converts undefined input to null foundedYear
-        expect(response.foundedYear).toBeNull()
+        expect(teamRepository.save).not.toHaveBeenCalled()
       })
     })
 
-    describe('error cases', () => {
-      it('should return Err when team name already exists', async () => {
+    // -------------------------------------------------------------------------
+    // ⚠️ INFRASTRUCTURE & LOGIC ERRORS
+    // -------------------------------------------------------------------------
+    describe('Infrastructure Errors', () => {
+      it('should return ConflictError when team name already exists', async () => {
         // Arrange
         const dto = buildCreateTeamDTO()
-
-        // 🔥 EXPLICIT USE: Force collision using the dynamic DTO name.
-        // It doesn't matter what random name faker generated, we create an existing team with the SAME name.
         const existingTeam = buildTeam({ name: dto.name })
 
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(existingTeam))
@@ -110,31 +108,10 @@ describe('CreateTeamUseCase', () => {
         expect(teamRepository.save).not.toHaveBeenCalled()
       })
 
-      it('should return ValidationError when team data is invalid (too old)', async () => {
-        // Arrange
-        // 🔥 EXPLICIT USE: Generate a dynamic invalid year (any between 0 and 1799).
-        // We test the invalid RANGE, not just a hardcoded number like '1700'.
-        const invalidYear = faker.number.int({ max: 1799, min: 0 })
-
-        const dto = buildCreateTeamDTO({ foundedYear: invalidYear })
-
-        vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
-
-        // Act
-        // The use case calls Team.create, which returns ValidationError for invalid VOs
-        expectErrorType({ errorType: ValidationError, result: await createTeamUseCase.execute({ dto }) })
-
-        expect(teamRepository.save).not.toHaveBeenCalled()
-      })
-
-      it('should return Err when repository save fails', async () => {
+      it('should return RepositoryError when repository save fails', async () => {
         // Arrange
         const dto = buildCreateTeamDTO()
-
-        // 🔥 EXPLICIT USE: The error message is also dynamic.
-        // Ensures the use case propagates the EXACT error it receives.
         const randomErrorMessage = faker.lorem.sentence()
-
         const repositoryError = RepositoryError.forOperation({ message: randomErrorMessage, operation: 'save' })
 
         vi.mocked(teamRepository.findByName).mockResolvedValue(Ok(null))
@@ -147,11 +124,10 @@ describe('CreateTeamUseCase', () => {
         expect(error.message).toBe(randomErrorMessage)
       })
 
-      it('should return Err when repository findByName fails', async () => {
+      it('should return RepositoryError when repository findByName fails', async () => {
         // Arrange
         const dto = buildCreateTeamDTO()
         const randomErrorMessage = faker.lorem.sentence()
-
         const repositoryError = RepositoryError.forOperation({ message: randomErrorMessage, operation: 'findByName' })
 
         vi.mocked(teamRepository.findByName).mockResolvedValue(Err(repositoryError))

@@ -4,10 +4,10 @@ import { type TeamNameInput, TeamNameSchema } from './TeamName.schema.js'
 import type { TeamNameProps } from './TeamName.types.js'
 
 export class TeamName {
-  readonly name: string
+  readonly value: string
 
-  private constructor(props: TeamNameProps) {
-    this.name = props.name
+  private constructor(value: TeamNameProps) {
+    this.value = value
   }
 
   static create(input: TeamNameInput): Result<TeamName, ValidationError> {
@@ -21,8 +21,6 @@ export class TeamName {
   }
 
   getValue(): TeamNameProps {
-    return {
-      name: this.name,
-    }
+    return this.value
   }
 }

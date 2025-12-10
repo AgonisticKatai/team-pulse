@@ -15,7 +15,7 @@ describe('TeamId Value Object', () => {
       const validUuid = faker.string.uuid()
 
       // Act
-      const result = TeamId.create({ id: validUuid })
+      const result = TeamId.create(validUuid)
 
       // Assert
       const id = expectSuccess(result)
@@ -29,7 +29,7 @@ describe('TeamId Value Object', () => {
       const invalidUuid = faker.string.alphanumeric(10)
 
       // Act
-      const result = TeamId.create({ id: invalidUuid })
+      const result = TeamId.create(invalidUuid)
 
       // Assert
       const error = expectErrorType({ errorType: ValidationError, result })
@@ -38,7 +38,7 @@ describe('TeamId Value Object', () => {
     })
 
     it('should return ValidationError for empty string', () => {
-      expectErrorType({ errorType: ValidationError, result: TeamId.create({ id: '' }) })
+      expectErrorType({ errorType: ValidationError, result: TeamId.create('') })
     })
   })
 
@@ -53,7 +53,7 @@ describe('TeamId Value Object', () => {
       // Assert
       expect(typeof id).toBe('string')
 
-      expectSuccess(TeamId.create({ id }))
+      expectSuccess(TeamId.create(id))
     })
 
     it('should generate unique ids on subsequent calls', () => {

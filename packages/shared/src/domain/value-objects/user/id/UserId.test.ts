@@ -15,7 +15,7 @@ describe('UserId Value Object', () => {
       const validUuid = faker.string.uuid()
 
       // Act
-      const result = UserId.create({ id: validUuid })
+      const result = UserId.create(validUuid)
 
       // Assert
       const id = expectSuccess(result)
@@ -29,7 +29,7 @@ describe('UserId Value Object', () => {
       const invalidUuid = faker.string.alphanumeric(10)
 
       // Act
-      const result = UserId.create({ id: invalidUuid })
+      const result = UserId.create(invalidUuid)
 
       // Assert
       const error = expectErrorType({ errorType: ValidationError, result })
@@ -38,7 +38,7 @@ describe('UserId Value Object', () => {
     })
 
     it('should return ValidationError for empty string', () => {
-      expectErrorType({ errorType: ValidationError, result: UserId.create({ id: '' }) })
+      expectErrorType({ errorType: ValidationError, result: UserId.create('') })
     })
   })
 
@@ -53,7 +53,7 @@ describe('UserId Value Object', () => {
       // Assert
       expect(typeof id).toBe('string')
 
-      expectSuccess(UserId.create({ id }))
+      expectSuccess(UserId.create(id))
     })
 
     it('should generate unique ids on subsequent calls', () => {

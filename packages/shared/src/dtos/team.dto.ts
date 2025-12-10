@@ -1,17 +1,13 @@
 import type { TeamId } from '@value-objects/team'
-import { TeamNameNameSchema } from '@value-objects/team'
+import { TeamNameSchema } from '@value-objects/team'
 import { z } from 'zod'
 import type { PaginatedResponse } from './pagination.dto.js'
 
-export const CreateTeamDTOSchema = z.object({
-  name: TeamNameNameSchema,
-})
+export const CreateTeamDTOSchema = z.object({ name: TeamNameSchema })
 
 export type CreateTeamDTO = z.infer<typeof CreateTeamDTOSchema>
 
-export const UpdateTeamDTOSchema = z.object({
-  name: TeamNameNameSchema.optional(),
-})
+export const UpdateTeamDTOSchema = z.object({ name: TeamNameSchema.optional() })
 
 export type UpdateTeamDTO = z.infer<typeof UpdateTeamDTOSchema>
 

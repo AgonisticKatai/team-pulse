@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import { TeamMapper } from '@application/mappers/TeamMapper.js'
 import { Team } from '@domain/models/team/Team.js'
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import type { CreateTeamDTO, RepositoryError, Result, TeamResponseDTO, ValidationError } from '@team-pulse/shared'
@@ -34,6 +35,6 @@ export class CreateTeamUseCase {
 
     if (!saveTeamResult.ok) return Err(saveTeamResult.error)
 
-    return Ok(saveTeamResult.value.toDTO())
+    return Ok(TeamMapper.toDTO({ team: saveTeamResult.value }))
   }
 }
