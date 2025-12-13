@@ -3,13 +3,13 @@ import { Err, Ok, type Result } from '@result'
 import { USER_ROLES } from './UserRole.constants.js'
 import type { UserRoleInput } from './UserRole.schema.js'
 import { UserRoleSchema } from './UserRole.schema.js'
-import type { UserRoleName, UserRoleProps } from './UserRole.types.js'
+import type { UserRoleProps, UserRoleType } from './UserRole.types.js'
 
 export class UserRole {
-  readonly name: UserRoleName
+  readonly value: UserRoleType
 
-  private constructor(props: UserRoleProps) {
-    this.name = props.name
+  private constructor(value: UserRoleProps) {
+    this.value = value
   }
 
   static create(input: UserRoleInput): Result<UserRole, ValidationError> {
@@ -26,23 +26,23 @@ export class UserRole {
     return Ok(new UserRole(validation.data))
   }
 
-  equals({ other }: { other: UserRole }): boolean {
-    return this.name === other.name
+  equals(other: UserRole): boolean {
+    return this.value === other.value
   }
 
   isAdmin(): boolean {
-    return this.name === USER_ROLES.ADMIN
+    return this.value === USER_ROLES.ADMIN
   }
 
   isGuest(): boolean {
-    return this.name === USER_ROLES.GUEST
+    return this.value === USER_ROLES.GUEST
   }
 
   isSuperAdmin(): boolean {
-    return this.name === USER_ROLES.SUPER_ADMIN
+    return this.value === USER_ROLES.SUPER_ADMIN
   }
 
   getValue(): UserRoleProps {
-    return { name: this.name }
+    return this.value
   }
 }

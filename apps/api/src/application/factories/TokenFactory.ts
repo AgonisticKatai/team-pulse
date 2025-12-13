@@ -1,6 +1,6 @@
 import type { IEnvironment } from '@domain/config/IEnvironment.js'
 import { RefreshToken } from '@domain/models/RefreshToken.js'
-import type { Email, RefreshTokenId, Result, Role, UserId, ValidationError } from '@team-pulse/shared'
+import type { RefreshTokenId, Result, UserEmail, UserId, UserRole, ValidationError } from '@team-pulse/shared'
 import { AuthenticationError, Err, IdUtils, Ok } from '@team-pulse/shared'
 import jwt from 'jsonwebtoken'
 
@@ -113,8 +113,8 @@ export class TokenFactory {
     role,
     userId,
   }: {
-    email: Email
-    role: Role
+    email: UserEmail
+    role: UserRole
     userId: UserId
   }): Result<string, AuthenticationError> {
     try {

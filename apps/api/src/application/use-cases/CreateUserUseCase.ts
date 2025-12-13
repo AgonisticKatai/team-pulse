@@ -1,4 +1,4 @@
-import { User } from '@domain/models/User.js'
+import { User } from '@domain/models/user/User.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { IPasswordHasher } from '@domain/services/IPasswordHasher.js'
 import type { CreateUserDTO, RepositoryError, UserResponseDTO, ValidationError } from '@team-pulse/shared'

@@ -10,14 +10,12 @@ describe('UserEmail Value Object', () => {
   describe('create', () => {
     // ✅ HAPPY PATH
     it('should create a valid instance', () => {
-      const input = {
-        address: faker.internet.email(),
-      } satisfies UserEmailInput
+      const input = faker.internet.email() satisfies UserEmailInput
 
       const userEmail = expectSuccess(UserEmail.create(input))
 
-      expect(userEmail.address).toBe(input.address.toLowerCase())
-      expect(userEmail.getValue()).toEqual({ address: input.address.toLowerCase() })
+      expect(userEmail.value).toBe(input.toLowerCase())
+      expect(userEmail.getValue()).toEqual(input.toLowerCase())
     })
 
     // -------------------------------------------------------------------------
@@ -31,12 +29,12 @@ describe('UserEmail Value Object', () => {
       const userLength = USER_EMAIL_RULES.MIN_LENGTH - suffix.length
 
       const user = faker.string.alpha(userLength)
-      const minEmail = `${user}${suffix}`
+      const minEmail = `${user}${suffix}` satisfies UserEmailInput
 
       expect(minEmail.length).toBe(USER_EMAIL_RULES.MIN_LENGTH)
 
-      const userEmail = expectSuccess(UserEmail.create({ address: minEmail }))
-      expect(userEmail.address).toBe(minEmail.toLowerCase())
+      const userEmail = expectSuccess(UserEmail.create(minEmail))
+      expect(userEmail.value).toBe(minEmail.toLowerCase())
     })
 
     it('should accept an email with exactly MAX_LENGTH', () => {
@@ -44,12 +42,12 @@ describe('UserEmail Value Object', () => {
       const userLength = USER_EMAIL_RULES.MAX_LENGTH - suffix.length
 
       const user = faker.string.alpha(userLength)
-      const maxEmail = `${user}${suffix}`
+      const maxEmail = `${user}${suffix}` satisfies UserEmailInput
 
       expect(maxEmail.length).toBe(USER_EMAIL_RULES.MAX_LENGTH)
 
-      const userEmail = expectSuccess(UserEmail.create({ address: maxEmail }))
-      expect(userEmail.address).toBe(maxEmail.toLowerCase())
+      const userEmail = expectSuccess(UserEmail.create(maxEmail))
+      expect(userEmail.value).toBe(maxEmail.toLowerCase())
     })
 
     // -------------------------------------------------------------------------
@@ -58,22 +56,16 @@ describe('UserEmail Value Object', () => {
 
     it('should return ValidationError if address is shorter than MIN_LENGTH', () => {
       // Generates a 5-character email (now invalid by both length and format)
-      const input = faker.string.alpha(USER_EMAIL_RULES.MIN_LENGTH - 1)
+      const input = faker.string.alpha(USER_EMAIL_RULES.MIN_LENGTH - 1) satisfies UserEmailInput
 
-      expectErrorType({
-        errorType: ValidationError,
-        result: UserEmail.create({ address: input }),
-      })
+      expectErrorType({ errorType: ValidationError, result: UserEmail.create(input) })
     })
 
     it('should return ValidationError if address is longer than MAX_LENGTH', () => {
       // Generates a 256-character email (now invalid by both length and format)
-      const input = faker.string.alpha(USER_EMAIL_RULES.MAX_LENGTH + 1)
+      const input = faker.string.alpha(USER_EMAIL_RULES.MAX_LENGTH + 1) satisfies UserEmailInput
 
-      expectErrorType({
-        errorType: ValidationError,
-        result: UserEmail.create({ address: input }),
-      })
+      expectErrorType({ errorType: ValidationError, result: UserEmail.create(input) })
     })
 
     // Manual format tests (without Faker, to be explicit)
@@ -85,13 +77,10 @@ describe('UserEmail Value Object', () => {
         'user@', // No domain
         'user@domain', // No TLD (Zod usually requests it)
         'a b@test.com', // Spaces inside
-      ]
+      ] as UserEmailInput[]
 
       for (const invalid of invalidInputs) {
-        expectErrorType({
-          errorType: ValidationError,
-          result: UserEmail.create({ address: invalid }),
-        })
+        expectErrorType({ errorType: ValidationError, result: UserEmail.create(invalid) })
       }
     })
   })

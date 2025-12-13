@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { User } from '@domain/models/User.js'
+import { User } from '@domain/models/user/index.js'
 import { ScryptPasswordHasher } from '@infrastructure/auth/ScryptPasswordHasher.js'
 import { validateEnv } from '@infrastructure/config/env.js'
 import { createDatabase } from '@infrastructure/database/connection.js'

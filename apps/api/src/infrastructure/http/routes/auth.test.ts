@@ -1,4 +1,4 @@
-import { User } from '@domain/models/User.js'
+import { User } from '@domain/models/user/User.js'
 import { ScryptPasswordHasher } from '@infrastructure/auth/ScryptPasswordHasher.js'
 import type { Container } from '@infrastructure/config/container.js'
 import type { Database } from '@infrastructure/database/connection.js'

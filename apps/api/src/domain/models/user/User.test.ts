@@ -1,6 +1,6 @@
-import { User } from '@domain/models/User.js'
-import { Email, EntityId, Role, ValidationError } from '@team-pulse/shared'
-import { expectError, expectSuccess, TestIds } from '@team-pulse/shared/testing'
+import { User } from '@domain/models/user/User.js'
+import { UserEmail, UserId, UserRole, ValidationError } from '@team-pulse/shared'
+import { expectError, expectSuccess } from '@team-pulse/shared/testing'
 import { describe, expect, it } from 'vitest'
 
 describe('User Domain Entity', () => {
@@ -18,11 +18,11 @@ describe('User Domain Entity', () => {
 
       // Assert
       expect(user).toBeInstanceOf(User)
-      expect(user.id).toBeInstanceOf(EntityId)
+      expect(user.id).toBeInstanceOf(UserId)
       expect(user.id.getValue()).toBe(TestIds.user(1))
-      expect(user.email).toBeInstanceOf(Email)
+      expect(user.email).toBeInstanceOf(UserEmail)
       expect(user.email.getValue()).toBe('test@example.com')
-      expect(user.role).toBeInstanceOf(Role)
+      expect(user.role).toBeInstanceOf(UserRole)
       expect(user.role.getValue()).toBe('USER')
       expect(user.createdAt).toBeInstanceOf(Date)
       expect(user.updatedAt).toBeInstanceOf(Date)

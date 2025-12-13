@@ -1,21 +1,23 @@
-import type { TeamId } from '@value-objects/team'
 import { TeamNameSchema } from '@value-objects/team'
 import { z } from 'zod'
-import type { PaginatedResponse } from './pagination.dto.js'
+import { EntityIdSchema, TimestampsSchema } from './entity-base.dto'
+import { createPaginatedResponseSchema } from './pagination.dto'
 
-export const CreateTeamDTOSchema = z.object({ name: TeamNameSchema })
+// 1. CORE
+const TeamCore = z.object({ name: TeamNameSchema })
 
-export type CreateTeamDTO = z.infer<typeof CreateTeamDTOSchema>
+// 2. INPUTS
+export const CreateTeamSchema = TeamCore.strict()
+export type CreateTeamDTO = z.infer<typeof CreateTeamSchema>
 
-export const UpdateTeamDTOSchema = z.object({ name: TeamNameSchema.optional() })
+export const UpdateTeamSchema = TeamCore.partial().strict()
+export type UpdateTeamDTO = z.infer<typeof UpdateTeamSchema>
 
-export type UpdateTeamDTO = z.infer<typeof UpdateTeamDTOSchema>
+// 3. OUTPUTS
+export const TeamResponseSchema = EntityIdSchema.merge(TeamCore).merge(TimestampsSchema)
 
-export interface TeamResponseDTO {
-  id: TeamId
-  name: string
-  createdAt: string // ISO string for JSON serialization
-  updatedAt: string // ISO string for JSON serialization
-}
+export type TeamResponseDTO = z.infer<typeof TeamResponseSchema>
 
-export type TeamsListResponseDTO = PaginatedResponse<TeamResponseDTO, 'teams'>
+// 4. LIST
+export const TeamsListResponseSchema = createPaginatedResponseSchema(TeamResponseSchema)
+export type TeamsListResponseDTO = z.infer<typeof TeamsListResponseSchema>

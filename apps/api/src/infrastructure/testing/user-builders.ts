@@ -1,4 +1,4 @@
-import { User } from '@domain/models/User.js'
+import { User } from '@domain/models/user/index.js'
 import { faker } from '@faker-js/faker'
 import type { CreateUserDTO } from '@team-pulse/shared'
 import { IdUtils, USER_ROLES, type UserId } from '@team-pulse/shared'

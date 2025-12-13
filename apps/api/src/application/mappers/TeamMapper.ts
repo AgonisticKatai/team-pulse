@@ -4,7 +4,7 @@ import type { PaginationDTO, TeamResponseDTO, TeamsListResponseDTO } from '@team
 export class TeamMapper {
   private constructor() {}
 
-  static toDTO({ team }: { team: Team }): TeamResponseDTO {
+  static toDTO(team: Team): TeamResponseDTO {
     return {
       createdAt: team.createdAt.toISOString(),
       id: team.id,
@@ -13,14 +13,14 @@ export class TeamMapper {
     }
   }
 
-  static toDTOList({ teams }: { teams: Team[] }): TeamResponseDTO[] {
-    return teams.map((team) => TeamMapper.toDTO({ team }))
+  static toDTOList(teams: Team[]): TeamResponseDTO[] {
+    return teams.map((team) => TeamMapper.toDTO(team))
   }
 
-  static toPaginatedList({ teams, pagination }: { teams: Team[]; pagination: PaginationDTO }): TeamsListResponseDTO {
+  static toPaginatedList(teams: Team[], pagination: PaginationDTO): TeamsListResponseDTO {
     return {
       pagination,
-      teams: TeamMapper.toDTOList({ teams }),
+      teams: TeamMapper.toDTOList(teams),
     }
   }
 }

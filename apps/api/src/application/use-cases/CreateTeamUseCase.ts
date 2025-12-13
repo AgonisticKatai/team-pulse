@@ -35,6 +35,6 @@ export class CreateTeamUseCase {
 
     if (!saveTeamResult.ok) return Err(saveTeamResult.error)
 
-    return Ok(TeamMapper.toDTO({ team: saveTeamResult.value }))
+    return Ok(TeamMapper.toDTO(saveTeamResult.value))
   }
 }

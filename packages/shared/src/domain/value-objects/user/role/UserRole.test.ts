@@ -13,15 +13,15 @@ describe('UserRole Value Object', () => {
 
     it.each(Object.values(USER_ROLES))('should create a valid instance for role: "%s"', (role) => {
       // Arrange
-      const input = { name: role } satisfies UserRoleInput
+      const input = role satisfies UserRoleInput
 
       // Act
       const userRole = expectSuccess(UserRole.create(input))
 
       // Assert
       expect(userRole).toBeInstanceOf(UserRole)
-      expect(userRole.name).toBe(role)
-      expect(userRole.getValue()).toEqual({ name: role })
+      expect(userRole.value).toBe(role)
+      expect(userRole.getValue()).toEqual(role)
     })
 
     // -------------------------------------------------------------------------
@@ -29,8 +29,8 @@ describe('UserRole Value Object', () => {
     // -------------------------------------------------------------------------
 
     it('should correctly identify ADMIN role', () => {
-      const admin = expectSuccess(UserRole.create({ name: USER_ROLES.ADMIN }))
-      const guest = expectSuccess(UserRole.create({ name: USER_ROLES.GUEST }))
+      const admin = expectSuccess(UserRole.create(USER_ROLES.ADMIN))
+      const guest = expectSuccess(UserRole.create(USER_ROLES.GUEST))
 
       expect(admin.isAdmin()).toBe(true)
       expect(guest.isAdmin()).toBe(false)
@@ -44,7 +44,7 @@ describe('UserRole Value Object', () => {
       expectErrorType({
         errorType: ValidationError,
         // @ts-expect-error
-        result: UserRole.create({ name: 'mega_admin' }),
+        result: UserRole.create('mega_admin'),
       })
     })
 
@@ -52,7 +52,7 @@ describe('UserRole Value Object', () => {
       expectErrorType({
         errorType: ValidationError,
         // @ts-expect-error
-        result: UserRole.create({ name: 'Admin' }),
+        result: UserRole.create('Admin'),
       })
     })
 
@@ -60,7 +60,7 @@ describe('UserRole Value Object', () => {
       expectErrorType({
         errorType: ValidationError,
         // @ts-expect-error
-        result: UserRole.create({ name: 12345 }),
+        result: UserRole.create(12345),
       })
     })
   })

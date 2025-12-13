@@ -1,5 +1,5 @@
 import { RefreshToken } from '@domain/models/RefreshToken.js'
-import type { User } from '@domain/models/User.js'
+import type { User } from '@domain/models/user/User.js'
 import { faker } from '@faker-js/faker'
 import { ScryptPasswordHasher } from '@infrastructure/auth/ScryptPasswordHasher.js'
 import type { Database } from '@infrastructure/database/connection.js'

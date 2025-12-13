@@ -1,4 +1,4 @@
-import type { User } from '@domain/models/User.js'
+import type { User } from '@domain/models/user/User.js'
 import type { RepositoryError, Result, UserId } from '@team-pulse/shared'
 
 /**

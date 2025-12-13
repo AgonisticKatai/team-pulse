@@ -20,7 +20,7 @@ describe('TeamMapper', () => {
       expect(dto).toEqual({
         createdAt: team.createdAt.toISOString(),
         id: team.id,
-        name: team.name.name,
+        name: team.name.getValue(),
         updatedAt: team.updatedAt.toISOString(),
       })
     })

@@ -4,10 +4,10 @@ import { type UserEmailInput, UserEmailSchema } from './UserEmail.schema.js'
 import type { UserEmailProps } from './UserEmail.types.js'
 
 export class UserEmail {
-  readonly address: string
+  readonly value: string
 
-  private constructor(props: UserEmailProps) {
-    this.address = props.address
+  private constructor(value: UserEmailProps) {
+    this.value = value
   }
 
   static create(input: UserEmailInput): Result<UserEmail, ValidationError> {
@@ -25,6 +25,6 @@ export class UserEmail {
   }
 
   getValue(): UserEmailProps {
-    return { address: this.address }
+    return this.value
   }
 }
