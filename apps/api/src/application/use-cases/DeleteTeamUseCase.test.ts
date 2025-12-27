@@ -2,7 +2,7 @@ import { DeleteTeamUseCase } from '@application/use-cases/DeleteTeamUseCase.js'
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import { faker } from '@faker-js/faker'
 import { buildTeam } from '@infrastructure/testing/index.js'
-import { Err, IdUtils, NotFoundError, Ok, RepositoryError, type TeamId } from '@team-pulse/shared'
+import { Err, NotFoundError, Ok, RepositoryError, TeamId } from '@team-pulse/shared'
 import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -19,15 +19,15 @@ describe('DeleteTeamUseCase', () => {
   })
 
   describe('execute', () => {
-    describe('successful deletion', () => {
+    // -------------------------------------------------------------------------
+    // ✅ HAPPY PATH
+    // -------------------------------------------------------------------------
+    describe('Success Scenarios', () => {
       it('should delete an existing team', async () => {
         // Arrange
-        // We create a random team instance to simulate the database record
         const team = buildTeam()
 
-        // 1. Simulate finding the team successfully
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(team))
-        // 2. Simulate successful deletion
         vi.mocked(teamRepository.delete).mockResolvedValue(Ok(undefined))
 
         // Act
@@ -35,18 +35,18 @@ describe('DeleteTeamUseCase', () => {
 
         // Assert
         expectSuccess(result)
-
-        // Verify flow: Find -> Delete
         expect(teamRepository.findById).toHaveBeenCalledWith({ id: team.id })
         expect(teamRepository.delete).toHaveBeenCalledWith({ id: team.id })
       })
     })
 
-    describe('error cases', () => {
+    // -------------------------------------------------------------------------
+    // ❌ DOMAIN VALIDATION ERRORS (Business Rules)
+    // -------------------------------------------------------------------------
+    describe('Validation Errors', () => {
       it('should return NotFoundError when team does not exist', async () => {
         // Arrange
-        // Generate a random ID that doesn't exist
-        const nonExistentId = IdUtils.generate<TeamId>()
+        const nonExistentId = TeamId.random()
 
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(null))
 
@@ -57,14 +57,17 @@ describe('DeleteTeamUseCase', () => {
         const error = expectErrorType({ errorType: NotFoundError, result })
         expect(error.message).toContain('Team')
         expect(error.metadata?.identifier).toBe(nonExistentId)
-
-        // CRITICAL: Ensure we didn't try to delete anything
         expect(teamRepository.delete).not.toHaveBeenCalled()
       })
+    })
 
+    // -------------------------------------------------------------------------
+    // ⚠️ INFRASTRUCTURE & LOGIC ERRORS
+    // -------------------------------------------------------------------------
+    describe('Infrastructure Errors', () => {
       it('should return RepositoryError when finding team fails', async () => {
         // Arrange
-        const id = IdUtils.generate<TeamId>()
+        const id = TeamId.random()
         const dbError = RepositoryError.forOperation({
           message: faker.lorem.sentence(),
           operation: 'findById',
@@ -89,9 +92,7 @@ describe('DeleteTeamUseCase', () => {
           operation: 'delete',
         })
 
-        // 1. Find works
         vi.mocked(teamRepository.findById).mockResolvedValue(Ok(team))
-        // 2. Delete fails
         vi.mocked(teamRepository.delete).mockResolvedValue(Err(dbError))
 
         // Act
@@ -100,8 +101,6 @@ describe('DeleteTeamUseCase', () => {
         // Assert
         const error = expectErrorType({ errorType: RepositoryError, result })
         expect(error).toBe(dbError)
-
-        // Ensure delete was actually attempted
         expect(teamRepository.delete).toHaveBeenCalledWith({ id: team.id })
       })
     })
