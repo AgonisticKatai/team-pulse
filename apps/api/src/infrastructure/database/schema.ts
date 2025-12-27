@@ -1,3 +1,4 @@
+import { userRoleValues } from '@team-pulse/shared'
 import { index, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 
 /**
@@ -31,7 +32,7 @@ export const teams = pgTable(
  * Users table schema
  *
  * Represents authenticated users in the system with role-based access control.
- * Roles: SUPER_ADMIN, ADMIN, USER
+ * Roles are defined in userRoleValues from shared package
  */
 export const users = pgTable(
   'users',
@@ -42,7 +43,7 @@ export const users = pgTable(
     email: text('email').notNull().unique(),
     id: text('id').primaryKey(),
     passwordHash: text('password_hash').notNull(),
-    role: text('role').notNull(), // 'SUPER_ADMIN' | 'ADMIN' | 'USER'
+    role: text('role', { enum: userRoleValues }).notNull(),
     updatedAt: timestamp('updated_at', { mode: 'date' })
       .notNull()
       .$defaultFn(() => new Date()),

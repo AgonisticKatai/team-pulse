@@ -2,13 +2,17 @@ import { User } from '@domain/models/user/User.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { Database } from '@infrastructure/database/connection.js'
 import { users as usersSchema } from '@infrastructure/database/schema.js'
-import type { ValidationError } from '@team-pulse/shared'
-import { collect, Err, IdUtils, Ok, RepositoryError, type Result, type UserId } from '@team-pulse/shared'
+import { collect, Err, Ok, RepositoryError, type Result, type UserId, type ValidationError } from '@team-pulse/shared'
 import { eq, sql } from 'drizzle-orm'
 
 /**
  * Drizzle User Repository (ADAPTER)
- * Implements strict typing mapping between DB (strings) and Domain (Branded Types).
+ *
+ * Maps between database layer and domain layer:
+ * - DB → Domain: Delegates validation to User.create()
+ * - Domain → DB: Uses User.toPrimitives() for type-safe persistence
+ *
+ * All validation logic lives in the domain model, not here.
  */
 export class DrizzleUserRepository implements IUserRepository {
   private readonly db: Database
@@ -166,17 +170,18 @@ export class DrizzleUserRepository implements IUserRepository {
 
   async save({ user }: { user: User }): Promise<Result<User, RepositoryError>> {
     try {
-      const obj = user.toObject()
+      const primitives = user.toPrimitives()
 
-      // Drizzle handles object mapping implicit as UserId extends string
+      // Map domain primitives to database schema
+      // Branded types (UserId) are compatible with string at runtime
       const row = {
-        createdAt: obj.createdAt,
-        email: obj.email,
-        id: obj.id,
+        createdAt: primitives.createdAt,
+        email: primitives.email,
+        id: primitives.id,
         passwordHash: user.getPasswordHash(),
-        role: obj.role,
-        updatedAt: obj.updatedAt,
-      }
+        role: primitives.role,
+        updatedAt: primitives.updatedAt,
+      } satisfies typeof usersSchema.$inferInsert
 
       await this.db
         .insert(usersSchema)
@@ -256,13 +261,13 @@ export class DrizzleUserRepository implements IUserRepository {
 
   /**
    * Map database row to domain entity
-   * Explicit hydration of UserId
+   * Delegates all validation to User.create()
    */
   private mapToDomain({ user }: { user: typeof usersSchema.$inferSelect }): Result<User, ValidationError> {
     return User.create({
       createdAt: new Date(user.createdAt),
       email: user.email,
-      id: IdUtils.toId<UserId>(user.id),
+      id: user.id,
       passwordHash: user.passwordHash,
       role: user.role,
       updatedAt: new Date(user.updatedAt),
