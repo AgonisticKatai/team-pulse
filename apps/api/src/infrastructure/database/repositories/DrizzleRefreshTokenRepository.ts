@@ -1,4 +1,4 @@
-import { RefreshToken } from '@domain/models/RefreshToken.js'
+import { RefreshToken } from '@domain/models/refresh-token/index.js'
 import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository.js'
 import type { Database } from '@infrastructure/database/connection.js'
 import { refreshTokens as refreshTokensSchema } from '@infrastructure/database/schema.js'
@@ -97,7 +97,7 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
 
   async save({ refreshToken }: { refreshToken: RefreshToken }): Promise<Result<RefreshToken, RepositoryError>> {
     try {
-      const obj = refreshToken.toObject()
+      const obj = refreshToken.toPrimitives()
 
       // 'obj.id' is RefreshTokenId.
       // Drizzle expects string. Since RefreshTokenId extends string, this compiles without errors.

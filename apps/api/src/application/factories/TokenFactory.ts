@@ -1,5 +1,5 @@
 import type { IEnvironment } from '@domain/config/IEnvironment.js'
-import { RefreshToken } from '@domain/models/RefreshToken.js'
+import { RefreshToken } from '@domain/models/refresh-token/index.js'
 import type { Result, UserEmail, UserRole, ValidationError } from '@team-pulse/shared'
 import { AuthenticationError, Err, Ok, RefreshTokenId, UserId } from '@team-pulse/shared'
 import jwt from 'jsonwebtoken'

@@ -1,4 +1,4 @@
-import type { RefreshToken } from '@domain/models/RefreshToken.js'
+import type { RefreshToken } from '@domain/models/refresh-token/index.js'
 import type { RepositoryError, Result, UserId } from '@team-pulse/shared'
 
 /**
