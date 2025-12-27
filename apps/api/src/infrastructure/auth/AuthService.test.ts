@@ -1,25 +1,31 @@
 import { TokenFactory } from '@application/factories/TokenFactory.js'
 import { AuthService } from '@infrastructure/auth/AuthService.js'
+import { buildUser } from '@infrastructure/testing/user-builders.js'
 import { TEST_INVALID_TOKEN_ENV, TEST_TOKEN_ENV } from '@infrastructure/testing/test-env.js'
-import { AuthenticationError, ValidationError } from '@team-pulse/shared'
-import { expectErrorType, expectSuccess, TEST_CONSTANTS } from '@team-pulse/shared/testing'
+import type { User } from '@domain/models/user/User.js'
+import { AuthenticationError, USER_ROLES, UserRole, ValidationError } from '@team-pulse/shared'
+import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing'
 import { beforeEach, describe, expect, it } from 'vitest'
 
 describe('AuthService', () => {
   let authService: AuthService
   let tokenFactory: TokenFactory
   let validToken: string
+  let testUser: User
 
   beforeEach(() => {
     // Arrange - Create dependencies
     tokenFactory = TokenFactory.create({ env: TEST_TOKEN_ENV })
     authService = AuthService.create({ tokenFactory })
 
+    // Generate test user
+    testUser = buildUser()
+
     // Create a valid token for tests
     const tokenResult = tokenFactory.createAccessToken({
-      email: TEST_CONSTANTS.users.johnDoe.email,
-      role: TEST_CONSTANTS.users.johnDoe.role,
-      userId: TEST_CONSTANTS.users.johnDoe.id,
+      email: testUser.email,
+      role: testUser.role,
+      userId: testUser.id,
     })
     validToken = expectSuccess(tokenResult)
   })
@@ -45,9 +51,9 @@ describe('AuthService', () => {
 
         // Assert
         const payload = expectSuccess(result)
-        expect(payload.userId).toBe(TEST_CONSTANTS.users.johnDoe.id)
-        expect(payload.email).toBe(TEST_CONSTANTS.users.johnDoe.email)
-        expect(payload.role).toBe(TEST_CONSTANTS.users.johnDoe.role)
+        expect(payload.userId).toBe(testUser.id)
+        expect(payload.email).toBe(testUser.email.value)
+        expect(payload.role).toBe(testUser.role.value)
       })
 
       it('should return complete payload with all JWT claims', () => {
@@ -191,9 +197,9 @@ describe('AuthService', () => {
         // Arrange - Create a token with different secret/issuer
         const wrongTokenFactory = TokenFactory.create({ env: TEST_INVALID_TOKEN_ENV })
         const wrongTokenResult = wrongTokenFactory.createAccessToken({
-          email: TEST_CONSTANTS.users.johnDoe.email,
-          role: TEST_CONSTANTS.users.johnDoe.role,
-          userId: TEST_CONSTANTS.users.johnDoe.id,
+          email: testUser.email,
+          role: testUser.role,
+          userId: testUser.id,
         })
         const wrongToken = expectSuccess(wrongTokenResult)
 
@@ -211,14 +217,16 @@ describe('AuthService', () => {
     describe('Success cases', () => {
       it('should return true when user has exact role', () => {
         // Arrange
-        const user = {
-          email: TEST_CONSTANTS.users.johnDoe.email,
-          role: 'USER' as const,
-          userId: TEST_CONSTANTS.users.johnDoe.id,
+        const user = buildUser({ role: USER_ROLES.GUEST })
+        const guestRole = expectSuccess(UserRole.create(USER_ROLES.GUEST))
+        const userPayload = {
+          email: user.email.value,
+          role: guestRole,
+          userId: user.id,
         }
 
         // Act
-        const result = authService.checkUserRole({ allowedRoles: ['USER'], user })
+        const result = authService.checkUserRole({ allowedRoles: [guestRole], user: userPayload })
 
         // Assert
         expect(result).toBe(true)
@@ -226,14 +234,20 @@ describe('AuthService', () => {
 
       it('should return true when user role is in allowed list', () => {
         // Arrange
-        const user = {
-          email: TEST_CONSTANTS.users.adminUser.email,
-          role: 'ADMIN' as const,
-          userId: TEST_CONSTANTS.users.adminUser.id,
+        const user = buildUser({ role: USER_ROLES.ADMIN })
+        const adminRole = expectSuccess(UserRole.create(USER_ROLES.ADMIN))
+        const superAdminRole = expectSuccess(UserRole.create(USER_ROLES.SUPER_ADMIN))
+        const userPayload = {
+          email: user.email.value,
+          role: adminRole,
+          userId: user.id,
         }
 
         // Act
-        const result = authService.checkUserRole({ allowedRoles: ['ADMIN', 'SUPER_ADMIN'], user })
+        const result = authService.checkUserRole({
+          allowedRoles: [adminRole, superAdminRole],
+          user: userPayload,
+        })
 
         // Assert
         expect(result).toBe(true)
@@ -241,14 +255,21 @@ describe('AuthService', () => {
 
       it('should return true for SUPER_ADMIN in multi-role list', () => {
         // Arrange
-        const user = {
-          email: TEST_CONSTANTS.users.superAdminUser.email,
-          role: 'SUPER_ADMIN' as const,
-          userId: TEST_CONSTANTS.users.superAdminUser.id,
+        const user = buildUser({ role: USER_ROLES.SUPER_ADMIN })
+        const guestRole = expectSuccess(UserRole.create(USER_ROLES.GUEST))
+        const adminRole = expectSuccess(UserRole.create(USER_ROLES.ADMIN))
+        const superAdminRole = expectSuccess(UserRole.create(USER_ROLES.SUPER_ADMIN))
+        const userPayload = {
+          email: user.email.value,
+          role: superAdminRole,
+          userId: user.id,
         }
 
         // Act
-        const result = authService.checkUserRole({ allowedRoles: ['USER', 'ADMIN', 'SUPER_ADMIN'], user })
+        const result = authService.checkUserRole({
+          allowedRoles: [guestRole, adminRole, superAdminRole],
+          user: userPayload,
+        })
 
         // Assert
         expect(result).toBe(true)
@@ -257,8 +278,11 @@ describe('AuthService', () => {
 
     describe('Error cases', () => {
       it('should return false when user is undefined', () => {
+        // Arrange
+        const guestRole = expectSuccess(UserRole.create(USER_ROLES.GUEST))
+
         // Act
-        const result = authService.checkUserRole({ allowedRoles: ['USER'], user: undefined })
+        const result = authService.checkUserRole({ allowedRoles: [guestRole], user: undefined })
 
         // Assert
         expect(result).toBe(false)
@@ -266,14 +290,21 @@ describe('AuthService', () => {
 
       it('should return false when user role is not in allowed list', () => {
         // Arrange
-        const user = {
-          email: TEST_CONSTANTS.users.johnDoe.email,
-          role: 'USER' as const,
-          userId: TEST_CONSTANTS.users.johnDoe.id,
+        const user = buildUser({ role: USER_ROLES.GUEST })
+        const guestRole = expectSuccess(UserRole.create(USER_ROLES.GUEST))
+        const adminRole = expectSuccess(UserRole.create(USER_ROLES.ADMIN))
+        const superAdminRole = expectSuccess(UserRole.create(USER_ROLES.SUPER_ADMIN))
+        const userPayload = {
+          email: user.email.value,
+          role: guestRole,
+          userId: user.id,
         }
 
         // Act
-        const result = authService.checkUserRole({ allowedRoles: ['ADMIN', 'SUPER_ADMIN'], user })
+        const result = authService.checkUserRole({
+          allowedRoles: [adminRole, superAdminRole],
+          user: userPayload,
+        })
 
         // Assert
         expect(result).toBe(false)
@@ -281,14 +312,16 @@ describe('AuthService', () => {
 
       it('should return false when allowed roles is empty array', () => {
         // Arrange
-        const user = {
-          email: TEST_CONSTANTS.users.johnDoe.email,
-          role: 'USER' as const,
-          userId: TEST_CONSTANTS.users.johnDoe.id,
+        const user = buildUser({ role: USER_ROLES.GUEST })
+        const guestRole = expectSuccess(UserRole.create(USER_ROLES.GUEST))
+        const userPayload = {
+          email: user.email.value,
+          role: guestRole,
+          userId: user.id,
         }
 
         // Act
-        const result = authService.checkUserRole({ allowedRoles: [], user })
+        const result = authService.checkUserRole({ allowedRoles: [], user: userPayload })
 
         // Assert
         expect(result).toBe(false)
