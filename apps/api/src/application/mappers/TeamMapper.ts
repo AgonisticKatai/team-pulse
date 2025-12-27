@@ -1,5 +1,5 @@
 import type { Team } from '@domain/models/team/Team.js'
-import type { PaginationDTO, TeamResponseDTO, TeamsListResponseDTO } from '@team-pulse/shared'
+import type { PaginationMetaDTO, TeamResponseDTO, TeamsListResponseDTO } from '@team-pulse/shared'
 
 export class TeamMapper {
   private constructor() {}
@@ -17,10 +17,10 @@ export class TeamMapper {
     return teams.map((team) => TeamMapper.toDTO(team))
   }
 
-  static toPaginatedList(teams: Team[], pagination: PaginationDTO): TeamsListResponseDTO {
+  static toPaginatedList(teams: Team[], pagination: PaginationMetaDTO): TeamsListResponseDTO {
     return {
-      pagination,
-      teams: TeamMapper.toDTOList(teams),
+      data: TeamMapper.toDTOList(teams),
+      meta: pagination,
     }
   }
 }

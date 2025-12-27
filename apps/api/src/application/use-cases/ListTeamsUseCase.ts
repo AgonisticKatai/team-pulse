@@ -1,6 +1,7 @@
+import { TeamMapper } from '@application/mappers/TeamMapper.js'
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import type { IMetricsService } from '@domain/services/IMetricsService.js'
-import type { PaginationQuery, RepositoryError, TeamsListResponseDTO, ValidationError } from '@team-pulse/shared'
+import type { PaginationQueryDTO, RepositoryError, TeamsListResponseDTO, ValidationError } from '@team-pulse/shared'
 import { Err, Ok, Pagination, type Result } from '@team-pulse/shared'
 
 /**
@@ -39,7 +40,7 @@ export class ListTeamsUseCase {
   async execute({
     dto,
   }: {
-    dto: PaginationQuery
+    dto: Partial<PaginationQueryDTO>
   }): Promise<Result<TeamsListResponseDTO, RepositoryError | ValidationError>> {
     const { page = 1, limit = 10 } = dto
 
@@ -55,6 +56,6 @@ export class ListTeamsUseCase {
 
     if (!paginationResult.ok) return Err(paginationResult.error)
 
-    return Ok({ pagination: paginationResult.value.toDTO(), teams: teams.map((team) => team.toDTO()) })
+    return Ok(TeamMapper.toPaginatedList(teams, paginationResult.value.toDTO()))
   }
 }

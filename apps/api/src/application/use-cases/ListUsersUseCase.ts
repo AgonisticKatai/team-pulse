@@ -1,6 +1,7 @@
+import { UserMapper } from '@application/mappers/UserMapper.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { IMetricsService } from '@domain/services/IMetricsService.js'
-import type { PaginationQuery, RepositoryError, UsersListResponseDTO, ValidationError } from '@team-pulse/shared'
+import type { PaginationQueryDTO, RepositoryError, UsersListResponseDTO, ValidationError } from '@team-pulse/shared'
 import { Err, Ok, Pagination, type Result } from '@team-pulse/shared'
 
 /**
@@ -50,7 +51,7 @@ export class ListUsersUseCase {
   async execute({
     dto,
   }: {
-    dto: PaginationQuery
+    dto: Partial<PaginationQueryDTO>
   }): Promise<Result<UsersListResponseDTO, RepositoryError | ValidationError>> {
     const { page = 1, limit = 10 } = dto
 
@@ -66,6 +67,6 @@ export class ListUsersUseCase {
 
     if (!paginationResult.ok) return Err(paginationResult.error)
 
-    return Ok({ pagination: paginationResult.value.toDTO(), users: users.map((user) => user.toDTO()) })
+    return Ok(UserMapper.toPaginatedList(users, paginationResult.value.toDTO()))
   }
 }

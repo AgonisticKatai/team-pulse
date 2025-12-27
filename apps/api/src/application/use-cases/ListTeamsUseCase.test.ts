@@ -3,8 +3,8 @@ import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import type { IMetricsService } from '@domain/services/IMetricsService.js'
 import { faker } from '@faker-js/faker'
 import { buildTeam } from '@infrastructure/testing/index.js'
-import type { PaginationQuery } from '@team-pulse/shared'
-import { Err, Ok, RepositoryError, ValidationError } from '@team-pulse/shared'
+import type { PaginationQueryDTO } from '@team-pulse/shared'
+import { Err, Ok, RepositoryError } from '@team-pulse/shared'
 import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -23,15 +23,16 @@ describe('ListTeamsUseCase', () => {
   })
 
   describe('execute', () => {
-    describe('successful retrieval', () => {
+    // -------------------------------------------------------------------------
+    // ✅ HAPPY PATH
+    // -------------------------------------------------------------------------
+    describe('Success Scenarios', () => {
       it('should return paginated teams with default parameters', async () => {
         // Arrange
         // No params provided in DTO, should default to page 1, limit 10
-        const dto: PaginationQuery = {}
-
-        // Generate random teams
+        const dto = {} satisfies Partial<PaginationQueryDTO>
         const mockTeams = Array.from({ length: 5 }, () => buildTeam())
-        const mockTotal = 20 // Total in DB
+        const mockTotal = 20
 
         vi.mocked(teamRepository.findAllPaginated).mockResolvedValue(Ok({ teams: mockTeams, total: mockTotal }))
 
@@ -41,21 +42,23 @@ describe('ListTeamsUseCase', () => {
         // Assert
         const response = expectSuccess(result)
 
-        // 1. Verify Repository Call (Defaults)
         expect(teamRepository.findAllPaginated).toHaveBeenCalledWith({ limit: 10, page: 1 })
 
-        // 2. Verify DTO Mapping
-        expect(response.teams).toHaveLength(5)
-        expect(response.teams[0]?.id).toBe(mockTeams[0]?.id)
-
-        // 3. Verify Pagination Metadata (Calculated by Domain VO)
-        expect(response.pagination).toEqual({ limit: 10, page: 1, total: mockTotal, totalPages: 2 })
+        expect(response.data).toHaveLength(5)
+        expect(response.data[0]?.id).toBe(mockTeams[0]?.id)
+        expect(response.meta).toEqual({
+          hasNext: true,
+          hasPrev: false,
+          limit: 10,
+          page: 1,
+          total: mockTotal,
+          totalPages: 2,
+        })
       })
 
       it('should return paginated teams with custom parameters', async () => {
         // Arrange
-        const dto: PaginationQuery = { limit: 50, page: 3 }
-
+        const dto = { limit: 50, page: 3 } satisfies PaginationQueryDTO
         const mockTeams = Array.from({ length: 10 }, () => buildTeam())
         const mockTotal = 150
 
@@ -65,17 +68,16 @@ describe('ListTeamsUseCase', () => {
         const response = expectSuccess(await listTeamsUseCase.execute({ dto }))
 
         // Assert
-        // Verify custom params were passed to repo
         expect(teamRepository.findAllPaginated).toHaveBeenCalledWith({ limit: 50, page: 3 })
 
-        expect(response.pagination.page).toBe(3)
-        expect(response.pagination.limit).toBe(50)
-        expect(response.pagination.totalPages).toBe(3) // 150 / 50 = 3
+        expect(response.meta.page).toBe(3)
+        expect(response.meta.limit).toBe(50)
+        expect(response.meta.totalPages).toBe(3)
       })
 
       it('should handle empty result set', async () => {
         // Arrange
-        const dto: PaginationQuery = { limit: 10, page: 1 }
+        const dto = { limit: 10, page: 1 } satisfies PaginationQueryDTO
 
         vi.mocked(teamRepository.findAllPaginated).mockResolvedValue(Ok({ teams: [], total: 0 }))
 
@@ -83,9 +85,9 @@ describe('ListTeamsUseCase', () => {
         const response = expectSuccess(await listTeamsUseCase.execute({ dto }))
 
         // Assert
-        expect(response.teams).toEqual([])
-        expect(response.pagination.total).toBe(0)
-        expect(response.pagination.totalPages).toBe(0) // Or 1, depending on your VO logic
+        expect(response.data).toEqual([])
+        expect(response.meta.total).toBe(0)
+        expect(response.meta.totalPages).toBe(1) // Minimum page is 1
       })
 
       it('should update metrics with total count', async () => {
@@ -98,13 +100,33 @@ describe('ListTeamsUseCase', () => {
         await listTeamsUseCase.execute({ dto: {} })
 
         // Assert
-        // Verify side effect
         expect(metricsService.setTeamsTotal).toHaveBeenCalledWith({ count: mockTotal })
         expect(metricsService.setTeamsTotal).toHaveBeenCalledTimes(1)
       })
     })
 
-    describe('error cases', () => {
+    // -------------------------------------------------------------------------
+    // ❌ DOMAIN VALIDATION ERRORS (Business Rules)
+    // -------------------------------------------------------------------------
+    describe('Validation Errors', () => {
+      it('should sanitize invalid pagination parameters instead of failing', async () => {
+        // Arrange
+        const dto = { limit: 10, page: -5 } satisfies PaginationQueryDTO
+
+        vi.mocked(teamRepository.findAllPaginated).mockResolvedValue(Ok({ teams: [], total: 0 }))
+
+        // Act
+        const response = expectSuccess(await listTeamsUseCase.execute({ dto }))
+
+        // Assert
+        expect(response.meta.page).toBe(1) // Should be sanitized to default
+      })
+    })
+
+    // -------------------------------------------------------------------------
+    // ⚠️ INFRASTRUCTURE & LOGIC ERRORS
+    // -------------------------------------------------------------------------
+    describe('Infrastructure Errors', () => {
       it('should return RepositoryError when repository fails', async () => {
         // Arrange
         const dbError = RepositoryError.forOperation({ message: faker.lorem.sentence(), operation: 'findAllPaginated' })
@@ -117,26 +139,7 @@ describe('ListTeamsUseCase', () => {
         // Assert
         const error = expectErrorType({ errorType: RepositoryError, result })
         expect(error).toBe(dbError)
-
-        // Metrics should NOT be updated on error
         expect(metricsService.setTeamsTotal).not.toHaveBeenCalled()
-      })
-
-      it('should return ValidationError if Pagination Value Object creation fails', async () => {
-        // Arrange
-        // We force invalid inputs via DTO that might bypass repo check
-        // but fail domain validation (e.g., negative page)
-        const dto: PaginationQuery = { limit: 10, page: -5 }
-
-        // Even if repo ignores it or handles it, we assume it returns something
-        vi.mocked(teamRepository.findAllPaginated).mockResolvedValue(Ok({ teams: [], total: 0 }))
-
-        // Act
-        const result = await listTeamsUseCase.execute({ dto })
-
-        // Assert
-        // The Use Case calls Pagination.create({ page: -5 ... }) which should fail
-        expectErrorType({ errorType: ValidationError, result })
       })
     })
   })
