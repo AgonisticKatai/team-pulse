@@ -1,4 +1,4 @@
-import type { PaginationDTO } from '@dtos/pagination.dto.js'
+import type { PaginationMetaDTO } from '@dtos/pagination.dto.js'
 import { ValidationError } from '@errors/ValidationError.js'
 import { faker } from '@faker-js/faker'
 import { expectErrorType, expectSuccess } from '@testing/helpers.js'
@@ -166,7 +166,7 @@ describe('Pagination Value Object', () => {
         total: 45,
         // These fields are ignored/recalculated by fromDTO logic usually
         totalPages: 999,
-      } satisfies PaginationDTO
+      } satisfies PaginationMetaDTO
 
       // Act
       const pagination = expectSuccess(Pagination.fromDTO(dtoMock))

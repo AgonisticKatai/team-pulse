@@ -21,10 +21,7 @@ export const RefreshTokenSchema = TokensSchema.pick({ refreshToken: true }).stri
 export type RefreshTokenDTO = z.infer<typeof RefreshTokenSchema>
 
 // --- RESPONSES ---
-export const LoginResponseSchema = TokensSchema.extend({
-  user: UserResponseSchema,
-})
-
+export const LoginResponseSchema = TokensSchema.extend({ user: UserResponseSchema })
 export type LoginResponseDTO = z.infer<typeof LoginResponseSchema>
 
 export const RefreshTokenResponseSchema = TokensSchema.pick({ accessToken: true })

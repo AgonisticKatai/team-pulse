@@ -6,8 +6,7 @@ export const PaginationQuerySchema = z.object({
   limit: PaginationLimitSchema,
   page: PaginationPageSchema,
 })
-
-export type PaginationQuery = z.infer<typeof PaginationQuerySchema>
+export type PaginationQueryDTO = z.infer<typeof PaginationQuerySchema>
 
 // 2. OUTPUT
 const PaginationMetaSchema = z.object({
@@ -18,6 +17,7 @@ const PaginationMetaSchema = z.object({
   total: z.number(),
   totalPages: z.number(),
 })
+export type PaginationMetaDTO = z.infer<typeof PaginationMetaSchema>
 
 // 3. FACTORY
 export const createPaginatedResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) => {

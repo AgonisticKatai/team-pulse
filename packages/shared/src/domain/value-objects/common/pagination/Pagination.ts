@@ -1,4 +1,4 @@
-import type { PaginationDTO } from '@dtos/pagination.dto'
+import type { PaginationMetaDTO } from '@dtos/pagination.dto'
 import { ValidationError } from '@errors/ValidationError'
 import { Err, Ok, type Result } from '@result'
 import { type PaginationInput, PaginationSchema } from '@value-objects/common/pagination/Pagination.schema.js'
@@ -26,7 +26,7 @@ export class Pagination {
     return Ok(new Pagination(validation.data))
   }
 
-  static fromDTO(dto: PaginationDTO): Result<Pagination, ValidationError> {
+  static fromDTO(dto: PaginationMetaDTO): Result<Pagination, ValidationError> {
     return Pagination.create({
       limit: dto.limit,
       page: dto.page,
@@ -48,7 +48,7 @@ export class Pagination {
     return this.page > PAGINATION_RULES.MIN_PAGE
   }
 
-  toDTO(): PaginationDTO {
+  toDTO(): PaginationMetaDTO {
     return {
       hasNext: this.hasNext,
       hasPrev: this.hasPrev,

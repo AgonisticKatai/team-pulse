@@ -15,7 +15,6 @@ export type UpdateTeamDTO = z.infer<typeof UpdateTeamSchema>
 
 // 3. OUTPUTS
 export const TeamResponseSchema = EntityIdSchema.merge(TeamCore).merge(TimestampsSchema)
-
 export type TeamResponseDTO = z.infer<typeof TeamResponseSchema>
 
 // 4. LIST
