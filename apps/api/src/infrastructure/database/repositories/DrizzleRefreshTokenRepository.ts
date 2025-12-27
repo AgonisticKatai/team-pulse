@@ -3,16 +3,7 @@ import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshToken
 import type { Database } from '@infrastructure/database/connection.js'
 import { refreshTokens as refreshTokensSchema } from '@infrastructure/database/schema.js'
 import type { ValidationError } from '@team-pulse/shared'
-import {
-  collect,
-  Err,
-  IdUtils,
-  Ok,
-  type RefreshTokenId,
-  RepositoryError,
-  type Result,
-  type UserId,
-} from '@team-pulse/shared'
+import { collect, Err, Ok, RepositoryError, type Result, type UserId } from '@team-pulse/shared'
 import { eq, lt } from 'drizzle-orm'
 
 /**
@@ -188,22 +179,19 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
   /**
    * Map database row to domain entity
    * HYDRATION:
-   * Converts raw DB strings back to Branded Types using IdUtils.toId()
+   * RefreshToken.create validates and converts raw DB strings to Branded Types
    */
   private mapToDomain({
     refreshToken,
   }: {
     refreshToken: typeof refreshTokensSchema.$inferSelect
   }): Result<RefreshToken, ValidationError> {
-    // If the DB has an invalid ID (corrupted data), IdUtils will throw an error.
-    // Since we are inside a try/catch in the public methods (findBy...),
     return RefreshToken.create({
       createdAt: new Date(refreshToken.createdAt),
       expiresAt: new Date(refreshToken.expiresAt),
-      // HYDRATION
-      id: IdUtils.toId<RefreshTokenId>(refreshToken.id),
+      id: refreshToken.id,
       token: refreshToken.token,
-      userId: IdUtils.toId<UserId>(refreshToken.userId),
+      userId: refreshToken.userId,
     })
   }
 }

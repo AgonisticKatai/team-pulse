@@ -30,7 +30,7 @@ export const DB_TABLES = ['users', 'teams', 'refresh_tokens'] as const
 /**
  * Valid user roles for login metrics
  */
-export const USER_ROLES = ['USER', 'ADMIN', 'SUPER_ADMIN'] as const
+export const USER_ROLES = ['user', 'admin', 'super_admin', 'guest'] as const
 
 /**
  * Metric label keys (using snake_case for Prometheus compatibility)

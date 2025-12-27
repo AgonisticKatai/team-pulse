@@ -1,4 +1,5 @@
 import type { TokenFactory } from '@application/factories/TokenFactory.js'
+import { UserMapper } from '@application/mappers/UserMapper.js'
 import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { IMetricsService } from '@domain/services/IMetricsService.js'
@@ -120,7 +121,7 @@ export class LoginUseCase {
     return Ok({
       accessToken: accessTokenResult.value,
       refreshToken: refreshTokenResult.value.token,
-      user: findUserResult.value.toDTO(),
+      user: UserMapper.toDTO(findUserResult.value),
     })
   }
 }

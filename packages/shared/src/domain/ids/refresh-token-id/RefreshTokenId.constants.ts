@@ -1,0 +1,3 @@
+export const REFRESH_TOKEN_ID_BRAND = 'RefreshTokenId' as const
+
+export const REFRESH_TOKEN_ID_VALIDATION_ERROR = 'REFRESH_TOKEN_ID_VALIDATION_ERROR' as const

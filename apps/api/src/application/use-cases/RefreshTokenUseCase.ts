@@ -131,14 +131,12 @@ export class RefreshTokenUseCase {
     const refreshTokenResult = this.tokenFactory.createRefreshToken({ userId: userResult.value.id })
     if (!refreshTokenResult.ok) return Err(refreshTokenResult.error)
 
-    // 8. ROTATION: Save new
+    // 8. ROTATION: Save new refresh token
     const saveResult = await this.refreshTokenRepository.save({ refreshToken: refreshTokenResult.value })
     if (!saveResult.ok) return Err(saveResult.error)
 
-    // 9. ROTATION: Delete old (Best effort)
+    // 9. ROTATION: Delete old refresh token (Best effort)
     await this.refreshTokenRepository.deleteByToken({ token: dto.refreshToken })
-
-    // TODO: log if it fails, but don't break the request
 
     return Ok({ accessToken: accessTokenResult.value, refreshToken: refreshTokenResult.value.token })
   }

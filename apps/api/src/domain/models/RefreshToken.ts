@@ -1,5 +1,5 @@
 import type { RefreshTokenFactoryInput, RefreshTokenValueObjects } from '@domain/models/RefreshToken.types.js'
-import { Err, IdUtils, Ok, type RefreshTokenId, type Result, type UserId, ValidationError } from '@team-pulse/shared'
+import { Err, Ok, RefreshTokenId, type Result, UserId, ValidationError } from '@team-pulse/shared'
 
 // Re-export public types
 export type { RefreshTokenFactoryInput, RefreshTokenValueObjects }
@@ -64,13 +64,21 @@ export class RefreshToken {
     const tokenResult = RefreshToken.validateToken({ token: data.token })
     if (!tokenResult.ok) return Err(tokenResult.error)
 
+    // Validate RefreshTokenId
+    const idResult = RefreshTokenId.create(data.id)
+    if (!idResult.ok) return Err(idResult.error)
+
+    // Validate UserId
+    const userIdResult = UserId.create(data.userId)
+    if (!userIdResult.ok) return Err(userIdResult.error)
+
     return Ok(
       new RefreshToken({
         createdAt: data.createdAt ?? new Date(),
         expiresAt: data.expiresAt,
-        id: IdUtils.toId<RefreshTokenId>(data.id),
+        id: idResult.value,
         token: tokenResult.value,
-        userId: IdUtils.toId<UserId>(data.userId),
+        userId: userIdResult.value,
       }),
     )
   }

@@ -1,7 +1,7 @@
 import { RefreshToken } from '@domain/models/RefreshToken.js'
 import { faker } from '@faker-js/faker'
 import type { LoginDTO, RefreshTokenDTO } from '@team-pulse/shared'
-import { IdUtils, type RefreshTokenId, type UserId } from '@team-pulse/shared'
+import { RefreshTokenId, UserId } from '@team-pulse/shared'
 
 // ==========================================
 // DTO BUILDERS (Simple data containers)
@@ -48,9 +48,9 @@ type RefreshTokenPrimitives = {
 const generateRandomTokenData = (): RefreshTokenPrimitives => ({
   createdAt: new Date(),
   expiresAt: faker.date.future(),
-  id: IdUtils.generate<RefreshTokenId>(),
+  id: RefreshTokenId.random(),
   token: faker.string.uuid(),
-  userId: IdUtils.generate<UserId>(),
+  userId: UserId.random(),
 })
 
 // 3. MAIN BUILDER
@@ -62,13 +62,13 @@ export function buildRefreshToken(overrides: Partial<RefreshTokenPrimitives> = {
   }
 
   // B. Domain Instantiation
-  // Convert primitives to Domain Types here
+  // RefreshToken.create validates and converts primitives to Domain Types
   const result = RefreshToken.create({
     createdAt: raw.createdAt,
     expiresAt: raw.expiresAt,
-    id: IdUtils.toId<RefreshTokenId>(raw.id), // Ensure Brand Safety
+    id: raw.id,
     token: raw.token,
-    userId: IdUtils.toId<UserId>(raw.userId), // Ensure Brand Safety
+    userId: raw.userId,
   })
 
   if (!result.ok) {

@@ -10,8 +10,9 @@ import {
   buildUser,
   buildValidRefreshToken,
 } from '@infrastructure/testing/index.js'
-import { AuthenticationError, Err, IdUtils, Ok, type RefreshTokenId, RepositoryError } from '@team-pulse/shared'
-import { buildRefreshTokenDTO, expectErrorType, expectSuccess } from '@team-pulse/shared/testing'
+import type { RefreshTokenDTO } from '@team-pulse/shared'
+import { AuthenticationError, Err, Ok, RepositoryError } from '@team-pulse/shared'
+import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('RefreshTokenUseCase', () => {
@@ -20,201 +21,80 @@ describe('RefreshTokenUseCase', () => {
   let refreshTokenRepository: IRefreshTokenRepository
   let tokenFactory: TokenFactory
 
-  // 1. DATA SETUP (Dynamic but consistent for the suite)
-  // -------------------------------------------------------
-
-  // Standard user for general tests
+  // 1. DATA SETUP
   const mockUser = buildUser()
-
-  // Existing valid RefreshToken in DB
   const mockRefreshTokenEntity = buildValidRefreshToken({ userId: mockUser.id })
-
-  // New RefreshToken that will be generated after rotation
   const mockNewRefreshTokenEntity = buildValidRefreshToken({ userId: mockUser.id })
-
-  // New AccessToken that will be generated after rotation
   const mockNewAccessToken = faker.string.uuid()
-
-  // Payload that returns the JWT when verified
-  // IMPORTANT: Matches the ID of the mockRefreshTokenEntity entity
   const mockPayload = { tokenId: mockRefreshTokenEntity.id, userId: mockUser.id }
 
   beforeEach(() => {
     vi.clearAllMocks()
 
     tokenFactory = {
-      createAccessToken: vi.fn(() => Ok(mockNewAccessToken)),
-      createRefreshToken: vi.fn(() => Ok(mockNewRefreshTokenEntity)),
-      verifyRefreshToken: vi.fn(() => Ok(mockPayload)),
+      createAccessToken: vi.fn(),
+      createRefreshToken: vi.fn(),
+      verifyRefreshToken: vi.fn(),
     } as unknown as TokenFactory
 
     userRepository = { findById: vi.fn() } as unknown as IUserRepository
 
     refreshTokenRepository = {
-      deleteByToken: vi.fn(() => Promise.resolve(Ok(true))),
+      deleteByToken: vi.fn(),
       findByToken: vi.fn(),
-      save: vi.fn(() => Promise.resolve(Ok(mockNewRefreshTokenEntity))),
+      save: vi.fn(),
     } as unknown as IRefreshTokenRepository
 
     refreshTokenUseCase = RefreshTokenUseCase.create({ refreshTokenRepository, tokenFactory, userRepository })
   })
 
   describe('execute', () => {
-    describe('successful refresh', () => {
+    // -------------------------------------------------------------------------
+    // ✅ HAPPY PATH
+    // -------------------------------------------------------------------------
+    describe('Success Scenarios', () => {
       it('should generate new access token and new refresh token (rotation)', async () => {
-        const dto = buildRefreshTokenDTO()
-
-        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshTokenEntity))
-        vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
-
-        const result = await refreshTokenUseCase.execute({ dto })
-
-        const data = expectSuccess(result)
-        expect(data.accessToken).toBe(mockNewAccessToken)
-        expect(data.refreshToken).toBe(mockNewRefreshTokenEntity.token)
-      })
-
-      it('should verify refresh token JWT signature', async () => {
-        const dto = buildRefreshTokenDTO()
-        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshTokenEntity))
-        vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
-
-        const result = await refreshTokenUseCase.execute({ dto })
-
-        expectSuccess(result)
-        expect(tokenFactory.verifyRefreshToken).toHaveBeenCalledWith({ token: dto.refreshToken })
-      })
-
-      it('should check if refresh token exists in database', async () => {
-        const dto = buildRefreshTokenDTO()
-
-        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshTokenEntity))
-        vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
-
-        const result = await refreshTokenUseCase.execute({ dto })
-
-        expectSuccess(result)
-        expect(refreshTokenRepository.findByToken).toHaveBeenCalledWith({ token: dto.refreshToken })
-      })
-
-      it('should get user from database', async () => {
-        const dto = buildRefreshTokenDTO()
-
-        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshTokenEntity))
-        vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
-
-        const result = await refreshTokenUseCase.execute({ dto })
-
-        expectSuccess(result)
-        // Verify that it called findById with the ID that we passed in the DTO
-        expect(userRepository.findById).toHaveBeenCalledWith({ id: mockUser.id })
-      })
-
-      it('should generate new access token with correct payload', async () => {
-        const dto = buildRefreshTokenDTO()
-
-        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshTokenEntity))
-        vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
-
-        const result = await refreshTokenUseCase.execute({ dto })
-
-        expectSuccess(result)
-        expect(tokenFactory.createAccessToken).toHaveBeenCalledWith({
-          email: mockUser.email,
-          role: mockUser.role,
-          userId: mockUser.id,
-        })
-      })
-    })
-
-    describe('token rotation', () => {
-      it('should generate new refresh token', async () => {
-        const dto = buildRefreshTokenDTO()
-
-        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshTokenEntity))
-        vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
-
-        const result = await refreshTokenUseCase.execute({ dto })
-
-        expectSuccess(result)
-        expect(tokenFactory.createRefreshToken).toHaveBeenCalledWith({ userId: mockUser.id })
-      })
-
-      it('should save new refresh token to database', async () => {
-        const dto = buildRefreshTokenDTO()
-
-        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshTokenEntity))
-        vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
-
-        const result = await refreshTokenUseCase.execute({ dto })
-
-        expectSuccess(result)
-        expect(refreshTokenRepository.save).toHaveBeenCalledWith({ refreshToken: mockNewRefreshTokenEntity })
-      })
-
-      it('should delete old refresh token after generating new one', async () => {
-        const dto = buildRefreshTokenDTO()
-
-        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshTokenEntity))
-        vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
-
-        const result = await refreshTokenUseCase.execute({ dto })
-
-        expectSuccess(result)
-        expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith({ token: dto.refreshToken })
-      })
-
-      it('should not fail if old token deletion fails', async () => {
-        const dto = buildRefreshTokenDTO()
-
-        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshTokenEntity))
-        vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
-        vi.mocked(refreshTokenRepository.deleteByToken).mockResolvedValue(
-          Err(
-            RepositoryError.forOperation({
-              cause: new Error('Database error'),
-              message: 'Failed to delete old token',
-              operation: 'deleteByToken',
-            }),
-          ),
-        )
-
-        const result = await refreshTokenUseCase.execute({ dto })
-
-        const data = expectSuccess(result)
-        expect(data.accessToken).toBe(mockNewAccessToken)
-      })
-    })
-
-    describe('error cases', () => {
-      it('should return AuthenticationError when Token Identity (JTI) does not match Database ID', async () => {
         // Arrange
-        const dto = buildRefreshTokenDTO()
+        const dto = { refreshToken: mockRefreshTokenEntity.token } satisfies RefreshTokenDTO
 
-        // 1. DB returns a token with ID "A"
-        const storedEntity = buildValidRefreshToken({ userId: mockUser.id })
-
-        // 2. JWT says its ID is "B" (Different)
-        const maliciousPayloadId = IdUtils.generate<RefreshTokenId>()
-
-        // Ensure they are different for the test
-        expect(storedEntity.id).not.toBe(maliciousPayloadId)
-
-        // Mocks
-        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(storedEntity))
-        vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(
-          Ok({ tokenId: maliciousPayloadId, userId: mockUser.id }),
-        )
+        vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(Ok(mockPayload))
+        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshTokenEntity))
+        vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
+        vi.mocked(tokenFactory.createRefreshToken).mockReturnValue(Ok(mockNewRefreshTokenEntity))
+        vi.mocked(refreshTokenRepository.save).mockResolvedValue(Ok(mockNewRefreshTokenEntity))
+        vi.mocked(tokenFactory.createAccessToken).mockReturnValue(Ok(mockNewAccessToken))
+        vi.mocked(refreshTokenRepository.deleteByToken).mockResolvedValue(Ok(true))
 
         // Act
         const result = await refreshTokenUseCase.execute({ dto })
 
         // Assert
-        expectErrorType({ errorType: AuthenticationError, result })
-      })
+        const data = expectSuccess(result)
+        expect(data.accessToken).toBe(mockNewAccessToken)
+        expect(data.refreshToken).toBe(mockNewRefreshTokenEntity.token)
 
+        // Verify Flow
+        expect(tokenFactory.verifyRefreshToken).toHaveBeenCalledWith({ token: dto.refreshToken })
+        expect(refreshTokenRepository.findByToken).toHaveBeenCalledWith({ token: dto.refreshToken })
+        expect(userRepository.findById).toHaveBeenCalledWith({ id: mockUser.id })
+        expect(tokenFactory.createAccessToken).toHaveBeenCalledWith({
+          email: mockUser.email,
+          role: mockUser.role,
+          userId: mockUser.id,
+        })
+        expect(tokenFactory.createRefreshToken).toHaveBeenCalledWith({ userId: mockUser.id })
+        expect(refreshTokenRepository.save).toHaveBeenCalledWith({ refreshToken: mockNewRefreshTokenEntity })
+        expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith({ token: dto.refreshToken })
+      })
+    })
+
+    // -------------------------------------------------------------------------
+    // ❌ VALIDATION ERRORS (Security)
+    // -------------------------------------------------------------------------
+    describe('Validation & Security Errors', () => {
       it('should return AuthenticationError when JWT signature is invalid', async () => {
-        const dto = buildRefreshTokenDTO()
+        // Arrange
+        const dto = { refreshToken: 'invalid.token' } satisfies RefreshTokenDTO
 
         vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(
           Err(
@@ -225,91 +105,161 @@ describe('RefreshTokenUseCase', () => {
           ),
         )
 
+        // Act
         const result = await refreshTokenUseCase.execute({ dto })
 
+        // Assert
+        expectErrorType({ errorType: AuthenticationError, result })
+      })
+
+      it('should return AuthenticationError when Token Identity (JTI) does not match Database ID', async () => {
+        // Arrange
+        const dto = { refreshToken: mockRefreshTokenEntity.token } satisfies RefreshTokenDTO
+        const storedEntity = buildValidRefreshToken({ userId: mockUser.id })
+        // Malicious or mismatched payload ID
+        const maliciousPayloadId = buildValidRefreshToken().id
+
+        vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(
+          Ok({ tokenId: maliciousPayloadId, userId: mockUser.id }),
+        )
+        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(storedEntity))
+
+        // Act
+        const result = await refreshTokenUseCase.execute({ dto })
+
+        // Assert
         expectErrorType({ errorType: AuthenticationError, result })
       })
 
       it('should return AuthenticationError when refresh token does not exist in database', async () => {
-        const dto = buildRefreshTokenDTO()
+        // Arrange
+        const dto = { refreshToken: 'not.found.token' } satisfies RefreshTokenDTO
 
         vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(Ok(mockPayload))
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(null))
 
+        // Act
         const result = await refreshTokenUseCase.execute({ dto })
 
+        // Assert
         expectErrorType({ errorType: AuthenticationError, result })
       })
 
       it('should return AuthenticationError and delete token when refresh token has expired', async () => {
-        const dto = buildRefreshTokenDTO()
+        // Arrange
+        const dto = { refreshToken: 'expired.token' } satisfies RefreshTokenDTO
         const expiredTokenEntity = buildExpiredRefreshToken()
+        const expiredPayload = { tokenId: expiredTokenEntity.id, userId: mockUser.id }
 
-        vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(Ok(mockPayload))
+        vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(Ok(expiredPayload))
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(expiredTokenEntity))
         vi.mocked(refreshTokenRepository.deleteByToken).mockResolvedValue(Ok(true))
 
+        // Act
         const result = await refreshTokenUseCase.execute({ dto })
 
+        // Assert
         expectErrorType({ errorType: AuthenticationError, result })
+        // Reuse detection / Cleanup
+        expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith({ token: dto.refreshToken })
       })
 
       it('should return AuthenticationError and delete token when user no longer exists', async () => {
-        const dto = buildRefreshTokenDTO()
+        // Arrange
+        const dto = { refreshToken: mockRefreshTokenEntity.token } satisfies RefreshTokenDTO
 
         vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(Ok(mockPayload))
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshTokenEntity))
         vi.mocked(userRepository.findById).mockResolvedValue(Ok(null))
         vi.mocked(refreshTokenRepository.deleteByToken).mockResolvedValue(Ok(true))
 
+        // Act
         const result = await refreshTokenUseCase.execute({ dto })
 
+        // Assert
         expectErrorType({ errorType: AuthenticationError, result })
-      })
-
-      it('should include field name in AuthenticationError metadata', async () => {
-        const dto = buildRefreshTokenDTO()
-
-        vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(
-          Err(
-            AuthenticationError.create({
-              message: 'Invalid token format',
-              metadata: { field: 'refreshToken', reason: 'invalid_format' },
-            }),
-          ),
-        )
-
-        const result = await refreshTokenUseCase.execute({ dto })
-
-        expectErrorType({ errorType: AuthenticationError, result })
+        expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith({ token: dto.refreshToken })
       })
     })
 
-    describe('edge cases', () => {
-      it('should handle user with ADMIN role', async () => {
-        const adminUser = buildAdminUser()
-        const dto = buildRefreshTokenDTO()
+    // -------------------------------------------------------------------------
+    // ⚠️ INFRASTRUCTURE & LOGIC ERRORS
+    // -------------------------------------------------------------------------
+    describe('Infrastructure Errors', () => {
+      it('should return RepositoryError when findByToken fails', async () => {
+        // Arrange
+        const dto = { refreshToken: mockRefreshTokenEntity.token } satisfies RefreshTokenDTO
+        const dbError = RepositoryError.forOperation({ message: 'DB Connection failed', operation: 'findByToken' })
 
-        vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(
-          Ok({ tokenId: mockRefreshTokenEntity.id, userId: adminUser.id }),
-        )
-        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshTokenEntity))
-        vi.mocked(userRepository.findById).mockResolvedValue(Ok(adminUser))
+        vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(Ok(mockPayload))
+        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Err(dbError))
 
+        // Act
         const result = await refreshTokenUseCase.execute({ dto })
-        expectSuccess(result)
+
+        // Assert
+        const error = expectErrorType({ errorType: RepositoryError, result })
+        expect(error.message).toBe('DB Connection failed')
       })
 
+      it('should return RepositoryError when user lookup fails and delete old token', async () => {
+        // Arrange
+        const dto = { refreshToken: mockRefreshTokenEntity.token } satisfies RefreshTokenDTO
+        const dbError = RepositoryError.forOperation({ message: 'User lookup failed', operation: 'findById' })
+
+        vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(Ok(mockPayload))
+        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshTokenEntity))
+        vi.mocked(userRepository.findById).mockResolvedValue(Err(dbError))
+        vi.mocked(refreshTokenRepository.deleteByToken).mockResolvedValue(Ok(true))
+
+        // Act
+        const result = await refreshTokenUseCase.execute({ dto })
+
+        // Assert
+        const error = expectErrorType({ errorType: RepositoryError, result })
+        expect(error.message).toBe('User lookup failed')
+        // Security: Delete token when user lookup fails
+        expect(refreshTokenRepository.deleteByToken).toHaveBeenCalledWith({ token: dto.refreshToken })
+      })
+
+      it('should return RepositoryError when saving new refresh token fails', async () => {
+        // Arrange
+        const dto = { refreshToken: mockRefreshTokenEntity.token } satisfies RefreshTokenDTO
+        const dbError = RepositoryError.forOperation({ message: 'Save failed', operation: 'save' })
+
+        vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(Ok(mockPayload))
+        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshTokenEntity))
+        vi.mocked(userRepository.findById).mockResolvedValue(Ok(mockUser))
+        vi.mocked(tokenFactory.createRefreshToken).mockReturnValue(Ok(mockNewRefreshTokenEntity))
+        vi.mocked(tokenFactory.createAccessToken).mockReturnValue(Ok(mockNewAccessToken))
+        vi.mocked(refreshTokenRepository.save).mockResolvedValue(Err(dbError))
+
+        // Act
+        const result = await refreshTokenUseCase.execute({ dto })
+
+        // Assert
+        const error = expectErrorType({ errorType: RepositoryError, result })
+        expect(error.message).toBe('Save failed')
+      })
+    })
+
+    // -------------------------------------------------------------------------
+    // 🧪 EDGE CASES
+    // -------------------------------------------------------------------------
+    describe('Edge Cases', () => {
       it('should handle user with SUPER_ADMIN role', async () => {
         // Arrange
         const superAdminUser = buildSuperAdminUser()
-        const dto = buildRefreshTokenDTO()
+        const dto = { refreshToken: mockRefreshTokenEntity.token } satisfies RefreshTokenDTO
+        const payload = { tokenId: mockRefreshTokenEntity.id, userId: superAdminUser.id }
 
-        vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(
-          Ok({ tokenId: mockRefreshTokenEntity.id, userId: superAdminUser.id }),
-        )
+        vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(Ok(payload))
         vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshTokenEntity))
         vi.mocked(userRepository.findById).mockResolvedValue(Ok(superAdminUser))
+        vi.mocked(tokenFactory.createRefreshToken).mockReturnValue(Ok(mockNewRefreshTokenEntity))
+        vi.mocked(refreshTokenRepository.save).mockResolvedValue(Ok(mockNewRefreshTokenEntity))
+        vi.mocked(tokenFactory.createAccessToken).mockReturnValue(Ok(mockNewAccessToken))
+        vi.mocked(refreshTokenRepository.deleteByToken).mockResolvedValue(Ok(true))
 
         // Act
         const result = await refreshTokenUseCase.execute({ dto })
@@ -323,10 +273,36 @@ describe('RefreshTokenUseCase', () => {
         })
       })
 
-      it('should not delete token when JWT verification fails', async () => {
-        const dto = buildRefreshTokenDTO()
+      it('should handle user with ADMIN role', async () => {
+        // Arrange
+        const adminUser = buildAdminUser()
+        const dto = { refreshToken: mockRefreshTokenEntity.token } satisfies RefreshTokenDTO
+        const payload = { tokenId: mockRefreshTokenEntity.id, userId: adminUser.id }
 
-        // Simulate signature failure (JWT invalid, logically not expired)
+        vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(Ok(payload))
+        vi.mocked(refreshTokenRepository.findByToken).mockResolvedValue(Ok(mockRefreshTokenEntity))
+        vi.mocked(userRepository.findById).mockResolvedValue(Ok(adminUser))
+        vi.mocked(tokenFactory.createRefreshToken).mockReturnValue(Ok(mockNewRefreshTokenEntity))
+        vi.mocked(refreshTokenRepository.save).mockResolvedValue(Ok(mockNewRefreshTokenEntity))
+        vi.mocked(tokenFactory.createAccessToken).mockReturnValue(Ok(mockNewAccessToken))
+        vi.mocked(refreshTokenRepository.deleteByToken).mockResolvedValue(Ok(true))
+
+        // Act
+        const result = await refreshTokenUseCase.execute({ dto })
+
+        // Assert
+        expectSuccess(result)
+        expect(tokenFactory.createAccessToken).toHaveBeenCalledWith({
+          email: adminUser.email,
+          role: adminUser.role,
+          userId: adminUser.id,
+        })
+      })
+
+      it('should not delete token when JWT verification fails (brute force protection)', async () => {
+        // Arrange
+        const dto = { refreshToken: 'garbage.token' } satisfies RefreshTokenDTO
+
         vi.mocked(tokenFactory.verifyRefreshToken).mockReturnValue(
           Err(
             AuthenticationError.create({
@@ -341,8 +317,6 @@ describe('RefreshTokenUseCase', () => {
 
         // Assert
         expectErrorType({ errorType: AuthenticationError, result })
-        // IMPORTANT: Do not delete if the token is not even valid cryptographically
-        // (it could be a brute force attack with garbage)
         expect(refreshTokenRepository.deleteByToken).not.toHaveBeenCalled()
       })
     })

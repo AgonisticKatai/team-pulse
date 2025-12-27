@@ -1,7 +1,7 @@
 import type { IEnvironment } from '@domain/config/IEnvironment.js'
 import { RefreshToken } from '@domain/models/RefreshToken.js'
-import type { RefreshTokenId, Result, UserEmail, UserId, UserRole, ValidationError } from '@team-pulse/shared'
-import { AuthenticationError, Err, IdUtils, Ok } from '@team-pulse/shared'
+import type { Result, UserEmail, UserRole, ValidationError } from '@team-pulse/shared'
+import { AuthenticationError, Err, Ok, RefreshTokenId, UserId } from '@team-pulse/shared'
 import jwt from 'jsonwebtoken'
 
 /**
@@ -87,7 +87,7 @@ export class TokenFactory {
    */
   createRefreshToken({ userId }: { userId: UserId }): Result<RefreshToken, ValidationError> {
     // 1. Generate strictly typed ID
-    const tokenId = IdUtils.generate<RefreshTokenId>()
+    const tokenId = RefreshTokenId.random()
     const expiresAt = TokenFactory.getRefreshTokenExpirationDate()
 
     // 2. Prepare payload (TypeScript ensures userId is UserId type)
@@ -157,7 +157,12 @@ export class TokenFactory {
       // This tells the linter: "I don't know what this is, but I promise to check it before using it"
       const rawPayload = decoded as Record<string, unknown>
 
-      // 4. HYDRATION: Map explicitly and ensure they are strings
+      // 4. HYDRATION: Map explicitly and validate branded types
+      const userIdResult = UserId.create(rawPayload['userId'] as string)
+      if (!userIdResult.ok) {
+        throw new Error('Invalid userId in token payload')
+      }
+
       const payload: AccessTokenPayload = {
         aud: rawPayload['aud'] as string,
         email: rawPayload['email'] as string,
@@ -166,7 +171,7 @@ export class TokenFactory {
         iat: rawPayload['iat'] as number,
         iss: rawPayload['iss'] as string,
         role: rawPayload['role'] as string,
-        userId: IdUtils.toId<UserId>(rawPayload['userId'] as string),
+        userId: userIdResult.value,
       }
 
       return Ok(payload)
@@ -195,15 +200,25 @@ export class TokenFactory {
       // This tells the linter: "I don't know what this is, but I promise to check it before using it"
       const rawPayload = decoded as Record<string, unknown>
 
-      // 4. HYDRATION: Map explicitly and ensure they are strings
+      // 4. HYDRATION: Map explicitly and validate branded types
+      const tokenIdResult = RefreshTokenId.create(rawPayload['tokenId'] as string)
+      if (!tokenIdResult.ok) {
+        throw new Error('Invalid tokenId in token payload')
+      }
+
+      const userIdResult = UserId.create(rawPayload['userId'] as string)
+      if (!userIdResult.ok) {
+        throw new Error('Invalid userId in token payload')
+      }
+
       const payload: RefreshTokenPayload = {
         aud: rawPayload['aud'] as string,
         exp: rawPayload['exp'] as number,
         // Standard claims
         iat: rawPayload['iat'] as number,
         iss: rawPayload['iss'] as string,
-        tokenId: IdUtils.toId<RefreshTokenId>(rawPayload['tokenId'] as string),
-        userId: IdUtils.toId<UserId>(rawPayload['userId'] as string),
+        tokenId: tokenIdResult.value,
+        userId: userIdResult.value,
       }
 
       return Ok(payload)

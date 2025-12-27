@@ -1,6 +1,6 @@
 import { RefreshToken } from '@domain/models/RefreshToken.js'
 import { faker } from '@faker-js/faker'
-import { IdUtils, type RefreshTokenId, type UserId, ValidationError } from '@team-pulse/shared'
+import { RefreshTokenId, UserId, ValidationError } from '@team-pulse/shared'
 import { expectError, expectSuccess } from '@team-pulse/shared/testing'
 import { describe, expect, it } from 'vitest'
 
@@ -18,8 +18,8 @@ describe('RefreshToken Domain Entity', () => {
       // Arrange
       const expiresAt = faker.date.future({ refDate: new Date() })
 
-      const validId = IdUtils.generate<RefreshTokenId>()
-      const validUserId = IdUtils.generate<UserId>()
+      const validId = RefreshTokenId.random()
+      const validUserId = UserId.random()
 
       const testToken = faker.string.uuid()
 
@@ -48,8 +48,8 @@ describe('RefreshToken Domain Entity', () => {
       // Arrange
       const expiresAt = faker.date.future({ refDate: new Date() })
 
-      const validId = IdUtils.generate<RefreshTokenId>()
-      const validUserId = IdUtils.generate<UserId>()
+      const validId = RefreshTokenId.random()
+      const validUserId = UserId.random()
 
       const testToken = ''
 
@@ -72,17 +72,13 @@ describe('RefreshToken Domain Entity', () => {
       // Arrange
       const expiresAt = faker.date.future({ refDate: new Date() })
 
-      const validId = IdUtils.generate<RefreshTokenId>()
+      const validId = RefreshTokenId.random()
 
       const testToken = faker.string.uuid()
 
       // Act & Assert
-      // In the new architecture, IdUtils.toId('') would throw an error before reaching the entity.
-      // If you force it with 'as UserId' or 'as any', the entity should protect itself.
-
-      // Option A: If your create expects UserId typed, typescript will warn you here.
-      // Option B: If you're testing "runtime safety", force the type:
-      const invalidUserId = '' as UserId
+      // Testing runtime validation - RefreshToken.create() now validates the userId
+      const invalidUserId = ''
 
       const error = createRefreshTokenError({
         expiresAt,
@@ -98,8 +94,8 @@ describe('RefreshToken Domain Entity', () => {
       // Arrange
       const expiresAt = faker.date.past({ refDate: new Date() }) // Expired
 
-      const validId = IdUtils.generate<RefreshTokenId>()
-      const validUserId = IdUtils.generate<UserId>()
+      const validId = RefreshTokenId.random()
+      const validUserId = UserId.random()
 
       const testToken = faker.string.uuid()
 
@@ -124,8 +120,8 @@ describe('RefreshToken Domain Entity', () => {
       const createdAt = faker.date.past({ refDate: new Date() })
       const expiresAt = faker.date.future({ refDate: new Date() })
 
-      const validId = IdUtils.generate<RefreshTokenId>()
-      const validUserId = IdUtils.generate<UserId>()
+      const validId = RefreshTokenId.random()
+      const validUserId = UserId.random()
 
       const testToken = faker.string.uuid()
 
@@ -152,8 +148,8 @@ describe('RefreshToken Domain Entity', () => {
       const before = faker.date.past({ refDate: new Date() })
       const expiresAt = faker.date.future({ refDate: new Date() })
 
-      const validId = IdUtils.generate<RefreshTokenId>()
-      const validUserId = IdUtils.generate<UserId>()
+      const validId = RefreshTokenId.random()
+      const validUserId = UserId.random()
 
       const testToken = faker.string.uuid()
 
@@ -188,9 +184,9 @@ describe('RefreshToken Domain Entity', () => {
       // Act
       const token = createRefreshToken({
         expiresAt,
-        id: IdUtils.generate<RefreshTokenId>(),
+        id: RefreshTokenId.random(),
         token: testToken,
-        userId: IdUtils.generate<UserId>(),
+        userId: UserId.random(),
       })
 
       // Assert
@@ -204,9 +200,9 @@ describe('RefreshToken Domain Entity', () => {
       // Act
       const token = createRefreshToken({
         expiresAt,
-        id: IdUtils.generate<RefreshTokenId>(),
+        id: RefreshTokenId.random(),
         token: faker.string.uuid(),
-        userId: IdUtils.generate<UserId>(),
+        userId: UserId.random(),
       })
 
       // Assert
@@ -222,9 +218,9 @@ describe('RefreshToken Domain Entity', () => {
       // Act
       const token = createRefreshToken({
         expiresAt,
-        id: IdUtils.generate<RefreshTokenId>(),
+        id: RefreshTokenId.random(),
         token: faker.string.uuid(),
-        userId: IdUtils.generate<UserId>(),
+        userId: UserId.random(),
       })
 
       // Assert
@@ -238,9 +234,9 @@ describe('RefreshToken Domain Entity', () => {
       // Act
       const token = createRefreshToken({
         expiresAt,
-        id: IdUtils.generate<RefreshTokenId>(),
+        id: RefreshTokenId.random(),
         token: faker.string.uuid(),
-        userId: IdUtils.generate<UserId>(),
+        userId: UserId.random(),
       })
 
       // Assert
@@ -253,8 +249,8 @@ describe('RefreshToken Domain Entity', () => {
       // Arrange
       const expiresAt = faker.date.future({ refDate: new Date() })
 
-      const id = IdUtils.generate<RefreshTokenId>()
-      const userId = IdUtils.generate<UserId>()
+      const id = RefreshTokenId.random()
+      const userId = UserId.random()
 
       const testToken = faker.string.uuid()
 

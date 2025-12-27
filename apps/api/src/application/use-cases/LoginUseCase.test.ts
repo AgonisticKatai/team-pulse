@@ -5,7 +5,8 @@ import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { IMetricsService } from '@domain/services/IMetricsService.js'
 import type { IPasswordHasher } from '@domain/services/IPasswordHasher.js'
 import { faker } from '@faker-js/faker'
-import { buildLoginDTO, buildUser, buildValidRefreshToken } from '@infrastructure/testing/index.js'
+import { buildUser, buildValidRefreshToken } from '@infrastructure/testing/index.js'
+import type { LoginDTO } from '@team-pulse/shared'
 import { AuthenticationError, Err, Ok, RepositoryError } from '@team-pulse/shared'
 import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -37,17 +38,24 @@ describe('LoginUseCase', () => {
   })
 
   describe('execute', () => {
-    describe('successful login', () => {
+    // -------------------------------------------------------------------------
+    // ✅ HAPPY PATH
+    // -------------------------------------------------------------------------
+    describe('Success Scenarios', () => {
       it('should authenticate user and return tokens', async () => {
         // Arrange
-        const dto = buildLoginDTO() // Random email and password
-        const user = buildUser({ email: dto.email }) // User that matches the DTO
+        const user = buildUser()
+        const dto = {
+          email: user.email.getValue(),
+          password: 'Password123!',
+        } satisfies LoginDTO
+
         const refreshTokenEntity = buildValidRefreshToken({ userId: user.id })
         const accessTokenString = faker.string.alphanumeric(100)
 
-        // Mocks Setup (The Happy Path Chain)
+        // Mocks Setup
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(user))
-        vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(true)) // Password matches
+        vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(true))
         vi.mocked(tokenFactory.createRefreshToken).mockReturnValue(Ok(refreshTokenEntity))
         vi.mocked(refreshTokenRepository.save).mockResolvedValue(Ok(refreshTokenEntity))
         vi.mocked(tokenFactory.createAccessToken).mockReturnValue(Ok(accessTokenString))
@@ -60,7 +68,7 @@ describe('LoginUseCase', () => {
 
         // 1. Verify Response Structure
         expect(response.accessToken).toBe(accessTokenString)
-        expect(response.refreshToken).toBe(refreshTokenEntity.token) // JWT string
+        expect(response.refreshToken).toBe(refreshTokenEntity.token)
         expect(response.user.id).toBe(user.id)
         expect(response.user.email).toBe(user.email.getValue())
 
@@ -80,11 +88,17 @@ describe('LoginUseCase', () => {
       })
     })
 
-    describe('error cases (security)', () => {
-      it('should return "Invalid credentials" when user does not exist', async () => {
+    // -------------------------------------------------------------------------
+    // ❌ VALIDATION ERRORS (Security)
+    // -------------------------------------------------------------------------
+    describe('Validation & Security Errors', () => {
+      it('should return AuthenticationError when user does not exist', async () => {
         // Arrange
-        const dto = buildLoginDTO()
-        // Simulate user not found
+        const dto = {
+          email: 'unknown@example.com',
+          password: 'password',
+        } satisfies LoginDTO
+
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(null))
 
         // Act
@@ -92,21 +106,20 @@ describe('LoginUseCase', () => {
 
         // Assert
         const error = expectErrorType({ errorType: AuthenticationError, result })
-        // 🛡️ SECURITY CHECK: Generic message to prevent enumeration
         expect(error.message).toBe('Invalid email or password')
         expect(error.metadata?.reason).toBe('invalid_credentials')
-
-        // Ensure flow stopped early
         expect(passwordHasher.verify).not.toHaveBeenCalled()
       })
 
-      it('should return "Invalid credentials" when password does not match', async () => {
+      it('should return AuthenticationError when password does not match', async () => {
         // Arrange
-        const dto = buildLoginDTO()
-        const user = buildUser({ email: dto.email })
+        const user = buildUser()
+        const dto = {
+          email: user.email.getValue(),
+          password: 'WrongPassword',
+        } satisfies LoginDTO
 
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(user))
-        // Simulate wrong password
         vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(false))
 
         // Act
@@ -114,19 +127,23 @@ describe('LoginUseCase', () => {
 
         // Assert
         const error = expectErrorType({ errorType: AuthenticationError, result })
-        // 🛡️ SECURITY CHECK: Same message as "user not found"
         expect(error.message).toBe('Invalid email or password')
         expect(error.metadata?.reason).toBe('invalid_credentials')
-
-        // Ensure we didn't generate tokens
         expect(tokenFactory.createRefreshToken).not.toHaveBeenCalled()
       })
     })
 
-    describe('error cases (infrastructure)', () => {
+    // -------------------------------------------------------------------------
+    // ⚠️ INFRASTRUCTURE & LOGIC ERRORS
+    // -------------------------------------------------------------------------
+    describe('Infrastructure Errors', () => {
       it('should return RepositoryError when finding user fails', async () => {
         // Arrange
-        const dto = buildLoginDTO()
+        const dto = {
+          email: faker.internet.email(),
+          password: 'password',
+        } satisfies LoginDTO
+
         const dbError = RepositoryError.forOperation({
           message: 'DB Connection failed',
           operation: 'findByEmail',
@@ -144,8 +161,12 @@ describe('LoginUseCase', () => {
 
       it('should return RepositoryError when saving refresh token fails', async () => {
         // Arrange
-        const dto = buildLoginDTO()
         const user = buildUser()
+        const dto = {
+          email: user.email.getValue(),
+          password: 'password',
+        } satisfies LoginDTO
+
         const refreshToken = buildValidRefreshToken()
         const dbError = RepositoryError.forOperation({
           message: 'Write failed',
@@ -155,7 +176,6 @@ describe('LoginUseCase', () => {
         vi.mocked(userRepository.findByEmail).mockResolvedValue(Ok(user))
         vi.mocked(passwordHasher.verify).mockResolvedValue(Ok(true))
         vi.mocked(tokenFactory.createRefreshToken).mockReturnValue(Ok(refreshToken))
-        // Simulate save failure
         vi.mocked(refreshTokenRepository.save).mockResolvedValue(Err(dbError))
 
         // Act
