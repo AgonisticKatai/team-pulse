@@ -1,3 +1,4 @@
+import { TeamMapper } from '@application/mappers/TeamMapper.js'
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import type { RepositoryError, TeamId, TeamResponseDTO } from '@team-pulse/shared'
 import { Err, NotFoundError, Ok, type Result } from '@team-pulse/shared'
@@ -25,6 +26,6 @@ export class GetTeamUseCase {
 
     if (!findTeamResult.value) return Err(NotFoundError.forResource({ identifier: id, resource: 'Team' }))
 
-    return Ok(findTeamResult.value.toDTO())
+    return Ok(TeamMapper.toDTO(findTeamResult.value))
   }
 }

@@ -1,21 +1,21 @@
-import { GetTeamUseCase } from '@application/use-cases/GetTeamUseCase.js'
-import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
+import { GetUserUseCase } from '@application/use-cases/GetUserUseCase.js'
+import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import { faker } from '@faker-js/faker'
-import { buildTeam } from '@infrastructure/testing/index.js'
-import { Err, NotFoundError, Ok, RepositoryError, TeamId } from '@team-pulse/shared'
+import { buildUser } from '@infrastructure/testing/index.js'
+import { Err, NotFoundError, Ok, RepositoryError, UserId } from '@team-pulse/shared'
 import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-describe('GetTeamUseCase', () => {
-  let getTeamUseCase: GetTeamUseCase
-  let teamRepository: ITeamRepository
+describe('GetUserUseCase', () => {
+  let getUserUseCase: GetUserUseCase
+  let userRepository: IUserRepository
 
   beforeEach(() => {
     vi.clearAllMocks()
 
-    teamRepository = { findById: vi.fn() } as unknown as ITeamRepository
+    userRepository = { findById: vi.fn() } as unknown as IUserRepository
 
-    getTeamUseCase = GetTeamUseCase.create({ teamRepository })
+    getUserUseCase = GetUserUseCase.create({ userRepository })
   })
 
   describe('execute', () => {
@@ -23,24 +23,25 @@ describe('GetTeamUseCase', () => {
     // ✅ HAPPY PATH
     // -------------------------------------------------------------------------
     describe('Success Scenarios', () => {
-      it('should return team DTO when team exists', async () => {
+      it('should return user DTO when user exists', async () => {
         // Arrange
-        const team = buildTeam()
+        const user = buildUser()
 
-        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(team))
+        vi.mocked(userRepository.findById).mockResolvedValue(Ok(user))
 
         // Act
-        const result = await getTeamUseCase.execute({ id: team.id })
+        const result = await getUserUseCase.execute({ id: user.id })
 
         // Assert
         const dto = expectSuccess(result)
 
-        expect(teamRepository.findById).toHaveBeenCalledWith({ id: team.id })
+        expect(userRepository.findById).toHaveBeenCalledWith({ id: user.id })
 
-        expect(dto.id).toBe(team.id)
-        expect(dto.name).toBe(team.name.getValue())
-        expect(dto.createdAt).toBe(team.createdAt.toISOString())
-        expect(dto.updatedAt).toBe(team.updatedAt.toISOString())
+        expect(dto.id).toBe(user.id)
+        expect(dto.email).toBe(user.email.getValue())
+        expect(dto.role).toBe(user.role.getValue())
+        expect(dto.createdAt).toBe(user.createdAt.toISOString())
+        expect(dto.updatedAt).toBe(user.updatedAt.toISOString())
       })
     })
 
@@ -48,18 +49,18 @@ describe('GetTeamUseCase', () => {
     // ❌ DOMAIN VALIDATION ERRORS (Business Rules)
     // -------------------------------------------------------------------------
     describe('Validation Errors', () => {
-      it('should return NotFoundError when team does not exist', async () => {
+      it('should return NotFoundError when user does not exist', async () => {
         // Arrange
-        const nonExistentId = TeamId.random()
+        const nonExistentId = UserId.random()
 
-        vi.mocked(teamRepository.findById).mockResolvedValue(Ok(null))
+        vi.mocked(userRepository.findById).mockResolvedValue(Ok(null))
 
         // Act
-        const result = await getTeamUseCase.execute({ id: nonExistentId })
+        const result = await getUserUseCase.execute({ id: nonExistentId })
 
         // Assert
         const error = expectErrorType({ errorType: NotFoundError, result })
-        expect(error.message).toContain('Team')
+        expect(error.message).toContain('User')
         expect(error.metadata?.identifier).toBe(nonExistentId)
       })
     })
@@ -70,15 +71,15 @@ describe('GetTeamUseCase', () => {
     describe('Infrastructure Errors', () => {
       it('should return RepositoryError when database fails', async () => {
         // Arrange
-        const id = TeamId.random()
+        const id = UserId.random()
         const errorMessage = faker.lorem.sentence()
 
-        vi.mocked(teamRepository.findById).mockResolvedValue(
+        vi.mocked(userRepository.findById).mockResolvedValue(
           Err(RepositoryError.forOperation({ message: errorMessage, operation: 'findById' })),
         )
 
         // Act
-        const result = await getTeamUseCase.execute({ id })
+        const result = await getUserUseCase.execute({ id })
 
         // Assert
         const error = expectErrorType({ errorType: RepositoryError, result })
