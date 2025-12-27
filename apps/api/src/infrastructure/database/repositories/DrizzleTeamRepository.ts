@@ -2,10 +2,18 @@ import { Team } from '@domain/models/team/Team.js'
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import type { Database } from '@infrastructure/database/connection.js'
 import { teams as teamsSchema } from '@infrastructure/database/schema.js'
-import type { ValidationError } from '@team-pulse/shared'
-import { collect, Err, IdUtils, Ok, RepositoryError, type Result, TeamId } from '@team-pulse/shared'
+import { collect, Err, Ok, RepositoryError, type Result, TeamId, type ValidationError } from '@team-pulse/shared'
 import { eq, sql } from 'drizzle-orm'
 
+/**
+ * Drizzle Team Repository (ADAPTER)
+ *
+ * Maps between database layer and domain layer:
+ * - DB → Domain: Delegates validation to Team.create()
+ * - Domain → DB: Uses Team.toPrimitives() for type-safe persistence
+ *
+ * All validation logic lives in the domain model, not here.
+ */
 export class DrizzleTeamRepository implements ITeamRepository {
   private readonly db: Database
 
@@ -156,14 +164,16 @@ export class DrizzleTeamRepository implements ITeamRepository {
 
   async save({ team }: { team: Team }): Promise<Result<Team, RepositoryError>> {
     try {
-      const obj = team.toObject()
+      const primitives = team.toPrimitives()
 
+      // Map domain primitives to database schema
+      // Branded types (TeamId) are compatible with string at runtime
       const row = {
-        createdAt: obj.createdAt,
-        id: obj.id,
-        name: obj.name,
-        updatedAt: obj.updatedAt,
-      }
+        createdAt: primitives.createdAt,
+        id: primitives.id,
+        name: primitives.name,
+        updatedAt: primitives.updatedAt,
+      } satisfies typeof teamsSchema.$inferInsert
 
       await this.db
         .insert(teamsSchema)
@@ -222,13 +232,13 @@ export class DrizzleTeamRepository implements ITeamRepository {
 
   /**
    * Map database row to domain entity
-   * Explicitly hydrate strings to TeamId using IdUtils
+   * Delegates all validation to Team.create()
    */
   private mapToDomain({ team }: { team: typeof teamsSchema.$inferSelect }): Result<Team, ValidationError> {
     return Team.create({
       createdAt: new Date(team.createdAt),
-      id: TeamId.create({ value: team.id }),
-      name: team.name,
+      id: team.id,           // String - Team.create() validates
+      name: team.name,       // String - Team.create() validates
       updatedAt: new Date(team.updatedAt),
     })
   }

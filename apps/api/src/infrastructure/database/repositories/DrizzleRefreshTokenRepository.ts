@@ -8,7 +8,12 @@ import { eq, lt } from 'drizzle-orm'
 
 /**
  * Drizzle RefreshToken Repository (ADAPTER)
- * Implements strict typing mapping between DB (strings) and Domain (Branded Types).
+ *
+ * Maps between database layer and domain layer:
+ * - DB → Domain: Delegates validation to RefreshToken.create()
+ * - Domain → DB: Uses RefreshToken.toPrimitives() for type-safe persistence
+ *
+ * All validation logic lives in the domain model, not here.
  */
 export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
   private readonly db: Database
@@ -97,17 +102,17 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
 
   async save({ refreshToken }: { refreshToken: RefreshToken }): Promise<Result<RefreshToken, RepositoryError>> {
     try {
-      const obj = refreshToken.toPrimitives()
+      const primitives = refreshToken.toPrimitives()
 
-      // 'obj.id' is RefreshTokenId.
-      // Drizzle expects string. Since RefreshTokenId extends string, this compiles without errors.
+      // Map domain primitives to database schema
+      // Branded types (RefreshTokenId, UserId) are compatible with string at runtime
       const row = {
-        createdAt: obj.createdAt,
-        expiresAt: obj.expiresAt,
-        id: obj.id,
-        token: obj.token,
-        userId: obj.userId,
-      }
+        createdAt: primitives.createdAt,
+        expiresAt: primitives.expiresAt,
+        id: primitives.id,
+        token: primitives.token,
+        userId: primitives.userId,
+      } satisfies typeof refreshTokensSchema.$inferInsert
 
       await this.db
         .insert(refreshTokensSchema)
@@ -178,8 +183,7 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
 
   /**
    * Map database row to domain entity
-   * HYDRATION:
-   * RefreshToken.create validates and converts raw DB strings to Branded Types
+   * Delegates all validation to RefreshToken.create()
    */
   private mapToDomain({
     refreshToken,
@@ -189,9 +193,9 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
     return RefreshToken.create({
       createdAt: new Date(refreshToken.createdAt),
       expiresAt: new Date(refreshToken.expiresAt),
-      id: refreshToken.id,
-      token: refreshToken.token,
-      userId: refreshToken.userId,
+      id: refreshToken.id,        // String - RefreshToken.create() validates
+      token: refreshToken.token,  // String - RefreshToken.create() validates
+      userId: refreshToken.userId, // String - RefreshToken.create() validates
     })
   }
 }
