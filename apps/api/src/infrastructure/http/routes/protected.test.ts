@@ -4,8 +4,8 @@ import type { Container } from '@infrastructure/config/container.js'
 import type { Database } from '@infrastructure/database/connection.js'
 import { setupTestEnvironment } from '@infrastructure/testing/test-helpers.js'
 import { expectSuccess } from '@team-pulse/shared/testing'
-import { sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
+import { sql } from 'kysely'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { buildApp } from '../../../app.js'
 
@@ -34,7 +34,7 @@ describe('Protected Routes and RBAC', () => {
     container = result.container
 
     // Clean database for test isolation
-    await db.execute(sql`TRUNCATE TABLE users, refresh_tokens, teams RESTART IDENTITY CASCADE`)
+    await sql`TRUNCATE TABLE users, refresh_tokens, teams RESTART IDENTITY CASCADE`.execute(db)
 
     // Create test users with different roles (fixed emails since we have isolated container)
     const superAdminEmail = 'superadmin@test.com'
@@ -46,7 +46,7 @@ describe('Protected Routes and RBAC', () => {
         email: superAdminEmail,
         id: '550e8400-e29b-41d4-a716-446655440010',
         passwordHash: expectSuccess(await passwordHasher.hash({ password: 'SuperAdmin123!' })),
-        role: 'SUPER_ADMIN',
+        role: 'super_admin',
       }),
     )
 
@@ -55,7 +55,7 @@ describe('Protected Routes and RBAC', () => {
         email: adminEmail,
         id: '550e8400-e29b-41d4-a716-446655440011',
         passwordHash: expectSuccess(await passwordHasher.hash({ password: 'Admin123!' })),
-        role: 'ADMIN',
+        role: 'admin',
       }),
     )
 
@@ -64,7 +64,7 @@ describe('Protected Routes and RBAC', () => {
         email: userEmail,
         id: '550e8400-e29b-41d4-a716-446655440012',
         passwordHash: expectSuccess(await passwordHasher.hash({ password: 'User123!' })),
-        role: 'USER',
+        role: 'guest',
       }),
     )
 

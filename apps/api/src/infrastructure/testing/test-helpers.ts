@@ -29,9 +29,9 @@ import { afterAll, beforeAll } from 'vitest'
  * describe('My Test Suite', () => {
  *   const { getDatabase } = setupTestEnvironment()
  *
- *   beforeEach(() => {
+ *   beforeEach(async () => {
  *     const db = getDatabase()
- *     await db.execute(sql`TRUNCATE TABLE users`)
+ *     await sql`TRUNCATE TABLE users`.execute(db)
  *   })
  * })
  * ```

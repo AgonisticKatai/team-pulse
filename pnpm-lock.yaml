@@ -109,13 +109,19 @@ importers:
         version: link:../../packages/shared
       drizzle-orm:
         specifier: 'catalog:'
-        version: 0.45.1(@opentelemetry/api@1.9.0)(postgres@3.4.7)
+        version: 0.45.1(@opentelemetry/api@1.9.0)(kysely@0.28.9)(postgres@3.4.7)
       fastify:
         specifier: ^5.6.2
         version: 5.6.2
       jsonwebtoken:
         specifier: ^9.0.3
         version: 9.0.3
+      kysely:
+        specifier: ^0.28.9
+        version: 0.28.9
+      kysely-postgres-js:
+        specifier: ^3.0.0
+        version: 3.0.0(kysely@0.28.9)(postgres@3.4.7)
       postgres:
         specifier: ^3.4.7
         version: 3.4.7
@@ -3615,6 +3621,20 @@ packages:
 
   kolorist@1.8.0:
     resolution: {integrity: sha512-Y+60/zizpJ3HRH8DCss+q95yr6145JXZo46OTpFvDZWLfRCE4qChOyk1b26nMaNpfHHgxagk9dXT5OP0Tfe+dQ==}
+
+  kysely-postgres-js@3.0.0:
+    resolution: {integrity: sha512-o2t/xNSYJQDW6rVGGFPXKmZ0BEz2dGn66c2B+cO/k9ZNcU2qPWPycQPQ+B+P2MBXbKYq0xV9BZmFIvkUrmFWAQ==}
+    engines: {bun: '>=1.2', node: '>=20'}
+    peerDependencies:
+      kysely: '>= 0.24.0 < 1'
+      postgres: ^3.4.0
+    peerDependenciesMeta:
+      postgres:
+        optional: true
+
+  kysely@0.28.9:
+    resolution: {integrity: sha512-3BeXMoiOhpOwu62CiVpO6lxfq4eS6KMYfQdMsN/2kUCRNuF2YiEr7u0HLHaQU+O4Xu8YXE3bHVkwaQ85i72EuA==}
+    engines: {node: '>=20.0.0'}
 
   lazystream@1.0.1:
     resolution: {integrity: sha512-b94GiNHQNy6JNTrt5w6zNyffMrNkXZb3KTkCZJb2V1xaEGCk093vkZ2jk3tpaeP33/OiXC+WvK9AxUebnf5nbw==}
@@ -7479,9 +7499,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.45.1(@opentelemetry/api@1.9.0)(postgres@3.4.7):
+  drizzle-orm@0.45.1(@opentelemetry/api@1.9.0)(kysely@0.28.9)(postgres@3.4.7):
     optionalDependencies:
       '@opentelemetry/api': 1.9.0
+      kysely: 0.28.9
       postgres: 3.4.7
 
   dunder-proto@1.0.1:
@@ -8310,6 +8331,14 @@ snapshots:
       safe-buffer: 5.2.1
 
   kolorist@1.8.0: {}
+
+  kysely-postgres-js@3.0.0(kysely@0.28.9)(postgres@3.4.7):
+    dependencies:
+      kysely: 0.28.9
+    optionalDependencies:
+      postgres: 3.4.7
+
+  kysely@0.28.9: {}
 
   lazystream@1.0.1:
     dependencies:

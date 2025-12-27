@@ -1,0 +1,77 @@
+import { promises as fs } from 'node:fs'
+import * as path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { Migrator, FileMigrationProvider } from 'kysely'
+import type { KyselyDB } from './kysely-connection.js'
+
+/**
+ * Kysely Migration Runner
+ *
+ * Runs database migrations in a type-safe, programmatic way.
+ * No CLI tools needed - pure TypeScript execution.
+ *
+ * Migrations are stored in TypeScript files in the migrations directory.
+ * Each migration exports `up()` and `down()` functions.
+ */
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+export async function migrateToLatest(db: KyselyDB): Promise<void> {
+  const migrator = new Migrator({
+    db,
+    provider: new FileMigrationProvider({
+      fs,
+      path,
+      // Path to migrations directory
+      migrationFolder: path.join(__dirname, 'migrations'),
+    }),
+  })
+
+  const { error, results } = await migrator.migrateToLatest()
+
+  results?.forEach((it) => {
+    if (it.status === 'Success') {
+      console.log(`✅ Migration "${it.migrationName}" was executed successfully`)
+    } else if (it.status === 'Error') {
+      console.error(`❌ Migration "${it.migrationName}" failed`)
+    }
+  })
+
+  if (error) {
+    console.error('❌ Failed to migrate')
+    console.error(error)
+    throw error
+  }
+
+  console.log('🎉 All migrations executed successfully')
+}
+
+export async function migrateDown(db: KyselyDB): Promise<void> {
+  const migrator = new Migrator({
+    db,
+    provider: new FileMigrationProvider({
+      fs,
+      path,
+      migrationFolder: path.join(__dirname, 'migrations'),
+    }),
+  })
+
+  const { error, results } = await migrator.migrateDown()
+
+  results?.forEach((it) => {
+    if (it.status === 'Success') {
+      console.log(`✅ Rollback "${it.migrationName}" was executed successfully`)
+    } else if (it.status === 'Error') {
+      console.error(`❌ Rollback "${it.migrationName}" failed`)
+    }
+  })
+
+  if (error) {
+    console.error('❌ Failed to rollback')
+    console.error(error)
+    throw error
+  }
+
+  console.log('🎉 Rollback executed successfully')
+}

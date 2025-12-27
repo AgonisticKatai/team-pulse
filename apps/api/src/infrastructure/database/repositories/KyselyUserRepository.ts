@@ -1,40 +1,40 @@
 import { User } from '@domain/models/user/User.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
-import type { Database } from '@infrastructure/database/connection.js'
-import { users as usersSchema } from '@infrastructure/database/schema.js'
+import type { KyselyDB } from '@infrastructure/database/kysely-connection.js'
 import { collect, Err, Ok, RepositoryError, type Result, type UserId, type ValidationError } from '@team-pulse/shared'
-import { eq, sql } from 'drizzle-orm'
+import { sql } from 'kysely'
 
 /**
- * Drizzle User Repository (ADAPTER)
+ * Kysely User Repository (ADAPTER)
  *
  * Maps between database layer and domain layer:
  * - DB → Domain: Delegates validation to User.create()
  * - Domain → DB: Uses User.toPrimitives() for type-safe persistence
  *
  * All validation logic lives in the domain model, not here.
+ *
+ * Pure TypeScript, zero DSLs, full type safety.
  */
-export class DrizzleUserRepository implements IUserRepository {
-  private readonly db: Database
+export class KyselyUserRepository implements IUserRepository {
+  private readonly db: KyselyDB
 
-  private constructor({ db }: { db: Database }) {
+  private constructor({ db }: { db: KyselyDB }) {
     this.db = db
   }
 
-  static create({ db }: { db: Database }): DrizzleUserRepository {
-    return new DrizzleUserRepository({ db })
+  static create({ db }: { db: KyselyDB }): KyselyUserRepository {
+    return new KyselyUserRepository({ db })
   }
 
-  // Accepts strict UserId
   async findById({ id }: { id: UserId }): Promise<Result<User | null, RepositoryError>> {
     try {
-      const [user] = await this.db.select().from(usersSchema).where(eq(usersSchema.id, id)).limit(1)
+      const row = await this.db.selectFrom('users').selectAll().where('id', '=', id).executeTakeFirst()
 
-      if (!user) {
+      if (!row) {
         return Ok(null)
       }
 
-      const domainResult = this.mapToDomain({ user })
+      const domainResult = this.mapToDomain({ user: row })
 
       if (!domainResult.ok) {
         return Err(
@@ -60,18 +60,18 @@ export class DrizzleUserRepository implements IUserRepository {
 
   async findByEmail({ email }: { email: string }): Promise<Result<User | null, RepositoryError>> {
     try {
-      // Case-insensitive email search
-      const [user] = await this.db
-        .select()
-        .from(usersSchema)
-        .where(sql`LOWER(${usersSchema.email}) = LOWER(${email})`)
-        .limit(1)
+      // Case-insensitive email search using SQL
+      const row = await this.db
+        .selectFrom('users')
+        .selectAll()
+        .where(sql`LOWER(email)`, '=', email.toLowerCase())
+        .executeTakeFirst()
 
-      if (!user) {
+      if (!row) {
         return Ok(null)
       }
 
-      const domainResult = this.mapToDomain({ user })
+      const domainResult = this.mapToDomain({ user: row })
 
       if (!domainResult.ok) {
         return Err(
@@ -97,10 +97,9 @@ export class DrizzleUserRepository implements IUserRepository {
 
   async findAll(): Promise<Result<User[], RepositoryError>> {
     try {
-      const rows = await this.db.select().from(usersSchema)
+      const rows = await this.db.selectFrom('users').selectAll().execute()
 
-      const mappedResults = rows.map((user: typeof usersSchema.$inferSelect) => this.mapToDomain({ user }))
-
+      const mappedResults = rows.map((user) => this.mapToDomain({ user }))
       const collectedResult = collect(mappedResults)
 
       if (!collectedResult.ok) {
@@ -135,15 +134,18 @@ export class DrizzleUserRepository implements IUserRepository {
     try {
       const offset = (page - 1) * limit
 
-      const [rows, totalResult] = await Promise.all([
-        this.db.select().from(usersSchema).limit(limit).offset(offset),
-        this.db.select({ count: sql<number>`count(*)` }).from(usersSchema),
+      // Execute queries in parallel
+      const [rows, countResult] = await Promise.all([
+        this.db.selectFrom('users').selectAll().limit(limit).offset(offset).execute(),
+        this.db
+          .selectFrom('users')
+          .select((eb) => eb.fn.countAll<number>().as('count'))
+          .executeTakeFirst(),
       ])
 
-      const total = Number(totalResult[0]?.count ?? 0)
+      const total = Number(countResult?.count ?? 0)
 
-      const mappedResults = rows.map((user: typeof usersSchema.$inferSelect) => this.mapToDomain({ user }))
-
+      const mappedResults = rows.map((user) => this.mapToDomain({ user }))
       const collectedResult = collect(mappedResults)
 
       if (!collectedResult.ok) {
@@ -172,29 +174,27 @@ export class DrizzleUserRepository implements IUserRepository {
     try {
       const primitives = user.toPrimitives()
 
-      // Map domain primitives to database schema
-      // Branded types (UserId) are compatible with string at runtime
-      const row = {
-        createdAt: primitives.createdAt,
-        email: primitives.email,
-        id: primitives.id,
-        passwordHash: user.getPasswordHash(),
-        role: primitives.role,
-        updatedAt: primitives.updatedAt,
-      } satisfies typeof usersSchema.$inferInsert
-
+      // Map domain primitives to database row
+      // Kysely provides full type safety here
       await this.db
-        .insert(usersSchema)
-        .values(row)
-        .onConflictDoUpdate({
-          set: {
-            email: row.email,
-            passwordHash: row.passwordHash,
-            role: row.role,
-            updatedAt: row.updatedAt,
-          },
-          target: usersSchema.id,
+        .insertInto('users')
+        .values({
+          created_at: primitives.createdAt,
+          email: primitives.email,
+          id: primitives.id,
+          password_hash: user.getPasswordHash(),
+          role: primitives.role,
+          updated_at: primitives.updatedAt,
         })
+        .onConflict((oc) =>
+          oc.column('id').doUpdateSet({
+            email: primitives.email,
+            password_hash: user.getPasswordHash(),
+            role: primitives.role,
+            updated_at: primitives.updatedAt,
+          }),
+        )
+        .execute()
 
       return Ok(user)
     } catch (error) {
@@ -208,11 +208,10 @@ export class DrizzleUserRepository implements IUserRepository {
     }
   }
 
-  // Accepts strict UserId
   async delete({ id }: { id: UserId }): Promise<Result<boolean, RepositoryError>> {
     try {
-      const result = await this.db.delete(usersSchema).where(eq(usersSchema.id, id))
-      return Ok(result.count > 0)
+      const result = await this.db.deleteFrom('users').where('id', '=', id).executeTakeFirst()
+      return Ok(Number(result.numDeletedRows) > 0)
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -226,13 +225,13 @@ export class DrizzleUserRepository implements IUserRepository {
 
   async existsByEmail({ email }: { email: string }): Promise<Result<boolean, RepositoryError>> {
     try {
-      const rows = await this.db
-        .select({ id: usersSchema.id })
-        .from(usersSchema)
-        .where(sql`LOWER(${usersSchema.email}) = LOWER(${email})`)
-        .limit(1)
+      const row = await this.db
+        .selectFrom('users')
+        .select('id')
+        .where(sql`LOWER(email)`, '=', email.toLowerCase())
+        .executeTakeFirst()
 
-      return Ok(rows.length > 0)
+      return Ok(row !== undefined)
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -246,8 +245,12 @@ export class DrizzleUserRepository implements IUserRepository {
 
   async count(): Promise<Result<number, RepositoryError>> {
     try {
-      const result = await this.db.select({ count: sql<number>`count(*)` }).from(usersSchema)
-      return Ok(Number(result[0]?.count ?? 0))
+      const result = await this.db
+        .selectFrom('users')
+        .select((eb) => eb.fn.countAll<number>().as('count'))
+        .executeTakeFirst()
+
+      return Ok(Number(result?.count ?? 0))
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -263,14 +266,14 @@ export class DrizzleUserRepository implements IUserRepository {
    * Map database row to domain entity
    * Delegates all validation to User.create()
    */
-  private mapToDomain({ user }: { user: typeof usersSchema.$inferSelect }): Result<User, ValidationError> {
+  private mapToDomain({ user }: { user: { id: string; email: string; password_hash: string; role: string; created_at: Date; updated_at: Date } }): Result<User, ValidationError> {
     return User.create({
-      createdAt: new Date(user.createdAt),
-      email: user.email,
-      id: user.id,
-      passwordHash: user.passwordHash,
-      role: user.role,
-      updatedAt: new Date(user.updatedAt),
+      createdAt: new Date(user.created_at),
+      email: user.email,           // String - User.create() validates
+      id: user.id,                 // String - User.create() validates
+      passwordHash: user.password_hash,
+      role: user.role,             // String - User.create() validates
+      updatedAt: new Date(user.updated_at),
     })
   }
 }

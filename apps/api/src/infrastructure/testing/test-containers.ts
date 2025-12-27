@@ -44,7 +44,7 @@ interface TestContainerResult {
  *
  * This function:
  * 1. Starts a PostgreSQL container with testcontainers
- * 2. Pushes the database schema using drizzle-kit
+ * 2. Runs Kysely migrations to set up the schema
  * 3. Returns a database instance and cleanup function
  *
  * The container is automatically cleaned up when cleanup() is called.
@@ -60,17 +60,17 @@ export async function setupTestContainer(): Promise<TestContainerResult> {
 
   const connectionUri = container.getConnectionUri()
 
-  // Push schema to the container using drizzle-kit
+  // Run migrations to set up the schema
   try {
-    execSync(`DATABASE_URL="${connectionUri}" pnpm db:push`, {
+    execSync(`DATABASE_URL="${connectionUri}" pnpm db:migrate`, {
       cwd: process.cwd(),
       encoding: 'utf-8',
       stdio: 'pipe', // Suppress output
     })
   } catch (error) {
-    // If push fails, stop the container and rethrow
+    // If migrations fail, stop the container and rethrow
     await container.stop()
-    throw new Error(`Failed to push schema to test container: ${error}`)
+    throw new Error(`Failed to run migrations on test container: ${error}`)
   }
 
   // Create database instance

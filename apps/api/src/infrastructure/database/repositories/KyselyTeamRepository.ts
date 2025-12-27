@@ -1,12 +1,10 @@
 import { Team } from '@domain/models/team/Team.js'
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
-import type { Database } from '@infrastructure/database/connection.js'
-import { teams as teamsSchema } from '@infrastructure/database/schema.js'
-import { collect, Err, Ok, RepositoryError, type Result, TeamId, type ValidationError } from '@team-pulse/shared'
-import { eq, sql } from 'drizzle-orm'
+import type { KyselyDB } from '@infrastructure/database/kysely-connection.js'
+import { collect, Err, Ok, RepositoryError, type Result, type TeamId, type ValidationError } from '@team-pulse/shared'
 
 /**
- * Drizzle Team Repository (ADAPTER)
+ * Kysely Team Repository (ADAPTER)
  *
  * Maps between database layer and domain layer:
  * - DB → Domain: Delegates validation to Team.create()
@@ -14,26 +12,26 @@ import { eq, sql } from 'drizzle-orm'
  *
  * All validation logic lives in the domain model, not here.
  */
-export class DrizzleTeamRepository implements ITeamRepository {
-  private readonly db: Database
+export class KyselyTeamRepository implements ITeamRepository {
+  private readonly db: KyselyDB
 
-  private constructor({ db }: { db: Database }) {
+  private constructor({ db }: { db: KyselyDB }) {
     this.db = db
   }
 
-  static create({ db }: { db: Database }): DrizzleTeamRepository {
-    return new DrizzleTeamRepository({ db })
+  static create({ db }: { db: KyselyDB }): KyselyTeamRepository {
+    return new KyselyTeamRepository({ db })
   }
 
   async findById({ id }: { id: TeamId }): Promise<Result<Team | null, RepositoryError>> {
     try {
-      const [team] = await this.db.select().from(teamsSchema).where(eq(teamsSchema.id, id)).limit(1)
+      const row = await this.db.selectFrom('teams').selectAll().where('id', '=', id).executeTakeFirst()
 
-      if (!team) {
+      if (!row) {
         return Ok(null)
       }
 
-      const domainResult = this.mapToDomain({ team })
+      const domainResult = this.mapToDomain({ team: row })
 
       if (!domainResult.ok) {
         return Err(
@@ -59,10 +57,9 @@ export class DrizzleTeamRepository implements ITeamRepository {
 
   async findAll(): Promise<Result<Team[], RepositoryError>> {
     try {
-      const teams = await this.db.select().from(teamsSchema)
+      const rows = await this.db.selectFrom('teams').selectAll().execute()
 
-      const mappedResults = teams.map((team: typeof teamsSchema.$inferSelect) => this.mapToDomain({ team }))
-
+      const mappedResults = rows.map((team) => this.mapToDomain({ team }))
       const collectedResult = collect(mappedResults)
 
       if (!collectedResult.ok) {
@@ -97,15 +94,17 @@ export class DrizzleTeamRepository implements ITeamRepository {
     try {
       const offset = (page - 1) * limit
 
-      const [teams, totalResult] = await Promise.all([
-        this.db.select().from(teamsSchema).limit(limit).offset(offset),
-        this.db.select({ count: sql<number>`count(*)` }).from(teamsSchema),
+      const [rows, countResult] = await Promise.all([
+        this.db.selectFrom('teams').selectAll().limit(limit).offset(offset).execute(),
+        this.db
+          .selectFrom('teams')
+          .select((eb) => eb.fn.countAll<number>().as('count'))
+          .executeTakeFirst(),
       ])
 
-      const total = Number(totalResult[0]?.count ?? 0)
+      const total = Number(countResult?.count ?? 0)
 
-      const mappedResults = teams.map((team: typeof teamsSchema.$inferSelect) => this.mapToDomain({ team }))
-
+      const mappedResults = rows.map((team) => this.mapToDomain({ team }))
       const collectedResult = collect(mappedResults)
 
       if (!collectedResult.ok) {
@@ -132,13 +131,13 @@ export class DrizzleTeamRepository implements ITeamRepository {
 
   async findByName({ name }: { name: string }): Promise<Result<Team | null, RepositoryError>> {
     try {
-      const [team] = await this.db.select().from(teamsSchema).where(eq(teamsSchema.name, name)).limit(1)
+      const row = await this.db.selectFrom('teams').selectAll().where('name', '=', name).executeTakeFirst()
 
-      if (!team) {
+      if (!row) {
         return Ok(null)
       }
 
-      const domainResult = this.mapToDomain({ team })
+      const domainResult = this.mapToDomain({ team: row })
 
       if (!domainResult.ok) {
         return Err(
@@ -166,22 +165,21 @@ export class DrizzleTeamRepository implements ITeamRepository {
     try {
       const primitives = team.toPrimitives()
 
-      // Map domain primitives to database schema
-      // Branded types (TeamId) are compatible with string at runtime
-      const row = {
-        createdAt: primitives.createdAt,
-        id: primitives.id,
-        name: primitives.name,
-        updatedAt: primitives.updatedAt,
-      } satisfies typeof teamsSchema.$inferInsert
-
       await this.db
-        .insert(teamsSchema)
-        .values(row)
-        .onConflictDoUpdate({
-          set: { name: row.name, updatedAt: row.updatedAt },
-          target: teamsSchema.id,
+        .insertInto('teams')
+        .values({
+          created_at: primitives.createdAt,
+          id: primitives.id,
+          name: primitives.name,
+          updated_at: primitives.updatedAt,
         })
+        .onConflict((oc) =>
+          oc.column('id').doUpdateSet({
+            name: primitives.name,
+            updated_at: primitives.updatedAt,
+          }),
+        )
+        .execute()
 
       return Ok(team)
     } catch (error) {
@@ -197,7 +195,7 @@ export class DrizzleTeamRepository implements ITeamRepository {
 
   async delete({ id }: { id: TeamId }): Promise<Result<void, RepositoryError>> {
     try {
-      await this.db.delete(teamsSchema).where(eq(teamsSchema.id, id))
+      await this.db.deleteFrom('teams').where('id', '=', id).execute()
       return Ok(undefined)
     } catch (error) {
       return Err(
@@ -212,13 +210,9 @@ export class DrizzleTeamRepository implements ITeamRepository {
 
   async existsByName({ name }: { name: string }): Promise<Result<boolean, RepositoryError>> {
     try {
-      const teams = await this.db
-        .select({ id: teamsSchema.id })
-        .from(teamsSchema)
-        .where(eq(teamsSchema.name, name))
-        .limit(1)
+      const row = await this.db.selectFrom('teams').select('id').where('name', '=', name).executeTakeFirst()
 
-      return Ok(teams.length > 0)
+      return Ok(row !== undefined)
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -234,12 +228,12 @@ export class DrizzleTeamRepository implements ITeamRepository {
    * Map database row to domain entity
    * Delegates all validation to Team.create()
    */
-  private mapToDomain({ team }: { team: typeof teamsSchema.$inferSelect }): Result<Team, ValidationError> {
+  private mapToDomain({ team }: { team: { id: string; name: string; created_at: Date; updated_at: Date } }): Result<Team, ValidationError> {
     return Team.create({
-      createdAt: new Date(team.createdAt),
+      createdAt: new Date(team.created_at),
       id: team.id,           // String - Team.create() validates
       name: team.name,       // String - Team.create() validates
-      updatedAt: new Date(team.updatedAt),
+      updatedAt: new Date(team.updated_at),
     })
   }
 }

@@ -17,9 +17,9 @@ import type { IPasswordHasher } from '@domain/services/IPasswordHasher.js'
 import { ScryptPasswordHasher } from '@infrastructure/auth/ScryptPasswordHasher.js'
 import type { Env } from '@infrastructure/config/env.js'
 import { createDatabase, type Database } from '@infrastructure/database/connection.js'
-import { DrizzleRefreshTokenRepository } from '@infrastructure/database/repositories/DrizzleRefreshTokenRepository.js'
-import { DrizzleTeamRepository } from '@infrastructure/database/repositories/DrizzleTeamRepository.js'
-import { DrizzleUserRepository } from '@infrastructure/database/repositories/DrizzleUserRepository.js'
+import { KyselyRefreshTokenRepository } from '@infrastructure/database/repositories/KyselyRefreshTokenRepository.js'
+import { KyselyTeamRepository } from '@infrastructure/database/repositories/KyselyTeamRepository.js'
+import { KyselyUserRepository } from '@infrastructure/database/repositories/KyselyUserRepository.js'
 import { MetricsService } from '@infrastructure/monitoring/MetricsService.js'
 import { PrometheusMetricsFactory } from '@infrastructure/monitoring/prometheus/PrometheusMetricsFactory.js'
 
@@ -90,7 +90,7 @@ export class Container {
    */
   get teamRepository(): ITeamRepository {
     if (!this._teamRepository) {
-      this._teamRepository = DrizzleTeamRepository.create({ db: this.database })
+      this._teamRepository = KyselyTeamRepository.create({ db: this.database })
     }
     return this._teamRepository
   }
@@ -100,7 +100,7 @@ export class Container {
    */
   get userRepository(): IUserRepository {
     if (!this._userRepository) {
-      this._userRepository = DrizzleUserRepository.create({ db: this.database })
+      this._userRepository = KyselyUserRepository.create({ db: this.database })
     }
     return this._userRepository
   }
@@ -110,7 +110,7 @@ export class Container {
    */
   get refreshTokenRepository(): IRefreshTokenRepository {
     if (!this._refreshTokenRepository) {
-      this._refreshTokenRepository = DrizzleRefreshTokenRepository.create({ db: this.database })
+      this._refreshTokenRepository = KyselyRefreshTokenRepository.create({ db: this.database })
     }
     return this._refreshTokenRepository
   }

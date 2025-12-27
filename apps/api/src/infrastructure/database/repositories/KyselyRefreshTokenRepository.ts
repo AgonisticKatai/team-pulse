@@ -1,13 +1,10 @@
 import { RefreshToken } from '@domain/models/refresh-token/index.js'
 import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository.js'
-import type { Database } from '@infrastructure/database/connection.js'
-import { refreshTokens as refreshTokensSchema } from '@infrastructure/database/schema.js'
-import type { ValidationError } from '@team-pulse/shared'
-import { collect, Err, Ok, RepositoryError, type Result, type UserId } from '@team-pulse/shared'
-import { eq, lt } from 'drizzle-orm'
+import type { KyselyDB } from '@infrastructure/database/kysely-connection.js'
+import { collect, Err, Ok, RepositoryError, type Result, type UserId, type ValidationError } from '@team-pulse/shared'
 
 /**
- * Drizzle RefreshToken Repository (ADAPTER)
+ * Kysely RefreshToken Repository (ADAPTER)
  *
  * Maps between database layer and domain layer:
  * - DB → Domain: Delegates validation to RefreshToken.create()
@@ -15,30 +12,26 @@ import { eq, lt } from 'drizzle-orm'
  *
  * All validation logic lives in the domain model, not here.
  */
-export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
-  private readonly db: Database
+export class KyselyRefreshTokenRepository implements IRefreshTokenRepository {
+  private readonly db: KyselyDB
 
-  private constructor({ db }: { db: Database }) {
+  private constructor({ db }: { db: KyselyDB }) {
     this.db = db
   }
 
-  static create({ db }: { db: Database }): DrizzleRefreshTokenRepository {
-    return new DrizzleRefreshTokenRepository({ db })
+  static create({ db }: { db: KyselyDB }): KyselyRefreshTokenRepository {
+    return new KyselyRefreshTokenRepository({ db })
   }
 
   async findByToken({ token }: { token: string }): Promise<Result<RefreshToken | null, RepositoryError>> {
     try {
-      const [refreshToken] = await this.db
-        .select()
-        .from(refreshTokensSchema)
-        .where(eq(refreshTokensSchema.token, token))
-        .limit(1)
+      const row = await this.db.selectFrom('refresh_tokens').selectAll().where('token', '=', token).executeTakeFirst()
 
-      if (!refreshToken) {
+      if (!row) {
         return Ok(null)
       }
 
-      const domainResult = this.mapToDomain({ refreshToken })
+      const domainResult = this.mapToDomain({ refreshToken: row })
 
       if (!domainResult.ok) {
         return Err(
@@ -62,20 +55,11 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
     }
   }
 
-  // The signature uses UserId strictly
   async findByUserId({ userId }: { userId: UserId }): Promise<Result<RefreshToken[], RepositoryError>> {
     try {
-      // Drizzle accepts 'UserId' here because under the hood it's a string.
-      // TypeScript allows passing a "more specific" type (UserId) where a "more generic" type (string) is expected.
-      const refreshTokens = await this.db
-        .select()
-        .from(refreshTokensSchema)
-        .where(eq(refreshTokensSchema.userId, userId))
+      const rows = await this.db.selectFrom('refresh_tokens').selectAll().where('user_id', '=', userId).execute()
 
-      const mappedResults = refreshTokens.map((row: typeof refreshTokensSchema.$inferSelect) =>
-        this.mapToDomain({ refreshToken: row }),
-      )
-
+      const mappedResults = rows.map((row) => this.mapToDomain({ refreshToken: row }))
       const collectedResult = collect(mappedResults)
 
       if (!collectedResult.ok) {
@@ -104,23 +88,23 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
     try {
       const primitives = refreshToken.toPrimitives()
 
-      // Map domain primitives to database schema
-      // Branded types (RefreshTokenId, UserId) are compatible with string at runtime
-      const row = {
-        createdAt: primitives.createdAt,
-        expiresAt: primitives.expiresAt,
-        id: primitives.id,
-        token: primitives.token,
-        userId: primitives.userId,
-      } satisfies typeof refreshTokensSchema.$inferInsert
-
       await this.db
-        .insert(refreshTokensSchema)
-        .values(row)
-        .onConflictDoUpdate({
-          set: { expiresAt: row.expiresAt, token: row.token, userId: row.userId },
-          target: refreshTokensSchema.id,
+        .insertInto('refresh_tokens')
+        .values({
+          created_at: primitives.createdAt,
+          expires_at: primitives.expiresAt,
+          id: primitives.id,
+          token: primitives.token,
+          user_id: primitives.userId,
         })
+        .onConflict((oc) =>
+          oc.column('id').doUpdateSet({
+            expires_at: primitives.expiresAt,
+            token: primitives.token,
+            user_id: primitives.userId,
+          }),
+        )
+        .execute()
 
       return Ok(refreshToken)
     } catch (error) {
@@ -136,8 +120,8 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
 
   async deleteByToken({ token }: { token: string }): Promise<Result<boolean, RepositoryError>> {
     try {
-      const result = await this.db.delete(refreshTokensSchema).where(eq(refreshTokensSchema.token, token))
-      return Ok(result.count > 0)
+      const result = await this.db.deleteFrom('refresh_tokens').where('token', '=', token).executeTakeFirst()
+      return Ok(Number(result.numDeletedRows) > 0)
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -149,11 +133,10 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
     }
   }
 
-  // The signature uses UserId strictly
   async deleteByUserId({ userId }: { userId: UserId }): Promise<Result<number, RepositoryError>> {
     try {
-      const result = await this.db.delete(refreshTokensSchema).where(eq(refreshTokensSchema.userId, userId))
-      return Ok(result.count)
+      const result = await this.db.deleteFrom('refresh_tokens').where('user_id', '=', userId).executeTakeFirst()
+      return Ok(Number(result.numDeletedRows))
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -168,8 +151,8 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
   async deleteExpired(): Promise<Result<number, RepositoryError>> {
     const now = new Date()
     try {
-      const result = await this.db.delete(refreshTokensSchema).where(lt(refreshTokensSchema.expiresAt, now))
-      return Ok(result.count)
+      const result = await this.db.deleteFrom('refresh_tokens').where('expires_at', '<', now).executeTakeFirst()
+      return Ok(Number(result.numDeletedRows))
     } catch (error) {
       return Err(
         RepositoryError.forOperation({
@@ -188,14 +171,14 @@ export class DrizzleRefreshTokenRepository implements IRefreshTokenRepository {
   private mapToDomain({
     refreshToken,
   }: {
-    refreshToken: typeof refreshTokensSchema.$inferSelect
+    refreshToken: { id: string; token: string; user_id: string; expires_at: Date; created_at: Date }
   }): Result<RefreshToken, ValidationError> {
     return RefreshToken.create({
-      createdAt: new Date(refreshToken.createdAt),
-      expiresAt: new Date(refreshToken.expiresAt),
+      createdAt: new Date(refreshToken.created_at),
+      expiresAt: new Date(refreshToken.expires_at),
       id: refreshToken.id,        // String - RefreshToken.create() validates
       token: refreshToken.token,  // String - RefreshToken.create() validates
-      userId: refreshToken.userId, // String - RefreshToken.create() validates
+      userId: refreshToken.user_id, // String - RefreshToken.create() validates
     })
   }
 }

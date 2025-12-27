@@ -3,7 +3,8 @@ import { User } from '@domain/models/user/index.js'
 import { ScryptPasswordHasher } from '@infrastructure/auth/ScryptPasswordHasher.js'
 import { validateEnv } from '@infrastructure/config/env.js'
 import { createDatabase } from '@infrastructure/database/connection.js'
-import { DrizzleUserRepository } from '@infrastructure/database/repositories/DrizzleUserRepository.js'
+import { KyselyUserRepository } from '@infrastructure/database/repositories/KyselyUserRepository.js'
+import { USER_ROLES } from '@team-pulse/shared'
 
 /**
  * Seed script to create the initial SUPER_ADMIN user
@@ -32,7 +33,7 @@ async function seedSuperAdmin() {
 
     // 2. Connect to database
     const db = createDatabase(env.DATABASE_URL)
-    const userRepository = DrizzleUserRepository.create({ db })
+    const userRepository = KyselyUserRepository.create({ db })
     console.log('✅ Database connected')
 
     // 3. Check if users exist
@@ -66,10 +67,10 @@ async function seedSuperAdmin() {
 
     // 6. Create user entity
     const userResult = User.create({
-      email,
       id: randomUUID(),
+      email,
       passwordHash: passwordHash.value,
-      role: 'SUPER_ADMIN',
+      role: USER_ROLES.SUPER_ADMIN,
     })
 
     if (!userResult.ok) {

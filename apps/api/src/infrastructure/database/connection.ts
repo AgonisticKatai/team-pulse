@@ -1,14 +1,17 @@
-import * as schema from '@infrastructure/database/schema.js'
-import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js'
+import { Kysely } from 'kysely'
+import { PostgresJSDialect } from 'kysely-postgres-js'
 import postgres from 'postgres'
+import type { Database as DatabaseSchema } from './kysely-schema.js'
 
 /**
- * Database connection factory
+ * Kysely Database Connection Factory
  *
- * Creates a PostgreSQL connection using the provided DATABASE_URL.
+ * Creates a type-safe Kysely instance connected to PostgreSQL.
+ * Pure TypeScript, zero DSLs, full type inference.
+ *
+ * Uses PostgresJSDialect (not PostgresDialect) for postgres.js compatibility.
+ *
  * Used in all environments (local development, tests, and production).
- *
- * For local development, run PostgreSQL via Docker Compose.
  *
  * Connection pooling configuration:
  * - Production: 20 connections (scales with load)
@@ -22,7 +25,7 @@ export function createDatabase(dbUrl: string, options?: DatabaseOptions): Databa
   // Determine pool size based on environment
   const defaultMax = isTest ? 5 : isProduction ? 20 : 10
 
-  const client = postgres(dbUrl, {
+  const pool = postgres(dbUrl, {
     // biome-ignore lint/style/useNamingConvention: postgres.js API uses snake_case
     connect_timeout: options?.connectTimeout ?? 10,
     // biome-ignore lint/style/useNamingConvention: postgres.js API uses snake_case
@@ -33,7 +36,11 @@ export function createDatabase(dbUrl: string, options?: DatabaseOptions): Databa
     ...options?.postgres,
   })
 
-  return drizzle(client, { schema })
+  return new Kysely<DatabaseSchema>({
+    dialect: new PostgresJSDialect({
+      postgres: pool,
+    }),
+  })
 }
 
 /**
@@ -53,7 +60,7 @@ export interface DatabaseOptions {
 }
 
 /**
- * Database instance type
+ * Database instance type (Kysely)
  * Use this type for dependency injection
  */
-export type Database = PostgresJsDatabase<typeof schema>
+export type Database = Kysely<DatabaseSchema>

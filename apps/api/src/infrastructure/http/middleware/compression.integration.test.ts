@@ -1,7 +1,7 @@
 import type { Database } from '@infrastructure/database/connection.js'
 import { setupTestEnvironment } from '@infrastructure/testing/test-helpers.js'
-import { sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
+import { sql } from 'kysely'
 import { afterEach, beforeAll, describe, expect, it } from 'vitest'
 import { buildApp } from '../../../app.js'
 
@@ -43,7 +43,7 @@ describe('HTTP Compression Middleware', () => {
     const result = await buildApp()
     app = result.app
     // Clean database for test isolation
-    await db.execute(sql`TRUNCATE TABLE users, refresh_tokens, teams RESTART IDENTITY CASCADE`)
+    await sql`TRUNCATE TABLE users, refresh_tokens, teams RESTART IDENTITY CASCADE`.execute(db)
     return app
   }
 

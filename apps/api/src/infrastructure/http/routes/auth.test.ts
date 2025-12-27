@@ -4,8 +4,8 @@ import type { Container } from '@infrastructure/config/container.js'
 import type { Database } from '@infrastructure/database/connection.js'
 import { setupTestEnvironment } from '@infrastructure/testing/test-helpers.js'
 import { expectSuccess } from '@team-pulse/shared/testing'
-import { sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
+import { sql } from 'kysely'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { buildApp } from '../../../app.js'
 
@@ -35,7 +35,7 @@ describe('Authentication Endpoints', () => {
     container = result.container
 
     // Clean database for test isolation
-    await db.execute(sql`TRUNCATE TABLE users, refresh_tokens, teams RESTART IDENTITY CASCADE`)
+    await sql`TRUNCATE TABLE users, refresh_tokens, teams RESTART IDENTITY CASCADE`.execute(db)
 
     // Create test users (fixed emails since we have isolated container)
     testUserEmail = 'user@test.com'
@@ -51,7 +51,7 @@ describe('Authentication Endpoints', () => {
         email: testUserEmail,
         id: '550e8400-e29b-41d4-a716-446655490001',
         passwordHash: userPasswordHash,
-        role: 'USER',
+        role: 'guest',
       }),
     )
 
@@ -60,7 +60,7 @@ describe('Authentication Endpoints', () => {
         email: testAdminEmail,
         id: '550e8400-e29b-41d4-a716-446655490002',
         passwordHash: adminPasswordHash,
-        role: 'ADMIN',
+        role: 'admin',
       }),
     )
 

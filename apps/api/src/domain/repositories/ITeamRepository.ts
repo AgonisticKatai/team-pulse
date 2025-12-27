@@ -11,7 +11,7 @@ import type { RepositoryError, Result, TeamId } from '@team-pulse/shared'
  *
  * Benefits:
  * - Domain layer doesn't depend on database technology
- * - Easy to swap implementations (Drizzle → Prisma → TypeORM)
+ * - Easy to swap implementations (Kysely → Prisma → TypeORM)
  * - Easy to mock for testing
  * - Follows Dependency Inversion Principle (SOLID)
  *
