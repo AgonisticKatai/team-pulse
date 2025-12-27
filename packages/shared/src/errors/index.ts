@@ -22,6 +22,9 @@ export {
   isIApplicationError,
 } from './core.js'
 export { ExternalServiceError } from './ExternalServiceError.js'
+export type { ErrorHandlerResult } from './handler/index.js'
+export { ErrorHandler } from './handler/index.js'
+export type { ILogger } from './handler/index.js'
 export { InternalError } from './InternalError.js'
 export { NotFoundError } from './NotFoundError.js'
 export type { ForOperationProps, RepositoryErrorProps } from './RepositoryError.js'
