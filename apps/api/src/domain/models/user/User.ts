@@ -60,7 +60,7 @@ export class User {
       ...updatedProps,
       createdAt: this.createdAt,
       id: this.id,
-      passwordHash: this.passwordHash,
+      passwordHash: data.passwordHash ?? this.passwordHash,
       updatedAt: new Date(),
     })
   }

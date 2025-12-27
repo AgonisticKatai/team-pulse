@@ -1,3 +1,4 @@
+import { TeamMapper } from '@application/mappers/TeamMapper.js'
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import type { RepositoryError, TeamId, TeamResponseDTO, UpdateTeamDTO, ValidationError } from '@team-pulse/shared'
 import { ConflictError, Err, NotFoundError, Ok, type Result } from '@team-pulse/shared'
@@ -48,6 +49,6 @@ export class UpdateTeamUseCase {
 
     if (!saveResult.ok) return Err(saveResult.error)
 
-    return Ok(saveResult.value.toDTO())
+    return Ok(TeamMapper.toDTO(saveResult.value))
   }
 }
