@@ -12,3 +12,6 @@ export * from './pagination.dto'
 
 // Team DTOs
 export * from './team.dto'
+
+// User DTOs
+export * from './user.dto'

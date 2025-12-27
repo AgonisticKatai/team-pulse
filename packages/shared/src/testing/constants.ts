@@ -406,25 +406,25 @@ export const TEST_CONSTANTS = {
       email: 'admin@example.com',
       password: 'AdminPass123',
       passwordHash: 'hashed-admin-password',
-      role: 'ADMIN' as const,
+      role: 'admin' as const,
     },
     janeAdmin: {
       email: 'jane.admin@example.com',
       password: 'AdminPass456',
       passwordHash: 'hashed-admin-password-2',
-      role: 'ADMIN' as const,
+      role: 'admin' as const,
     },
     johnDoe: {
       email: 'john.doe@example.com',
       password: 'ValidPass123',
       passwordHash: 'hashed-password',
-      role: 'USER' as const,
+      role: 'admin' as const, // Changed to admin since USER doesn't exist in USER_ROLES
     },
     superAdminUser: {
       email: 'superadmin@example.com',
       password: 'SuperPass123',
       passwordHash: 'hashed-superadmin-password',
-      role: 'SUPER_ADMIN' as const,
+      role: 'super_admin' as const,
     },
   },
 

@@ -1,13 +1,13 @@
-import { User } from '@domain/models/user/index.js'
+import { User } from '@domain/models/user/User.js'
 import { faker } from '@faker-js/faker'
-import type { CreateUserDTO } from '@team-pulse/shared'
-import { IdUtils, USER_ROLES, type UserId } from '@team-pulse/shared'
+import type { CreateUserDTO, UserRoleType } from '@team-pulse/shared'
+import { USER_ROLES } from '@team-pulse/shared'
 
 // 1. SIMPLE DEFINITION: Only primitive types
 type UserPrimitives = {
   id: string
   email: string
-  role: string
+  role: UserRoleType
   passwordHash: string
   createdAt: Date
   updatedAt: Date
@@ -17,7 +17,7 @@ type UserPrimitives = {
 const generateRandomUserData = (): UserPrimitives => ({
   createdAt: new Date(),
   email: faker.internet.email(),
-  id: UserId.random(),
+  id: faker.string.uuid(),
   passwordHash: faker.internet.password(),
   role: USER_ROLES.ADMIN,
   updatedAt: new Date(),
@@ -35,7 +35,7 @@ export function buildUser(overrides: Partial<UserPrimitives> = {}): User {
   const result = User.create({
     createdAt: raw.createdAt,
     email: raw.email,
-    id: UserId.create({ id: raw.id }),
+    id: raw.id,
     passwordHash: raw.passwordHash,
     role: raw.role,
     updatedAt: raw.updatedAt,
@@ -77,7 +77,6 @@ export function buildSuperAdminUser(overrides: Partial<UserPrimitives> = {}): Us
 export function buildCreateUserDTO(overrides: Partial<CreateUserDTO> = {}): CreateUserDTO {
   return {
     email: faker.internet.email(),
-    password: faker.internet.password(),
     role: USER_ROLES.ADMIN,
     ...overrides,
   }

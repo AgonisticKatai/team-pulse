@@ -1,16 +1,6 @@
-import type { UserCreateInput, UserProps } from '@domain/models/user/User.types.js'
-import type { UserResponseDTO } from '@team-pulse/shared'
-import {
-  combine,
-  Err,
-  IdUtils,
-  Ok,
-  type Result,
-  UserEmail,
-  UserId,
-  UserRole,
-  ValidationError,
-} from '@team-pulse/shared'
+import type { UserCreateInput, UserPrimitives, UserProps, UserUpdateInput } from '@domain/models/user/User.types.js'
+import type { Result } from '@team-pulse/shared'
+import { combine, Err, merge, Ok, UserEmail, UserId, UserRole, ValidationError } from '@team-pulse/shared'
 
 export class User {
   readonly id: UserId
@@ -29,24 +19,26 @@ export class User {
     this.passwordHash = props.passwordHash
   }
 
-  static create(data: UserCreateInput): Result<User, ValidationError> {
+  static create(input: UserCreateInput): Result<User, ValidationError> {
     const results = combine({
-      email: UserEmail.create(data.email),
-      id: UserId.create(data.id),
-      passwordHash: User.validatePasswordHash({ passwordHash: data.passwordHash }),
-      role: UserRole.create(data.role),
+      email: UserEmail.create(input.email),
+      id: UserId.create(input.id),
+      passwordHash: User.validatePasswordHash({ passwordHash: input.passwordHash }),
+      role: UserRole.create(input.role),
     })
 
-    if (!results.ok) return Err(results.error)
+    if (!results.ok) {
+      return Err(results.error)
+    }
 
     return Ok(
       new User({
-        createdAt: data.createdAt ?? new Date(),
+        createdAt: input.createdAt ?? new Date(),
         email: results.value.email,
         id: results.value.id,
         passwordHash: results.value.passwordHash,
         role: results.value.role,
-        updatedAt: data.updatedAt ?? new Date(),
+        updatedAt: input.updatedAt ?? new Date(),
       }),
     )
   }
@@ -62,12 +54,13 @@ export class User {
   }
 
   update(data: UserUpdateInput): Result<User, ValidationError> {
+    const updatedProps = merge({ current: this.toPrimitives(), update: data })
+
     return User.create({
+      ...updatedProps,
       createdAt: this.createdAt,
-      email: data.email ?? this.email.getValue(),
-      id: this.id.getValue(),
-      passwordHash: data.passwordHash ?? this.passwordHash,
-      role: data.role ?? this.role.getValue(),
+      id: this.id,
+      passwordHash: this.passwordHash,
       updatedAt: new Date(),
     })
   }

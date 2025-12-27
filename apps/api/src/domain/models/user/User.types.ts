@@ -1,12 +1,18 @@
-import type { UserEmail, UserId, UserRole } from '@team-pulse/shared'
+import type { UserEmail, UserEmailInput, UserId, UserRole, UserRoleInput, UserRoleType } from '@team-pulse/shared'
 
 export interface UserCreateInput {
   id: string
-  email: string
+  email: UserEmailInput
   passwordHash: string
-  role: string
+  role: UserRoleInput
   createdAt?: Date
   updatedAt?: Date
+}
+
+export interface UserUpdateInput {
+  email?: UserEmailInput
+  passwordHash?: string
+  role?: UserRoleInput
 }
 
 export interface UserProps {
@@ -18,23 +24,10 @@ export interface UserProps {
   updatedAt: Date
 }
 
-export type UserConstructorProps = UserProps
-
-interface UserPrimitiveFields {
+export interface UserPrimitives {
   id: string
   email: string
-  passwordHash: string
-  role: string
-}
-
-export type CreateUserData = UserPrimitiveFields & {
-  createdAt?: Date
-  updatedAt?: Date
-}
-
-export type UpdateUserData = Partial<Omit<UserPrimitiveFields, 'id'>>
-
-export type UserData = Omit<UserPrimitiveFields, 'passwordHash'> & {
+  role: UserRoleType
   createdAt: Date
   updatedAt: Date
 }
