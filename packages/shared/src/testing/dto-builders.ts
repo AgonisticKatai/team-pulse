@@ -73,6 +73,7 @@ export function buildRefreshTokenDTO(overrides: Partial<RefreshTokenDTO> = {}): 
 export function buildCreateUserDTO(overrides: Partial<CreateUserDTO> = {}): CreateUserDTO {
   return {
     email: TEST_CONSTANTS.users.johnDoe.email,
+    password: TEST_CONSTANTS.users.johnDoe.password,
     role: TEST_CONSTANTS.users.johnDoe.role,
     ...overrides,
   }

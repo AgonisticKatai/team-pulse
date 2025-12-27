@@ -77,6 +77,7 @@ export function buildSuperAdminUser(overrides: Partial<UserPrimitives> = {}): Us
 export function buildCreateUserDTO(overrides: Partial<CreateUserDTO> = {}): CreateUserDTO {
   return {
     email: faker.internet.email(),
+    password: faker.internet.password(),
     role: USER_ROLES.ADMIN,
     ...overrides,
   }

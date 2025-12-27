@@ -1,8 +1,10 @@
+import { randomUUID } from 'node:crypto'
+import { UserMapper } from '@application/mappers/UserMapper.js'
 import { User } from '@domain/models/user/User.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import type { IPasswordHasher } from '@domain/services/IPasswordHasher.js'
 import type { CreateUserDTO, RepositoryError, UserResponseDTO, ValidationError } from '@team-pulse/shared'
-import { ConflictError, Err, IdUtils, Ok, type Result, type UserId } from '@team-pulse/shared'
+import { ConflictError, Err, Ok, type Result } from '@team-pulse/shared'
 
 /**
  * Create User Use Case
@@ -62,7 +64,7 @@ export class CreateUserUseCase {
 
     const createUserResult = User.create({
       email: dto.email,
-      id: IdUtils.generate<UserId>(),
+      id: randomUUID(),
       passwordHash: hashResult.value,
       role: dto.role,
     })
@@ -73,6 +75,6 @@ export class CreateUserUseCase {
 
     if (!saveUserResult.ok) return Err(saveUserResult.error)
 
-    return Ok(saveUserResult.value.toDTO())
+    return Ok(UserMapper.toDTO(saveUserResult.value))
   }
 }

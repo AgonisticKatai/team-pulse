@@ -7,7 +7,9 @@ import { createPaginatedResponseSchema } from './pagination.dto'
 const UserCore = z.object({ email: UserEmailSchema, role: UserRoleSchema })
 
 // 2. INPUTS
-export const CreateUserSchema = UserCore.strict()
+export const CreateUserSchema = UserCore.extend({
+  password: z.string().min(6), // Basic validation for raw password
+}).strict()
 export type CreateUserDTO = z.infer<typeof CreateUserSchema>
 
 export const UpdateUserSchema = UserCore.partial().strict()
