@@ -1,5 +1,5 @@
 import { buildTeam } from '@infrastructure/testing/team-builders.js'
-import type { PaginationDTO } from '@team-pulse/shared'
+import type { PaginationMetaDTO } from '@team-pulse/shared'
 import { assertDefined, expectFirst } from '@team-pulse/shared/testing'
 import { describe, expect, it } from 'vitest'
 import { TeamMapper } from './TeamMapper.js'
@@ -68,15 +68,15 @@ describe('TeamMapper', () => {
           page: 1,
           total: 50,
           totalPages: 5,
-        } satisfies PaginationDTO
+        } satisfies PaginationMetaDTO
 
         // Act
         const result = TeamMapper.toPaginatedList(teams, pagination)
 
         // Assert
-        expect(result.pagination).toEqual(pagination)
+        expect(result.meta).toEqual(pagination)
 
-        const firstTeamDTO = expectFirst(result.teams)
+        const firstTeamDTO = expectFirst(result.data)
 
         expect(firstTeamDTO.id).toBe(team.id)
       })
