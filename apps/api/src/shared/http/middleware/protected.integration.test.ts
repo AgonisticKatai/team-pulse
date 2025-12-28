@@ -69,9 +69,9 @@ describe('Protected Routes and RBAC', () => {
       }),
     )
 
-    await container.userRepository.save({ user: superAdmin })
-    await container.userRepository.save({ user: admin })
-    await container.userRepository.save({ user })
+    await container.users.userRepository.save({ user: superAdmin })
+    await container.users.userRepository.save({ user: admin })
+    await container.users.userRepository.save({ user })
 
     // Get tokens for each user
     const superAdminLogin = await app.inject({

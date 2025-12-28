@@ -65,8 +65,8 @@ describe('Authentication Endpoints', () => {
       }),
     )
 
-    await container.userRepository.save({ user: testUser })
-    await container.userRepository.save({ user: testAdmin })
+    await container.users.userRepository.save({ user: testUser })
+    await container.users.userRepository.save({ user: testAdmin })
   })
 
   afterEach(async () => {

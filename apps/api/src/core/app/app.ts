@@ -143,27 +143,27 @@ export async function buildApp(): Promise<{ app: FastifyInstance; container: Con
 
   // Authentication routes
   await registerAuthRoutes(fastify, {
-    loginUseCase: container.loginUseCase,
-    logoutUseCase: container.logoutUseCase,
-    refreshTokenUseCase: container.refreshTokenUseCase,
-    tokenFactory: container.tokenFactory,
+    loginUseCase: container.auth.loginUseCase,
+    logoutUseCase: container.auth.logoutUseCase,
+    refreshTokenUseCase: container.auth.refreshTokenUseCase,
+    tokenFactory: container.auth.tokenFactory,
   })
 
   // User management routes
   await registerUserRoutes(fastify, {
-    createUserUseCase: container.createUserUseCase,
-    listUsersUseCase: container.listUsersUseCase,
-    tokenFactory: container.tokenFactory,
+    createUserUseCase: container.users.createUserUseCase,
+    listUsersUseCase: container.users.listUsersUseCase,
+    tokenFactory: container.auth.tokenFactory,
   })
 
   // Team routes
   await registerTeamRoutes(fastify, {
-    createTeamUseCase: container.createTeamUseCase,
-    deleteTeamUseCase: container.deleteTeamUseCase,
-    getTeamUseCase: container.getTeamUseCase,
-    listTeamsUseCase: container.listTeamsUseCase,
-    tokenFactory: container.tokenFactory,
-    updateTeamUseCase: container.updateTeamUseCase,
+    createTeamUseCase: container.teams.createTeamUseCase,
+    deleteTeamUseCase: container.teams.deleteTeamUseCase,
+    getTeamUseCase: container.teams.getTeamUseCase,
+    listTeamsUseCase: container.teams.listTeamsUseCase,
+    tokenFactory: container.auth.tokenFactory,
+    updateTeamUseCase: container.teams.updateTeamUseCase,
   })
 
   // 11. Health check endpoint
