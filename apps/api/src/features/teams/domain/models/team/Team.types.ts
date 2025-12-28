@@ -1,24 +1,24 @@
 import type { TeamId, TeamName } from '@team-pulse/shared'
 
-export interface TeamCreateInput {
+export type TeamCreateInput = {
   id: string
   name: string
   createdAt?: Date
   updatedAt?: Date
 }
 
-export interface TeamUpdateInput {
+export type TeamUpdateInput = {
   name?: string
 }
 
-export interface TeamProps {
+export type TeamProps = {
   id: TeamId
   name: TeamName
   createdAt: Date
   updatedAt: Date
 }
 
-export interface TeamPrimitives {
+export type TeamPrimitives = {
   id: string
   name: string
   createdAt: Date

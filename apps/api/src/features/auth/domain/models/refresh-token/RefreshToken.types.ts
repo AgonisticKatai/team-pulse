@@ -1,6 +1,6 @@
 import type { RefreshTokenId, UserId } from '@team-pulse/shared'
 
-export interface RefreshTokenCreateInput {
+export type RefreshTokenCreateInput = {
   id: string
   token: string
   userId: string
@@ -8,7 +8,7 @@ export interface RefreshTokenCreateInput {
   createdAt?: Date
 }
 
-export interface RefreshTokenProps {
+export type RefreshTokenProps = {
   id: RefreshTokenId
   token: string
   userId: UserId
@@ -16,7 +16,7 @@ export interface RefreshTokenProps {
   createdAt: Date
 }
 
-export interface RefreshTokenPrimitives {
+export type RefreshTokenPrimitives = {
   id: string
   token: string
   userId: string

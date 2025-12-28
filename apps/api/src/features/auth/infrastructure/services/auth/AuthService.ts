@@ -15,7 +15,7 @@ import { Err, Ok, type Result, ValidationError } from '@team-pulse/shared'
  *
  * This keeps the infrastructure layer (HTTP, JWT) independent of domain models.
  */
-export interface AuthenticatedUser {
+export type AuthenticatedUser = {
   userId: string
   email: string
   role: string // Primitive from JWT payload, not UserRole value object

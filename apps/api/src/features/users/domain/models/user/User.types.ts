@@ -1,6 +1,6 @@
 import type { UserEmail, UserEmailInput, UserId, UserRole, UserRoleInput, UserRoleType } from '@team-pulse/shared'
 
-export interface UserCreateInput {
+export type UserCreateInput = {
   id: string
   email: UserEmailInput
   passwordHash: string
@@ -9,13 +9,13 @@ export interface UserCreateInput {
   updatedAt?: Date
 }
 
-export interface UserUpdateInput {
+export type UserUpdateInput = {
   email?: UserEmailInput
   passwordHash?: string
   role?: UserRoleInput
 }
 
-export interface UserProps {
+export type UserProps = {
   id: UserId
   email: UserEmail
   passwordHash: string
@@ -24,7 +24,7 @@ export interface UserProps {
   updatedAt: Date
 }
 
-export interface UserPrimitives {
+export type UserPrimitives = {
   id: string
   email: string
   role: UserRoleType
