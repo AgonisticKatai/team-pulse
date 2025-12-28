@@ -2,7 +2,7 @@ import { promises as fs } from 'node:fs'
 import * as path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { Migrator, FileMigrationProvider } from 'kysely'
-import type { KyselyDB } from './kysely-connection.js'
+import type { Database } from './connection.js'
 
 /**
  * Kysely Migration Runner
@@ -17,7 +17,7 @@ import type { KyselyDB } from './kysely-connection.js'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-export async function migrateToLatest(db: KyselyDB): Promise<void> {
+export async function migrateToLatest(db: Database): Promise<void> {
   const migrator = new Migrator({
     db,
     provider: new FileMigrationProvider({
@@ -47,7 +47,7 @@ export async function migrateToLatest(db: KyselyDB): Promise<void> {
   console.log('🎉 All migrations executed successfully')
 }
 
-export async function migrateDown(db: KyselyDB): Promise<void> {
+export async function migrateDown(db: Database): Promise<void> {
   const migrator = new Migrator({
     db,
     provider: new FileMigrationProvider({

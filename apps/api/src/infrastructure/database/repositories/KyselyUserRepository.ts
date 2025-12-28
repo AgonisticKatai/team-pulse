@@ -1,6 +1,7 @@
 import { User } from '@domain/models/user/User.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
-import type { KyselyDB } from '@infrastructure/database/kysely-connection.js'
+import type { Database } from '@infrastructure/database/connection.js'
+import type { User as UserRow } from '@infrastructure/database/kysely-schema.js'
 import { collect, Err, Ok, RepositoryError, type Result, type UserId, type ValidationError } from '@team-pulse/shared'
 import { sql } from 'kysely'
 
@@ -16,13 +17,13 @@ import { sql } from 'kysely'
  * Pure TypeScript, zero DSLs, full type safety.
  */
 export class KyselyUserRepository implements IUserRepository {
-  private readonly db: KyselyDB
+  private readonly db: Database
 
-  private constructor({ db }: { db: KyselyDB }) {
+  private constructor({ db }: { db: Database }) {
     this.db = db
   }
 
-  static create({ db }: { db: KyselyDB }): KyselyUserRepository {
+  static create({ db }: { db: Database }): KyselyUserRepository {
     return new KyselyUserRepository({ db })
   }
 
@@ -266,13 +267,13 @@ export class KyselyUserRepository implements IUserRepository {
    * Map database row to domain entity
    * Delegates all validation to User.create()
    */
-  private mapToDomain({ user }: { user: { id: string; email: string; password_hash: string; role: string; created_at: Date; updated_at: Date } }): Result<User, ValidationError> {
+  private mapToDomain({ user }: { user: UserRow }): Result<User, ValidationError> {
     return User.create({
       createdAt: new Date(user.created_at),
-      email: user.email,           // String - User.create() validates
-      id: user.id,                 // String - User.create() validates
+      email: user.email,        
+      id: user.id,            
       passwordHash: user.password_hash,
-      role: user.role,             // String - User.create() validates
+      role: user.role,             
       updatedAt: new Date(user.updated_at),
     })
   }

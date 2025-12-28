@@ -1,6 +1,7 @@
 import { RefreshToken } from '@domain/models/refresh-token/index.js'
 import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository.js'
-import type { KyselyDB } from '@infrastructure/database/kysely-connection.js'
+import type { Database } from '@infrastructure/database/connection.js'
+import type { RefreshToken as RefreshTokenRow } from '@infrastructure/database/kysely-schema.js'
 import { collect, Err, Ok, RepositoryError, type Result, type UserId, type ValidationError } from '@team-pulse/shared'
 
 /**
@@ -13,13 +14,13 @@ import { collect, Err, Ok, RepositoryError, type Result, type UserId, type Valid
  * All validation logic lives in the domain model, not here.
  */
 export class KyselyRefreshTokenRepository implements IRefreshTokenRepository {
-  private readonly db: KyselyDB
+  private readonly db: Database
 
-  private constructor({ db }: { db: KyselyDB }) {
+  private constructor({ db }: { db: Database }) {
     this.db = db
   }
 
-  static create({ db }: { db: KyselyDB }): KyselyRefreshTokenRepository {
+  static create({ db }: { db: Database }): KyselyRefreshTokenRepository {
     return new KyselyRefreshTokenRepository({ db })
   }
 
@@ -168,17 +169,13 @@ export class KyselyRefreshTokenRepository implements IRefreshTokenRepository {
    * Map database row to domain entity
    * Delegates all validation to RefreshToken.create()
    */
-  private mapToDomain({
-    refreshToken,
-  }: {
-    refreshToken: { id: string; token: string; user_id: string; expires_at: Date; created_at: Date }
-  }): Result<RefreshToken, ValidationError> {
+  private mapToDomain({ refreshToken }: { refreshToken: RefreshTokenRow }): Result<RefreshToken, ValidationError> {
     return RefreshToken.create({
       createdAt: new Date(refreshToken.created_at),
       expiresAt: new Date(refreshToken.expires_at),
-      id: refreshToken.id,        // String - RefreshToken.create() validates
-      token: refreshToken.token,  // String - RefreshToken.create() validates
-      userId: refreshToken.user_id, // String - RefreshToken.create() validates
+      id: refreshToken.id,        
+      token: refreshToken.token,  
+      userId: refreshToken.user_id, 
     })
   }
 }

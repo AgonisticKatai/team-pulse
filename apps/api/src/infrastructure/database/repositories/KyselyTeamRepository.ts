@@ -1,6 +1,7 @@
 import { Team } from '@domain/models/team/Team.js'
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
-import type { KyselyDB } from '@infrastructure/database/kysely-connection.js'
+import type { Database } from '@infrastructure/database/connection.js'
+import type { Team as TeamRow } from '@infrastructure/database/kysely-schema.js'
 import { collect, Err, Ok, RepositoryError, type Result, type TeamId, type ValidationError } from '@team-pulse/shared'
 
 /**
@@ -13,13 +14,13 @@ import { collect, Err, Ok, RepositoryError, type Result, type TeamId, type Valid
  * All validation logic lives in the domain model, not here.
  */
 export class KyselyTeamRepository implements ITeamRepository {
-  private readonly db: KyselyDB
+  private readonly db: Database
 
-  private constructor({ db }: { db: KyselyDB }) {
+  private constructor({ db }: { db: Database }) {
     this.db = db
   }
 
-  static create({ db }: { db: KyselyDB }): KyselyTeamRepository {
+  static create({ db }: { db: Database }): KyselyTeamRepository {
     return new KyselyTeamRepository({ db })
   }
 
@@ -228,11 +229,11 @@ export class KyselyTeamRepository implements ITeamRepository {
    * Map database row to domain entity
    * Delegates all validation to Team.create()
    */
-  private mapToDomain({ team }: { team: { id: string; name: string; created_at: Date; updated_at: Date } }): Result<Team, ValidationError> {
+  private mapToDomain({ team }: { team: TeamRow }): Result<Team, ValidationError> {
     return Team.create({
       createdAt: new Date(team.created_at),
-      id: team.id,           // String - Team.create() validates
-      name: team.name,       // String - Team.create() validates
+      id: team.id,        
+      name: team.name,       
       updatedAt: new Date(team.updated_at),
     })
   }
