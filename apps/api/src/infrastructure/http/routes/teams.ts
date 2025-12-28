@@ -6,8 +6,9 @@ import type { ListTeamsUseCase } from '@application/use-cases/ListTeamsUseCase.j
 import type { UpdateTeamUseCase } from '@application/use-cases/UpdateTeamUseCase.js'
 import { requireAuth, requireRole } from '@infrastructure/http/middleware/auth.js'
 import { handleError } from '@infrastructure/http/middleware/error-handler.js'
+import { TeamIdParamsSchema } from '@infrastructure/http/schemas/params.schemas.js'
 import { FastifyLogger } from '@infrastructure/logging/FastifyLogger.js'
-import { CreateTeamDTOSchema, PaginationQuerySchema, UpdateTeamDTOSchema, USER_ROLES } from '@team-pulse/shared'
+import { CreateTeamSchema, PaginationQuerySchema, UpdateTeamSchema, USER_ROLES } from '@team-pulse/shared'
 import type { FastifyInstance } from 'fastify'
 
 /**
@@ -60,7 +61,7 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
     async (request, reply) => {
       try {
         // Validate request body using Zod
-        const dto = CreateTeamDTOSchema.parse(request.body)
+        const dto = CreateTeamSchema.parse(request.body)
 
         // Execute use case - Returns Result<TeamResponseDTO, ValidationError>
         const result = await createTeamUseCase.execute({ dto })
@@ -127,7 +128,8 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
     { preHandler: requireAuth({ tokenFactory }) },
     async (request, reply) => {
       try {
-        const { id } = request.params
+        // Validate and transform params: string → TeamId branded type
+        const { id } = TeamIdParamsSchema.parse(request.params)
 
         const result = await getTeamUseCase.execute({ id })
 
@@ -155,13 +157,14 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
    */
   fastify.patch<{ Params: { id: string } }>(
     '/api/teams/:id',
-    { preHandler: [requireAuth({ tokenFactory }), requireRole(['ADMIN', 'SUPER_ADMIN'])] },
+    { preHandler: [requireAuth({ tokenFactory }), requireRole([USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN])] },
     async (request, reply) => {
       try {
-        const { id } = request.params
+        // Validate and transform params: string → TeamId branded type
+        const { id } = TeamIdParamsSchema.parse(request.params)
 
         // Validate request body
-        const dto = UpdateTeamDTOSchema.parse(request.body)
+        const dto = UpdateTeamSchema.parse(request.body)
 
         // Execute use case - Returns Result<TeamResponseDTO, NotFoundError | ValidationError | RepositoryError>
         const result = await updateTeamUseCase.execute({ dto, id })
@@ -192,10 +195,11 @@ export function registerTeamRoutes(fastify: FastifyInstance, dependencies: TeamR
    */
   fastify.delete<{ Params: { id: string } }>(
     '/api/teams/:id',
-    { preHandler: [requireAuth({ tokenFactory }), requireRole(['ADMIN', 'SUPER_ADMIN'])] },
+    { preHandler: [requireAuth({ tokenFactory }), requireRole([USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN])] },
     async (request, reply) => {
       try {
-        const { id } = request.params
+        // Validate and transform params: string → TeamId branded type
+        const { id } = TeamIdParamsSchema.parse(request.params)
 
         await deleteTeamUseCase.execute({ id })
 

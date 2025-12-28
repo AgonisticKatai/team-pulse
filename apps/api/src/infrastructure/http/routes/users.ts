@@ -4,7 +4,7 @@ import type { ListUsersUseCase } from '@application/use-cases/ListUsersUseCase.j
 import { requireAuth, requireRole } from '@infrastructure/http/middleware/auth.js'
 import { handleError } from '@infrastructure/http/middleware/error-handler.js'
 import { FastifyLogger } from '@infrastructure/logging/FastifyLogger.js'
-import { CreateUserDTOSchema, PaginationQuerySchema } from '@team-pulse/shared'
+import { CreateUserSchema, PaginationQuerySchema, USER_ROLES } from '@team-pulse/shared'
 import type { FastifyInstance } from 'fastify'
 
 /**
@@ -40,11 +40,11 @@ export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserR
    */
   fastify.post(
     '/api/users',
-    { preHandler: [requireAuth({ tokenFactory }), requireRole(['SUPER_ADMIN', 'ADMIN'])] },
+    { preHandler: [requireAuth({ tokenFactory }), requireRole([USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN])] },
     async (request, reply) => {
       try {
         // Validate request body using Zod
-        const dto = CreateUserDTOSchema.parse(request.body)
+        const dto = CreateUserSchema.parse(request.body)
 
         // Execute use case
         const result = await createUserUseCase.execute({ dto })
@@ -79,7 +79,7 @@ export function registerUserRoutes(fastify: FastifyInstance, dependencies: UserR
    */
   fastify.get(
     '/api/users',
-    { preHandler: [requireAuth({ tokenFactory }), requireRole(['SUPER_ADMIN', 'ADMIN'])] },
+    { preHandler: [requireAuth({ tokenFactory }), requireRole([USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN])] },
     async (request, reply) => {
       try {
         // Parse and validate pagination query params

@@ -1,6 +1,5 @@
 import type { TokenFactory } from '@application/factories/TokenFactory.js'
 import { type AuthenticatedUser, AuthService } from '@infrastructure/auth/AuthService.js'
-import type { UserRole } from '@team-pulse/shared'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
 /**
@@ -14,6 +13,10 @@ import type { FastifyReply, FastifyRequest } from 'fastify'
  * - Framework-specific (Fastify)
  * - Handle HTTP concerns (headers, status codes)
  * - Delegate to AuthService (infrastructure service)
+ * - Use primitives (strings) for roles, not domain Value Objects
+ *
+ * IMPORTANT: This layer does NOT create domain objects (like UserRole).
+ * It works with primitives from the JWT payload.
  *
  * Patterns:
  * - Uses AuthService for authentication logic
@@ -37,7 +40,7 @@ declare module 'fastify' {
  * ```typescript
  * fastify.get('/protected', { preHandler: requireAuth({ tokenFactory }) }, async (request, reply) => {
  *   const user = request.user // Available after authentication
- *   // ...
+ *   // user.role is a string from JWT payload
  * })
  * ```
  */
@@ -45,7 +48,7 @@ export function requireAuth({ tokenFactory }: { tokenFactory: TokenFactory }) {
   const authService = AuthService.create({ tokenFactory })
 
   return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
-    // Verify authorization header
+    // Verify authorization header and extract JWT payload
     const result = authService.verifyAuthHeader({ authHeader: request.headers.authorization })
 
     if (!result.ok) {
@@ -60,11 +63,12 @@ export function requireAuth({ tokenFactory }: { tokenFactory: TokenFactory }) {
       return
     }
 
-    // Attach user to request for use in route handlers
+    // Attach user to request - using primitives from JWT payload
     const payload = result.value
+
     request.user = {
       email: payload.email,
-      role: payload.role,
+      role: payload.role, // String from JWT, not UserRole value object
       userId: payload.userId,
     }
   }
@@ -78,28 +82,19 @@ export function requireAuth({ tokenFactory }: { tokenFactory: TokenFactory }) {
  * Usage in routes:
  * ```typescript
  * fastify.post('/admin', {
- *   preHandler: [requireAuth({ tokenFactory }), requireRole(['ADMIN', 'SUPER_ADMIN'])]
+ *   preHandler: [requireAuth({ tokenFactory }), requireRole(['admin', 'super_admin'])]
  * }, async (request, reply) => {
- *   // Only ADMIN or SUPER_ADMIN can access this
+ *   // Only admin or super_admin can access this
  * })
  * ```
  */
-export function requireRole(allowedRoles: UserRole[]) {
+export function requireRole(allowedRoles: string[]) {
   return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
-    // Ensure user is authenticated (should be done by requireAuth)
-    if (!request.user) {
-      await reply.code(401).send({
-        error: {
-          code: 'UNAUTHORIZED',
-          message: 'Authentication required',
-        },
-        success: false,
-      })
-      return
-    }
+    // AuthService handles the validation logic
+    const authService = AuthService.create({ tokenFactory: {} as TokenFactory }) // We only need checkUserRole, not token verification
 
-    // Check if user has required role
-    const hasRole = allowedRoles.includes(request.user.role)
+    const hasRole = authService.checkUserRole({ user: request.user, allowedRoles })
+
     if (!hasRole) {
       await reply.code(403).send({
         error: {

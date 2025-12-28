@@ -3,6 +3,7 @@ import { ScryptPasswordHasher } from '@infrastructure/auth/ScryptPasswordHasher.
 import type { Container } from '@infrastructure/config/container.js'
 import type { Database } from '@infrastructure/database/connection.js'
 import { setupTestEnvironment } from '@infrastructure/testing/test-helpers.js'
+import { USER_ROLES } from '@team-pulse/shared'
 import { expectSuccess } from '@team-pulse/shared/testing'
 import type { FastifyInstance } from 'fastify'
 import { sql } from 'kysely'
@@ -46,7 +47,7 @@ describe('Protected Routes and RBAC', () => {
         email: superAdminEmail,
         id: '550e8400-e29b-41d4-a716-446655440010',
         passwordHash: expectSuccess(await passwordHasher.hash({ password: 'SuperAdmin123!' })),
-        role: 'super_admin',
+        role: USER_ROLES.SUPER_ADMIN,
       }),
     )
 
@@ -55,7 +56,7 @@ describe('Protected Routes and RBAC', () => {
         email: adminEmail,
         id: '550e8400-e29b-41d4-a716-446655440011',
         passwordHash: expectSuccess(await passwordHasher.hash({ password: 'Admin123!' })),
-        role: 'admin',
+        role: USER_ROLES.ADMIN,
       }),
     )
 
@@ -64,7 +65,7 @@ describe('Protected Routes and RBAC', () => {
         email: userEmail,
         id: '550e8400-e29b-41d4-a716-446655440012',
         passwordHash: expectSuccess(await passwordHasher.hash({ password: 'User123!' })),
-        role: 'guest',
+        role: USER_ROLES.GUEST,
       }),
     )
 
@@ -78,6 +79,11 @@ describe('Protected Routes and RBAC', () => {
       payload: { email: superAdminEmail, password: 'SuperAdmin123!' },
       url: '/api/auth/login',
     })
+
+    if (superAdminLogin.statusCode !== 200) {
+      console.error('SuperAdmin login failed:', superAdminLogin.statusCode, superAdminLogin.body)
+      throw new Error('SuperAdmin login failed')
+    }
     superAdminToken = JSON.parse(superAdminLogin.body).data.accessToken
 
     const adminLogin = await app.inject({
@@ -85,6 +91,11 @@ describe('Protected Routes and RBAC', () => {
       payload: { email: adminEmail, password: 'Admin123!' },
       url: '/api/auth/login',
     })
+
+    if (adminLogin.statusCode !== 200) {
+      console.error('Admin login failed:', adminLogin.statusCode, adminLogin.body)
+      throw new Error('Admin login failed')
+    }
     adminToken = JSON.parse(adminLogin.body).data.accessToken
 
     const userLogin = await app.inject({
@@ -92,6 +103,11 @@ describe('Protected Routes and RBAC', () => {
       payload: { email: userEmail, password: 'User123!' },
       url: '/api/auth/login',
     })
+
+    if (userLogin.statusCode !== 200) {
+      console.error('User login failed:', userLogin.statusCode, userLogin.body)
+      throw new Error('User login failed')
+    }
     userToken = JSON.parse(userLogin.body).data.accessToken
   })
 
@@ -114,7 +130,7 @@ describe('Protected Routes and RBAC', () => {
         payload: {
           email: 'newuser@test.com',
           password: 'NewUser123!',
-          role: 'USER',
+          role: USER_ROLES.GUEST,
         },
         url: '/api/users',
       })
@@ -123,7 +139,7 @@ describe('Protected Routes and RBAC', () => {
       const body = JSON.parse(response.body)
       expect(body.success).toBe(true)
       expect(body.data.email).toBe('newuser@test.com')
-      expect(body.data.role).toBe('USER')
+      expect(body.data.role).toBe(USER_ROLES.GUEST)
     })
 
     it('should allow ADMIN to create users', async () => {
@@ -135,7 +151,7 @@ describe('Protected Routes and RBAC', () => {
         payload: {
           email: 'newuser2@test.com',
           password: 'NewUser123!',
-          role: 'USER',
+          role: USER_ROLES.GUEST,
         },
         url: '/api/users',
       })
@@ -154,7 +170,7 @@ describe('Protected Routes and RBAC', () => {
         payload: {
           email: 'newuser3@test.com',
           password: 'NewUser123!',
-          role: 'USER',
+          role: USER_ROLES.GUEST,
         },
         url: '/api/users',
       })
@@ -163,8 +179,8 @@ describe('Protected Routes and RBAC', () => {
       const body = JSON.parse(response.body)
       expect(body.success).toBe(false)
       expect(body.error.code).toBe('FORBIDDEN')
-      expect(body.error.message).toContain('ADMIN')
-      expect(body.error.message).toContain('SUPER_ADMIN')
+      expect(body.error.message).toContain('admin')
+      expect(body.error.message).toContain('super_admin')
     })
 
     it('should NOT allow unauthenticated users to create users', async () => {
@@ -173,7 +189,7 @@ describe('Protected Routes and RBAC', () => {
         payload: {
           email: 'newuser4@test.com',
           password: 'NewUser123!',
-          role: 'USER',
+          role: USER_ROLES.GUEST,
         },
         url: '/api/users',
       })
@@ -190,7 +206,7 @@ describe('Protected Routes and RBAC', () => {
         payload: {
           email: 'weak@test.com',
           password: 'weak', // Too weak
-          role: 'USER',
+          role: USER_ROLES.GUEST,
         },
         url: '/api/users',
       })
@@ -209,7 +225,7 @@ describe('Protected Routes and RBAC', () => {
         payload: {
           email: 'duplicate@test.com',
           password: 'Password123!',
-          role: 'USER',
+          role: USER_ROLES.GUEST,
         },
         url: '/api/users',
       })
@@ -222,7 +238,7 @@ describe('Protected Routes and RBAC', () => {
         payload: {
           email: 'duplicate@test.com',
           password: 'Password123!',
-          role: 'USER',
+          role: USER_ROLES.GUEST,
         },
         url: '/api/users',
       })
@@ -246,8 +262,8 @@ describe('Protected Routes and RBAC', () => {
       expect(response.statusCode).toBe(200)
       const body = JSON.parse(response.body)
       expect(body.success).toBe(true)
-      expect(body.data.users).toBeInstanceOf(Array)
-      expect(body.data.pagination.total).toBeGreaterThan(0)
+      expect(body.data.data).toBeInstanceOf(Array)
+      expect(body.data.meta.total).toBeGreaterThan(0)
     })
 
     it('should allow ADMIN to list users', async () => {
@@ -288,7 +304,7 @@ describe('Protected Routes and RBAC', () => {
       })
 
       const body = JSON.parse(response.body)
-      const users = body.data.users
+      const users = body.data.data
 
       for (const user of users) {
         expect(user).not.toHaveProperty('passwordHash')
@@ -405,7 +421,7 @@ describe('Protected Routes and RBAC', () => {
         expect(response.statusCode).toBe(200)
         const body = JSON.parse(response.body)
         expect(body.success).toBe(true)
-        expect(body.data.teams).toBeInstanceOf(Array)
+        expect(body.data.data).toBeInstanceOf(Array)
       })
 
       it('should NOT allow unauthenticated users to view teams', async () => {

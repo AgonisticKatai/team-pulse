@@ -5,7 +5,7 @@ import type { RefreshTokenUseCase } from '@application/use-cases/RefreshTokenUse
 import { requireAuth } from '@infrastructure/http/middleware/auth.js'
 import { handleError } from '@infrastructure/http/middleware/error-handler.js'
 import { FastifyLogger } from '@infrastructure/logging/FastifyLogger.js'
-import { LoginDTOSchema, RefreshTokenDTOSchema } from '@team-pulse/shared'
+import { LoginSchema, RefreshTokenSchema } from '@team-pulse/shared'
 import type { FastifyInstance } from 'fastify'
 
 /**
@@ -52,7 +52,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
     async (request, reply) => {
       try {
         // Validate request body using Zod
-        const dto = LoginDTOSchema.parse(request.body)
+        const dto = LoginSchema.parse(request.body)
 
         // Execute use case
         const result = await loginUseCase.execute({ dto })
@@ -82,7 +82,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
   fastify.post('/api/auth/refresh', async (request, reply) => {
     try {
       // Validate request body using Zod
-      const dto = RefreshTokenDTOSchema.parse(request.body)
+      const dto = RefreshTokenSchema.parse(request.body)
 
       // Execute use case
       const result = await refreshTokenUseCase.execute({ dto })
@@ -113,7 +113,7 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
   fastify.post('/api/auth/logout', { preHandler: requireAuth({ tokenFactory }) }, async (request, reply) => {
     try {
       // Validate request body using Zod
-      const dto = RefreshTokenDTOSchema.parse(request.body)
+      const dto = RefreshTokenSchema.parse(request.body)
 
       // Execute use case (Result<void, never> - always succeeds)
       await logoutUseCase.execute({ refreshToken: dto.refreshToken })
@@ -138,7 +138,11 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
       const user = request.user
 
       return reply.code(200).send({
-        data: user,
+        data: {
+          email: user!.email,
+          role: user!.role,  // Already a string from JWT payload
+          userId: user!.userId,
+        },
         success: true,
       })
     } catch (error) {

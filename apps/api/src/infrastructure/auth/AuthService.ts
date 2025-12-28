@@ -1,14 +1,23 @@
 import type { AccessTokenPayload, TokenFactory } from '@application/factories/TokenFactory.js'
-import type { AuthenticationError, UserRole } from '@team-pulse/shared'
+import type { AuthenticationError } from '@team-pulse/shared'
 import { Err, Ok, type Result, ValidationError } from '@team-pulse/shared'
 
 /**
  * User information extracted from authenticated request
+ *
+ * IMPORTANT: This is an infrastructure-layer DTO, not a domain entity.
+ * It uses primitives (string) for the role, not the UserRole value object.
+ *
+ * UserRole value objects are only created in:
+ * - Repositories (when mapping from DB to domain entities)
+ * - Use Cases (when creating/updating User entities)
+ *
+ * This keeps the infrastructure layer (HTTP, JWT) independent of domain models.
  */
 export interface AuthenticatedUser {
   userId: string
   email: string
-  role: UserRole
+  role: string // Primitive from JWT payload, not UserRole value object
 }
 
 /**
@@ -120,10 +129,10 @@ export class AuthService {
    * Check if user has one of the allowed roles
    *
    * @param user - Authenticated user (can be undefined if not authenticated)
-   * @param allowedRoles - Array of allowed roles
+   * @param allowedRoles - Array of allowed role strings (e.g., ['admin', 'super_admin'])
    * @returns true if user has required role, false otherwise
    */
-  checkUserRole({ user, allowedRoles }: { user: AuthenticatedUser | undefined; allowedRoles: UserRole[] }): boolean {
+  checkUserRole({ user, allowedRoles }: { user: AuthenticatedUser | undefined; allowedRoles: string[] }): boolean {
     if (!user) {
       return false
     }

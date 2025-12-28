@@ -3,7 +3,7 @@ import { AuthService } from '@infrastructure/auth/AuthService.js'
 import { buildUser } from '@infrastructure/testing/user-builders.js'
 import { TEST_INVALID_TOKEN_ENV, TEST_TOKEN_ENV } from '@infrastructure/testing/test-env.js'
 import type { User } from '@domain/models/user/User.js'
-import { AuthenticationError, USER_ROLES, UserRole, ValidationError } from '@team-pulse/shared'
+import { AuthenticationError, USER_ROLES, ValidationError } from '@team-pulse/shared'
 import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing'
 import { beforeEach, describe, expect, it } from 'vitest'
 
@@ -218,15 +218,14 @@ describe('AuthService', () => {
       it('should return true when user has exact role', () => {
         // Arrange
         const user = buildUser({ role: USER_ROLES.GUEST })
-        const guestRole = expectSuccess(UserRole.create(USER_ROLES.GUEST))
         const userPayload = {
           email: user.email.value,
-          role: guestRole,
+          role: USER_ROLES.GUEST,
           userId: user.id,
         }
 
         // Act
-        const result = authService.checkUserRole({ allowedRoles: [guestRole], user: userPayload })
+        const result = authService.checkUserRole({ allowedRoles: [USER_ROLES.GUEST], user: userPayload })
 
         // Assert
         expect(result).toBe(true)
@@ -235,17 +234,15 @@ describe('AuthService', () => {
       it('should return true when user role is in allowed list', () => {
         // Arrange
         const user = buildUser({ role: USER_ROLES.ADMIN })
-        const adminRole = expectSuccess(UserRole.create(USER_ROLES.ADMIN))
-        const superAdminRole = expectSuccess(UserRole.create(USER_ROLES.SUPER_ADMIN))
         const userPayload = {
           email: user.email.value,
-          role: adminRole,
+          role: USER_ROLES.ADMIN,
           userId: user.id,
         }
 
         // Act
         const result = authService.checkUserRole({
-          allowedRoles: [adminRole, superAdminRole],
+          allowedRoles: [USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN],
           user: userPayload,
         })
 
@@ -256,18 +253,15 @@ describe('AuthService', () => {
       it('should return true for SUPER_ADMIN in multi-role list', () => {
         // Arrange
         const user = buildUser({ role: USER_ROLES.SUPER_ADMIN })
-        const guestRole = expectSuccess(UserRole.create(USER_ROLES.GUEST))
-        const adminRole = expectSuccess(UserRole.create(USER_ROLES.ADMIN))
-        const superAdminRole = expectSuccess(UserRole.create(USER_ROLES.SUPER_ADMIN))
         const userPayload = {
           email: user.email.value,
-          role: superAdminRole,
+          role: USER_ROLES.SUPER_ADMIN,
           userId: user.id,
         }
 
         // Act
         const result = authService.checkUserRole({
-          allowedRoles: [guestRole, adminRole, superAdminRole],
+          allowedRoles: [USER_ROLES.GUEST, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN],
           user: userPayload,
         })
 
@@ -279,10 +273,9 @@ describe('AuthService', () => {
     describe('Error cases', () => {
       it('should return false when user is undefined', () => {
         // Arrange
-        const guestRole = expectSuccess(UserRole.create(USER_ROLES.GUEST))
 
         // Act
-        const result = authService.checkUserRole({ allowedRoles: [guestRole], user: undefined })
+        const result = authService.checkUserRole({ allowedRoles: [USER_ROLES.GUEST], user: undefined })
 
         // Assert
         expect(result).toBe(false)
@@ -291,18 +284,15 @@ describe('AuthService', () => {
       it('should return false when user role is not in allowed list', () => {
         // Arrange
         const user = buildUser({ role: USER_ROLES.GUEST })
-        const guestRole = expectSuccess(UserRole.create(USER_ROLES.GUEST))
-        const adminRole = expectSuccess(UserRole.create(USER_ROLES.ADMIN))
-        const superAdminRole = expectSuccess(UserRole.create(USER_ROLES.SUPER_ADMIN))
         const userPayload = {
           email: user.email.value,
-          role: guestRole,
+          role: USER_ROLES.GUEST,
           userId: user.id,
         }
 
         // Act
         const result = authService.checkUserRole({
-          allowedRoles: [adminRole, superAdminRole],
+          allowedRoles: [USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN],
           user: userPayload,
         })
 
@@ -313,10 +303,9 @@ describe('AuthService', () => {
       it('should return false when allowed roles is empty array', () => {
         // Arrange
         const user = buildUser({ role: USER_ROLES.GUEST })
-        const guestRole = expectSuccess(UserRole.create(USER_ROLES.GUEST))
         const userPayload = {
           email: user.email.value,
-          role: guestRole,
+          role: USER_ROLES.GUEST,
           userId: user.id,
         }
 

@@ -3,42 +3,23 @@ import { RefreshToken } from '@domain/models/refresh-token/index.js'
 import type { Result, UserEmail, UserRole, ValidationError } from '@team-pulse/shared'
 import { AuthenticationError, Err, Ok, RefreshTokenId, UserId } from '@team-pulse/shared'
 import jwt from 'jsonwebtoken'
+import {
+  type AccessTokenPayload,
+  AccessTokenPayloadSchema,
+  type RefreshTokenPayload,
+  RefreshTokenPayloadSchema,
+} from './TokenFactory.schemas.js'
 
 /**
  * Token Factory
  * Application Service for unified secure token operations.
+ *
+ * Payload types are defined in TokenFactory.schemas.ts and inferred from Zod schemas.
+ * This ensures type safety and validation consistency.
  */
 
-// ==========================================
-// 1. PAYLOADS (Strict Typing)
-// ==========================================
-
-/**
- * Payload structure for access tokens
- * USES BRANDED TYPES
- */
-export interface AccessTokenPayload {
-  email: string
-  role: string
-  userId: UserId
-  iat?: number
-  exp?: number
-  aud?: string
-  iss?: string
-}
-
-/**
- * Payload structure for refresh tokens
- * USES BRANDED TYPES
- */
-export interface RefreshTokenPayload {
-  tokenId: RefreshTokenId
-  userId: UserId
-  iat?: number
-  exp?: number
-  aud?: string
-  iss?: string
-}
+// Re-export payload types for convenience
+export type { AccessTokenPayload, RefreshTokenPayload }
 
 const ACCESS_TOKEN_EXPIRATION = '15m'
 const REFRESH_TOKEN_EXPIRATION = '7d'
@@ -139,42 +120,30 @@ export class TokenFactory {
 
   /**
    * Verify an access token
-   * Hydrates strings back to Branded Types
+   * Uses Zod schema to validate and transform JWT payload
    */
   verifyAccessToken({ token }: { token: string }): Result<AccessTokenPayload, AuthenticationError> {
     try {
-      // 1. Get the result (can be string or object)
+      // 1. Verify JWT signature and get decoded payload
       const decoded = jwt.verify(token, this.env.JWT_SECRET, {
         audience: 'team-pulse-app',
         issuer: 'team-pulse-api',
       })
 
-      // 2. SAFETY CHECK: jwt.verify can return string if the payload is not JSON.
-      // This is improbable in your app, but TypeScript appreciates it.
-      if (typeof decoded === 'string') throw new Error('Invalid token payload type (string)')
-
-      // 3. CAST: Cast to 'unknown' instead of 'any'.
-      // This tells the linter: "I don't know what this is, but I promise to check it before using it"
-      const rawPayload = decoded as Record<string, unknown>
-
-      // 4. HYDRATION: Map explicitly and validate branded types
-      const userIdResult = UserId.create(rawPayload['userId'] as string)
-      if (!userIdResult.ok) {
-        throw new Error('Invalid userId in token payload')
+      // 2. Safety check: jwt.verify can return string if payload is not JSON
+      if (typeof decoded === 'string') {
+        throw new Error('Invalid token payload type (string)')
       }
 
-      const payload: AccessTokenPayload = {
-        aud: rawPayload['aud'] as string,
-        email: rawPayload['email'] as string,
-        exp: rawPayload['exp'] as number,
-        // Standard claims (optional)
-        iat: rawPayload['iat'] as number,
-        iss: rawPayload['iss'] as string,
-        role: rawPayload['role'] as string,
-        userId: userIdResult.value,
+      // 3. Validate and transform payload using Zod schema
+      // This validates email format, role enum, and transforms userId string → UserId branded type
+      const validation = AccessTokenPayloadSchema.safeParse(decoded)
+
+      if (!validation.success) {
+        throw new Error(`Invalid token payload: ${validation.error.message}`)
       }
 
-      return Ok(payload)
+      return Ok(validation.data)
     } catch (error) {
       return Err(TokenFactory.handleJwtError({ error, field: 'accessToken' }))
     }
@@ -182,46 +151,30 @@ export class TokenFactory {
 
   /**
    * Verify a refresh token
-   * Hydrates strings back to Branded Types
+   * Uses Zod schema to validate and transform JWT payload
    */
   verifyRefreshToken({ token }: { token: string }): Result<RefreshTokenPayload, AuthenticationError> {
     try {
-      // 1. Get the result (can be string or object)
+      // 1. Verify JWT signature and get decoded payload
       const decoded = jwt.verify(token, this.env.JWT_REFRESH_SECRET, {
         audience: 'team-pulse-app',
         issuer: 'team-pulse-api',
       })
 
-      // 2. SAFETY CHECK: jwt.verify can return string if the payload is not JSON.
-      // This is improbable in your app, but TypeScript appreciates it.
-      if (typeof decoded === 'string') throw new Error('Invalid token payload type (string)')
-
-      // 3. CAST: Cast to 'unknown' instead of 'any'.
-      // This tells the linter: "I don't know what this is, but I promise to check it before using it"
-      const rawPayload = decoded as Record<string, unknown>
-
-      // 4. HYDRATION: Map explicitly and validate branded types
-      const tokenIdResult = RefreshTokenId.create(rawPayload['tokenId'] as string)
-      if (!tokenIdResult.ok) {
-        throw new Error('Invalid tokenId in token payload')
+      // 2. Safety check: jwt.verify can return string if payload is not JSON
+      if (typeof decoded === 'string') {
+        throw new Error('Invalid token payload type (string)')
       }
 
-      const userIdResult = UserId.create(rawPayload['userId'] as string)
-      if (!userIdResult.ok) {
-        throw new Error('Invalid userId in token payload')
+      // 3. Validate and transform payload using Zod schema
+      // This validates UUID formats and transforms tokenId/userId strings → branded types
+      const validation = RefreshTokenPayloadSchema.safeParse(decoded)
+
+      if (!validation.success) {
+        throw new Error(`Invalid token payload: ${validation.error.message}`)
       }
 
-      const payload: RefreshTokenPayload = {
-        aud: rawPayload['aud'] as string,
-        exp: rawPayload['exp'] as number,
-        // Standard claims
-        iat: rawPayload['iat'] as number,
-        iss: rawPayload['iss'] as string,
-        tokenId: tokenIdResult.value,
-        userId: userIdResult.value,
-      }
-
-      return Ok(payload)
+      return Ok(validation.data)
     } catch (error) {
       return Err(TokenFactory.handleJwtError({ error, field: 'refreshToken' }))
     }
