@@ -1,20 +1,29 @@
 import type { RepositoryError, Result } from '@team-pulse/shared'
 
 /**
- * Password Hasher Interface (DOMAIN SERVICE)
+ * Password Hasher Interface (SHARED SECURITY CONTRACT)
  *
- * This is a DOMAIN SERVICE INTERFACE in Hexagonal Architecture:
- * - Defined in the domain layer (port)
- * - Implemented in the infrastructure layer (adapter)
- * - Used by application use cases
+ * This is a SHARED PORT in Hexagonal Architecture:
+ * - Defined in shared layer (used by multiple features)
+ * - Implemented in infrastructure layer (concrete adapters)
+ * - Used by application use cases across features
  *
- * Why is this needed?
- * - Password hashing is infrastructure concern (bcrypt, argon2, etc.)
- * - But use cases need to hash/verify passwords
- * - This interface inverts the dependency: Application depends on this interface,
- *   not on the concrete implementation
+ * Why in shared/?
+ * - Password hashing is needed by multiple features (auth, users)
+ * - Features should NOT depend on each other
+ * - This interface breaks the coupling between features
+ *
+ * Implementation:
+ * - ScryptPasswordHasher in features/auth/infrastructure/services/password-hasher/
+ * - Or any other implementation (bcrypt, argon2, etc.)
+ *
+ * Dependency Injection:
+ * - Container creates the implementation
+ * - Injects it into use cases that need it
+ * - Use cases depend only on this interface
  *
  * Benefits:
+ * - Zero coupling between features
  * - Easy to swap implementations (bcrypt -> argon2)
  * - Easy to test (mock the interface)
  * - Respects hexagonal architecture boundaries

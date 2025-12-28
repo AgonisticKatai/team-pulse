@@ -1,7 +1,7 @@
-import type { IPasswordHasher } from '@features/auth/domain/services/password-hasher/IPasswordHasher.js'
 import { CreateUserUseCase } from '@features/users/application/use-cases/create-user/CreateUserUseCase.js'
 import { User } from '@features/users/domain/models/user/User.js'
 import type { IUserRepository } from '@features/users/domain/repositories/user/IUserRepository.js'
+import type { IPasswordHasher } from '@shared/security/IPasswordHasher.js'
 import { buildCreateUserDTO, buildUser } from '@shared/testing/index.js'
 import { ConflictError, Err, IdUtils, Ok, RepositoryError, ValidationError } from '@team-pulse/shared'
 import { expectErrorType, expectMockCallArg, expectSuccess, TEST_CONSTANTS } from '@team-pulse/shared/testing'

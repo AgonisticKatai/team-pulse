@@ -3,7 +3,6 @@ import { LoginUseCase } from '@features/auth/application/use-cases/login/LoginUs
 import { LogoutUseCase } from '@features/auth/application/use-cases/logout/LogoutUseCase.js'
 import { RefreshTokenUseCase } from '@features/auth/application/use-cases/refresh-token/RefreshTokenUseCase.js'
 import type { IRefreshTokenRepository } from '@features/auth/domain/repositories/refresh-token/IRefreshTokenRepository.js'
-import type { IPasswordHasher } from '@features/auth/domain/services/password-hasher/IPasswordHasher.js'
 import { KyselyRefreshTokenRepository } from '@features/auth/infrastructure/repositories/refresh-token/KyselyRefreshTokenRepository.js'
 import { ScryptPasswordHasher } from '@features/auth/infrastructure/services/password-hasher/ScryptPasswordHasher.js'
 import { CreateTeamUseCase } from '@features/teams/application/use-cases/create-team/CreateTeamUseCase.js'
@@ -22,6 +21,7 @@ import { createDatabase, type Database } from '@shared/database/connection/conne
 import type { IMetricsService } from '@shared/monitoring/interfaces/IMetricsService.js'
 import { PrometheusMetricsFactory } from '@shared/monitoring/prometheus/factory/PrometheusMetricsFactory.js'
 import { MetricsService } from '@shared/monitoring/services/MetricsService.js'
+import type { IPasswordHasher } from '@shared/security/IPasswordHasher.js'
 
 /**
  * Dependency Injection Container

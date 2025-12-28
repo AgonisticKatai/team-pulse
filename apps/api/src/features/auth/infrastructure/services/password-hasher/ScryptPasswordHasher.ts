@@ -1,5 +1,5 @@
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto'
-import type { IPasswordHasher } from '@features/auth/domain/services/password-hasher/IPasswordHasher.js'
+import type { IPasswordHasher } from '@shared/security/IPasswordHasher.js'
 import { Err, Ok, RepositoryError, type Result } from '@team-pulse/shared'
 
 /**

@@ -1,9 +1,9 @@
 import type { TokenFactory } from '@features/auth/application/factories/token/TokenFactory.js'
 import type { IRefreshTokenRepository } from '@features/auth/domain/repositories/refresh-token/IRefreshTokenRepository.js'
-import type { IPasswordHasher } from '@features/auth/domain/services/password-hasher/IPasswordHasher.js'
 import { UserMapper } from '@features/users/application/mappers/user/UserMapper.js'
 import type { IUserRepository } from '@features/users/domain/repositories/user/IUserRepository.js'
 import type { IMetricsService } from '@shared/monitoring/interfaces/IMetricsService.js'
+import type { IPasswordHasher } from '@shared/security/IPasswordHasher.js'
 import type { LoginDTO, LoginResponseDTO, RepositoryError, ValidationError } from '@team-pulse/shared'
 import { AuthenticationError, Err, Ok, type Result } from '@team-pulse/shared'
 
