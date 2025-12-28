@@ -28,7 +28,7 @@
   "name": "@team-pulse/api",
   "private": true,
   "scripts": {
-    "build": "tsc && bash src/scripts/run-kysely-migrations.ts",
+    "build": "tsx src/scripts/run-kysely-migrations.ts",
     "db:migrate": "tsx src/scripts/run-kysely-migrations.ts",
     "db:migrate:ci": "tsx src/scripts/run-kysely-migrations.ts",
     "db:migrate:run": "tsx --env-file=.env src/scripts/run-kysely-migrations.ts",
