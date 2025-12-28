@@ -1,4 +1,4 @@
-import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository.js'
+import type { IRefreshTokenRepository } from '@features/auth/domain/repositories/refresh-token/IRefreshTokenRepository.js'
 import { Ok, type Result } from '@team-pulse/shared'
 
 /**

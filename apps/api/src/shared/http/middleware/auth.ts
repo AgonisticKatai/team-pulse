@@ -1,5 +1,5 @@
-import type { TokenFactory } from '@application/factories/TokenFactory.js'
-import { type AuthenticatedUser, AuthService } from '@infrastructure/auth/AuthService.js'
+import type { TokenFactory } from '@features/auth/application/factories/token/TokenFactory.js'
+import { type AuthenticatedUser, AuthService } from '@features/auth/infrastructure/services/auth/AuthService.js'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
 /**

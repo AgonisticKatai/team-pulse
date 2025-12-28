@@ -1,4 +1,4 @@
-import { buildApp } from './app.js'
+import { buildApp } from '@core/app/app.js'
 
 // Build and start the app
 const { app, container } = await buildApp()

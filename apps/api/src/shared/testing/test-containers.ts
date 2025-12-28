@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process'
-import { createDatabase, type Database } from '@infrastructure/database/connection.js'
+import { createDatabase, type Database } from '@shared/database/connection.js'
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql'
 
 /**

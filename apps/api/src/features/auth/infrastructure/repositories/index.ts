@@ -2,4 +2,4 @@
  * Auth Repository Implementations
  */
 
-export * from './KyselyRefreshTokenRepository.js'
+export * from './refresh-token/index.js'

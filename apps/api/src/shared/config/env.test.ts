@@ -1,4 +1,4 @@
-import { type Env, validateEnv, validateProductionEnv } from '@infrastructure/config/env.js'
+import { type Env, validateEnv, validateProductionEnv } from '@shared/config/env.js'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 

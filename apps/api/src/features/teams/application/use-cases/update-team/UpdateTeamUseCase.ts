@@ -1,0 +1,54 @@
+import { TeamMapper } from '@features/teams/application/mappers/team/TeamMapper.js'
+import type { ITeamRepository } from '@features/teams/domain/repositories/team/ITeamRepository.js'
+import type { RepositoryError, TeamId, TeamResponseDTO, UpdateTeamDTO, ValidationError } from '@team-pulse/shared'
+import { ConflictError, Err, NotFoundError, Ok, type Result } from '@team-pulse/shared'
+
+/**
+ * Update Team Use Case
+ *
+ * Updates an existing team
+ */
+export class UpdateTeamUseCase {
+  private readonly teamRepository: ITeamRepository
+
+  private constructor({ teamRepository }: { teamRepository: ITeamRepository }) {
+    this.teamRepository = teamRepository
+  }
+
+  static create({ teamRepository }: { teamRepository: ITeamRepository }): UpdateTeamUseCase {
+    return new UpdateTeamUseCase({ teamRepository })
+  }
+
+  async execute({
+    id,
+    dto,
+  }: {
+    id: TeamId
+    dto: UpdateTeamDTO
+  }): Promise<Result<TeamResponseDTO, ConflictError | NotFoundError | ValidationError | RepositoryError>> {
+    const findTeamResult = await this.teamRepository.findById({ id })
+
+    if (!findTeamResult.ok) return Err(findTeamResult.error)
+
+    if (!findTeamResult.value) return Err(NotFoundError.forResource({ identifier: id, resource: 'Team' }))
+
+    if (dto.name && dto.name !== findTeamResult.value.name.getValue()) {
+      const findTeamResult = await this.teamRepository.findByName({ name: dto.name })
+
+      if (!findTeamResult.ok) return Err(findTeamResult.error)
+
+      if (findTeamResult.value && findTeamResult.value.id !== id)
+        return Err(ConflictError.duplicate({ identifier: dto.name, resource: 'Team' }))
+    }
+
+    const updateResult = findTeamResult.value.update({ name: dto.name })
+
+    if (!updateResult.ok) return Err(updateResult.error)
+
+    const saveResult = await this.teamRepository.save({ team: updateResult.value })
+
+    if (!saveResult.ok) return Err(saveResult.error)
+
+    return Ok(TeamMapper.toDTO(saveResult.value))
+  }
+}

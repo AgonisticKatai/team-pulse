@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { correlationIdMiddleware } from '@infrastructure/http/middleware/correlation-id.js'
+import { correlationIdMiddleware } from '@shared/http/middleware/correlation-id.js'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { describe, expect, it, vi } from 'vitest'
 

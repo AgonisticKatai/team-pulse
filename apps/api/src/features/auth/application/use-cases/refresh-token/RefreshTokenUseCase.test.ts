@@ -1,15 +1,15 @@
-import type { TokenFactory } from '@application/factories/TokenFactory.js'
-import { RefreshTokenUseCase } from '@application/use-cases/RefreshTokenUseCase.js'
-import type { IRefreshTokenRepository } from '@domain/repositories/IRefreshTokenRepository.js'
-import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import { faker } from '@faker-js/faker'
+import type { TokenFactory } from '@features/auth/application/factories/token/TokenFactory.js'
+import { RefreshTokenUseCase } from '@features/auth/application/use-cases/refresh-token/RefreshTokenUseCase.js'
+import type { IRefreshTokenRepository } from '@features/auth/domain/repositories/refresh-token/IRefreshTokenRepository.js'
+import type { IUserRepository } from '@features/users/domain/repositories/user/IUserRepository.js'
 import {
   buildAdminUser,
   buildExpiredRefreshToken,
   buildSuperAdminUser,
   buildUser,
   buildValidRefreshToken,
-} from '@infrastructure/testing/index.js'
+} from '@shared/testing/index.js'
 import type { RefreshTokenDTO } from '@team-pulse/shared'
 import { AuthenticationError, Err, Ok, RepositoryError } from '@team-pulse/shared'
 import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing'

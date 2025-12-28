@@ -1,5 +1,5 @@
-import type { Database } from '@infrastructure/database/connection.js'
-import { setupTestContainer } from '@infrastructure/testing/test-containers.js'
+import type { Database } from '@shared/database/connection.js'
+import { setupTestContainer } from '@shared/testing/test-containers.js'
 import { afterAll, beforeAll } from 'vitest'
 
 /**

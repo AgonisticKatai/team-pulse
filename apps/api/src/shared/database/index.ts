@@ -5,7 +5,7 @@
  * shared across all features.
  */
 
-export * from './connection.js'
+export { createDatabase, type Database } from './connection.js'
 export * from './kysely-schema.js'
 export * from './migrator.js'
 export * from './repositories/index.js'

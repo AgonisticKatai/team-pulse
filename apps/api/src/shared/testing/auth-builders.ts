@@ -1,5 +1,5 @@
-import { RefreshToken } from '@domain/models/refresh-token/index.js'
 import { faker } from '@faker-js/faker'
+import { RefreshToken } from '@features/auth/domain/models/index.js'
 import type { LoginDTO, RefreshTokenDTO } from '@team-pulse/shared'
 import { RefreshTokenId, UserId } from '@team-pulse/shared'
 

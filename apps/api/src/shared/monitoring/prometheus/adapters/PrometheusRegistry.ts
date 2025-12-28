@@ -1,4 +1,4 @@
-import type { IMetricRegistry } from '@domain/services/metrics/IMetricRegistry.js'
+import type { IMetricRegistry } from '@shared/monitoring/metrics/IMetricRegistry.js'
 import type * as promClient from 'prom-client'
 
 /**

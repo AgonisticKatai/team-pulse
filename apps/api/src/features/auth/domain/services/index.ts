@@ -2,4 +2,4 @@
  * Auth Domain Service Interfaces
  */
 
-export * from './IPasswordHasher.js'
+export * from './password-hasher/index.js'

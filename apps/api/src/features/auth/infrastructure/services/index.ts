@@ -2,5 +2,5 @@
  * Auth Service Implementations
  */
 
-export * from './AuthService.js'
-export * from './ScryptPasswordHasher.js'
+export * from './auth/index.js'
+export * from './password-hasher/index.js'

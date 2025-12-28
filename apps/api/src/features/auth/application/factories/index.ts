@@ -2,5 +2,4 @@
  * Auth Factories
  */
 
-export * from './TokenFactory.js'
-export type { AccessTokenPayload, RefreshTokenPayload } from './TokenFactory.schemas.js'
+export * from './token/index.js'

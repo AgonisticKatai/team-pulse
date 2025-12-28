@@ -1,4 +1,4 @@
-import type { IGauge } from '@domain/services/metrics/IGauge.js'
+import type { IGauge } from '@shared/monitoring/metrics/IGauge.js'
 import type * as promClient from 'prom-client'
 
 /**

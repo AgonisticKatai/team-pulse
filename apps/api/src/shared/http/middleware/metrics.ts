@@ -1,5 +1,5 @@
-import type { IMetricsService } from '@domain/services/IMetricsService.js'
-import type { HttpErrorType, HttpMethod } from '@domain/services/metrics/metrics.types.js'
+import type { IMetricsService } from '@shared/monitoring/IMetricsService.js'
+import type { HttpErrorType, HttpMethod } from '@shared/monitoring/metrics/metrics.types.js'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
 // WeakMap to store request start times

@@ -1,5 +1,5 @@
-import type { IEnvironment } from '@domain/config/IEnvironment.js'
-import type { Env } from '@infrastructure/config/env.js'
+import type { Env } from '@shared/config/env.js'
+import type { IEnvironment } from '@shared/config/IEnvironment.js'
 
 /**
  * Mock environment configuration for tests

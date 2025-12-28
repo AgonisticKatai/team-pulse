@@ -1,5 +1,5 @@
-import { METRIC_CONFIG } from '@domain/services/metrics/metrics.config.js'
-import { PrometheusMetricsFactory } from '@infrastructure/monitoring/prometheus/PrometheusMetricsFactory.js'
+import { METRIC_CONFIG } from '@shared/monitoring/metrics/metrics.config.js'
+import { PrometheusMetricsFactory } from '@shared/monitoring/prometheus/PrometheusMetricsFactory.js'
 import { beforeEach, describe, expect, it } from 'vitest'
 
 describe('PrometheusMetricsFactory', () => {

@@ -1,7 +1,7 @@
-import type { Container } from '@infrastructure/config/container.js'
-import { setupTestEnvironment } from '@infrastructure/testing/test-helpers.js'
+import { buildApp } from '@core/app/app.js'
+import type { Container } from '@core/container/container.js'
+import { setupTestEnvironment } from '@shared/testing/test-helpers.js'
 import { describe, expect, it } from 'vitest'
-import { buildApp } from '../../../app.js'
 
 describe('Metrics Middleware', () => {
   setupTestEnvironment()

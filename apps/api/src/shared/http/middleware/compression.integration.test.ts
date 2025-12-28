@@ -1,9 +1,9 @@
-import type { Database } from '@infrastructure/database/connection.js'
-import { setupTestEnvironment } from '@infrastructure/testing/test-helpers.js'
+import { buildApp } from '@core/app/app.js'
+import type { Database } from '@shared/database/connection.js'
+import { setupTestEnvironment } from '@shared/testing/test-helpers.js'
 import type { FastifyInstance } from 'fastify'
 import { sql } from 'kysely'
 import { afterEach, beforeAll, describe, expect, it } from 'vitest'
-import { buildApp } from '../../../app.js'
 
 /**
  * HTTP Compression Integration Tests

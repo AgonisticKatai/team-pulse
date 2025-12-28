@@ -1,4 +1,4 @@
-import { PrometheusHistogram } from '@infrastructure/monitoring/prometheus/adapters/PrometheusHistogram.js'
+import { PrometheusHistogram } from '@shared/monitoring/prometheus/adapters/PrometheusHistogram.js'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing'
 import { Histogram, Registry } from 'prom-client'
 import { beforeEach, describe, expect, it } from 'vitest'

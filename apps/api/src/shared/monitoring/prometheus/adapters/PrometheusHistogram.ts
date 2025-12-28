@@ -1,4 +1,4 @@
-import type { IHistogram } from '@domain/services/metrics/IHistogram.js'
+import type { IHistogram } from '@shared/monitoring/metrics/IHistogram.js'
 import type * as promClient from 'prom-client'
 
 /**

@@ -1,6 +1,6 @@
-import { Team } from '@domain/models/team/Team.js'
-import type { TeamPrimitives } from '@domain/models/team/Team.types.js'
 import { faker } from '@faker-js/faker'
+import { Team } from '@features/teams/domain/models/team/Team.js'
+import type { TeamPrimitives } from '@features/teams/domain/models/team/Team.types.js'
 import type { CreateTeamDTO } from '@team-pulse/shared'
 import { TEAM_NAME_RULES, TeamId } from '@team-pulse/shared'
 

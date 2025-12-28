@@ -2,4 +2,4 @@
  * Auth Domain Repository Interfaces
  */
 
-export * from './IRefreshTokenRepository.js'
+export * from './refresh-token/index.js'

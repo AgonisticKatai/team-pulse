@@ -1,4 +1,4 @@
-import type { ICounter } from '@domain/services/metrics/ICounter.js'
+import type { ICounter } from '@shared/monitoring/metrics/ICounter.js'
 import type * as promClient from 'prom-client'
 
 /**

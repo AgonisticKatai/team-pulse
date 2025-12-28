@@ -1,6 +1,6 @@
-import type { IMetricsService } from '@domain/services/IMetricsService.js'
-import type { IMetricsFactory } from '@domain/services/metrics/IMetricsFactory.js'
-import type { MetricsCollection } from '@domain/services/metrics/MetricsCollection.js'
+import type { IMetricsService } from '@shared/monitoring/IMetricsService.js'
+import type { IMetricsFactory } from '@shared/monitoring/metrics/IMetricsFactory.js'
+import type { MetricsCollection } from '@shared/monitoring/metrics/MetricsCollection.js'
 import type {
   DbErrorMetrics,
   DbQueryMetrics,
@@ -8,7 +8,7 @@ import type {
   HttpRequestMetrics,
   LoginMetrics,
   TotalCountMetrics,
-} from '@domain/services/metrics/metrics.types.js'
+} from '@shared/monitoring/metrics/metrics.types.js'
 
 /**
  * Service for managing application metrics

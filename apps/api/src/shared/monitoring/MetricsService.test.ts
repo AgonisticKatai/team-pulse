@@ -1,6 +1,6 @@
-import { METRIC_CONFIG } from '@domain/services/metrics/metrics.config.js'
-import { MetricsService } from '@infrastructure/monitoring/MetricsService.js'
-import { PrometheusMetricsFactory } from '@infrastructure/monitoring/prometheus/PrometheusMetricsFactory.js'
+import { MetricsService } from '@shared/monitoring/MetricsService.js'
+import { METRIC_CONFIG } from '@shared/monitoring/metrics/metrics.config.js'
+import { PrometheusMetricsFactory } from '@shared/monitoring/prometheus/PrometheusMetricsFactory.js'
 import { TEST_CONSTANTS } from '@team-pulse/shared/testing'
 import { beforeEach, describe, expect, it } from 'vitest'
 
