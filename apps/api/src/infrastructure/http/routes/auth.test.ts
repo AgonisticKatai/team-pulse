@@ -3,6 +3,7 @@ import { ScryptPasswordHasher } from '@infrastructure/auth/ScryptPasswordHasher.
 import type { Container } from '@infrastructure/config/container.js'
 import type { Database } from '@infrastructure/database/connection.js'
 import { setupTestEnvironment } from '@infrastructure/testing/test-helpers.js'
+import { USER_ROLES } from '@team-pulse/shared'
 import { expectSuccess } from '@team-pulse/shared/testing'
 import type { FastifyInstance } from 'fastify'
 import { sql } from 'kysely'
@@ -29,7 +30,7 @@ describe('Authentication Endpoints', () => {
 
   beforeEach(async () => {
     // Build app with test container database
-    // Schema is already created by setupTestContainer() using db:push
+    // Schema is already created by setupTestContainer() using Kysely migrations
     const result = await buildApp()
     app = result.app
     container = result.container
@@ -51,7 +52,7 @@ describe('Authentication Endpoints', () => {
         email: testUserEmail,
         id: '550e8400-e29b-41d4-a716-446655490001',
         passwordHash: userPasswordHash,
-        role: 'guest',
+        role: USER_ROLES.GUEST,
       }),
     )
 
@@ -60,7 +61,7 @@ describe('Authentication Endpoints', () => {
         email: testAdminEmail,
         id: '550e8400-e29b-41d4-a716-446655490002',
         passwordHash: adminPasswordHash,
-        role: 'admin',
+        role: USER_ROLES.ADMIN,
       }),
     )
 
@@ -95,7 +96,7 @@ describe('Authentication Endpoints', () => {
       expect(body.data).toHaveProperty('refreshToken')
       expect(body.data.user).toMatchObject({
         email: testUserEmail,
-        role: 'USER',
+        role: USER_ROLES.GUEST,
       })
       expect(body.data.user).not.toHaveProperty('passwordHash')
     })
@@ -189,7 +190,7 @@ describe('Authentication Endpoints', () => {
 
       expect(response.statusCode).toBe(200)
       const body = JSON.parse(response.body)
-      expect(body.data.user.role).toBe('ADMIN')
+      expect(body.data.user.role).toBe(USER_ROLES.ADMIN)
     })
   })
 
@@ -280,7 +281,7 @@ describe('Authentication Endpoints', () => {
       expect(body.success).toBe(true)
       expect(body.data).toMatchObject({
         email: testUserEmail,
-        role: 'USER',
+        role: USER_ROLES.GUEST,
       })
     })
 
