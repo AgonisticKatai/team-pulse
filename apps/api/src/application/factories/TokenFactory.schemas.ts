@@ -25,16 +25,16 @@ import { z } from 'zod'
  * - Avoids redundant string operations (trim, toLowerCase) on every request
  */
 export const AccessTokenPayloadSchema = z.object({
-  // Domain fields with validation and transformation
-  userId: UserIdSchema, // string → UserId branded type
+  aud: z.string().optional(),
   email: z.email(), // Validate email format (Zod v4 standalone API)
-  role: UserRoleSchema, // Validate enum membership
+  exp: z.number().optional(),
 
   // JWT standard claims (optional)
   iat: z.number().optional(),
-  exp: z.number().optional(),
-  aud: z.string().optional(),
   iss: z.string().optional(),
+  role: UserRoleSchema, // Validate enum membership
+  // Domain fields with validation and transformation
+  userId: UserIdSchema, // string → UserId branded type
 })
 
 /**
@@ -53,15 +53,15 @@ export type AccessTokenPayload = z.infer<typeof AccessTokenPayloadSchema>
  * - userId: string → UserId (validates UUID format)
  */
 export const RefreshTokenPayloadSchema = z.object({
-  // Domain fields with validation and transformation
-  tokenId: RefreshTokenIdSchema, // string → RefreshTokenId branded type
-  userId: UserIdSchema, // string → UserId branded type
+  aud: z.string().optional(),
+  exp: z.number().optional(),
 
   // JWT standard claims (optional)
   iat: z.number().optional(),
-  exp: z.number().optional(),
-  aud: z.string().optional(),
   iss: z.string().optional(),
+  // Domain fields with validation and transformation
+  tokenId: RefreshTokenIdSchema, // string → RefreshTokenId branded type
+  userId: UserIdSchema, // string → UserId branded type
 })
 
 /**

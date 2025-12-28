@@ -1,5 +1,5 @@
-import { TeamId } from './TeamId.js'
 import { createIdSchema } from '@domain/utils/zod-id.factory.js'
+import { TeamId } from './TeamId.js'
 
 /**
  * Zod schema for TeamId

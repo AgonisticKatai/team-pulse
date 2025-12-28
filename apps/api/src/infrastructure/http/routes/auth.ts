@@ -134,14 +134,15 @@ export function registerAuthRoutes(fastify: FastifyInstance, dependencies: AuthR
    */
   fastify.get('/api/auth/me', { preHandler: requireAuth({ tokenFactory }) }, (request, reply) => {
     try {
-      // User is available from requireAuth middleware
-      const user = request.user
+      // User is guaranteed by requireAuth middleware
+      // biome-ignore lint/style/noNonNullAssertion: requireAuth middleware ensures user is defined
+      const { email, role, userId } = request.user!
 
       return reply.code(200).send({
         data: {
-          email: user!.email,
-          role: user!.role,  // Already a string from JWT payload
-          userId: user!.userId,
+          email,
+          role, // Already a string from JWT payload
+          userId,
         },
         success: true,
       })

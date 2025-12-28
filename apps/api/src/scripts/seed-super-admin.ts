@@ -67,8 +67,8 @@ async function seedSuperAdmin() {
 
     // 6. Create user entity
     const userResult = User.create({
-      id: randomUUID(),
       email,
+      id: randomUUID(),
       passwordHash: passwordHash.value,
       role: USER_ROLES.SUPER_ADMIN,
     })

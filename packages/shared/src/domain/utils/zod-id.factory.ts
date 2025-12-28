@@ -1,6 +1,6 @@
-import { z } from 'zod'
-import type { Result } from '@result'
 import type { ValidationError } from '@errors/ValidationError.js'
+import type { Result } from '@result'
+import { z } from 'zod'
 
 /**
  * Factory function type for creating domain ID branded types

@@ -1,5 +1,5 @@
-import { RefreshTokenId } from './RefreshTokenId.js'
 import { createIdSchema } from '@domain/utils/zod-id.factory.js'
+import { RefreshTokenId } from './RefreshTokenId.js'
 
 /**
  * Zod schema for RefreshTokenId

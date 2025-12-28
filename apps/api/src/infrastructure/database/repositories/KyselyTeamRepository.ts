@@ -232,8 +232,8 @@ export class KyselyTeamRepository implements ITeamRepository {
   private mapToDomain({ team }: { team: TeamRow }): Result<Team, ValidationError> {
     return Team.create({
       createdAt: new Date(team.created_at),
-      id: team.id,        
-      name: team.name,       
+      id: team.id,
+      name: team.name,
       updatedAt: new Date(team.updated_at),
     })
   }

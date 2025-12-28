@@ -270,10 +270,10 @@ export class KyselyUserRepository implements IUserRepository {
   private mapToDomain({ user }: { user: UserRow }): Result<User, ValidationError> {
     return User.create({
       createdAt: new Date(user.created_at),
-      email: user.email,        
-      id: user.id,            
+      email: user.email,
+      id: user.id,
       passwordHash: user.password_hash,
-      role: user.role,             
+      role: user.role,
       updatedAt: new Date(user.updated_at),
     })
   }

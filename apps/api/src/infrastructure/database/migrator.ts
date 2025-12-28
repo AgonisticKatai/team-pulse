@@ -1,7 +1,7 @@
 import { promises as fs } from 'node:fs'
 import * as path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { Migrator, FileMigrationProvider } from 'kysely'
+import { FileMigrationProvider, Migrator } from 'kysely'
 import type { Database } from './connection.js'
 
 /**
@@ -14,17 +14,17 @@ import type { Database } from './connection.js'
  * Each migration exports `up()` and `down()` functions.
  */
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const Filename = fileURLToPath(import.meta.url)
+const Dirname = path.dirname(Filename)
 
 export async function migrateToLatest(db: Database): Promise<void> {
   const migrator = new Migrator({
     db,
     provider: new FileMigrationProvider({
       fs,
-      path,
       // Path to migrations directory
-      migrationFolder: path.join(__dirname, 'migrations'),
+      migrationFolder: path.join(Dirname, 'migrations'),
+      path,
     }),
   })
 
@@ -52,8 +52,8 @@ export async function migrateDown(db: Database): Promise<void> {
     db,
     provider: new FileMigrationProvider({
       fs,
+      migrationFolder: path.join(Dirname, 'migrations'),
       path,
-      migrationFolder: path.join(__dirname, 'migrations'),
     }),
   })
 

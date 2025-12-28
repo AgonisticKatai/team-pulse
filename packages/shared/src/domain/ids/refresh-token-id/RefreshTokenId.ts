@@ -1,6 +1,6 @@
 import { ValidationError } from '@errors/ValidationError'
 import { Err, Ok, type Result } from '@result'
-import { type EntityId } from '../EntityId.js'
+import type { EntityId } from '../EntityId.js'
 import { IdUtils } from '../EntityId.utils.js'
 import { REFRESH_TOKEN_ID_BRAND, REFRESH_TOKEN_ID_VALIDATION_ERROR } from './RefreshTokenId.constants.js'
 

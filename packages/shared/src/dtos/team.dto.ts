@@ -1,7 +1,7 @@
 import { TeamNameSchema } from '@value-objects/team'
 import { z } from 'zod'
-import { EntityIdSchema, TimestampsSchema } from './entity-base.dto'
-import { createPaginatedResponseSchema } from './pagination.dto'
+import { EntityIdSchema, TimestampsSchema } from './entity-base.dto.js'
+import { createPaginatedResponseSchema } from './pagination.dto.js'
 
 // 1. CORE
 const TeamCore = z.object({ name: TeamNameSchema })

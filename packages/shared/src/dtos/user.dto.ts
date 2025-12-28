@@ -1,7 +1,7 @@
 import { UserEmailSchema, UserRoleSchema } from '@value-objects/user'
 import { z } from 'zod'
-import { EntityIdSchema, TimestampsSchema } from './entity-base.dto'
-import { createPaginatedResponseSchema } from './pagination.dto'
+import { EntityIdSchema, TimestampsSchema } from './entity-base.dto.js'
+import { createPaginatedResponseSchema } from './pagination.dto.js'
 
 // 1. CORE
 const UserCore = z.object({ email: UserEmailSchema, role: UserRoleSchema })

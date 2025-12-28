@@ -81,8 +81,7 @@ describe('Protected Routes and RBAC', () => {
     })
 
     if (superAdminLogin.statusCode !== 200) {
-      console.error('SuperAdmin login failed:', superAdminLogin.statusCode, superAdminLogin.body)
-      throw new Error('SuperAdmin login failed')
+      throw new Error(`SuperAdmin login failed: ${superAdminLogin.statusCode} ${superAdminLogin.body}`)
     }
     superAdminToken = JSON.parse(superAdminLogin.body).data.accessToken
 
@@ -93,8 +92,7 @@ describe('Protected Routes and RBAC', () => {
     })
 
     if (adminLogin.statusCode !== 200) {
-      console.error('Admin login failed:', adminLogin.statusCode, adminLogin.body)
-      throw new Error('Admin login failed')
+      throw new Error(`Admin login failed: ${adminLogin.statusCode} ${adminLogin.body}`)
     }
     adminToken = JSON.parse(adminLogin.body).data.accessToken
 
@@ -105,8 +103,7 @@ describe('Protected Routes and RBAC', () => {
     })
 
     if (userLogin.statusCode !== 200) {
-      console.error('User login failed:', userLogin.statusCode, userLogin.body)
-      throw new Error('User login failed')
+      throw new Error(`User login failed: ${userLogin.statusCode} ${userLogin.body}`)
     }
     userToken = JSON.parse(userLogin.body).data.accessToken
   })

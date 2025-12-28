@@ -1,5 +1,5 @@
-import { UserId } from './UserId.js'
 import { createIdSchema } from '@domain/utils/zod-id.factory.js'
+import { UserId } from './UserId.js'
 
 /**
  * Zod schema for UserId

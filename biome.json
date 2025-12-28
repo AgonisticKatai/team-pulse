@@ -248,6 +248,21 @@
       }
     },
     {
+      "includes": ["**/kysely-schema.ts", "**/migrations/**", "**/migrator.ts", "**/Kysely*Repository.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useNamingConvention": "off",
+            "useFilenamingConvention": "off"
+          },
+          "suspicious": {
+            "noExplicitAny": "off",
+            "noConsole": "off"
+          }
+        }
+      }
+    },
+    {
       "assist": {
         "actions": {
           "source": {

@@ -5,13 +5,13 @@
  */
 
 // Auth DTOs
-export * from './auth.dto'
+export * from './auth.dto.js'
 
 // Pagination DTOs
-export * from './pagination.dto'
+export * from './pagination.dto.js'
 
 // Team DTOs
-export * from './team.dto'
+export * from './team.dto.js'
 
 // User DTOs
-export * from './user.dto'
+export * from './user.dto.js'

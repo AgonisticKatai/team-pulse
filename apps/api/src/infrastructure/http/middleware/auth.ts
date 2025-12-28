@@ -93,7 +93,7 @@ export function requireRole(allowedRoles: string[]) {
     // AuthService handles the validation logic
     const authService = AuthService.create({ tokenFactory: {} as TokenFactory }) // We only need checkUserRole, not token verification
 
-    const hasRole = authService.checkUserRole({ user: request.user, allowedRoles })
+    const hasRole = authService.checkUserRole({ allowedRoles, user: request.user })
 
     if (!hasRole) {
       await reply.code(403).send({

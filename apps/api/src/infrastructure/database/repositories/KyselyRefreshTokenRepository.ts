@@ -173,9 +173,9 @@ export class KyselyRefreshTokenRepository implements IRefreshTokenRepository {
     return RefreshToken.create({
       createdAt: new Date(refreshToken.created_at),
       expiresAt: new Date(refreshToken.expires_at),
-      id: refreshToken.id,        
-      token: refreshToken.token,  
-      userId: refreshToken.user_id, 
+      id: refreshToken.id,
+      token: refreshToken.token,
+      userId: refreshToken.user_id,
     })
   }
 }
