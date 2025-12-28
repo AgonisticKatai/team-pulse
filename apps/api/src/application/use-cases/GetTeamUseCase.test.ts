@@ -1,7 +1,7 @@
 import { GetTeamUseCase } from '@application/use-cases/GetTeamUseCase.js'
 import type { ITeamRepository } from '@domain/repositories/ITeamRepository.js'
 import { faker } from '@faker-js/faker'
-import { buildTeam } from '@infrastructure/testing/index.js'
+import { buildTeam } from '@shared/testing/index.js'
 import { Err, NotFoundError, Ok, RepositoryError, TeamId } from '@team-pulse/shared'
 import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing'
 import { beforeEach, describe, expect, it, vi } from 'vitest'

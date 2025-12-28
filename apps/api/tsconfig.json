@@ -7,6 +7,9 @@
     "moduleResolution": "nodenext",
     "outDir": "./dist",
     "paths": {
+      "@features/*": ["./src/features/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@core/*": ["./src/core/*"],
       "@application/*": ["./src/application/*"],
       "@domain/*": ["./src/domain/*"],
       "@infrastructure/*": ["./src/infrastructure/*"]

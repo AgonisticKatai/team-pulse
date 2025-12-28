@@ -1,7 +1,7 @@
 import { DeleteUserUseCase } from '@application/use-cases/DeleteUserUseCase.js'
 import type { IUserRepository } from '@domain/repositories/IUserRepository.js'
 import { faker } from '@faker-js/faker'
-import { buildUser } from '@infrastructure/testing/index.js'
+import { buildUser } from '@shared/testing/index.js'
 import { Err, NotFoundError, Ok, RepositoryError, UserId } from '@team-pulse/shared'
 import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing'
 import { beforeEach, describe, expect, it, vi } from 'vitest'

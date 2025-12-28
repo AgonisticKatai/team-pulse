@@ -1,4 +1,4 @@
-import { buildTeam } from '@infrastructure/testing/team-builders.js'
+import { buildTeam } from '@shared/testing/team-builders.js'
 import type { PaginationMetaDTO } from '@team-pulse/shared'
 import { assertDefined, expectFirst } from '@team-pulse/shared/testing'
 import { describe, expect, it } from 'vitest'
