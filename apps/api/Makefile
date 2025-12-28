@@ -14,7 +14,7 @@ dev: ## Start API dev server (with watch)
 
 build: ## Build for production
 	@echo "🏗️  Building for production..."
-	@pnpm exec tsx src/scripts/run-kysely-migrations.ts
+	@pnpm exec tsc
 
 start: ## Start production server
 	@echo "🚀 Starting production server..."
