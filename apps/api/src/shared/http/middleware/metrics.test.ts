@@ -1,6 +1,6 @@
 import { buildApp } from '@core/app/app.js'
 import type { Container } from '@core/container/container.js'
-import { setupTestEnvironment } from '@shared/testing/test-helpers.js'
+import { setupTestEnvironment } from '@shared/testing/helpers/test-helpers.js'
 import { describe, expect, it } from 'vitest'
 
 describe('Metrics Middleware', () => {

@@ -17,11 +17,11 @@ import { CreateUserUseCase } from '@features/users/application/use-cases/create-
 import { ListUsersUseCase } from '@features/users/application/use-cases/list-users/ListUsersUseCase.js'
 import type { IUserRepository } from '@features/users/domain/repositories/user/IUserRepository.js'
 import { KyselyUserRepository } from '@features/users/infrastructure/repositories/user/KyselyUserRepository.js'
-import type { Env } from '@shared/config/env.js'
-import { createDatabase, type Database } from '@shared/database/connection.js'
-import type { IMetricsService } from '@shared/monitoring/IMetricsService.js'
-import { MetricsService } from '@shared/monitoring/MetricsService.js'
-import { PrometheusMetricsFactory } from '@shared/monitoring/prometheus/PrometheusMetricsFactory.js'
+import type { Env } from '@shared/config/environment/env.js'
+import { createDatabase, type Database } from '@shared/database/connection/connection.js'
+import type { IMetricsService } from '@shared/monitoring/interfaces/IMetricsService.js'
+import { PrometheusMetricsFactory } from '@shared/monitoring/prometheus/factory/PrometheusMetricsFactory.js'
+import { MetricsService } from '@shared/monitoring/services/MetricsService.js'
 
 /**
  * Dependency Injection Container

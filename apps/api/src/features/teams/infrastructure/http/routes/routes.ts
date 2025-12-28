@@ -6,8 +6,8 @@ import type { ListTeamsUseCase } from '@features/teams/application/use-cases/lis
 import type { UpdateTeamUseCase } from '@features/teams/application/use-cases/update-team/UpdateTeamUseCase.js'
 import { requireAuth, requireRole } from '@shared/http/middleware/auth.js'
 import { handleError } from '@shared/http/middleware/error-handler.js'
-import { TeamIdParamsSchema } from '@shared/http/schemas/params.schemas.js'
-import { FastifyLogger } from '@shared/logging/FastifyLogger.js'
+import { TeamIdParamsSchema } from '@shared/http/schemas/params.schema.js'
+import { FastifyLogger } from '@shared/logging/fastify/FastifyLogger.js'
 import { CreateTeamSchema, PaginationQuerySchema, UpdateTeamSchema, USER_ROLES } from '@team-pulse/shared'
 import type { FastifyInstance } from 'fastify'
 

@@ -11,8 +11,8 @@
  *   tsx src/scripts/run-kysely-migrations.ts
  */
 
-import { createDatabase } from '../shared/database/connection.js'
-import { migrateToLatest } from '../shared/database/migrator.js'
+import { createDatabase } from '../shared/database/connection/connection.js'
+import { migrateToLatest } from '../shared/database/migrations/migrator.js'
 
 async function main() {
   const connectionString = process.env.DATABASE_URL || 'postgresql://teampulse:teampulse@localhost:5432/teampulse'

@@ -3,4 +3,4 @@
  */
 
 export * from './TokenFactory.js'
-export * from './TokenFactory.schemas.js'
+export * from './TokenFactory.schema.js'

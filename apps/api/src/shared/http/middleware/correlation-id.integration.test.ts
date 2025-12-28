@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { buildApp } from '@core/app/app.js'
-import { setupTestEnvironment } from '@shared/testing/test-helpers.js'
+import { setupTestEnvironment } from '@shared/testing/helpers/test-helpers.js'
 import type { FastifyInstance } from 'fastify'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 

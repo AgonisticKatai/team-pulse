@@ -1,7 +1,7 @@
 import { Team } from '@features/teams/domain/models/team/Team.js'
 import type { ITeamRepository } from '@features/teams/domain/repositories/team/ITeamRepository.js'
-import type { Database } from '@shared/database/connection.js'
-import type { Team as TeamRow } from '@shared/database/kysely-schema.js'
+import type { Database } from '@shared/database/connection/connection.js'
+import type { Team as TeamRow } from '@shared/database/schemas/kysely-schema.js'
 import { collect, Err, Ok, RepositoryError, type Result, type TeamId, type ValidationError } from '@team-pulse/shared'
 
 /**

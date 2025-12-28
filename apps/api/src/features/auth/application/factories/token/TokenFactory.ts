@@ -1,5 +1,5 @@
 import { RefreshToken } from '@features/auth/domain/models/refresh-token/index.js'
-import type { IEnvironment } from '@shared/config/IEnvironment.js'
+import type { IEnvironment } from '@shared/config/environment/IEnvironment.js'
 import type { Result, UserEmail, UserRole, ValidationError } from '@team-pulse/shared'
 import { AuthenticationError, Err, Ok, RefreshTokenId, type UserId } from '@team-pulse/shared'
 import jwt from 'jsonwebtoken'
@@ -8,7 +8,7 @@ import {
   AccessTokenPayloadSchema,
   type RefreshTokenPayload,
   RefreshTokenPayloadSchema,
-} from './TokenFactory.schemas.js'
+} from './TokenFactory.schema.js'
 
 /**
  * Token Factory
@@ -17,9 +17,6 @@ import {
  * Payload types are defined in TokenFactory.schemas.ts and inferred from Zod schemas.
  * This ensures type safety and validation consistency.
  */
-
-// Re-export payload types for convenience
-export type { AccessTokenPayload, RefreshTokenPayload }
 
 const ACCESS_TOKEN_EXPIRATION = '15m'
 const REFRESH_TOKEN_EXPIRATION = '7d'

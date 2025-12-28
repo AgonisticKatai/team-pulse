@@ -1,6 +1,6 @@
 import { TeamMapper } from '@features/teams/application/mappers/team/TeamMapper.js'
 import type { ITeamRepository } from '@features/teams/domain/repositories/team/ITeamRepository.js'
-import type { IMetricsService } from '@shared/monitoring/IMetricsService.js'
+import type { IMetricsService } from '@shared/monitoring/interfaces/IMetricsService.js'
 import type { PaginationQueryDTO, RepositoryError, TeamsListResponseDTO, ValidationError } from '@team-pulse/shared'
 import { Err, Ok, Pagination, type Result } from '@team-pulse/shared'
 

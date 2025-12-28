@@ -4,7 +4,7 @@ import { LoginUseCase } from '@features/auth/application/use-cases/login/LoginUs
 import type { IRefreshTokenRepository } from '@features/auth/domain/repositories/refresh-token/IRefreshTokenRepository.js'
 import type { IPasswordHasher } from '@features/auth/domain/services/password-hasher/IPasswordHasher.js'
 import type { IUserRepository } from '@features/users/domain/repositories/user/IUserRepository.js'
-import type { IMetricsService } from '@shared/monitoring/IMetricsService.js'
+import type { IMetricsService } from '@shared/monitoring/interfaces/IMetricsService.js'
 import { buildUser, buildValidRefreshToken } from '@shared/testing/index.js'
 import type { LoginDTO } from '@team-pulse/shared'
 import { AuthenticationError, Err, Ok, RepositoryError } from '@team-pulse/shared'

@@ -1,6 +1,6 @@
 import { UserMapper } from '@features/users/application/mappers/user/UserMapper.js'
 import type { IUserRepository } from '@features/users/domain/repositories/user/IUserRepository.js'
-import type { IMetricsService } from '@shared/monitoring/IMetricsService.js'
+import type { IMetricsService } from '@shared/monitoring/interfaces/IMetricsService.js'
 import type { PaginationQueryDTO, RepositoryError, UsersListResponseDTO, ValidationError } from '@team-pulse/shared'
 import { Err, Ok, Pagination, type Result } from '@team-pulse/shared'
 

@@ -1,11 +1,9 @@
 /**
  * Shared Database Infrastructure
  *
- * Database connection, schema, migrations, and repository implementations
- * shared across all features.
+ * Database connection, schema, and migrations shared across all features.
  */
 
-export { createDatabase, type Database } from './connection.js'
-export * from './kysely-schema.js'
-export * from './migrator.js'
-export * from './repositories/index.js'
+export { createDatabase, type Database } from './connection/index.js'
+export * from './migrations/index.js'
+export * from './schemas/index.js'

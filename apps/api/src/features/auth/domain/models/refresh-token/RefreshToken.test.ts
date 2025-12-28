@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { buildRefreshToken } from '@shared/testing/auth-builders.js'
+import { buildRefreshToken } from '@shared/testing/builders/auth-builders.js'
 import { RefreshTokenId, UserId, ValidationError } from '@team-pulse/shared'
 import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing'
 import { describe, expect, it } from 'vitest'

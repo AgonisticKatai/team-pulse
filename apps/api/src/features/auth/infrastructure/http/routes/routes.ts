@@ -4,7 +4,7 @@ import type { LogoutUseCase } from '@features/auth/application/use-cases/logout/
 import type { RefreshTokenUseCase } from '@features/auth/application/use-cases/refresh-token/RefreshTokenUseCase.js'
 import { requireAuth } from '@shared/http/middleware/auth.js'
 import { handleError } from '@shared/http/middleware/error-handler.js'
-import { FastifyLogger } from '@shared/logging/FastifyLogger.js'
+import { FastifyLogger } from '@shared/logging/fastify/FastifyLogger.js'
 import { LoginSchema, RefreshTokenSchema } from '@team-pulse/shared'
 import type { FastifyInstance } from 'fastify'
 

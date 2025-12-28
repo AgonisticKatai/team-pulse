@@ -3,7 +3,7 @@ import type { CreateUserUseCase } from '@features/users/application/use-cases/cr
 import type { ListUsersUseCase } from '@features/users/application/use-cases/list-users/ListUsersUseCase.js'
 import { requireAuth, requireRole } from '@shared/http/middleware/auth.js'
 import { handleError } from '@shared/http/middleware/error-handler.js'
-import { FastifyLogger } from '@shared/logging/FastifyLogger.js'
+import { FastifyLogger } from '@shared/logging/fastify/FastifyLogger.js'
 import { CreateUserSchema, PaginationQuerySchema, USER_ROLES } from '@team-pulse/shared'
 import type { FastifyInstance } from 'fastify'
 

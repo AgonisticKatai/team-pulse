@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { User } from '@features/users/domain/models/user/User.js'
-import { buildCreateUserDTO, buildUser } from '@shared/testing/user-builders.js'
+import { buildCreateUserDTO, buildUser } from '@shared/testing/builders/user-builders.js'
 import { ValidationError } from '@team-pulse/shared'
 import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing'
 import { describe, expect, it } from 'vitest'

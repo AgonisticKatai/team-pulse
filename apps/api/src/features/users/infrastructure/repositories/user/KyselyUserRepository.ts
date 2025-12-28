@@ -1,7 +1,7 @@
 import { User } from '@features/users/domain/models/user/User.js'
 import type { IUserRepository } from '@features/users/domain/repositories/user/IUserRepository.js'
-import type { Database } from '@shared/database/connection.js'
-import type { User as UserRow } from '@shared/database/kysely-schema.js'
+import type { Database } from '@shared/database/connection/connection.js'
+import type { User as UserRow } from '@shared/database/schemas/kysely-schema.js'
 import { collect, Err, Ok, RepositoryError, type Result, type UserId, type ValidationError } from '@team-pulse/shared'
 import { sql } from 'kysely'
 

@@ -1,5 +1,5 @@
 import type { Container } from '@core/container/container.js'
-import { setupTestEnvironment } from '@shared/testing/test-helpers.js'
+import { setupTestEnvironment } from '@shared/testing/helpers/test-helpers.js'
 import type { FastifyInstance } from 'fastify'
 import { afterEach, describe, expect, it } from 'vitest'
 import { buildApp } from './app.js'

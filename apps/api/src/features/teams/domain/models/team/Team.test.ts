@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { buildCreateTeamDTO, buildTeam } from '@shared/testing/team-builders.js'
+import { buildCreateTeamDTO, buildTeam } from '@shared/testing/builders/team-builders.js'
 import { ValidationError } from '@team-pulse/shared'
 import { expectErrorType, expectSuccess } from '@team-pulse/shared/testing'
 import { describe, expect, it } from 'vitest'

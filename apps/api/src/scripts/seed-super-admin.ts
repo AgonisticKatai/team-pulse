@@ -2,8 +2,8 @@ import { randomUUID } from 'node:crypto'
 import { ScryptPasswordHasher } from '@features/auth/infrastructure/services/password-hasher/ScryptPasswordHasher.js'
 import { User } from '@features/users/domain/models/index.js'
 import { KyselyUserRepository } from '@features/users/infrastructure/repositories/user/KyselyUserRepository.js'
-import { validateEnv } from '@shared/config/env.js'
-import { createDatabase } from '@shared/database/connection.js'
+import { validateEnv } from '@shared/config/environment/env.js'
+import { createDatabase } from '@shared/database/connection/connection.js'
 import { USER_ROLES } from '@team-pulse/shared'
 
 /**

@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { ListUsersUseCase } from '@features/users/application/use-cases/list-users/ListUsersUseCase.js'
 import type { IUserRepository } from '@features/users/domain/repositories/user/IUserRepository.js'
-import type { IMetricsService } from '@shared/monitoring/IMetricsService.js'
+import type { IMetricsService } from '@shared/monitoring/interfaces/IMetricsService.js'
 import { buildUser } from '@shared/testing/index.js'
 import type { PaginationQueryDTO } from '@team-pulse/shared'
 import { Err, Ok, RepositoryError } from '@team-pulse/shared'

@@ -1,6 +1,6 @@
 import { buildApp } from '@core/app/app.js'
-import type { Database } from '@shared/database/connection.js'
-import { setupTestEnvironment } from '@shared/testing/test-helpers.js'
+import type { Database } from '@shared/database/connection/connection.js'
+import { setupTestEnvironment } from '@shared/testing/helpers/test-helpers.js'
 import type { FastifyInstance } from 'fastify'
 import { sql } from 'kysely'
 import { afterEach, beforeAll, describe, expect, it } from 'vitest'

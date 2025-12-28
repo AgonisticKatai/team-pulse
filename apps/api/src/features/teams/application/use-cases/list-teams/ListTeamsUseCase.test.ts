@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { ListTeamsUseCase } from '@features/teams/application/use-cases/list-teams/ListTeamsUseCase.js'
 import type { ITeamRepository } from '@features/teams/domain/repositories/team/ITeamRepository.js'
-import type { IMetricsService } from '@shared/monitoring/IMetricsService.js'
+import type { IMetricsService } from '@shared/monitoring/interfaces/IMetricsService.js'
 import { buildTeam } from '@shared/testing/index.js'
 import type { PaginationQueryDTO } from '@team-pulse/shared'
 import { Err, Ok, RepositoryError } from '@team-pulse/shared'

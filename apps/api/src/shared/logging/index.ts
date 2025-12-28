@@ -2,5 +2,5 @@
  * Shared Logging Infrastructure
  */
 
-export * from './FastifyLogger.js'
-export * from './logger-config.js'
+export * from './config/index.js'
+export * from './fastify/index.js'

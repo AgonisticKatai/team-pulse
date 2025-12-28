@@ -2,5 +2,4 @@
  * Shared Configuration
  */
 
-export * from './env.js'
-export * from './IEnvironment.js'
+export * from './environment/index.js'

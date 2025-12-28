@@ -1,4 +1,5 @@
-import type { AccessTokenPayload, TokenFactory } from '@features/auth/application/factories/token/TokenFactory.js'
+import type { TokenFactory } from '@features/auth/application/factories/token/TokenFactory.js'
+import type { AccessTokenPayload } from '@features/auth/application/factories/token/TokenFactory.schema.js'
 import type { AuthenticationError } from '@team-pulse/shared'
 import { Err, Ok, type Result, ValidationError } from '@team-pulse/shared'
 

@@ -1,7 +1,7 @@
 import { RefreshToken } from '@features/auth/domain/models/index.js'
 import type { IRefreshTokenRepository } from '@features/auth/domain/repositories/refresh-token/IRefreshTokenRepository.js'
-import type { Database } from '@shared/database/connection.js'
-import type { RefreshToken as RefreshTokenRow } from '@shared/database/kysely-schema.js'
+import type { Database } from '@shared/database/connection/connection.js'
+import type { RefreshToken as RefreshTokenRow } from '@shared/database/schemas/kysely-schema.js'
 import { collect, Err, Ok, RepositoryError, type Result, type UserId, type ValidationError } from '@team-pulse/shared'
 
 /**
