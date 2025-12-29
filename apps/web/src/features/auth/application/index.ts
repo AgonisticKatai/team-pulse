@@ -4,7 +4,7 @@
  */
 
 // Hooks
-export { useLogin } from './hooks/useLogin.js'
+export { useLogin } from './hooks/use-login.js'
 
 // Use Cases
 export { LoginUseCase } from './use-cases/login/LoginUseCase.js'
