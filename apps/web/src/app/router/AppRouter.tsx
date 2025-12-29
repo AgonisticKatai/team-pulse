@@ -1,13 +1,13 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { ROUTES } from '@/lib/constants/routes'
+import { ROUTES } from '../../lib/constants/routes'
 
 // Lazy load pages for code splitting
-const LoginPage = lazy(() => import('@/pages/LoginPage'))
-const DashboardPage = lazy(() => import('@/pages/DashboardPage'))
-const TeamsPage = lazy(() => import('@/pages/TeamsPage'))
-const UsersPage = lazy(() => import('@/pages/UsersPage'))
-const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
+const LoginPage = lazy(() => import('../../pages/LoginPage'))
+const DashboardPage = lazy(() => import('../../pages/DashboardPage'))
+const TeamsPage = lazy(() => import('../../pages/TeamsPage'))
+const UsersPage = lazy(() => import('../../pages/UsersPage'))
+const NotFoundPage = lazy(() => import('../../pages/NotFoundPage'))
 
 /**
  * Loading Fallback Component

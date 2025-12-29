@@ -1,4 +1,13 @@
-import type { CreateTeamDTO, CreateUserDTO, LoginDTO, RefreshTokenDTO } from '../dtos/index.js'
+import { faker } from '@faker-js/faker'
+import { USER_ROLES } from '../domain/value-objects/user/role/UserRole.constants.js'
+import type {
+  CreateTeamDTO,
+  CreateUserDTO,
+  LoginDTO,
+  LoginResponseDTO,
+  RefreshTokenDTO,
+  UserResponseDTO,
+} from '../dtos/index.js'
 import { TEST_CONSTANTS } from './constants.js'
 
 /**
@@ -12,7 +21,7 @@ import { TEST_CONSTANTS } from './constants.js'
  */
 
 // ============================================================================
-// AUTH DTO BUILDERS
+// AUTH DTO BUILDERS - REQUESTS
 // ============================================================================
 
 /**
@@ -50,6 +59,54 @@ export function buildLoginDTO(overrides: Partial<LoginDTO> = {}): LoginDTO {
 export function buildRefreshTokenDTO(overrides: Partial<RefreshTokenDTO> = {}): RefreshTokenDTO {
   return {
     refreshToken: TEST_CONSTANTS.auth.mockRefreshToken,
+    ...overrides,
+  }
+}
+
+// ============================================================================
+// AUTH DTO BUILDERS - RESPONSES
+// ============================================================================
+
+/**
+ * Builder for UserResponseDTO test data
+ *
+ * Provides sensible defaults and allows easy customization via overrides
+ *
+ * @example
+ * // Use defaults
+ * const dto = buildUserResponseDTO()
+ *
+ * // Override specific fields
+ * const dto = buildUserResponseDTO({ email: 'custom@example.com' })
+ */
+export function buildUserResponseDTO(overrides: Partial<UserResponseDTO> = {}): UserResponseDTO {
+  return {
+    createdAt: faker.date.past().toISOString(),
+    email: faker.internet.email(),
+    id: faker.string.uuid(),
+    role: faker.helpers.arrayElement(Object.values(USER_ROLES)),
+    updatedAt: faker.date.recent().toISOString(),
+    ...overrides,
+  }
+}
+
+/**
+ * Builder for LoginResponseDTO test data
+ *
+ * Provides sensible defaults and allows easy customization via overrides
+ *
+ * @example
+ * // Use defaults
+ * const dto = buildLoginResponseDTO()
+ *
+ * // Override specific fields
+ * const dto = buildLoginResponseDTO({ accessToken: 'custom-token' })
+ */
+export function buildLoginResponseDTO(overrides: Partial<LoginResponseDTO> = {}): LoginResponseDTO {
+  return {
+    accessToken: faker.internet.jwt(),
+    refreshToken: faker.internet.jwt(),
+    user: buildUserResponseDTO(),
     ...overrides,
   }
 }
