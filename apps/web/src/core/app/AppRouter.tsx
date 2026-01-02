@@ -1,6 +1,6 @@
+import { ROUTES } from '@web/shared/constants/routes.js'
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { ROUTES } from '../../lib/constants/routes'
 
 // Lazy load pages for code splitting
 const LoginPage = lazy(() => import('../../pages/LoginPage'))

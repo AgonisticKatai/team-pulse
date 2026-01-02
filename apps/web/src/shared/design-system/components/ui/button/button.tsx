@@ -1,8 +1,7 @@
 import { Slot } from '@radix-ui/react-slot'
+import { cn } from '@web/shared/utils/cn.js'
 import { cva, type VariantProps } from 'class-variance-authority'
 import type * as React from 'react'
-
-import { cn } from '../../lib/utils.js'
 
 /**
  * Button component with design token integration
