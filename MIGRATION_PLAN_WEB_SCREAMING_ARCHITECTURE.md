@@ -1,5 +1,36 @@
 # 🏗️ PLAN MAESTRO: Migración Web a Screaming Architecture
 
+## 📈 PROGRESO ACTUAL
+
+**Estado:** 🚧 En progreso - FASE 1 completada (37.5% del total)
+
+| Fase | Estado | Descripción |
+|------|--------|-------------|
+| **FASE 1.1** | ✅ **100%** | Core Structure creado |
+| **FASE 1.2** | ✅ **100%** | Shared Infrastructure organizado |
+| **FASE 1.3** | ✅ **100%** | Providers globales implementados |
+| **FASE 1.4** | ⏳ **0%** | Protected Routing (siguiente) |
+| **FASE 2** | ⏳ **0%** | Teams Feature |
+| **FASE 3** | ⏳ **0%** | Users Feature |
+| **FASE 4** | ⏳ **0%** | Design System expansion |
+| **FASE 5** | ⏳ **0%** | Routing feature-based |
+| **FASE 6** | ⏳ **0%** | Pages migration & cleanup |
+| **FASE 7** | ⏳ **0%** | Testing & Documentation |
+| **FASE 8** | ⏳ **0%** | Polish & Optimization |
+
+### ✅ Logros principales:
+- ✅ Arquitectura `/core` establecida (App, Router, Providers, Container)
+- ✅ Design System iniciado (`/shared/design-system`)
+- ✅ Providers globales completos (Auth, Theme, Toast, ErrorBoundary)
+- ✅ Hooks renombrados a camelCase (`useLogin.ts`)
+- ✅ Biome configurado para naming conventions
+- ✅ Migraciones de archivos completadas (`/lib` → `/shared`)
+- ✅ 62 tests pasando
+- ✅ Build exitoso
+- ✅ TypeScript sin errores
+
+---
+
 ## 📊 ANÁLISIS COMPARATIVO
 
 ### API Structure (✅ Implementada)
@@ -28,43 +59,56 @@ apps/api/src/
 
 ### Web Structure (🚧 En Migración)
 
-#### ✅ YA IMPLEMENTADO
+#### ✅ YA IMPLEMENTADO (FASE 1.1, 1.2, 1.3 COMPLETADAS)
 ```
 apps/web/src/
+├── core/                   # ✅ Application Bootstrap
+│   ├── app/
+│   │   ├── App.tsx        # ✅ Root component
+│   │   ├── AppRouter.tsx  # ✅ Router setup
+│   │   ├── AppProviders.tsx # ✅ All providers composed
+│   │   └── QueryProvider.tsx # ✅ React Query
+│   └── container/
+│       └── container.ts   # ✅ DI Container
 ├── features/
-│   └── auth/               # ✅ Completamente implementado
-│       ├── application/    # LoginUseCase, useLogin hook
-│       ├── domain/         # IAuthRepository interface
-│       ├── infrastructure/ # AuthRepository (HTTP)
-│       └── presentation/   # LoginForm component
+│   └── auth/              # ✅ Completamente implementado
+│       ├── application/   # ✅ LoginUseCase, useLogin hook (camelCase)
+│       ├── domain/        # ✅ IAuthRepository interface
+│       ├── infrastructure/# ✅ AuthRepository (HTTP)
+│       └── presentation/  # ✅ LoginForm component
 ├── shared/
-│   └── infrastructure/
-│       ├── di/             # ✅ Container pattern implementado
-│       └── http/           # ✅ HTTP client implementado
-└── app/
-    ├── router/             # ✅ Routing básico
-    └── providers/          # ✅ QueryProvider
+│   ├── constants/         # ✅ Routes constants
+│   │   └── routes.ts
+│   ├── design-system/     # ✅ UI Components
+│   │   ├── components/ui/button/
+│   │   └── index.ts
+│   ├── infrastructure/
+│   │   └── http/          # ✅ HTTP client
+│   ├── providers/         # ✅ Global providers
+│   │   ├── AuthProvider.tsx
+│   │   ├── ThemeProvider.tsx
+│   │   ├── ToastProvider.tsx
+│   │   ├── ErrorBoundary.tsx
+│   │   └── index.ts
+│   └── utils/             # ✅ Utilities (cn)
+│       ├── cn.ts
+│       └── index.ts
+└── pages/                 # ⚠️ LEGACY - Pendiente migrar en FASE 6
+    ├── LoginPage.tsx
+    ├── DashboardPage.tsx
+    ├── TeamsPage.tsx
+    ├── UsersPage.tsx
+    └── NotFoundPage.tsx
 ```
 
-#### ❌ PENDIENTE DE MIGRAR
+#### ❌ PENDIENTE DE IMPLEMENTAR
 ```
-apps/web/src/
-├── pages/                  # ❌ 5 páginas en carpeta legacy
-│   ├── LoginPage.tsx
-│   ├── DashboardPage.tsx
-│   ├── TeamsPage.tsx
-│   ├── UsersPage.tsx
-│   └── NotFoundPage.tsx
-├── components/             # ❌ Solo tiene 1 componente Button
-│   └── ui/
-│       └── button.tsx
-├── lib/                    # ⚠️ Mantener solo utils
-│   ├── constants/routes.ts
-│   └── utils.ts
-└── styles/                 # ⚠️ Migrar a Tailwind
-    ├── base/
-    ├── themes/
-    └── utilities/
+- FASE 1.4: Protected Routing (ProtectedRoute, PublicRoute)
+- FASE 2: Teams Feature (domain, application, infrastructure, presentation)
+- FASE 3: Users Feature (domain, application, infrastructure, presentation)
+- FASE 4: Design System expansion (Shadcn/Tailwind components)
+- FASE 5: Routing feature-based
+- FASE 6: Pages migration & cleanup
 ```
 
 ---
@@ -282,76 +326,56 @@ apps/web/src/
 
 ## 📋 PLAN DE EJECUCIÓN (MODO DIOS)
 
-### FASE 1: Preparación y Fundamentos (Día 1-2)
+### ✅ FASE 1: Preparación y Fundamentos (COMPLETADA)
 **Objetivo:** Establecer la infraestructura base para la nueva arquitectura
 
-#### 1.1 Crear Core Structure
-- [ ] Crear `/src/core/app/`
-- [ ] Crear `/src/core/container/`
-- [ ] Mover `/app/App.tsx` → `/core/app/App.tsx`
-- [ ] Mover `/app/router/AppRouter.tsx` → `/core/app/AppRouter.tsx`
-- [ ] Mover `/app/providers/AppProviders.tsx` → `/core/app/AppProviders.tsx`
-- [ ] Mover `/shared/infrastructure/di/container.ts` → `/core/container/container.ts`
-- [ ] Actualizar imports en `main.tsx`
-- [ ] Actualizar imports en todos los archivos afectados
+#### ✅ 1.1 Crear Core Structure (COMPLETADO)
+- [x] Crear `/src/core/app/`
+- [x] Crear `/src/core/container/`
+- [x] Mover `/app/App.tsx` → `/core/app/App.tsx`
+- [x] Mover `/app/router/AppRouter.tsx` → `/core/app/AppRouter.tsx`
+- [x] Mover `/app/providers/AppProviders.tsx` → `/core/app/AppProviders.tsx`
+- [x] Mover `/shared/infrastructure/di/container.ts` → `/core/container/container.ts`
+- [x] Actualizar imports en `main.tsx`
+- [x] Actualizar imports en archivos (useLogin, container)
+- [x] Renombrar hooks: `use-login.ts` → `useLogin.ts` (camelCase)
+- [x] Configurar Biome para permitir camelCase en `/hooks/use*.ts`
 
-#### 1.2 Expandir Shared Infrastructure
-- [ ] Crear `/src/shared/design-system/` structure
-  - [ ] `components/ui/`
-  - [ ] `layout/`
-  - [ ] `tokens/`
-- [ ] Instalar Tailwind CSS
-  ```bash
-  npm install -D tailwindcss postcss autoprefixer
-  npx tailwindcss init -p
-  ```
-- [ ] Configurar `tailwind.config.js`
-- [ ] Crear design tokens
-- [ ] Migrar estilos CSS existentes a Tailwind
-- [ ] Mover `/components/ui/button.tsx` → `/shared/design-system/components/ui/button/`
+#### ✅ 1.2 Expandir Shared Infrastructure (COMPLETADO)
+- [x] Crear `/src/shared/design-system/` structure
+  - [x] `components/ui/`
+  - [x] `layout/`
+  - [x] `tokens/`
+- [x] Tailwind CSS ya estaba instalado (v4.x)
+- [x] Mover `/components/ui/button/` → `/shared/design-system/components/ui/button/`
+- [x] Mover `/lib/utils.ts` → `/shared/utils/cn.ts`
+- [x] Mover `/lib/constants/routes.ts` → `/shared/constants/routes.ts`
+- [x] Crear barrel exports para design-system y utils
+- [x] Actualizar imports (LoginForm, AppRouter, NotFoundPage)
+- [x] Eliminar carpetas legacy (`/lib`, `/components`)
 
-#### 1.3 Setup Providers
-- [ ] Crear `/src/shared/providers/`
-- [ ] Implementar `AuthProvider.tsx`
-  ```typescript
-  // Manage auth state globally
-  export const AuthProvider: React.FC<{ children: React.ReactNode }>
-  ```
-- [ ] Implementar `ThemeProvider.tsx`
-  ```typescript
-  // Dark/Light mode management
-  export const ThemeProvider: React.FC<{ children: React.ReactNode }>
-  ```
-- [ ] Implementar `ToastProvider.tsx`
-  ```typescript
-  // Global toast notifications
-  export const ToastProvider: React.FC<{ children: React.ReactNode }>
-  ```
-- [ ] Implementar `ErrorBoundary.tsx`
-  ```typescript
-  // Global error catching
-  export class ErrorBoundary extends React.Component
-  ```
-- [ ] Actualizar `/core/app/AppProviders.tsx` para incluir todos los providers
-  ```typescript
-  export function AppProviders({ children }: { children: React.ReactNode }) {
-    return (
-      <ErrorBoundary>
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <ThemeProvider>
-              <ToastProvider>
-                {children}
-              </ToastProvider>
-            </ThemeProvider>
-          </AuthProvider>
-        </QueryClientProvider>
-      </ErrorBoundary>
-    )
-  }
-  ```
+#### ✅ 1.3 Setup Providers (COMPLETADO)
+- [x] Crear `/src/shared/providers/`
+- [x] Implementar `AuthProvider.tsx`
+  - [x] Hook `useAuth()` con `login()`, `logout()`, `isAuthenticated`, `user`
+  - [x] Context para estado de autenticación global
+- [x] Implementar `ThemeProvider.tsx`
+  - [x] Hook `useTheme()` con `theme`, `setTheme()`
+  - [x] Soporte light/dark/system
+  - [x] Persistencia en localStorage
+- [x] Implementar `ToastProvider.tsx`
+  - [x] Hook `useToast()` con `showToast()`
+  - [x] Tipos: success, error, info, warning
+  - [x] Auto-dismiss después de 5s
+- [x] Implementar `ErrorBoundary.tsx`
+  - [x] Class component para captura de errores
+  - [x] UI de fallback con reload button
+  - [x] Detalles de error en dev mode
+- [x] Crear barrel export `/shared/providers/index.ts`
+- [x] Actualizar `/core/app/AppProviders.tsx` con jerarquía correcta:
+  - [x] ErrorBoundary → ThemeProvider → ToastProvider → QueryProvider → AuthProvider
 
-#### 1.4 Protected Routing
+#### ⏳ 1.4 Protected Routing (PENDIENTE)
 - [ ] Crear `/shared/infrastructure/routing/`
 - [ ] Implementar `ProtectedRoute.tsx`
   ```typescript
