@@ -196,6 +196,23 @@
   },
   "overrides": [
     {
+      "includes": ["**/hooks/use*.ts", "**/hooks/use*.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": {
+              "level": "error",
+              "options": {
+                "filenameCases": ["camelCase"],
+                "requireAscii": true,
+                "strictCase": false
+              }
+            }
+          }
+        }
+      }
+    },
+    {
       "includes": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
       "linter": {
         "rules": {

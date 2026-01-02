@@ -1,6 +1,6 @@
 import { LoginUseCase } from '@web/features/auth/application/index.js'
 import { AuthRepository } from '@web/features/auth/infrastructure/index.js'
-import { FetchHttpClient } from '../http/FetchHttpClient.js'
+import { FetchHttpClient } from '@web/shared/infrastructure/http/FetchHttpClient.js'
 
 /**
  * Dependency Injection Container
