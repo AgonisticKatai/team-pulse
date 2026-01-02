@@ -269,12 +269,12 @@
       "linter": {
         "rules": {
           "style": {
-            "useNamingConvention": "off",
-            "useFilenamingConvention": "off"
+            "useFilenamingConvention": "off",
+            "useNamingConvention": "off"
           },
           "suspicious": {
-            "noExplicitAny": "off",
-            "noConsole": "off"
+            "noConsole": "off",
+            "noExplicitAny": "off"
           }
         }
       }
