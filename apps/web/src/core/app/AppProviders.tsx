@@ -1,5 +1,6 @@
+import { AuthProvider, ErrorBoundary, ThemeProvider, ToastProvider } from '@web/shared/providers/index.js'
 import type { ReactNode } from 'react'
-import { QueryProvider } from './QueryProvider'
+import { QueryProvider } from './QueryProvider.js'
 
 interface AppProvidersProps {
   children: ReactNode
@@ -11,14 +12,23 @@ interface AppProvidersProps {
  * Composes all global providers in the correct order.
  * Order matters: outer providers wrap inner providers.
  *
- * Current providers:
- * - QueryProvider: React Query for data fetching
- *
- * Future providers to add:
- * - AuthProvider: Authentication context
- * - ThemeProvider: Dark/light mode
- * - ToastProvider: Global notifications
+ * Provider hierarchy (outermost to innermost):
+ * 1. ErrorBoundary - Catches errors from all providers below
+ * 2. ThemeProvider - Theme state (needed by all UI)
+ * 3. ToastProvider - Toast notifications
+ * 4. QueryProvider - React Query for data fetching
+ * 5. AuthProvider - Authentication state (depends on QueryProvider)
  */
 export const AppProviders = ({ children }: AppProvidersProps) => {
-  return <QueryProvider>{children}</QueryProvider>
+  return (
+    <ErrorBoundary>
+      <ThemeProvider>
+        <ToastProvider>
+          <QueryProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </QueryProvider>
+        </ToastProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
+  )
 }
