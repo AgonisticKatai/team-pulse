@@ -1,7 +1,7 @@
 import { useLogin } from '@web/features/auth/index.js'
+import { Button } from '@web/shared/design-system/index.js'
 import type { FormEvent } from 'react'
 import { useState } from 'react'
-import { Button } from '../../../../components/ui/button.js'
 
 /**
  * Login Form Component
