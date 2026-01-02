@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import type { LoginDTO, LoginResponseDTO } from '@team-pulse/shared'
-import { loginUseCase } from '@web/shared/infrastructure/di/container.js'
+import { loginUseCase } from '@web/core/container/container.js'
 
 /**
  * Login Hook

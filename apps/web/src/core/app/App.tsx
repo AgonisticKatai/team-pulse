@@ -1,5 +1,5 @@
-import { AppProviders } from './providers/AppProviders'
-import { AppRouter } from './router/AppRouter'
+import { AppProviders } from './AppProviders'
+import { AppRouter } from './AppRouter'
 
 /**
  * App Component

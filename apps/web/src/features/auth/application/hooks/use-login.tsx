@@ -3,13 +3,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthenticationError, Err, Ok } from '@team-pulse/shared'
 import { buildLoginResponseDTO } from '@team-pulse/shared/testing'
 import { renderHook, waitFor } from '@testing-library/react'
-import { loginUseCase } from '@web/shared/infrastructure/di/container.js'
+import { loginUseCase } from '@web/core/container/container.js'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useLogin } from './useLogin.js'
 
 // Mock the DI container
-vi.mock('@web/shared/infrastructure/di/container.js', () => ({
+vi.mock('@web/core/container/container.js', () => ({
   loginUseCase: {
     execute: vi.fn(),
   },
