@@ -2,15 +2,15 @@
 
 ## 📈 PROGRESO ACTUAL
 
-**Estado:** 🚧 En progreso - FASE 1 completada (37.5% del total)
+**Estado:** 🚧 En progreso - FASE 1 completada al 100% (50% del total)
 
 | Fase | Estado | Descripción |
 |------|--------|-------------|
 | **FASE 1.1** | ✅ **100%** | Core Structure creado |
 | **FASE 1.2** | ✅ **100%** | Shared Infrastructure organizado |
 | **FASE 1.3** | ✅ **100%** | Providers globales implementados |
-| **FASE 1.4** | ⏳ **0%** | Protected Routing (siguiente) |
-| **FASE 2** | ⏳ **0%** | Teams Feature |
+| **FASE 1.4** | ✅ **100%** | Protected Routing implementado |
+| **FASE 2** | ⏳ **0%** | Teams Feature (siguiente) |
 | **FASE 3** | ⏳ **0%** | Users Feature |
 | **FASE 4** | ⏳ **0%** | Design System expansion |
 | **FASE 5** | ⏳ **0%** | Routing feature-based |
@@ -22,6 +22,8 @@
 - ✅ Arquitectura `/core` establecida (App, Router, Providers, Container)
 - ✅ Design System iniciado (`/shared/design-system`)
 - ✅ Providers globales completos (Auth, Theme, Toast, ErrorBoundary)
+- ✅ Protected routing implementado (ProtectedRoute, PublicRoute)
+- ✅ Route guards aplicados en AppRouter
 - ✅ Hooks renombrados a camelCase (`useLogin.ts`)
 - ✅ Biome configurado para naming conventions
 - ✅ Migraciones de archivos completadas (`/lib` → `/shared`)
@@ -59,13 +61,13 @@ apps/api/src/
 
 ### Web Structure (🚧 En Migración)
 
-#### ✅ YA IMPLEMENTADO (FASE 1.1, 1.2, 1.3 COMPLETADAS)
+#### ✅ YA IMPLEMENTADO (FASE 1 COMPLETADA AL 100%)
 ```
 apps/web/src/
 ├── core/                   # ✅ Application Bootstrap
 │   ├── app/
 │   │   ├── App.tsx        # ✅ Root component
-│   │   ├── AppRouter.tsx  # ✅ Router setup
+│   │   ├── AppRouter.tsx  # ✅ Router setup con route guards
 │   │   ├── AppProviders.tsx # ✅ All providers composed
 │   │   └── QueryProvider.tsx # ✅ React Query
 │   └── container/
@@ -83,7 +85,11 @@ apps/web/src/
 │   │   ├── components/ui/button/
 │   │   └── index.ts
 │   ├── infrastructure/
-│   │   └── http/          # ✅ HTTP client
+│   │   ├── http/          # ✅ HTTP client
+│   │   └── routing/       # ✅ Route guards
+│   │       ├── ProtectedRoute.tsx
+│   │       ├── PublicRoute.tsx
+│   │       └── index.ts
 │   ├── providers/         # ✅ Global providers
 │   │   ├── AuthProvider.tsx
 │   │   ├── ThemeProvider.tsx
@@ -103,7 +109,6 @@ apps/web/src/
 
 #### ❌ PENDIENTE DE IMPLEMENTAR
 ```
-- FASE 1.4: Protected Routing (ProtectedRoute, PublicRoute)
 - FASE 2: Teams Feature (domain, application, infrastructure, presentation)
 - FASE 3: Users Feature (domain, application, infrastructure, presentation)
 - FASE 4: Design System expansion (Shadcn/Tailwind components)
@@ -375,19 +380,23 @@ apps/web/src/
 - [x] Actualizar `/core/app/AppProviders.tsx` con jerarquía correcta:
   - [x] ErrorBoundary → ThemeProvider → ToastProvider → QueryProvider → AuthProvider
 
-#### ⏳ 1.4 Protected Routing (PENDIENTE)
-- [ ] Crear `/shared/infrastructure/routing/`
-- [ ] Implementar `ProtectedRoute.tsx`
+#### ✅ 1.4 Protected Routing (COMPLETADO)
+- [x] Crear `/shared/infrastructure/routing/`
+- [x] Implementar `ProtectedRoute.tsx`
   ```typescript
-  // Requires authentication
-  export function ProtectedRoute({ children }: { children: React.ReactNode })
+  // Requires authentication, redirects to login if not authenticated
+  export function ProtectedRoute({ children, redirectTo = ROUTES.LOGIN }: ProtectedRouteProps)
   ```
-- [ ] Implementar `PublicRoute.tsx`
+- [x] Implementar `PublicRoute.tsx`
   ```typescript
-  // Redirects if already authenticated
-  export function PublicRoute({ children }: { children: React.ReactNode })
+  // Redirects to dashboard if already authenticated
+  export function PublicRoute({ children, redirectTo = ROUTES.DASHBOARD }: PublicRouteProps)
   ```
-- [ ] Actualizar `AppRouter.tsx` para usar route guards
+- [x] Crear barrel export `/shared/infrastructure/routing/index.ts`
+- [x] Actualizar `AppRouter.tsx` para usar route guards:
+  - [x] LoginPage envuelto con `<PublicRoute>`
+  - [x] DashboardPage, TeamsPage, UsersPage envueltos con `<ProtectedRoute>`
+  - [x] 404 pages sin guards (accesibles para todos)
 
 ---
 

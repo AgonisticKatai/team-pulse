@@ -1,4 +1,5 @@
 import { ROUTES } from '@web/shared/constants/routes.js'
+import { ProtectedRoute, PublicRoute } from '@web/shared/infrastructure/routing/index.js'
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
@@ -37,13 +38,41 @@ export const AppRouter = () => {
       <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* Public routes */}
-          <Route element={<LoginPage />} path={ROUTES.LOGIN} />
+          <Route
+            element={
+              <PublicRoute>
+                <LoginPage />
+              </PublicRoute>
+            }
+            path={ROUTES.LOGIN}
+          />
 
-          {/* Protected routes - TODO: Add ProtectedRoute wrapper */}
+          {/* Protected routes */}
           <Route element={<Navigate replace to={ROUTES.DASHBOARD} />} path={ROUTES.HOME} />
-          <Route element={<DashboardPage />} path={ROUTES.DASHBOARD} />
-          <Route element={<TeamsPage />} path={ROUTES.TEAMS} />
-          <Route element={<UsersPage />} path={ROUTES.USERS} />
+          <Route
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+            path={ROUTES.DASHBOARD}
+          />
+          <Route
+            element={
+              <ProtectedRoute>
+                <TeamsPage />
+              </ProtectedRoute>
+            }
+            path={ROUTES.TEAMS}
+          />
+          <Route
+            element={
+              <ProtectedRoute>
+                <UsersPage />
+              </ProtectedRoute>
+            }
+            path={ROUTES.USERS}
+          />
 
           {/* 404 */}
           <Route element={<NotFoundPage />} path={ROUTES.NOT_FOUND} />
