@@ -1,14 +1,19 @@
 {
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-slot": "^1.2.4",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-query": "^5.90.15",
     "@team-pulse/shared": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "i18next": "^25.7.3",
     "lucide-react": "^0.562.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
+    "react-hook-form": "^7.70.0",
+    "react-i18next": "^16.5.1",
     "react-router-dom": "^7.11.0",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18"
