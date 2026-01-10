@@ -4,7 +4,7 @@ packages:
 
 catalog:
   '@faker-js/faker': ^10.1.0
-  '@types/node': ^25.0.3
+  '@types/node': ^25.0.6
   '@vitest/browser-playwright': ^4.0.16
   '@vitest/coverage-v8': ^4.0.16
   '@vitest/ui': ^4.0.16

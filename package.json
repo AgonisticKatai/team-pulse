@@ -2,9 +2,9 @@
   "author": "",
   "description": "Modern football team statistics platform with real-time match tracking",
   "devDependencies": {
-    "@biomejs/biome": "^2.3.10",
-    "@commitlint/cli": "^20.2.0",
-    "@commitlint/config-conventional": "^20.2.0",
+    "@biomejs/biome": "^2.3.11",
+    "@commitlint/cli": "^20.3.1",
+    "@commitlint/config-conventional": "^20.3.1",
     "@types/node": "catalog:",
     "@vercel/node": "^5.5.16",
     "@vitest/coverage-v8": "catalog:",
@@ -12,7 +12,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "node-gyp": "^12.1.0",
-    "turbo": "^2.7.2",
+    "turbo": "^2.7.3",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
